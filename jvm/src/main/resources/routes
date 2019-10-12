@@ -1,0 +1,19 @@
+
+# Pages
+GET     /                       controllers.DbsController.index
+POST    /dbs/*path              controllers.DbsController.autowireRaw(path: String)
+
+GET     /query                   controllers.QueryController.query(db: String)
+#+ nocsrf
+POST    /query/*path             controllers.QueryController.autowireRaw(path: String)
+
+GET     /schema                 controllers.SchemaController.schema(db: String)
+POST    /schema/*path           controllers.SchemaController.autowireRaw(path: String)
+
+# Assets
+GET     /versionedAssets/*file  controllers.Assets.versioned(path="/public", file: Asset)
+
+# WebJars
+->      /webjars                webjars.Routes
+
+
