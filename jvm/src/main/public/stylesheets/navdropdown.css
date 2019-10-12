@@ -1,0 +1,96 @@
+
+.nav {
+    display: inline-flex;
+}
+
+.nav a {
+    color: #444;
+    padding-bottom: 5px;
+}
+
+.nav div.dropdown-menu {
+    padding: 10px;
+}
+
+.nav li.dropdown {
+    padding-left: 12px;
+}
+
+.dropdown-toggle:after {
+    content: none;
+}
+
+.nav li:hover>.dropdown-menu {
+  display: block;
+}
+
+.nav li>.dropdown-menu-off {
+  display: none;
+}
+
+
+
+.nav-pills {
+  padding-right: 10px;
+}
+.nav-pills.passive:hover {
+  color: #00a4db;
+}
+.nav-pills.active {
+  font-weight: bold;
+  cursor: default;
+}
+
+
+
+table.shortcuts {
+    border-collapse: collapse;
+    border-spacing: 0;
+    width: 100%;
+}
+.shortcuts tr.current {
+    color: #ababab;
+}
+.shortcuts tr.current:hover {
+    color: #ababab;
+    cursor: default;
+    background-color: default;
+}
+.shortcuts tr.other:hover {
+    color: #00a4db;
+    cursor: pointer;
+}
+.shortcuts th {
+    font-weight: normal;
+    padding-bottom: 8px;
+}
+.shortcuts th.grayNumber {
+    text-align: right;
+    padding-right: 11px;
+    color: #bbb;
+    width: 5%;
+}
+.shortcuts td {
+    padding: 1px 5px 8px 5px;
+}
+.shortcuts span.box {
+    border: 1px solid #dadde1;
+    border-radius: 4px;
+    margin-right: 3px;
+    min-width: 21px;
+    padding: 1px 4px;
+    box-sizing: border-box;
+    display: inline-block;
+    text-align: center;
+}
+.shortcuts span.circle {
+    border: 1px solid #dadde1;
+    margin-right: 3px;
+    box-sizing: border-box;
+    display: inline-block;
+    text-align: center;
+
+    border-radius: 11px;
+    min-width: 22px;
+    padding: 1px 1px;
+}
