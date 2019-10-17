@@ -6,8 +6,12 @@ Start Datomic transactor from Datomic distribution directory in separate process
 > cd <datomic-distribution-dir>
 > bin/transactor -Xmx4g -Xms4g -Ddatomic.txTimeoutMsec=120000 config/samples/free-transactor-template.properties
 
-To start application:
-> cd <path>/moleculeAdmin
+Download MoleculeAdmin
+> git clone https://github.com/scalamolecule/molecule-admin.git
+> cd molecule-admin
+
+Start application:
+
 > sbt run
 
 Then open localhost:9001 in browser. Might take a while to compile. 
