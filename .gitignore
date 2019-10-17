@@ -1,0 +1,13 @@
+target/
+.idea
+.DS_Store
+*~
+*.log
+*.iml
+
+logs
+project/project
+project/target
+tmp
+dist
+.cache
