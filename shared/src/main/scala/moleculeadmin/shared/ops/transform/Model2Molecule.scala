@@ -21,7 +21,7 @@ trait Model2Molecule extends QueryApi with Base with DateHandling {
     def c(s: String): String = if (s.contains('_')) s else s.capitalize
 
     def castNoDecimalEncoding(tpe: String, value: Any): String = (tpe, value) match {
-      case ("Date", date: Date)           => "\"" + dateLocal2str(date) + "\""
+      case ("Date", date: Date)           => "\"" + date2str(date) + "\""
       case ("String" | "UUID" | "URI", v) => "\"" + v + "\""
       case (_, v)                         => v.toString
     }

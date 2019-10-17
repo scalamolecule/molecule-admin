@@ -28,7 +28,7 @@ object Settings {
       "com.lihaoyi" %%% "utest" % "0.7.1",
       "io.suzaku" %%% "boopickle" % "1.3.0",
       "io.github.cquiroz" %%% "scala-java-locales" % "0.5.3-cldr31",
-      "io.github.cquiroz" %%% "scala-java-time" % "2.0.0-RC2"
+      "io.github.cquiroz" %%% "scala-java-time" % "2.0.0-RC3"
     )
   )
 

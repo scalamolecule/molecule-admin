@@ -45,7 +45,11 @@ class CastHelpers(rowCount: Int) extends HelpersAdmin with DateHandling {
     strArrays = strArrays :+ array
     updateColTypes(colIndex, 1)
     col.attrType match {
-      case "Date" => (row: jList[AnyRef], i: Int) => array(i) = Some(formatDate4(row.get(colIndex).asInstanceOf[Date]))
+//      case "Date" => (row: jList[AnyRef], i: Int) => array(i) = Some(date2datomicStr(row.get(colIndex).asInstanceOf[Date]))
+//      case "Date" => (row: jList[AnyRef], i: Int) => array(i) = Some(date2str(row.get(colIndex).asInstanceOf[Date]))
+      case "Date" => (row: jList[AnyRef], i: Int) =>
+        println("x " + date2str(row.get(colIndex).asInstanceOf[Date]))
+        array(i) = Some(date2str(row.get(colIndex).asInstanceOf[Date]))
       case _      => (row: jList[AnyRef], i: Int) => array(i) = Some(row.get(colIndex).toString)
     }
   }
@@ -78,8 +82,8 @@ class CastHelpers(rowCount: Int) extends HelpersAdmin with DateHandling {
       case "Date" => (row: jList[AnyRef], i: Int) =>
         array(i) = row.get(colIndex) match {
           case null    => Option.empty[String]
-          case v: Date => Some(formatDate4(v))
-          case v       => Some(formatDate4(v.asInstanceOf[jMap[String, Date]].values.iterator.next))
+          case v: Date => Some(date2datomicStr(v))
+          case v       => Some(date2datomicStr(v.asInstanceOf[jMap[String, Date]].values.iterator.next))
         }
 
       case _ => (row: jList[AnyRef], i: Int) =>
@@ -148,7 +152,7 @@ class CastHelpers(rowCount: Int) extends HelpersAdmin with DateHandling {
       updateColTypes(colIndex, 1)
       col.attrType match {
         case "Date" => (row: jList[AnyRef], i: Int) =>
-          array(i) = Some(formatDate4(row.get(colIndex).asInstanceOf[PersistentVector].iterator.next.asInstanceOf[Date]))
+          array(i) = Some(date2datomicStr(row.get(colIndex).asInstanceOf[PersistentVector].iterator.next.asInstanceOf[Date]))
         case _      => (row: jList[AnyRef], i: Int) =>
           array(i) = Some(row.get(colIndex).asInstanceOf[PersistentVector].iterator.next.toString)
       }
@@ -176,7 +180,7 @@ class CastHelpers(rowCount: Int) extends HelpersAdmin with DateHandling {
         val it   = row.get(colIndex).asInstanceOf[PersistentVector].iterator
         var list = ListBuffer.empty[String]
         while (it.hasNext)
-          list += formatDate4(it.next.asInstanceOf[Date])
+          list += date2datomicStr(it.next.asInstanceOf[Date])
         array(i) = Some(list.toList)
 
       case _ => (row: jList[AnyRef], i: Int) =>
@@ -219,7 +223,7 @@ class CastHelpers(rowCount: Int) extends HelpersAdmin with DateHandling {
         val it   = row.get(colIndex).asInstanceOf[LazySeq].iterator
         var list = ListBuffer.empty[String]
         while (it.hasNext)
-          list += formatDate4(it.next.asInstanceOf[Date])
+          list += date2datomicStr(it.next.asInstanceOf[Date])
         array(i) = Some(list.toList)
 
       case _ => (row: jList[AnyRef], i: Int) =>
@@ -256,9 +260,6 @@ class CastHelpers(rowCount: Int) extends HelpersAdmin with DateHandling {
 
   protected def castAggrListDistinct(col: Col, colIndex: Int): (jList[AnyRef], Int) => Unit = col.colType match {
     case "string" =>
-      //      val array = new Array[List[String]](rowCount)
-      //      listStrArrays = listStrArrays :+ array
-      //      updateColTypes(colIndex, 3)
       val array = new Array[Option[List[String]]](rowCount)
       listStrArrays = listStrArrays :+ array
       updateColTypes(colIndex, 3)
@@ -267,7 +268,7 @@ class CastHelpers(rowCount: Int) extends HelpersAdmin with DateHandling {
           val it   = row.get(colIndex).asInstanceOf[PersistentHashSet].iterator
           val list = ListBuffer.empty[String]
           while (it.hasNext)
-            list += formatDate4(it.next.asInstanceOf[Date])
+            list += date2datomicStr(it.next.asInstanceOf[Date])
           array(i) = Some(list.toList)
 
         case _ => (row: jList[AnyRef], i: Int) =>
@@ -310,19 +311,21 @@ class CastHelpers(rowCount: Int) extends HelpersAdmin with DateHandling {
     listStrArrays = listStrArrays :+ array
     updateColTypes(colIndex, 3)
     col.attrType match {
-      case "Date" => (row: jList[AnyRef], i: Int) =>
-        val it   = row.get(colIndex).asInstanceOf[PersistentHashSet].iterator
-        val list = ListBuffer.empty[String]
-        while (it.hasNext)
-          list += formatDate4(it.next.asInstanceOf[Date])
-        array(i) = Some(list.toList)
+      case "Date" =>
+        (row: jList[AnyRef], i: Int) =>
+          val it   = row.get(colIndex).asInstanceOf[PersistentHashSet].iterator
+          val list = ListBuffer.empty[String]
+          while (it.hasNext)
+            list += date2datomicStr(it.next.asInstanceOf[Date])
+          array(i) = Some(list.toList)
 
-      case _ => (row: jList[AnyRef], i: Int) =>
-        val it   = row.get(colIndex).asInstanceOf[PersistentHashSet].iterator
-        val list = ListBuffer.empty[String]
-        while (it.hasNext)
-          list += it.next.toString
-        array(i) = Some(list.toList)
+      case _ =>
+        (row: jList[AnyRef], i: Int) =>
+          val it   = row.get(colIndex).asInstanceOf[PersistentHashSet].iterator
+          val list = ListBuffer.empty[String]
+          while (it.hasNext)
+            list += it.next.toString
+          array(i) = Some(list.toList)
     }
   }
 
@@ -377,7 +380,7 @@ class CastHelpers(rowCount: Int) extends HelpersAdmin with DateHandling {
             }
             val list = ListBuffer.empty[String]
             while (it.hasNext)
-              list += formatDate4(it.next.asInstanceOf[Date])
+              list += date2datomicStr(it.next.asInstanceOf[Date])
             Some(list.toList)
         }
 
@@ -452,7 +455,7 @@ class CastHelpers(rowCount: Int) extends HelpersAdmin with DateHandling {
     listStrArrays = listStrArrays :+ array
     updateColTypes(colIndex, 3)
     col.attrType match {
-      case "Date" => (row: jList[AnyRef], i: Int) => array(i) = Some(List(formatDate4(row.get(colIndex).asInstanceOf[Date])))
+      case "Date" => (row: jList[AnyRef], i: Int) => array(i) = Some(List(date2datomicStr(row.get(colIndex).asInstanceOf[Date])))
       case _      => (row: jList[AnyRef], i: Int) => array(i) = Some(List(row.get(colIndex).toString))
     }
   }
@@ -479,14 +482,27 @@ class CastHelpers(rowCount: Int) extends HelpersAdmin with DateHandling {
     mapStrArrays = mapStrArrays :+ array
     updateColTypes(colIndex, 5)
     var vs = new Array[String](2)
-    (row: jList[AnyRef], i: Int) =>
-      val it  = row.get(colIndex).asInstanceOf[PersistentHashSet].iterator
-      var map = Map.empty[String, String]
-      while (it.hasNext) {
-        vs = it.next.toString.split("@", 2)
-        map = map + (vs(0) -> vs(1))
-      }
-      array(i) = Some(map)
+    col.attrType match {
+      case "Date" =>
+        (row: jList[AnyRef], i: Int) =>
+          val it  = row.get(colIndex).asInstanceOf[PersistentHashSet].iterator
+          var map = Map.empty[String, String]
+          while (it.hasNext) {
+            vs = it.next.toString.split("@", 2)
+            map = map + (vs(0) -> date2datomicStr(str2date(vs(1))))
+          }
+          array(i) = Some(map)
+
+      case _      =>
+        (row: jList[AnyRef], i: Int) =>
+          val it  = row.get(colIndex).asInstanceOf[PersistentHashSet].iterator
+          var map = Map.empty[String, String]
+          while (it.hasNext) {
+            vs = it.next.toString.split("@", 2)
+            map = map + (vs(0) -> vs(1))
+          }
+          array(i) = Some(map)
+    }
   }
 
   protected def castMandatoryMapDouble(col: Col, colIndex: Int): (jList[AnyRef], Int) => Unit = {

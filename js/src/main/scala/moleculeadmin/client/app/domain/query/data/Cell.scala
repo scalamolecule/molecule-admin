@@ -118,6 +118,7 @@ abstract class Cell(db: String,
         (baseClass: String, _: Int) => baseClass
     }
 
+    import scala.scalajs.js.Date
 
     colType match {
 

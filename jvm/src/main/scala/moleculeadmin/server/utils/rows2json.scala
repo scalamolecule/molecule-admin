@@ -89,7 +89,7 @@ object rows2json extends HelpersAdmin {
     case "String"  => quote(buf, value.toString)
     case "Int"     => buf.append(value)
     case "Float"   => buf.append(value)
-    case "Date"    => quote(buf, sdf.format(value.asInstanceOf[Date]))
+    case "Date"    => quote(buf, sdfDate.format(value.asInstanceOf[Date]))
     case "UUID"    => quote(buf, value.toString)
     case "URI"     => quote(buf, value.toString)
     case "Boolean" => buf.append(value.toString)
@@ -100,7 +100,7 @@ object rows2json extends HelpersAdmin {
     val values = value.asInstanceOf[PersistentHashSet].asScala.toSeq
     tpe match {
       case "String"  => renderArray(buf, values, true)
-      case "Date"    => renderArray(buf, values.map(v => sdf.format(v.asInstanceOf[Date])), true)
+      case "Date"    => renderArray(buf, values.map(v => sdfDate.format(v.asInstanceOf[Date])), true)
       case "UUID"    => renderArray(buf, values, true)
       case "URI"     => renderArray(buf, values, true)
       case "Boolean" => renderArray(buf, values, false)
@@ -112,7 +112,7 @@ object rows2json extends HelpersAdmin {
     val values = value.asInstanceOf[PersistentVector].asScala.toSeq
     tpe match {
       case "String"  => renderArray(buf, values, true)
-      case "Date"    => renderArray(buf, values.map(v => sdf.format(v.asInstanceOf[Date])), true)
+      case "Date"    => renderArray(buf, values.map(v => sdfDate.format(v.asInstanceOf[Date])), true)
       case "UUID"    => renderArray(buf, values, true)
       case "URI"     => renderArray(buf, values, true)
       case "Boolean" => renderArray(buf, values, false)
@@ -124,7 +124,7 @@ object rows2json extends HelpersAdmin {
     val values = value.asInstanceOf[LazySeq].asScala.toSeq
     tpe match {
       case "String"  => renderArray(buf, values, true)
-      case "Date"    => renderArray(buf, values.map(v => sdf.format(v.asInstanceOf[Date])), true)
+      case "Date"    => renderArray(buf, values.map(v => sdfDate.format(v.asInstanceOf[Date])), true)
       case "UUID"    => renderArray(buf, values, true)
       case "URI"     => renderArray(buf, values, true)
       case "Boolean" => renderArray(buf, values, false)
@@ -142,7 +142,7 @@ object rows2json extends HelpersAdmin {
         buf.append("{")
         values.foreach { case s: String =>
           val p = s.split("@", 2)
-          val (k, date) = (p(0), sdf.parse(p(1)))
+          val (k, date) = (p(0), sdfDate.parse(p(1)))
 
           if (firstInObj) {
             firstInObj = false
@@ -151,7 +151,7 @@ object rows2json extends HelpersAdmin {
           }
 
           buf.append(k).append(": ")
-          quote(buf, sdf.format(date))
+          quote(buf, sdfDate.format(date))
         }
         buf.append("}")
       case "UUID"    => renderObj(buf, values, true)
@@ -205,8 +205,8 @@ object rows2json extends HelpersAdmin {
     }
 
     case "Date" => value match {
-      case v: Date => quote(buf, sdf.format(v.asInstanceOf[Date]))
-      case v       => quote(buf, sdf.format(v.asInstanceOf[jMap[String, Date]].asScala.toMap.values.head))
+      case v: Date => quote(buf, sdfDate.format(v.asInstanceOf[Date]))
+      case v       => quote(buf, sdfDate.format(v.asInstanceOf[jMap[String, Date]].asScala.toMap.values.head))
     }
 
     case "UUID" => value match {
@@ -283,10 +283,10 @@ object rows2json extends HelpersAdmin {
     case "Date" => value match {
       case vs: PersistentHashSet =>
         val values = vs.asScala.map(_.asInstanceOf[Date])
-        renderArray(buf, values.map(v => sdf.format(v)), true)
+        renderArray(buf, values.map(v => sdfDate.format(v)), true)
       case vs                    =>
         val values = vs.asInstanceOf[jMap[String, PersistentVector]].asScala.toMap.values.head.asScala
-        renderArray(buf, values.map(v => sdf.format(v.asInstanceOf[Date])), true)
+        renderArray(buf, values.map(v => sdfDate.format(v.asInstanceOf[Date])), true)
     }
 
     case "UUID" => value match {
@@ -349,7 +349,7 @@ object rows2json extends HelpersAdmin {
         buf.append("{")
         values.foreach { case s: String =>
           val p = s.split("@", 2)
-          val (k, d) = (p(0), sdf.parse(p(1)))
+          val (k, d) = (p(0), sdfDate.parse(p(1)))
 
           if (firstInObj) {
             firstInObj = false
@@ -358,7 +358,7 @@ object rows2json extends HelpersAdmin {
           }
 
           buf.append(k).append(": ")
-          quote(buf, sdf.format(d))
+          quote(buf, sdfDate.format(d))
         }
         buf.append("}")
 
@@ -368,7 +368,7 @@ object rows2json extends HelpersAdmin {
         buf.append("{")
         values.foreach { case s: String =>
           val p = s.split("@", 2)
-          val (k, d) = (p(0), sdf.parse(p(1)))
+          val (k, d) = (p(0), sdfDate.parse(p(1)))
 
           if (firstInObj) {
             firstInObj = false
@@ -377,7 +377,7 @@ object rows2json extends HelpersAdmin {
           }
 
           buf.append(k).append(": ")
-          quote(buf, sdf.format(d))
+          quote(buf, sdfDate.format(d))
         }
         buf.append("}")
     }

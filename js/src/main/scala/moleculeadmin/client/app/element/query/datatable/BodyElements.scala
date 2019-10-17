@@ -257,10 +257,11 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     contenteditable := true,
     onblur := save,
     ul(vs.sorted.map(v => {
-      println("--------------")
-      println("raw date 2: " + v)
-      println("raw date 2: " + truncateDateStr(v))
-      li(truncateDateStr(v))
+//      println("--------------")
+//      println("raw date 2: " + v)
+//      println("raw date 2: " + truncateDateStr(v))
+//      li(truncateDateStr(v))
+      li(v)
     }))
   )
 
@@ -396,10 +397,13 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     _tdMapEdit(cellClass, cellId, eid, save,
       vs.toSeq.sortBy(_._1),
       (k: String, v: String) => {
-        println("--------------")
-        println("raw date 3: " + v)
-        println("raw date 3: " + truncateDateStr(v))
-        k + " -> " + truncateDateStr(v)})
+//        println("--------------")
+//        println("raw date 3: " + v)
+//        println("raw date 3: " + truncateDateStr(v))
+//        println("raw date 3: " + expandDateStr(v))
+//        k + " -> " + truncateDateStr(v)})
+        k + " -> " + v}
+    )
 
   def _tdMapStrOtherEdit(vs: Map[String, String],
                          cellClass: String,

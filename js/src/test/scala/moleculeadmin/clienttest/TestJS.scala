@@ -13,7 +13,7 @@ object TestJS extends TestSuite {
     }
 
 
-    test("scalafiddle") {
+    test("moleculeadmin/client/scalafiddle") {
 
 
     }

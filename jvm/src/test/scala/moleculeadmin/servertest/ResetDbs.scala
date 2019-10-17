@@ -173,6 +173,7 @@ object ResetDbs extends TestSuite with ExampleData with Settings {
 
     Ns.int.Parent.int insert List((1,11), (2, 22))
 
+    Ns.int(42).dates(date1).save
 
     Ns.strs insert List(Set("", " ", " \n ", "a", "b"), Set("c", "Hi there, Ben!\nHi Lisa"))
     Ns.ints insert List(Set(1, 2), Set(3, 4, 5, 6, 7))
@@ -214,7 +215,7 @@ object ResetDbs extends TestSuite with ExampleData with Settings {
     Ns.int.float$ insert List((4, None), (4, Some(2.0f)))
     Ns.int.double$ insert List((5, None), (5, Some(2.0)))
     Ns.int.bool$ insert List((6, None), (6, Some(true)), (6, Some(false)))
-    Ns.int.date$ insert List((7, None), (7, Some(date2)))
+    Ns.int.date$ insert List((7, None), (7, Some(date2)), (42, Some(date1)))
     Ns.int.uuid$ insert List((8, None), (8, Some(uuid2)))
     Ns.int.uri$ insert List((9, None), (9, Some(uri2)))
     Ns.int.enum$ insert List((10, None), (10, Some(enum2)))
@@ -240,7 +241,7 @@ object ResetDbs extends TestSuite with ExampleData with Settings {
     Ns.int.floatMap$ insert List((4, None), (4, Some(Map("a" -> 1.0f, "bb" -> 2.0f))))
     Ns.int.doubleMap$ insert List((5, None), (5, Some(Map("a" -> 1.0, "bb" -> 2.0))))
     Ns.int.boolMap$ insert List((6, None), (6, Some(Map("a" -> true, "bb" -> false))))
-    Ns.int.dateMap$ insert List((7, None), (7, Some(Map("a" -> date1, "bb" -> date2))))
+    Ns.int.dateMap$ insert List((7, None), (42, Some(Map("a" -> date1))), (7, Some(Map("a" -> date1, "bb" -> date2))))
     Ns.int.uuidMap$ insert List((8, None), (8, Some(Map("a" -> uuid1, "bb" -> uuid2))))
     Ns.int.uriMap$ insert List((9, None), (9, Some(Map("a" -> uri1, "bb" -> uri2))))
     Ns.int.bigIntMap$ insert List((11, None), (11, Some(Map("a" -> bigInt1, "bb" -> bigInt2))))
