@@ -1,6 +1,6 @@
 # Molecule Admin
 
-App to administrate your molecule databases
+ScalaJS client app to administrate your Datomic/molecule database schema, data queries and updates etc.
 
 Start Datomic transactor from Datomic distribution directory in separate process, something like
 
