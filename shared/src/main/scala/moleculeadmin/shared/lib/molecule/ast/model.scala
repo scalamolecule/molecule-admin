@@ -213,12 +213,9 @@ object model extends HelpersAdmin with DateHandling {
   // Correct output of values given scala-js type mixtures (+ hack for javascript decimal handling)
 
   final def cast2(tpe: String, value: Any): String = (tpe, value) match {
-    //    case ("Float", v)                   => v.toString.drop(5) + "f"
-    //    case ("Double", v)                  => v.toString.drop(5)
     case ("Long", v)                    => v.toString + "L"
     case ("Float" | "Double", v)        => v.toString.drop(5)
-//    case ("Date", date: Date)           => "\"" + date2str(date) + "\""
-    case ("Date", date: Date)           => "\"" + dateLocal2str(date) + "\""
+    case ("Date", date: Date)           => "\"" + date2str(date) + "\""
     case ("String" | "UUID" | "URI", v) => "\"" + v + "\""
     case (_, v)                         => v.toString
   }

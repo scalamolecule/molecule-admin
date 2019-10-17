@@ -446,8 +446,7 @@ trait QueryOps extends Helpers {
         q.func(s"""ground $arg""", Empty, v)
 
       //      case "Int" | "Long" | "Float" | "Double" | "Boolean" => q.func(s"""ground $arg""", Empty, v)
-//      case "java.util.Date" => q.func(s"""ground #inst "${date2str(arg.asInstanceOf[Date])}"""", Empty, v)
-      case "java.util.Date" => q.func(s"""ground #inst "${date2str(arg.asInstanceOf[Date])}"""", Empty, v)
+      case "java.util.Date" => q.func(s"""ground #inst "${date2datomicStr(arg.asInstanceOf[Date])}"""", Empty, v)
       case "java.util.UUID" => q.func(s"""ground #uuid "$arg"""", Empty, v)
       case "java.net.URI"   => q.func(s"""ground (java.net.URI. "$arg")""", Empty, v)
       case "BigInt"         => q.func(s"""ground (java.math.BigInteger. "$arg")""", Empty, v)

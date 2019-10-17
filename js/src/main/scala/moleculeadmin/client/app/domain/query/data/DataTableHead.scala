@@ -16,7 +16,7 @@ import org.scalajs.dom.html.{TableCell, TableHeaderCell, TableSection}
 import org.scalajs.dom.raw.Node
 import org.scalajs.dom.{MouseEvent, NodeList, document, window}
 import rx.{Ctx, Rx}
-import scalafiddle.ScalafiddleApi
+import moleculeadmin.client.scalafiddle.ScalafiddleApi
 import scalatags.JsDom
 import scalatags.JsDom.all._
 import scala.collection.mutable.ListBuffer
@@ -34,7 +34,7 @@ case class DataTableHead(db: String)(implicit val ctx: Ctx.Owner)
 
   def attrSortCell(col: Col): JsDom.TypedTag[TableHeaderCell] = {
     //      println("attrSortCell...")
-    val Col(colIndex, _, nsAlias, nsFull, attr, attrType, colType, card, _, _,
+    val Col(colIndex, _, nsAlias, nsFull, attr, _, colType, card, _, _,
     aggrType, expr, sortDir, sortPos) = col
 
     val attrFull = s":$nsFull/$attr"

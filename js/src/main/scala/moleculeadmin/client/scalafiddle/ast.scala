@@ -1,4 +1,4 @@
-package scalafiddle
+package moleculeadmin.client.scalafiddle
 
 import java.util.UUID
 import scala.scalajs.js

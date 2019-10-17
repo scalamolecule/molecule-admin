@@ -294,7 +294,7 @@ object Attribute extends SchemaBase  with Base {
                           case "Boolean"        => v: AnyRef => v.toString.split("@", 2)(1).toBoolean
                           case "Long"           => v: AnyRef => v.toString.split("@", 2)(1).toLong
                           case "Double"         => v: AnyRef => v.toString.split("@", 2)(1).toDouble
-                          case "java.util.Date" => v: AnyRef => date(v.toString.split("@", 2)(1))
+                          case "java.util.Date" => v: AnyRef => datomicStr2date(v.toString.split("@", 2)(1))
                           case "java.util.UUID" => v: AnyRef => UUID.fromString(v.toString.split("@", 2)(1))
                           case "java.net.URI"   => v: AnyRef => new URI(v.toString.split("@", 2)(1))
                           case "BigInt"         => v: AnyRef => BigInt(v.toString.split("@", 2)(1))

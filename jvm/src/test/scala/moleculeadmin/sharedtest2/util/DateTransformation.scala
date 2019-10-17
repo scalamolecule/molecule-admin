@@ -1,82 +1,205 @@
 package moleculeadmin.sharedtest2.util
 
 import java.time.ZoneOffset
+import moleculeadmin.servertest.Adhoc.{expandDateStr, localOffset}
 import moleculeadmin.shared.util.DateHandling
 import utest._
 
 
 object DateTransformation extends TestSuite with DateHandling {
 
+  val myPlus2hourZone  = ZoneOffset.of("+2")
   val plus1hourZone  = ZoneOffset.of("+1")
-  val plus2hourZone  = ZoneOffset.of("+2")
+  val utcZone = ZoneOffset.of("+0") // Same as ZoneOffset.UTC
   val minus1hourZone = ZoneOffset.of("-1")
-  val minus2hourZone = ZoneOffset.of("-2")
 
+  val otherOffset = "+01:45"
+
+
+  /*
+    OBS: beware that all test here are based on being in a +2 timezone!
+    todo: make independent of what timezone the tests are run in, maybe something like this:
+
+    // always returns 2009-02-13T23:31:30
+    val fixedClock = Clock.fixed(Instant.ofEpochSecond(1234567890L), ZoneOffset.ofHours(0))
+    // fixedClock: java.time.Clock = FixedClock[2009-02-13T23:31:30Z,Z]
+
+    val date = LocalDateTime.now(fixedClock)
+  */
 
   val tests = Tests {
 
-    test("ZoneOffSet") {
+    test("truncateDateStr") {
+      truncateDateStr(s"2019") ==> "2019-01-01"
+      truncateDateStr(s"2019-02") ==> "2019-02-01"
+      truncateDateStr(s"2019-02-13") ==> "2019-02-13"
 
-      // Local time with time zone difference (if your computer is in that time zone!)
-      dateLocal2str(str2dateLocal("2019-02-12")) ==> "2019-02-12 00:00:00 +02:00"
+      truncateDateStr(s"2019-02-13 00:00") ==> "2019-02-13"
+      truncateDateStr(s"2019-02-13 00:00:00") ==> "2019-02-13"
+      truncateDateStr(s"2019-02-13 00:00:00.000") ==> "2019-02-13"
 
-      // UTC default
-      dateZone2str(str2date("2019-02-12")) ==> "2019-02-12"
+      truncateDateStr(s"2019-02-13 00:17") ==> "2019-02-13 00:17"
+      truncateDateStr(s"2019-02-13 14:00") ==> "2019-02-13 14:00"
+      truncateDateStr(s"2019-02-13 14:17") ==> "2019-02-13 14:17"
+      truncateDateStr(s"2019-02-13 14:17:00") ==> "2019-02-13 14:17"
+      truncateDateStr(s"2019-02-13 14:17:00.000") ==> "2019-02-13 14:17"
+
+      truncateDateStr(s"2019-02-13 14:17:56") ==> "2019-02-13 14:17:56"
+      truncateDateStr(s"2019-02-13 14:17:56.000") ==> "2019-02-13 14:17:56"
+      truncateDateStr(s"2019-02-13 14:17:56.876") ==> "2019-02-13 14:17:56.876"
+
+
+      truncateDateStr(s"2019-02-12 00:00 $localOffset") ==> "2019-02-12"
+      truncateDateStr(s"2019-02-12 00:00 $otherOffset") ==> s"2019-02-12 00:00 $otherOffset"
+
+      truncateDateStr(s"2019-02-12 00:00:00 $localOffset") ==> "2019-02-12"
+      truncateDateStr(s"2019-02-12 00:00:00 $otherOffset") ==> s"2019-02-12 00:00 $otherOffset"
+
+      truncateDateStr(s"2019-02-12 00:00:00.000 $localOffset") ==> "2019-02-12"
+      truncateDateStr(s"2019-02-12 00:00:00.000 $otherOffset") ==> s"2019-02-12 00:00 $otherOffset"
+
+      truncateDateStr(s"2019-02-13 14:17 $localOffset") ==> s"2019-02-13 14:17"
+      truncateDateStr(s"2019-02-13 14:17 $otherOffset") ==> s"2019-02-13 14:17 $otherOffset"
+
+      truncateDateStr(s"2019-02-13 14:17:00 $localOffset") ==> s"2019-02-13 14:17"
+      truncateDateStr(s"2019-02-13 14:17:00 $otherOffset") ==> s"2019-02-13 14:17 $otherOffset"
+
+      truncateDateStr(s"2019-02-13 14:17:00.000 $localOffset") ==> s"2019-02-13 14:17"
+      truncateDateStr(s"2019-02-13 14:17:00.000 $otherOffset") ==> s"2019-02-13 14:17 $otherOffset"
+
+      truncateDateStr(s"2019-02-13 14:17:56 $localOffset") ==> s"2019-02-13 14:17:56"
+      truncateDateStr(s"2019-02-13 14:17:56 $otherOffset") ==> s"2019-02-13 14:17:56 $otherOffset"
+
+      truncateDateStr(s"2019-02-13 14:17:56.000 $localOffset") ==> s"2019-02-13 14:17:56"
+      truncateDateStr(s"2019-02-13 14:17:56.000 $otherOffset") ==> s"2019-02-13 14:17:56 $otherOffset"
+
+      truncateDateStr(s"2019-02-13 14:17:56.876 $localOffset") ==> s"2019-02-13 14:17:56.876"
+      truncateDateStr(s"2019-02-13 14:17:56.876 $otherOffset") ==> s"2019-02-13 14:17:56.876 $otherOffset"
     }
+
+
+    test("expandDateStr") {
+
+      // Pre-millenial years (not abbreviations for 19xx/20xx)
+      expandDateStr(s"2") ==> s"0002-01-01 00:00:00.000 $localOffset"
+      expandDateStr(s"20") ==> s"0020-01-01 00:00:00.000 $localOffset"
+      expandDateStr(s"201") ==> s"0201-01-01 00:00:00.000 $localOffset"
+
+      expandDateStr(s"2019") ==> s"2019-01-01 00:00:00.000 $localOffset"
+
+      expandDateStr(s"2019-2") ==> s"2019-02-01 00:00:00.000 $localOffset"
+
+      expandDateStr(s"2019-2-1") ==> s"2019-02-01 00:00:00.000 $localOffset"
+      expandDateStr(s"2019-02-13") ==> s"2019-02-13 00:00:00.000 $localOffset"
+
+      expandDateStr(s"2019-02-13 0:0") ==> s"2019-02-13 00:00:00.000 $localOffset"
+      expandDateStr(s"2019-02-13 1:1") ==> s"2019-02-13 01:01:00.000 $localOffset"
+      expandDateStr(s"2019-02-13 14:1") ==> s"2019-02-13 14:01:00.000 $localOffset"
+      expandDateStr(s"2019-02-13 14:17") ==> s"2019-02-13 14:17:00.000 $localOffset"
+
+      expandDateStr(s"2019-02-13 1:1:0") ==> s"2019-02-13 01:01:00.000 $localOffset"
+      expandDateStr(s"2019-02-13 14:1:0") ==> s"2019-02-13 14:01:00.000 $localOffset"
+      expandDateStr(s"2019-02-13 14:17:0") ==> s"2019-02-13 14:17:00.000 $localOffset"
+      expandDateStr(s"2019-02-13 14:17:00") ==> s"2019-02-13 14:17:00.000 $localOffset"
+      expandDateStr(s"2019-02-13 14:17:5") ==> s"2019-02-13 14:17:05.000 $localOffset"
+      expandDateStr(s"2019-02-13 14:17:56") ==> s"2019-02-13 14:17:56.000 $localOffset"
+
+      expandDateStr(s"2019-02-13 14:17:56.0") ==> s"2019-02-13 14:17:56.000 $localOffset"
+      expandDateStr(s"2019-02-13 14:17:56.00") ==> s"2019-02-13 14:17:56.000 $localOffset"
+      expandDateStr(s"2019-02-13 14:17:56.000") ==> s"2019-02-13 14:17:56.000 $localOffset"
+      expandDateStr(s"2019-02-13 14:17:56.8") ==> s"2019-02-13 14:17:56.008 $localOffset"
+      expandDateStr(s"2019-02-13 14:17:56.87") ==> s"2019-02-13 14:17:56.087 $localOffset"
+      expandDateStr(s"2019-02-13 14:17:56.876") ==> s"2019-02-13 14:17:56.876 $localOffset"
+
+      expandDateStr(s"2019-02-13 00:00 $localOffset") ==> s"2019-02-13 00:00:00.000 $localOffset"
+      expandDateStr(s"2019-02-13 00:00 $otherOffset") ==> s"2019-02-13 00:00:00.000 $otherOffset"
+
+      expandDateStr(s"2019-02-13 14:17 $localOffset") ==> s"2019-02-13 14:17:00.000 $localOffset"
+      expandDateStr(s"2019-02-13 14:17 $otherOffset") ==> s"2019-02-13 14:17:00.000 $otherOffset"
+
+      expandDateStr(s"2019-02-13 14:17:0 $localOffset") ==> s"2019-02-13 14:17:00.000 $localOffset"
+      expandDateStr(s"2019-02-13 14:17:0 $otherOffset") ==> s"2019-02-13 14:17:00.000 $otherOffset"
+      expandDateStr(s"2019-02-13 14:17:00 $localOffset") ==> s"2019-02-13 14:17:00.000 $localOffset"
+      expandDateStr(s"2019-02-13 14:17:00 $otherOffset") ==> s"2019-02-13 14:17:00.000 $otherOffset"
+
+      expandDateStr(s"2019-02-13 14:17:5 $localOffset") ==> s"2019-02-13 14:17:05.000 $localOffset"
+      expandDateStr(s"2019-02-13 14:17:5 $otherOffset") ==> s"2019-02-13 14:17:05.000 $otherOffset"
+      expandDateStr(s"2019-02-13 14:17:56 $localOffset") ==> s"2019-02-13 14:17:56.000 $localOffset"
+      expandDateStr(s"2019-02-13 14:17:56 $otherOffset") ==> s"2019-02-13 14:17:56.000 $otherOffset"
+
+
+      expandDateStr(s"2019-02-13 14:17:56.0 $localOffset") ==> s"2019-02-13 14:17:56.000 $localOffset"
+      expandDateStr(s"2019-02-13 14:17:56.00 $localOffset") ==> s"2019-02-13 14:17:56.000 $localOffset"
+      expandDateStr(s"2019-02-13 14:17:56.000 $localOffset") ==> s"2019-02-13 14:17:56.000 $localOffset"
+
+      expandDateStr(s"2019-02-13 14:17:56.0 $otherOffset") ==> s"2019-02-13 14:17:56.000 $otherOffset"
+      expandDateStr(s"2019-02-13 14:17:56.00 $otherOffset") ==> s"2019-02-13 14:17:56.000 $otherOffset"
+      expandDateStr(s"2019-02-13 14:17:56.000 $otherOffset") ==> s"2019-02-13 14:17:56.000 $otherOffset"
+
+
+      expandDateStr(s"2019-02-13 14:17:56.8 $localOffset") ==> s"2019-02-13 14:17:56.008 $localOffset"
+      expandDateStr(s"2019-02-13 14:17:56.87 $localOffset") ==> s"2019-02-13 14:17:56.087 $localOffset"
+      expandDateStr(s"2019-02-13 14:17:56.876 $localOffset") ==> s"2019-02-13 14:17:56.876 $localOffset"
+
+      expandDateStr(s"2019-02-13 14:17:56.8 $otherOffset") ==> s"2019-02-13 14:17:56.008 $otherOffset"
+      expandDateStr(s"2019-02-13 14:17:56.87 $otherOffset") ==> s"2019-02-13 14:17:56.087 $otherOffset"
+      expandDateStr(s"2019-02-13 14:17:56.876 $otherOffset") ==> s"2019-02-13 14:17:56.876 $otherOffset"
+    }
+
 
     test("Timezones") {
 
-      val baseDateStr = "2019-02-12 23:00"
+      val d1 = "2019-02-12 01:00"
 
-      // Create date from relaxed string and convert back to shortest str representation
-      dateZone2str(str2date(baseDateStr)) ==> "2019-02-12 23:00"
-
-      // Local hour is only 21
-      dateZone2str(str2date(baseDateStr), minus2hourZone) ==> "2019-02-12 21:00:00 -02:00"
-
-      // Date has already changed to the 13th
-      dateZone2str(str2date(baseDateStr), plus2hourZone) ==> "2019-02-13 01:00:00 +02:00"
-
-      // Month shifts
-      dateZone2str(str2date("2019-05-31 23:00"), plus2hourZone) ==> "2019-06-01 01:00:00 +02:00"
-      dateZone2str(str2date("2019-06-01 01:00"), minus2hourZone) ==> "2019-05-31 23:00:00 -02:00"
-
-      // Year shifts
-      dateZone2str(str2date("2018-12-31 23:00"), plus2hourZone) ==> "2019-01-01 01:00:00 +02:00"
-      dateZone2str(str2date("2019-01-01 01:00"), minus2hourZone) ==> "2018-12-31 23:00:00 -02:00"
+      date2str(str2date(d1)) ==> "2019-02-12 01:00"
+      date2str(str2date(d1), plus1hourZone) ==> "2019-02-12 00:00 +01:00"
+      date2str(str2date(d1), utcZone) ==> "2019-02-11 23:00 Z"
+      date2str(str2date(d1), minus1hourZone) ==> "2019-02-11 22:00 -01:00"
 
 
-      // Create date from relaxed string and convert back to full str representation
-      date2strFull(str2date(baseDateStr)) ==> "2019-02-12T23:00:00.000Z"
+      val d2 = "2019-02-12 01:00 Z"
 
-      // Local hour is only 21
-      date2strFull(str2date(baseDateStr), minus2hourZone) ==> "2019-02-12T21:00:00.000-02:00"
+      date2str(str2date(d2)) ==> "2019-02-12 01:00"
+      date2str(str2date(d2), plus1hourZone) ==> "2019-02-12 00:00 +01:00"
+      date2str(str2date(d2), utcZone) ==> "2019-02-11 23:00 Z"
+      date2str(str2date(d2), minus1hourZone) ==> "2019-02-11 22:00 -01:00"
 
-      // Date has already changed to the 13th
-      date2strFull(str2date(baseDateStr), plus2hourZone) ==> "2019-02-13T01:00:00.000+02:00"
 
-      // Month shifts
-      date2strFull(str2date("2019-05-31 23:00"), plus2hourZone) ==> "2019-06-01T01:00:00.000+02:00"
-      date2strFull(str2date("2019-06-01 01:00"), minus2hourZone) ==> "2019-05-31T23:00:00.000-02:00"
+      val d3 = "2019-02-12 01:00 +01:00"
 
-      // Year shifts
-      date2strFull(str2date("2018-12-31 23:00"), plus2hourZone) ==> "2019-01-01T01:00:00.000+02:00"
-      date2strFull(str2date("2019-01-01 01:00"), minus2hourZone) ==> "2018-12-31T23:00:00.000-02:00"
+      // Date is adjusted to current (+2) timezone
+      date2str(str2date(d3)) ==> "2019-02-12 02:00"
+      date2str(str2date(d3), myPlus2hourZone) ==> "2019-02-12 02:00"
+
+      date2str(str2date(d3), plus1hourZone) ==> "2019-02-12 01:00 +01:00"
+      date2str(str2date(d3), utcZone) ==> "2019-02-12 00:00 Z"
+      date2str(str2date(d3), minus1hourZone) ==> "2019-02-11 23:00 -01:00"
+
+
+      val d4 = "2019-02-12 01:00 -01:00"
+
+      // Date is adjusted to current (+2) timezone
+      date2str(str2date(d4)) ==> "2019-02-12 04:00"
+      date2str(str2date(d4), myPlus2hourZone) ==> "2019-02-12 04:00"
+
+      date2str(str2date(d4), plus1hourZone) ==> "2019-02-12 03:00 +01:00"
+      date2str(str2date(d4), utcZone) ==> "2019-02-12 02:00 Z"
+      date2str(str2date(d4), minus1hourZone) ==> "2019-02-12 01:00 -01:00"
     }
 
 
-    test("Ancient years") {
+    test("Pre-millenium years") {
 
-      dateZone2str(str2date("2001")) ==> "2001-01-01"
+      date2str(str2date("2001")) ==> "2001-01-01"
 
       // Years before 1000 are padded with zeros
-      dateZone2str(str2date("756")) ==> "0756-01-01"
+      date2str(str2date("756")) ==> "0756-01-01"
 
       // Note: _not_ 1995, but 95AD!
-      dateZone2str(str2date("95")) ==> "0095-01-01"
+      date2str(str2date("95")) ==> "0095-01-01"
 
       // 1AD
-      dateZone2str(str2date("1")) ==> "0001-01-01"
+      date2str(str2date("1")) ==> "0001-01-01"
     }
 
 
@@ -118,18 +241,11 @@ object DateTransformation extends TestSuite with DateHandling {
         "2001-1-1 0:0:0.000 -00:00"
       ).foreach { str =>
 
-        // Create date from relaxed string and convert back to shortest str representation
-        dateZone2str(str2date(str)) ==> "2001-01-01"
+        date2str(str2date(str)) ==> "2001-01-01"
 
-        // UTC (London) time 1 hour ahead of Swedish time
-        dateZone2str(str2date(str), plus1hourZone) ==> "2001-01-01 01:00:00 +01:00"
-
-
-        // Create date from relaxed string and convert back to full str representation
-        date2strFull(str2date(str)) ==> "2001-01-01T00:00:00.000Z"
-
-        // UTC (London) time 1 hour ahead of Swedish time
-        date2strFull(str2date(str), plus1hourZone) ==> "2001-01-01T01:00:00.000+01:00"
+        date2str(str2date(str), plus1hourZone) ==> "2000-12-31 23:00 +01:00"
+        date2str(str2date(str), plus1hourZone) ==> "2000-12-31 23:00 +01:00"
+        date2str(str2date(str), plus1hourZone) ==> "2000-12-31 23:00 +01:00"
       }
     }
 
@@ -170,19 +286,8 @@ object DateTransformation extends TestSuite with DateHandling {
         "2001-2-1 0:0:0.000 -0:00",
         "2001-2-1 0:0:0.000 -00:00"
       ).foreach { str =>
-
-        // Create date from relaxed string and convert back to shortest str representation
-        dateZone2str(str2date(str)) ==> "2001-02-01"
-
-        // UTC (London) time 1 hour ahead of Swedish time
-        dateZone2str(str2date(str), plus1hourZone) ==> "2001-02-01 01:00:00 +01:00"
-
-
-        // Create date from relaxed string and convert back to full str representation
-        date2strFull(str2date(str)) ==> "2001-02-01T00:00:00.000Z"
-
-        // UTC (London) time 1 hour ahead of Swedish time
-        date2strFull(str2date(str), plus1hourZone) ==> "2001-02-01T01:00:00.000+01:00"
+        date2str(str2date(str)) ==> "2001-02-01"
+        date2str(str2date(str), plus1hourZone) ==> "2001-01-31 23:00 +01:00"
       }
     }
 
@@ -220,20 +325,8 @@ object DateTransformation extends TestSuite with DateHandling {
         "2001-12-7 0:0:0.000 -0:00",
         "2001-12-7 0:0:0.000 -00:00"
       ).foreach { str =>
-        //      println(str)
-
-        // Create date from relaxed string and convert back to shortest str representation
-        dateZone2str(str2date(str)) ==> "2001-12-07"
-
-        // UTC (London) time 1 hour ahead of Swedish time
-        dateZone2str(str2date(str), plus1hourZone) ==> "2001-12-07 01:00:00 +01:00"
-
-
-        // Create date from relaxed string and convert back to full str representation
-        date2strFull(str2date(str)) ==> "2001-12-07T00:00:00.000Z"
-
-        // UTC (London) time 1 hour ahead of Swedish time
-        date2strFull(str2date(str), plus1hourZone) ==> "2001-12-07T01:00:00.000+01:00"
+        date2str(str2date(str)) ==> "2001-12-07"
+        date2str(str2date(str), plus1hourZone) ==> "2001-12-06 23:00 +01:00"
       }
     }
 
@@ -271,20 +364,8 @@ object DateTransformation extends TestSuite with DateHandling {
         "2001-12-7 08:06:0.000 -0:00",
         "2001-12-7 08:06:0.000 -00:00"
       ).foreach { str =>
-        //      println(str)
-
-        // Create date from relaxed string and convert back to shortest str representation
-        dateZone2str(str2date(str)) ==> "2001-12-07 08:06"
-
-        // UTC (London) time 1 hour ahead of Swedish time
-        dateZone2str(str2date(str), plus1hourZone) ==> "2001-12-07 09:06:00 +01:00"
-
-
-        // Create date from relaxed string and convert back to full str representation
-        date2strFull(str2date(str)) ==> "2001-12-07T08:06:00.000Z"
-
-        // UTC (London) time 1 hour ahead of Swedish time
-        date2strFull(str2date(str), plus1hourZone) ==> "2001-12-07T09:06:00.000+01:00"
+        date2str(str2date(str)) ==> "2001-12-07 08:06"
+        date2str(str2date(str), plus1hourZone) ==> "2001-12-07 07:06 +01:00"
       }
     }
 
@@ -319,20 +400,8 @@ object DateTransformation extends TestSuite with DateHandling {
         "2001-7-14 15:48:02.000 -0:00",
         "2001-7-14 15:48:02.000 -00:00"
       ).foreach { str =>
-        //      println(str)
-
-        // Create date from relaxed string and convert back to shortest str representation
-        dateZone2str(str2date(str)) ==> "2001-07-14 15:48:02"
-
-        // UTC (London) time 1 hour ahead of Swedish time
-        dateZone2str(str2date(str), plus1hourZone) ==> "2001-07-14 16:48:02 +01:00"
-
-
-        // Create date from relaxed string and convert back to full str representation
-        date2strFull(str2date(str)) ==> "2001-07-14T15:48:02.000Z"
-
-        // UTC (London) time 1 hour ahead of Swedish time
-        date2strFull(str2date(str), plus1hourZone) ==> "2001-07-14T16:48:02.000+01:00"
+        date2str(str2date(str)) ==> "2001-07-14 15:48:02"
+        date2str(str2date(str), plus1hourZone) ==> "2001-07-14 14:48:02 +01:00"
       }
     }
 
@@ -354,10 +423,8 @@ object DateTransformation extends TestSuite with DateHandling {
         "2001-4-5 21:59:40.300 -0:00",
         "2001-4-5 21:59:40.300 -00:00"
       ).foreach { str =>
-        dateZone2str(str2date(str)) ==> "2001-04-05 21:59:40.300"
-        dateZone2str(str2date(str), plus1hourZone) ==> "2001-04-05 22:59:40.300 +01:00"
-        date2strFull(str2date(str)) ==> "2001-04-05T21:59:40.300Z"
-        date2strFull(str2date(str), plus1hourZone) ==> "2001-04-05T22:59:40.300+01:00"
+        date2str(str2date(str)) ==> "2001-04-05 21:59:40.300"
+        date2str(str2date(str), plus1hourZone) ==> "2001-04-05 20:59:40.300 +01:00"
       }
 
       Seq(
@@ -375,10 +442,8 @@ object DateTransformation extends TestSuite with DateHandling {
         "2001-4-5 21:59:40.030 -0:00",
         "2001-4-5 21:59:40.030 -00:00"
       ).foreach { str =>
-        dateZone2str(str2date(str)) ==> "2001-04-05 21:59:40.030"
-        dateZone2str(str2date(str), plus1hourZone) ==> "2001-04-05 22:59:40.030 +01:00"
-        date2strFull(str2date(str)) ==> "2001-04-05T21:59:40.030Z"
-        date2strFull(str2date(str), plus1hourZone) ==> "2001-04-05T22:59:40.030+01:00"
+        date2str(str2date(str)) ==> "2001-04-05 21:59:40.030"
+        date2str(str2date(str), plus1hourZone) ==> "2001-04-05 20:59:40.030 +01:00"
       }
 
       Seq(
@@ -395,10 +460,8 @@ object DateTransformation extends TestSuite with DateHandling {
         "2001-4-5 21:59:40.003 -0:00",
         "2001-4-5 21:59:40.003 -00:00"
       ).foreach { str =>
-        dateZone2str(str2date(str)) ==> "2001-04-05 21:59:40.003"
-        dateZone2str(str2date(str), plus1hourZone) ==> "2001-04-05 22:59:40.003 +01:00"
-        date2strFull(str2date(str)) ==> "2001-04-05T21:59:40.003Z"
-        date2strFull(str2date(str), plus1hourZone) ==> "2001-04-05T22:59:40.003+01:00"
+        date2str(str2date(str)) ==> "2001-04-05 21:59:40.003"
+        date2str(str2date(str), plus1hourZone) ==> "2001-04-05 20:59:40.003 +01:00"
       }
     }
 
@@ -419,19 +482,8 @@ object DateTransformation extends TestSuite with DateHandling {
         "2001-11-23 15:44:00.000 -5:00",
         "2001-11-23 15:44:00.000 -05:00"
       ).foreach { str =>
-
-        // UTC time in London 5 hours later than New York
-        dateZone2str(str2date(str)) ==> "2001-11-23 20:44"
-
-        // Time in Sweden when time is 15:20 in New York (one more hour than London)
-        dateZone2str(str2date(str), plus1hourZone) ==> "2001-11-23 21:44:00 +01:00"
-
-
-        // Create date from relaxed string and convert back to full str representation
-        date2strFull(str2date(str)) ==> "2001-11-23T20:44:00.000Z"
-
-        // UTC (London) time 1 hour ahead of Swedish time - OBS extra hour for daylights saving!
-        date2strFull(str2date(str), plus1hourZone) ==> "2001-11-23T21:44:00.000+01:00"
+        date2str(str2date(str)) ==> "2001-11-23 22:44"
+        date2str(str2date(str), plus1hourZone) ==> "2001-11-23 21:44 +01:00"
       }
     }
 
@@ -445,19 +497,8 @@ object DateTransformation extends TestSuite with DateHandling {
         "2001-11-23 15:44:33.768 -5:00",
         "2001-11-23 15:44:33.768 -05:00"
       ).foreach { str =>
-
-        // UTC time in London 5 hours later than New York
-        dateZone2str(str2date(str)) ==> "2001-11-23 20:44:33.768"
-
-        // Time in Sweden when time is 15:20 in New York (one more hour than London)
-        dateZone2str(str2date(str), plus1hourZone) ==> "2001-11-23 21:44:33.768 +01:00"
-
-
-        // Create date from relaxed string and convert back to full str representation
-        date2strFull(str2date(str)) ==> "2001-11-23T20:44:33.768Z"
-
-        // UTC (London) time 1 hour ahead of Swedish time - OBS extra hour for daylights saving!
-        date2strFull(str2date(str), plus1hourZone) ==> "2001-11-23T21:44:33.768+01:00"
+        date2str(str2date(str)) ==> "2001-11-23 22:44:33.768"
+        date2str(str2date(str), plus1hourZone) ==> "2001-11-23 21:44:33.768 +01:00"
       }
     }
   }

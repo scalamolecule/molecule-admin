@@ -15,20 +15,20 @@ trait Helpers {
     }
   }
 
-  final protected lazy val sdfDatomic = new SimpleDateFormat("'#inst \"'yyyy-MM-dd'T'HH:mm:ss.SSSXXX'\"'")
-  final protected lazy val sdf        = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
+  final protected lazy val sdfInst = new SimpleDateFormat("'#inst \"'yyyy-MM-dd'T'HH:mm:ss.SSSXXX'\"'")
+  final protected lazy val sdfDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
 
-  protected def date2datomicStr(date: Date): String = sdfDatomic.format(date)
-  protected def date2str(date: Date): String = sdf.format(date)
+  protected def date2datomicInst(date: Date): String = sdfInst.format(date)
+  protected def date2datomicStr(date: Date): String = sdfDate.format(date)
 
-  protected def date(s: String): Date = sdf.parse(s)
+  protected def datomicStr2date(s: String): Date = sdfDate.parse(s)
 
   final protected def f(a: Any) = a match {
-    case date: Date => date2str(date).replace("+", "\\\\+")
+    case date: Date => date2datomicStr(date).replace("+", "\\\\+")
     case other      => other
   }
   final protected def f2(a: Any) = a match {
-    case date: Date => date2str(date)
+    case date: Date => date2datomicStr(date)
     case other      => other
   }
 
@@ -36,7 +36,7 @@ trait Helpers {
     case (a, b)     => s"(${cast(a)}, ${cast(b)})"
     case v: Long    => v + "L"
     case v: Float   => v + "f"
-    case date: Date => "\"" + date2datomicStr(date) + "\""
+    case date: Date => "\"" + date2datomicInst(date) + "\""
     case v: String  => "\"" + v + "\""
     case v: UUID    => "\"" + v + "\""
     case v: URI     => "\"" + v + "\""

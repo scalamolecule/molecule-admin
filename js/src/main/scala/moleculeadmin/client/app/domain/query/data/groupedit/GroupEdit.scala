@@ -11,7 +11,7 @@ import moleculeadmin.shared.ops.query.ColOps
 import org.scalajs.dom.html.{LI, TableCell}
 import org.scalajs.dom.{Node, NodeList, document}
 import rx.Ctx
-import scalafiddle.ScalafiddleApi
+import moleculeadmin.client.scalafiddle.ScalafiddleApi
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
 import scala.collection.{GenMap, mutable}
@@ -99,7 +99,14 @@ case class GroupEdit(col: Col,
         attrType match {
           case "String"     => (j: Int) => array(j).get
           case "Boolean"    => (j: Int) => array(j).get.map(_.toBoolean)
-          case "Date"       => (j: Int) => array(j).get.map(v => str2date(v))
+//          case "Date"       => (j: Int) => array(j).get.map(v => str2date(v))
+          case "Date"       => (j: Int) => array(j).get.map{v =>
+
+            println("list date " + str2date(v))
+            println("list date " + v)
+            str2date(v)
+            v
+          }
           case "UUID"       => (j: Int) => array(j).get.map(v => UUID.fromString(v))
           case "URI"        => (j: Int) => array(j).get.map(v => new URI(v))
           case "BigInt"     => (j: Int) => array(j).get
@@ -131,7 +138,12 @@ case class GroupEdit(col: Col,
           case "Date"       => (j: Int) =>
             array(j)
               .fold(Option.empty[Map[String, Date]])(pairs =>
-                Some(pairs.map { case (k, v) => k -> str2date(v) }))
+                Some(pairs.map { case (k, v) =>
+
+                  println("map date " + str2date(v))
+                  println("map date " + v)
+
+                  k -> str2date(v) }))
           case "UUID"       => (j: Int) =>
             array(j)
               .fold(Option.empty[Map[String, UUID]])(pairs =>
@@ -439,7 +451,7 @@ case class GroupEdit(col: Col,
       println("oldVopt0: " + oldVopt0)
       println("oldVopt : " + oldVopt)
       println("newVopt : " + newVopt)
-      println("newVopt_: " + colValueToItems(newVopt.get))
+      println("newVopt : " + formatValue(newVopt))
 
       cells = tableRows.item(tableRowIndex).childNodes
       editCell = cells.item(editColIndex).asInstanceOf[TableCell]
@@ -520,8 +532,15 @@ case class GroupEdit(col: Col,
           oldVopt = origArray(j)
           newVopt = applyFn(j) match {
             case Nil => None
-            case vs  => Some(toColType(vs))
+            case vs  =>
+              println("lambda 0: " + vs)
+              println("lambda 1: " + toColType(vs))
+              Some(toColType(vs))
           }
+
+          println("x old: " + oldVopt)
+          println("x new: " + newVopt)
+
           if (i >= tableRowIndexOffset && i < tableRowIndexMax) {
             updateCell(tableRowIndex, oldVopt, newVopt)
             tableRowIndex += 1
@@ -751,7 +770,7 @@ case class GroupEdit(col: Col,
     val cellBaseClass  = if (attrType == "BigInt" || attrType == "BigDecimal")
       "num" else "str"
     val toColType      = attrType match {
-      case "Date" => (s: String) => dateZone2str(new Date(s.toLong))
+      case "Date" => (s: String) => date2str(new Date(s.toLong))
       case _      => (s: String) => s
     }
     val colValueToNode = attrType match {
@@ -790,8 +809,10 @@ case class GroupEdit(col: Col,
       case "Date"       => transform("str", (vs: js.Array[Date]) => vs.toList.distinct.map(v => {
         println("--------------")
         println("transform date 2: " + v)
-        println("transform date 2: " + dateZone2str(v))
-        dateZone2str(v)
+        println("transform date 2: " + date2str(v))
+        println("transform date 2: " + date2str(v))
+//        println("transform date 2: " + date2str(v))
+        date2str(v)
       }
       ))
       case "UUID"       => transform("str", (vs: js.Array[UUID]) => vs.toList.distinct.map(_.toString))
@@ -843,10 +864,11 @@ case class GroupEdit(col: Col,
 
             println("--------------")
             println("transform date 3: " + v)
-            println("transform date 3: " + dateLocal2str(v))
-            println("transform date 3: " + dateZone2str(v))
+            println("transform date 3: " + date2str(v))
+            println("transform date 3: " + date2str(v))
+//            println("transform date 3: " + date2str(v))
 
-            k -> dateLocal2str(v)
+            k -> date2str(v)
           }
           })
       case "UUID"       =>

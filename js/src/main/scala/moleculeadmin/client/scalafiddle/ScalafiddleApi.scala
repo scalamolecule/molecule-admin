@@ -1,7 +1,7 @@
-package scalafiddle
+package moleculeadmin.client.scalafiddle
 import org.scalajs.dom
 import org.scalajs.dom.ext.Ajax
-import scalafiddle.ast._
+import moleculeadmin.client.scalafiddle.ast._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.scalajs.js

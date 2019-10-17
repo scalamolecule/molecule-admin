@@ -163,7 +163,7 @@ trait HelpersAdmin extends Helpers with DateHandling {
   val dummy = "Dummy to keep ns open"
 
 
-  def firstLow(str: Any) = str.toString.head.toLower + str.toString.tail
+  def firstLow(str: Any): String = str.toString.head.toLower + str.toString.tail
 
   implicit class capitalized2lower(cap: String) {
     def low: String = if (cap.nonEmpty) firstLow(cap) else ""
@@ -179,7 +179,7 @@ trait HelpersAdmin extends Helpers with DateHandling {
     case (a, b)                             => s"(${cast(a)}, ${cast(b)})"
     case v: Long                            => v + "L"
     case v: Float                           => v + "f"
-    case date: Date                         => "\"" + date2datomicStr(date) + "\""
+    case date: Date                         => "\"" + date2datomicInst(date) + "\""
     case v: String if v.startsWith("__n__") => v.drop(5)
     case v: String                          => "\"" + v + "\""
     case v: UUID                            => "\"" + v + "\""
@@ -189,22 +189,32 @@ trait HelpersAdmin extends Helpers with DateHandling {
 
   final protected def os(opt: Option[Set[_]]): String = if (opt.isEmpty) "None" else s"""Some(${opt.get.map(cast)})"""
 
-  val sdf2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
-  protected def date2(s: String): Date = sdf2.parse(s)
 
-//  val sdf3 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-//  def formatDate3(date: Date): String = sdf3.format(date)
+//  final protected lazy val sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS XXX")
+//  protected def date2str(date: Date): String = sdf.format(date)
 
-  val sdf4 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
-  def formatDate4(date: Date): String = sdf4.format(date)
+  //
+  //
+  //  def date2str(date: Date): String =
+  //    new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS XXX").format(date)
 
-//  val sdf5 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS XXX")
-//  def formatDate5(date: Date): String = sdf5.format(date)
+
+  //  val sdf2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
+  //  protected def date2(s: String): Date = sdf2.parse(s)
+
+  //  val sdf3 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+  //  def formatDate3(date: Date): String = sdf3.format(date)
+
+  //  val sdf4 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
+  //  def formatDate4(date: Date): String = sdf4.format(date)
+
+  //  val sdf5 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS XXX")
+  //  val sdf5 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
+  //  def formatDate5(date: Date): String = sdf5.format(date)
 
 
   def renderValue(v: Any): String = v match {
-    // todo: Is Date with local or UTC time zone?
-    case d: Date                            => dateLocal2str(d.asInstanceOf[Date])
+    case d: Date                            => date2str(d.asInstanceOf[Date])
     case s: String if s.startsWith("__n__") => s.drop(5)
     case _                                  => v.toString
   }

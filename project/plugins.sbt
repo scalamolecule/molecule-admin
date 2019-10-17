@@ -7,6 +7,6 @@ Seq(
 //  "com.typesafe.sbt" % "sbt-gzip" % "1.0.2",
 //  "com.typesafe.sbt" % "sbt-digest" % "1.1.4",
   "org.scalamolecule" % "sbt-molecule" % "0.8.2",
-  "io.github.cquiroz" % "sbt-tzdb" % "0.3.1",
+  "io.github.cquiroz" % "sbt-tzdb" % "0.3.2",
 //  "io.get-coursier" % "sbt-coursier" % "1.1.0-M13",
 ) map addSbtPlugin

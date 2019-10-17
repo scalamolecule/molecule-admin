@@ -235,16 +235,16 @@ object Molecule2ModelTest extends TestSuite with TreeSchema with Helpers with Ex
       Molecule2Model("Ns.bool(Seq(true, false))") ==> Right(Seq(Atom("Ns", "bool", "Boolean", 1, Eq(Seq(true, false)))))
 
       // Annoying Date formatting
-      Molecule2Model(s"""Ns.date("${dateLocal2str(date1)}")""") ==> Right(Seq(
+      Molecule2Model(s"""Ns.date("${date2str(date1)}")""") ==> Right(Seq(
         Atom("Ns", "date", "Date", 1, Eq(Seq(date1)), None, Seq(), Seq())
       ))
-      Molecule2Model(s"""Ns.date("${dateLocal2str(date1)}", "${dateLocal2str(date2)}")""") ==> Right(Seq(
+      Molecule2Model(s"""Ns.date("${date2str(date1)}", "${date2str(date2)}")""") ==> Right(Seq(
         Atom("Ns", "date", "Date", 1, Eq(Seq(date1, date2)), None, Seq(), Seq())
       ))
-      Molecule2Model(s"""Ns.date("${dateLocal2str(date1)}" or "${dateLocal2str(date2)}")""") ==> Right(Seq(
+      Molecule2Model(s"""Ns.date("${date2str(date1)}" or "${date2str(date2)}")""") ==> Right(Seq(
         Atom("Ns", "date", "Date", 1, Eq(Seq(date1, date2)), None, Seq(), Seq())
       ))
-      Molecule2Model(s"""Ns.date(Seq("${dateLocal2str(date1)}", "${dateLocal2str(date2)}"))""") ==> Right(Seq(
+      Molecule2Model(s"""Ns.date(Seq("${date2str(date1)}", "${date2str(date2)}"))""") ==> Right(Seq(
         Atom("Ns", "date", "Date", 1, Eq(Seq(date1, date2)), None, Seq(), Seq())
       ))
 
