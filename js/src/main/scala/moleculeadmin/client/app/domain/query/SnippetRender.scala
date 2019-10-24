@@ -1,23 +1,20 @@
 package moleculeadmin.client.app.domain.query
 import autowire._
 import boopickle.Default._
-import moleculeadmin.client.app.element.query.SnippetElements
+import molecule.ast.model.Model
+import molecule.ops.QueryOps._
+import molecule.transform.{Model2Query, Query2String}
 import moleculeadmin.client.app.domain.query.QueryState._
+import moleculeadmin.client.app.element.query.SnippetElements
 import moleculeadmin.client.autowire.queryWire
 import moleculeadmin.client.rxstuff.RxBindings
-import moleculeadmin.shared.ast.schema
-import moleculeadmin.shared.lib.molecule
-import moleculeadmin.shared.lib.molecule.ast.model.Model
-import moleculeadmin.shared.lib.molecule.ops.QueryOps._
-import moleculeadmin.shared.lib.molecule.transform.{Model2Query, Query2String}
 import moleculeadmin.shared.ops.query.ModelOps
 import moleculeadmin.shared.ops.query.builder.TreeOps
 import org.scalajs.dom.document
-import org.scalajs.dom.html.{Element, TableCell, TableRow}
+import org.scalajs.dom.html.{Element, TableCell}
 import rx.{Ctx, Rx}
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all.{td, tr, _}
-import scala.collection.immutable
 import scala.concurrent.ExecutionContext.Implicits.global
 
 

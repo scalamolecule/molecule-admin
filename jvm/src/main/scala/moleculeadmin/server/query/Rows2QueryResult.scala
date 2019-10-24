@@ -3,7 +3,7 @@ package moleculeadmin.server.query
 
 import moleculeadmin.shared.api.QueryApi
 import moleculeadmin.shared.ast.query.{Col, QueryResult}
-import moleculeadmin.shared.lib.moleculeExtras.HelpersAdmin
+import moleculeadmin.shared.util.HelpersAdmin
 
 case class Rows2QueryResult(rowCollection: java.util.Collection[java.util.List[AnyRef]],
                             rowCountAll: Int,

@@ -1,6 +1,6 @@
 package moleculeadmin.sharedtest2.ops.query.branch
 
-import moleculeadmin.shared.lib.molecule.ast.model._
+import molecule.ast.model._
 import moleculeadmin.shared.ops.query.builder.TreeOps
 import scala.languageFeature.implicitConversions._
 import moleculeadmin.shared.testdata.TreeSchema

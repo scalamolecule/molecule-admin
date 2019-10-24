@@ -1,4 +1,4 @@
-package moleculeadmin.shared.x.inspiration
+package moleculeadmin.shared.util
 
 object Path {
 

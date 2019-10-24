@@ -2,7 +2,7 @@ package moleculeadmin.client.app.domain.query
 import moleculeadmin.shared.ast.query.{Col, Favorite, Filter, QueryCache}
 import moleculeadmin.shared.ast.schema.Ns
 import moleculeadmin.shared.ast.tree.Tree
-import moleculeadmin.shared.lib.molecule.ast.model.Element
+import molecule.ast.model.Element
 import rx.Var
 import scalatags.JsDom.all.s
 import scala.collection.mutable.ListBuffer

@@ -50,6 +50,13 @@ Individual test
 > moleculeAdminJS/testOnly -- moleculeadmin.sharedtest.util.DateTransformation
 ```
 
+## Compile
+
+```
+> sbt clean compile
+> moleculeAdminJS/fastOptJS
+```
+
 
 
 

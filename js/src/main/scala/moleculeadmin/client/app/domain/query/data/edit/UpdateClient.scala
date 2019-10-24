@@ -26,8 +26,8 @@ abstract class UpdateClient[T](db: String,
                               )(implicit ctx: Ctx.Owner)
   extends BodyElements with Update {
 
-  val attrFull   = s":$nsFull/${cleanAttr(attr)}"
-  val enumPrefix = if (enums.isEmpty) "" else s":$nsAlias.${cleanAttr(attr)}/"
+  val attrFull   = s":$nsFull/${clean(attr)}"
+  val enumPrefix = if (enums.isEmpty) "" else s":$nsAlias.${clean(attr)}/"
 
   // Tx update coordinates
   val (

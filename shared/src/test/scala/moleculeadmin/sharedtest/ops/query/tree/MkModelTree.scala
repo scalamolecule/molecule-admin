@@ -1,6 +1,6 @@
 package moleculeadmin.sharedtest.ops.query.tree
 
-import moleculeadmin.shared.lib.molecule.ast.model._
+import molecule.ast.model._
 import moleculeadmin.shared.ops.query.builder.TreeOps
 import moleculeadmin.shared.testdata.TreeSchema
 import utest._

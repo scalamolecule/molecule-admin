@@ -6,7 +6,7 @@ import molecule.api.out10._
 import molecule.facade.Conn
 import moleculeadmin.shared.api.BaseApi
 import moleculeadmin.shared.ast.schema._
-import moleculeadmin.shared.lib.moleculeExtras.HelpersAdmin
+import moleculeadmin.shared.util.HelpersAdmin
 import sbtmolecule.Ast._
 import sbtmolecule.DefinitionParser
 import scala.io.Source
@@ -248,7 +248,7 @@ case class DefFile(db: String, path: Option[String] = None, schemaDefFile: Optio
       val enums = enums0 match {
         case None     => ""
         case Some(es) =>
-          es.toList.sorted.mkString("('", ", '", ")")
+          es.toList.sorted.mkString("(\"", "\", \"", "\")")
       }
 
       val options = options0 match {

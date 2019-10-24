@@ -1,6 +1,6 @@
 package moleculeadmin.server.utils
 
-import moleculeadmin.shared.lib.molecule.ast.model._
+import molecule.ast.model._
 
 object MoleculeParser {
 

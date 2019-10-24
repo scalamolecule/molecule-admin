@@ -4,7 +4,7 @@ import java.io
 import moleculeadmin.shared.api.QueryApi
 import moleculeadmin.shared.ast.schema.{Attr, Ns}
 import moleculeadmin.shared.ast.tree.Tree
-import moleculeadmin.shared.lib.molecule.ast.model._
+import molecule.ast.model._
 import moleculeadmin.shared.ops.query.Base
 
 

@@ -35,7 +35,8 @@ class Query extends QueryApi with Base {
     case ("BigInt", v)     => BigInt.apply(v).asInstanceOf[Object]
     case ("BigDecimal", v) => BigDecimal(v).asInstanceOf[Object]
     case ("Boolean", v)    => v.toBoolean.asInstanceOf[Object]
-    case ("Date", v)       => datomicStr2date(v).asInstanceOf[Object]
+    case ("Date", v)       => str2date(v).asInstanceOf[Object]
+//    case ("Date", v)       => datomicStr2date(v).asInstanceOf[Object]
     case ("UUID", v)       => java.util.UUID.fromString(v).asInstanceOf[Object]
     case ("URI", v)        => new java.net.URI(v).asInstanceOf[Object]
     case _                 => sys.error("Unexpected input pair to cast")
@@ -100,11 +101,11 @@ class Query extends QueryApi with Base {
     val conn = Conn(base + "/" + db)
     Entity(conn.db.entity(eid), conn, eid.asInstanceOf[Object]).touchListMax(1)
       .map {
-        case (a, date: Date) => (a, date2datomicStr(date))
+        case (a, date: Date) => (a, date2str(date))
         case (a, vs: Seq[_]) =>
           if (vs.nonEmpty && vs.head.isInstanceOf[Date])
             (a, vs.map(v =>
-              date2datomicStr(v.asInstanceOf[Date])
+              date2str(v.asInstanceOf[Date])
             ).mkString("__~~__"))
           else
             (a, vs.mkString("__~~__"))
@@ -149,7 +150,7 @@ class Query extends QueryApi with Base {
         row.get(2) match {
           case s: String                            => formatEmpty(s)
           case e: jLong if enumAttrs.contains(attr) => ident(conn, e)
-          case d: Date                              => date2datomicStr(d)
+          case d: Date                              => date2str(d)
           case v                                    => formatEmpty(v)
         },
         row.get(3).asInstanceOf[Boolean]
@@ -168,13 +169,13 @@ class Query extends QueryApi with Base {
       case (t, tx, txInstant, op, attr, v) =>
         (t,
           tx,
-          date2datomicStr(txInstant),
+          date2str(txInstant),
           op,
           attr,
           v match {
             case s: String                            => formatEmpty(s)
             case e: jLong if enumAttrs.contains(attr) => ident(conn, e)
-            case d: Date                              => date2datomicStr(d)
+            case d: Date                              => date2str(d)
             case v                                    => formatEmpty(v)
           }
         )
@@ -325,7 +326,7 @@ class Query extends QueryApi with Base {
     withTransactor {
       try {
         val txR: TxReport = conn.transact(stmtss)
-        Right((txR.t, txR.tx, date2datomicStr(txR.inst)))
+        Right((txR.t, txR.tx, date2str(txR.inst)))
       } catch {
         case t: Throwable => Left(t.getMessage)
       }

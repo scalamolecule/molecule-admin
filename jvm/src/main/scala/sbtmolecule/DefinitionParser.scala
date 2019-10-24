@@ -130,17 +130,17 @@ case class DefinitionParser(defFileName: String, lines0: List[String], allIndexe
 
         case r"oneEnum\((.*?)$enums\)(.*)$str" =>
           val rawEnums: Seq[String] = enums.replaceAll("\"", "").split(",").toList.map(_.trim)
-          if (rawEnums.forall(_.matches("[a-z][a-zA-Z0-9_]*")))
+          if (rawEnums.forall(_.matches("[a-zA-Z_][a-zA-Z0-9_]*")))
             Enum(attr, attrClean, "OneEnum", "String", "", rawEnums, parseOptions(str, Nil, attr, curFullNs), attrGroup = attrGroup0)
           else
             throw new SchemaDefinitionException("Enum values can only match `[a-z][a-zA-Z0-9_]*`. Found:\n" + rawEnums.mkString("`", "`\n`", "`"))
 
         case r"manyEnum\((.*?)$enums\)(.*)$str" =>
           val rawEnums: Seq[String] = enums.replaceAll("\"", "").split(",").toList.map(_.trim)
-          if (rawEnums.forall(_.matches("[a-z][a-zA-Z0-9_]*")))
+          if (rawEnums.forall(_.matches("[a-zA-Z_][a-zA-Z0-9_]*")))
             Enum(attr, attrClean, "ManyEnums", "Set[String]", "String", rawEnums, parseOptions(str, Nil, attr, curFullNs), attrGroup = attrGroup0)
           else
-            throw new SchemaDefinitionException("Enum values can only match [a-z][a-zA-Z0-9_]*`. Found:\n" + rawEnums.mkString("`", "`\n`", "`"))
+            throw new SchemaDefinitionException("Enum values can only match [a-zA-Z_][a-zA-Z0-9_]*`. Found:\n" + rawEnums.mkString("`", "`\n`", "`"))
 
 
         // Bidirectional edge ref
@@ -476,12 +476,12 @@ case class DefinitionParser(defFileName: String, lines0: List[String], allIndexe
 
     if (isEdge) {
       val newAttrs: Seq[DefAttr] = ns.attrs.map {
-        case biEdgeRefAttr@Ref(_, _, _, _, _, _, _, _, Some("BiEdgeRefAttr_"), refRef, _) => biEdgeRefAttr
+        case biEdgeRefAttr@Ref(_, _, _, _, _, _, _, _, Some("BiEdgeRefAttr_"), _, _) => biEdgeRefAttr
 
         case biTargetRef@Ref(_, _, _, _, _, _, _, _, Some("BiTargetRef_"), _, _) => biTargetRef
 
         case Ref(attr, _, _, _, _, _, _, _, Some(bi), _, _) if bi.substring(6, 10) != "Prop" => throw new SchemaDefinitionException(
-          s"""Attribute `${ns.ns}` is already defined as a "property edge" and can't also define a bidirectional reference `$attr`.""")
+          s"""Namespace `${ns.ns}` is already defined as a "property edge" and can't also define a bidirectional reference `$attr`.""")
 
         case ref: Ref   => ref.copy(bi = Some("BiEdgePropRef_"))
         case enum: Enum => enum.copy(bi = Some("BiEdgePropAttr_"))

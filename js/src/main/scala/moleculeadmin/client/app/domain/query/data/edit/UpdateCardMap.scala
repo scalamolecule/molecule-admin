@@ -87,30 +87,11 @@ case class UpdateCardMap[T](db: String,
       )
     }
 
-    val newPairs: List[(String, String)] = (if (attrType == "Date") {
-      if (vs.forall { pair =>
-        val v = pair.substring(pair.indexOf("->") + 2).trim
-        Try(expandDateStr(v)).isSuccess
-      }) {
-        vs.map { pair =>
-          val k = pair.substring(0, pair.indexOf("->")).trim
-          val v = pair.substring(pair.indexOf("->") + 2).trim
-          (k, expandDateStr(v))
-        }
-      } else {
-        vs.map { pair =>
-          val k = pair.substring(0, pair.indexOf("->")).trim
-          val v = pair.substring(pair.indexOf("->") + 2).trim
-          (k, v)
-        }
-      }
-    } else {
-      vs.map { pair =>
-        val k = pair.substring(0, pair.indexOf("->")).trim
-        val v = pair.substring(pair.indexOf("->") + 2).trim
-        (k, v)
-      }
-    }).sortBy(_._1)
+    val newPairs: List[(String, String)] = vs.map { pair =>
+      val k = pair.substring(0, pair.indexOf("->")).trim
+      val v = pair.substring(pair.indexOf("->") + 2).trim
+      (k, v)
+    }.sortBy(_._1)
 
     val newVopt: Option[T] = {
       if (newPairs.isEmpty)
@@ -142,10 +123,8 @@ case class UpdateCardMap[T](db: String,
       && eid > 0
       && oldPairs != newPairs
     ) {
-      val (retracts, asserts) = (
-        oldPairs.diff(newPairs).map { case (k, v) => s"$k@$v" },
-        newPairs.diff(oldPairs).map { case (k, v) => s"$k@$v" }
-      )
+      val retracts = oldPairs.diff(newPairs).map { case (k, v) => s"$k@$v" }
+      val asserts  = newPairs.diff(oldPairs).map { case (k, v) => s"$k@$v" }
 
       val newKeys       = newPairs.map(_._1)
       val duplicateKeys = newKeys.length - newKeys.distinct.length
@@ -187,8 +166,15 @@ case class UpdateCardMap[T](db: String,
         // Update value cell
         redrawCell()
 
+        val (retracts1, asserts1) = if (attrType == "Date") {
+          (
+            oldPairs.diff(newPairs).map { case (k, v) => k + "@" + expandDateStr(v) },
+            newPairs.diff(oldPairs).map { case (k, v) => k + "@" + expandDateStr(v) }
+          )
+        } else (retracts, asserts)
+
         // update db
-        val data = Seq((eid, retracts, asserts))
+        val data = Seq((eid, retracts1, asserts1))
         queryWire().updateStr(db, attrFull, "String", data).call().map {
           case Right((t, tx, txInstant)) =>
             updateClient(

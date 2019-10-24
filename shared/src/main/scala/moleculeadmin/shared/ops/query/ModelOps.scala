@@ -1,7 +1,7 @@
 package moleculeadmin.shared.ops.query
 
-import moleculeadmin.shared.lib.molecule.ast.model._
-import moleculeadmin.shared.lib.moleculeExtras.HelpersAdmin
+import molecule.ast.model._
+import moleculeadmin.shared.util.HelpersAdmin
 
 
 trait ModelOps extends HelpersAdmin {

@@ -2,7 +2,7 @@ package moleculeadmin.client.app.domain.query.data.edit
 import java.net.URI
 import java.util.UUID
 import moleculeadmin.client.app.domain.query.KeyEvents
-import moleculeadmin.shared.lib.moleculeExtras.HelpersAdmin
+import moleculeadmin.shared.util.HelpersAdmin
 import scala.scalajs.js.Date
 import scala.util.{Failure, Success, Try}
 

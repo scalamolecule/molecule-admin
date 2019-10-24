@@ -6,7 +6,7 @@ import db.migration.dsl.partition._
 import molecule.api.out10._
 import moleculeadmin.servertest.ResetDbs
 import moleculeadmin.shared.ast.schema._
-import moleculeadmin.shared.lib.molecule.util.Helpers
+import molecule.util.Helpers
 import moleculeadmin.shared.testdata.TreeSchema
 import sbtmolecule.Ast.{Definition, Namespace, Optional}
 import sbtmolecule.{Ast, DefinitionParser}

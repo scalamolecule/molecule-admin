@@ -1,17 +1,12 @@
 package moleculeadmin.shared.ops.query
-import moleculeadmin.shared.lib.molecule.ast.model._
-import moleculeadmin.shared.lib.moleculeExtras.HelpersAdmin
+import molecule.ast.model._
+import moleculeadmin.shared.util.HelpersAdmin
 
 
 trait Base extends HelpersAdmin {
 
 
   def isNumber(attrType: String) = Seq("Int", "Long", "Float", "Double", "BigInt", "BigDecimal").contains(attrType)
-
-  protected def clean(attr: String) = attr.last match {
-    case '_' | '$' => attr.init
-    case _         => attr
-  }
 
   def isolateBranch(model: Seq[Element], targetPath: Seq[(String, String)]): (Seq[Element], Seq[Element], Seq[Element]) = {
     val (_, before1, branch1, after1) = model.foldLeft(

@@ -1,8 +1,8 @@
 package moleculeadmin.shared.ops.query.data
 import moleculeadmin.shared.ast.query.{Col, Filter}
 import moleculeadmin.shared.util.PredicateMerger._
-import moleculeadmin.shared.util.{DateHandling, RegexMatching}
 import java.util.regex.Pattern
+import molecule.util.{DateHandling, RegexMatching}
 
 
 trait FilterFactory extends RegexMatching with DateHandling {

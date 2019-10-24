@@ -2,9 +2,9 @@ package moleculeadmin.shared.ops.query
 
 import moleculeadmin.shared.ast.query.Col
 import moleculeadmin.shared.ast.schema.{Attr, Ns}
-import moleculeadmin.shared.lib.molecule.ast.model._
-import moleculeadmin.shared.lib.molecule.transform.Model2Query.coalesce
-import moleculeadmin.shared.lib.moleculeExtras.HelpersAdmin
+import molecule.ast.model._
+import molecule.transform.Model2Query.coalesce
+import moleculeadmin.shared.util.HelpersAdmin
 import scala.collection.mutable.ListBuffer
 
 
@@ -143,7 +143,7 @@ trait ColOps extends HelpersAdmin {
           firstNs = false
         }
         val enums = if (enumPrefix.isDefined) {
-          val attr0 = cleanAttr(attr)
+          val attr0 = clean(attr)
           nsMap(nsFull).attrs.collectFirst {
             case Attr(_, `attr0`, _, _, enumsOpt, _, _, _, _, _, _, _, _) =>
               enumsOpt

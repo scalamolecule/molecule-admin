@@ -1,6 +1,6 @@
 package moleculeadmin.sharedtest2.ops.query.model
 import java.lang.IllegalArgumentException
-import moleculeadmin.shared.lib.molecule.ast.model._
+import molecule.ast.model._
 import moleculeadmin.shared.ops.query.ModelOps
 import utest._
 

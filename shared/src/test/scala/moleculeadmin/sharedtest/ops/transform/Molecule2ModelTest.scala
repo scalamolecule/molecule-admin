@@ -1,7 +1,7 @@
 package moleculeadmin.sharedtest.ops.transform
 
-import moleculeadmin.shared.lib.molecule.ast.model._
-import moleculeadmin.shared.lib.molecule.util.Helpers
+import molecule.ast.model._
+import molecule.util.Helpers
 import moleculeadmin.shared.ops.transform.Molecule2Model
 import moleculeadmin.shared.testdata.{ExampleData, TreeSchema}
 import utest._

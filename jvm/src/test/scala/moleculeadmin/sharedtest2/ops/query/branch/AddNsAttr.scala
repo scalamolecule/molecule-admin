@@ -1,8 +1,8 @@
 package moleculeadmin.sharedtest2.ops.query.branch
 
-import moleculeadmin.shared.lib.molecule.ast.model._
-import moleculeadmin.shared.lib.molecule.ops.exception.VerifyModelException
-import moleculeadmin.shared.lib.moleculeExtras.ValidatedModelElements
+import molecule.ast.model._
+import molecule.ops.exception.VerifyRawModelException
+import molecule.ops.VerifyRawModel
 import moleculeadmin.shared.ops.query.builder.TreeOps
 import moleculeadmin.shared.testdata.TreeSchema
 import utest._
@@ -17,7 +17,7 @@ object AddNsAttr extends TestSuite with TreeSchema with TreeOps {
         Atom("Aaa", "Dummy to keep ns open", "", 1, NoValue, None, List(), List())
       )
 
-      Model(ValidatedModelElements(addNs(model, List("" -> "Aaa"), "ab", "Bbb", "attrB"))).toString ==> Model(List(
+      Model(VerifyRawModel(addNs(model, List("" -> "Aaa"), "ab", "Bbb", "attrB"))).toString ==> Model(List(
         Bond("Aaa", "ab", "Bbb", 1, List()),
         Atom("Bbb", "attrB", "String", 1, VarValue, None, List(), List())
       )).toString
@@ -28,7 +28,7 @@ object AddNsAttr extends TestSuite with TreeSchema with TreeOps {
         Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List())
       )
 
-      Model(ValidatedModelElements(addNs(model, List("" -> "Aaa"), "ab", "Bbb", "e"))).toString ==> Model(List(
+      Model(VerifyRawModel(addNs(model, List("" -> "Aaa"), "ab", "Bbb", "e"))).toString ==> Model(List(
         Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List()),
         Bond("Aaa", "ab", "Bbb", 1, List()),
         Generic("Bbb", "e", "datom", EntValue)
@@ -40,7 +40,7 @@ object AddNsAttr extends TestSuite with TreeSchema with TreeOps {
         Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List())
       )
 
-      Model(ValidatedModelElements(addNs(model, List("" -> "Aaa"), "ab", "Bbb", "attrB"))).toString ==> Model(List(
+      Model(VerifyRawModel(addNs(model, List("" -> "Aaa"), "ab", "Bbb", "attrB"))).toString ==> Model(List(
         Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List()),
         Bond("Aaa", "ab", "Bbb", 1, List()),
         Atom("Bbb", "attrB", "String", 1, VarValue, None, List(), List())
@@ -52,7 +52,7 @@ object AddNsAttr extends TestSuite with TreeSchema with TreeOps {
         Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List())
       )
 
-      Model(ValidatedModelElements(addNs(model, List("" -> "Aaa"), "ab", "Bbb", "bc"))).toString ==> Model(List(
+      Model(VerifyRawModel(addNs(model, List("" -> "Aaa"), "ab", "Bbb", "bc"))).toString ==> Model(List(
         Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List()),
         Bond("Aaa", "ab", "Bbb", 1, List()),
         Atom("Bbb", "bc", "ref", 1, VarValue, None, List(), List())
@@ -65,7 +65,7 @@ object AddNsAttr extends TestSuite with TreeSchema with TreeOps {
         Atom("Aaa", "ab", "ref", 1, VarValue, None, List(), List())
       )
 
-      Model(ValidatedModelElements(addNs(model, List("" -> "Aaa"), "ab", "Bbb", "e"))).toString ==> Model(List(
+      Model(VerifyRawModel(addNs(model, List("" -> "Aaa"), "ab", "Bbb", "e"))).toString ==> Model(List(
         Bond("Aaa", "ab", "Bbb", 1, List()),
         Generic("Bbb", "e", "datom", EntValue)
       )).toString
@@ -76,7 +76,7 @@ object AddNsAttr extends TestSuite with TreeSchema with TreeOps {
         Atom("Aaa", "ab", "ref", 1, VarValue, None, List(), List())
       )
 
-      Model(ValidatedModelElements(addNs(model, List("" -> "Aaa"), "ab", "Bbb", "attrB"))).toString ==> Model(List(
+      Model(VerifyRawModel(addNs(model, List("" -> "Aaa"), "ab", "Bbb", "attrB"))).toString ==> Model(List(
         Bond("Aaa", "ab", "Bbb", 1, List()),
         Generic("Bbb", "e", "datom", EntValue),
         Atom("Bbb", "attrB", "String", 1, VarValue, None, List(), List())
@@ -90,7 +90,7 @@ object AddNsAttr extends TestSuite with TreeSchema with TreeOps {
         Atom("Aaa", "ab", "ref", 1, VarValue, None, List(), List())
       )
 
-      Model(ValidatedModelElements(addNs(model, List("" -> "Aaa"), "ab", "Bbb", "attrB"))).toString ==> Model(List(
+      Model(VerifyRawModel(addNs(model, List("" -> "Aaa"), "ab", "Bbb", "attrB"))).toString ==> Model(List(
         Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List()),
         Bond("Aaa", "ab", "Bbb", 1, List()),
         Generic("Bbb", "e", "datom", EntValue),
@@ -105,7 +105,7 @@ object AddNsAttr extends TestSuite with TreeSchema with TreeOps {
         Atom("Aaa", "ab", "ref", 1, VarValue, None, List(), List())
       )
 
-      Model(ValidatedModelElements(addNs(model, List("" -> "Aaa"), "ac", "Ccc", "attrC"))).toString ==> Model(List(
+      Model(VerifyRawModel(addNs(model, List("" -> "Aaa"), "ac", "Ccc", "attrC"))).toString ==> Model(List(
         Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List()),
         Atom("Aaa", "ab", "ref", 1, VarValue, None, List(), List()),
         Bond("Aaa", "ac", "Ccc", 1, List()),
@@ -119,7 +119,7 @@ object AddNsAttr extends TestSuite with TreeSchema with TreeOps {
         Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List())
       )
 
-      Model(ValidatedModelElements(addNs(model, List("" -> "Aaa"), "ac", "Ccc", "attrC"))).toString ==> Model(List(
+      Model(VerifyRawModel(addNs(model, List("" -> "Aaa"), "ac", "Ccc", "attrC"))).toString ==> Model(List(
         Atom("Aaa", "ab", "ref", 1, VarValue, None, List(), List()),
         Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List()),
         Bond("Aaa", "ac", "Ccc", 1, List()),
@@ -135,19 +135,19 @@ object AddNsAttr extends TestSuite with TreeSchema with TreeOps {
       )
 
       try {
-        ValidatedModelElements(List(
+        VerifyRawModel(List(
           Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List()),
           Atom("Aaa", "ac", "ref", 1, VarValue, None, List(), List()),
           Bond("Aaa", "ac", "Ccc", 1, List()),
           Atom("Ccc", "attrC", "String", 1, VarValue, None, List(), List())
         ))
       } catch {
-        case e: VerifyModelException => e.getMessage ==>
+        case e: VerifyRawModelException => e.getMessage ==>
           "Instead of getting the ref id with `ac` please get it via the referenced namespace: `Ac.e ...`"
       }
 
 
-      Model(ValidatedModelElements(addNs(model, List("" -> "Aaa"), "ac", "Ccc", "attrC"))).toString ==> Model(List(
+      Model(VerifyRawModel(addNs(model, List("" -> "Aaa"), "ac", "Ccc", "attrC"))).toString ==> Model(List(
         Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List()),
         Bond("Aaa", "ac", "Ccc", 1, List()),
         Generic("Ccc", "e", "datom", EntValue),
@@ -163,18 +163,18 @@ object AddNsAttr extends TestSuite with TreeSchema with TreeOps {
       )
 
       try {
-        ValidatedModelElements(List(
+        VerifyRawModel(List(
           Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List()),
           Atom("Aaa", "ac_", "ref", 1, VarValue, None, List(), List()),
           Bond("Aaa", "ac", "Ccc", 1, List()),
           Atom("Ccc", "attrC", "String", 1, VarValue, None, List(), List())
         ))
       } catch {
-        case e: VerifyModelException => e.getMessage ==>
+        case e: VerifyRawModelException => e.getMessage ==>
           "Instead of getting the ref id with `ac_` please get it via the referenced namespace: `Ac.e ...`"
       }
 
-      Model(ValidatedModelElements(addNs(model, List("" -> "Aaa"), "ac", "Ccc", "attrC"))).toString ==> Model(List(
+      Model(VerifyRawModel(addNs(model, List("" -> "Aaa"), "ac", "Ccc", "attrC"))).toString ==> Model(List(
         Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List()),
         Bond("Aaa", "ac", "Ccc", 1, List()),
         Generic("Ccc", "e", "datom", EntValue),
@@ -191,18 +191,18 @@ object AddNsAttr extends TestSuite with TreeSchema with TreeOps {
 
 
       try {
-        ValidatedModelElements(List(
+        VerifyRawModel(List(
           Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List()),
           Atom("Aaa", "ac$", "ref", 1, VarValue, None, List(), List()),
           Bond("Aaa", "ac", "Ccc", 1, List()),
           Atom("Ccc", "attrC", "String", 1, VarValue, None, List(), List())
         ))
       } catch {
-        case e: VerifyModelException => e.getMessage ==>
+        case e: VerifyRawModelException => e.getMessage ==>
           "Instead of getting the ref id with `ac$` please get it via the referenced namespace: `Ac.e ...`"
       }
 
-      Model(ValidatedModelElements(addNs(model, List("" -> "Aaa"), "ac", "Ccc", "attrC"))).toString ==> Model(List(
+      Model(VerifyRawModel(addNs(model, List("" -> "Aaa"), "ac", "Ccc", "attrC"))).toString ==> Model(List(
         Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List()),
         Bond("Aaa", "ac", "Ccc", 1, List()),
         Generic("Ccc", "e", "datom", EntValue),
@@ -219,18 +219,18 @@ object AddNsAttr extends TestSuite with TreeSchema with TreeOps {
 
 
       try {
-        ValidatedModelElements(List(
+        VerifyRawModel(List(
           Atom("Aaa", "ac", "ref", 1, VarValue, None, List(), List()),
           Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List()),
           Bond("Aaa", "ac", "Ccc", 1, List()),
           Atom("Ccc", "attrC", "String", 1, VarValue, None, List(), List())
         ))
       } catch {
-        case e: VerifyModelException => e.getMessage ==>
+        case e: VerifyRawModelException => e.getMessage ==>
           "Instead of getting the ref id with `ac` please get it via the referenced namespace: `Ac.e ...`"
       }
 
-      Model(ValidatedModelElements(addNs(model, List("" -> "Aaa"), "ac", "Ccc", "attrC"))).toString ==> Model(List(
+      Model(VerifyRawModel(addNs(model, List("" -> "Aaa"), "ac", "Ccc", "attrC"))).toString ==> Model(List(
         Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List()),
         Bond("Aaa", "ac", "Ccc", 1, List()),
         Generic("Ccc", "e", "datom", EntValue),
@@ -246,14 +246,14 @@ object AddNsAttr extends TestSuite with TreeSchema with TreeOps {
 
 
       try {
-        ValidatedModelElements(List(
+        VerifyRawModel(List(
           Atom("Aaa", "ac_", "ref", 1, VarValue, None, List(), List()),
           Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List()),
           Bond("Aaa", "ac", "Ccc", 1, List()),
           Atom("Ccc", "attrC", "String", 1, VarValue, None, List(), List())
         ))
       } catch {
-        case e: VerifyModelException => e.getMessage ==>
+        case e: VerifyRawModelException => e.getMessage ==>
           "Instead of getting the ref id with `ac_` please get it via the referenced namespace: `Ac.e ...`"
       }
 
@@ -263,11 +263,11 @@ object AddNsAttr extends TestSuite with TreeSchema with TreeOps {
       //        Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List()),
       //        Bond("Aaa", "ac", "Ccc", 1, List()),
       //        Atom("Ccc", "attrC", "String", 1, VarValue, None, List(), List())
-      //      )) must throwA[VerifyModelException])
-      //        .message ==> "Got the exception moleculeadmin.shared.lib.molecule.ops.exception.VerifyModelException: " +
+      //      )) must throwA[VerifyRawModelException])
+      //        .message ==> "Got the exception moleculeadmin.shared.lib.molecule.ops.exception.VerifyRawModelException: " +
       //        "Instead of getting the ref id with `ac_` please get it via the referenced namespace: `Ac.e ...`"
 
-      Model(ValidatedModelElements(addNs(model, List("" -> "Aaa"), "ac", "Ccc", "attrC"))).toString ==> Model(List(
+      Model(VerifyRawModel(addNs(model, List("" -> "Aaa"), "ac", "Ccc", "attrC"))).toString ==> Model(List(
         Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List()),
         Bond("Aaa", "ac", "Ccc", 1, List()),
         Generic("Ccc", "e", "datom", EntValue),
@@ -283,14 +283,14 @@ object AddNsAttr extends TestSuite with TreeSchema with TreeOps {
 
 
       try {
-        ValidatedModelElements(List(
+        VerifyRawModel(List(
           Atom("Aaa", "ac$", "ref", 1, VarValue, None, List(), List()),
           Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List()),
           Bond("Aaa", "ac", "Ccc", 1, List()),
           Atom("Ccc", "attrC", "String", 1, VarValue, None, List(), List())
         ))
       } catch {
-        case e: VerifyModelException => e.getMessage ==>
+        case e: VerifyRawModelException => e.getMessage ==>
           "Instead of getting the ref id with `ac$` please get it via the referenced namespace: `Ac.e ...`"
       }
 
@@ -299,11 +299,11 @@ object AddNsAttr extends TestSuite with TreeSchema with TreeOps {
       //        Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List()),
       //        Bond("Aaa", "ac", "Ccc", 1, List()),
       //        Atom("Ccc", "attrC", "String", 1, VarValue, None, List(), List())
-      //      )) must throwA[VerifyModelException])
-      //        .message ==> "Got the exception moleculeadmin.shared.lib.molecule.ops.exception.VerifyModelException: " +
+      //      )) must throwA[VerifyRawModelException])
+      //        .message ==> "Got the exception moleculeadmin.shared.lib.molecule.ops.exception.VerifyRawModelException: " +
       //        "Instead of getting the ref id with `ac$` please get it via the referenced namespace: `Ac.e ...`"
 
-      Model(ValidatedModelElements(addNs(model, List("" -> "Aaa"), "ac", "Ccc", "attrC"))).toString ==> Model(List(
+      Model(VerifyRawModel(addNs(model, List("" -> "Aaa"), "ac", "Ccc", "attrC"))).toString ==> Model(List(
         Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List()),
         Bond("Aaa", "ac", "Ccc", 1, List()),
         Generic("Ccc", "e", "datom", EntValue),
@@ -318,7 +318,7 @@ object AddNsAttr extends TestSuite with TreeSchema with TreeOps {
         Atom("Bbb", "Dummy to keep ns open", "", 1, NoValue, None, List(), List())
       )
 
-      Model(ValidatedModelElements(addNs(model, List("" -> "Aaa", "ab" -> "Bbb"), "bc", "Ccc", "attrC"))).toString ==> Model(List(
+      Model(VerifyRawModel(addNs(model, List("" -> "Aaa", "ab" -> "Bbb"), "bc", "Ccc", "attrC"))).toString ==> Model(List(
         Bond("Aaa", "ab", "Bbb", 1, List()),
         Bond("Bbb", "bc", "Ccc", 1, List()),
         Atom("Ccc", "attrC", "String", 1, VarValue, None, List(), List())
@@ -333,7 +333,7 @@ object AddNsAttr extends TestSuite with TreeSchema with TreeOps {
         Atom("Bbb", "Dummy to keep ns open", "", 1, NoValue, None, List(), List())
       )
 
-      Model(ValidatedModelElements(addNs(model, List("" -> "Aaa", "ab" -> "Bbb"), "bc", "Ccc", "attrC"))).toString ==> Model(List(
+      Model(VerifyRawModel(addNs(model, List("" -> "Aaa", "ab" -> "Bbb"), "bc", "Ccc", "attrC"))).toString ==> Model(List(
         Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List()),
         Bond("Aaa", "ab", "Bbb", 1, List()),
         Bond("Bbb", "bc", "Ccc", 1, List()),
@@ -349,7 +349,7 @@ object AddNsAttr extends TestSuite with TreeSchema with TreeOps {
         Atom("Bbb", "attrB", "String", 1, VarValue, None, List(), List())
       )
 
-      Model(ValidatedModelElements(addNs(model, List("" -> "Aaa", "ab" -> "Bbb"), "bc", "Ccc", "attrC"))).toString ==> Model(List(
+      Model(VerifyRawModel(addNs(model, List("" -> "Aaa", "ab" -> "Bbb"), "bc", "Ccc", "attrC"))).toString ==> Model(List(
         Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List()),
         Bond("Aaa", "ab", "Bbb", 1, List()),
         Atom("Bbb", "attrB", "String", 1, VarValue, None, List(), List()),
@@ -366,7 +366,7 @@ object AddNsAttr extends TestSuite with TreeSchema with TreeOps {
         Atom("Ccc", "Dummy to keep ns open", "", 1, NoValue, None, List(), List())
       )
 
-      Model(ValidatedModelElements(addNs(model, List("" -> "Aaa"), "ad", "Ddd", "attrD"))).toString ==> Model(List(
+      Model(VerifyRawModel(addNs(model, List("" -> "Aaa"), "ad", "Ddd", "attrD"))).toString ==> Model(List(
         Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List()),
         Bond("Aaa", "ac", "Ccc", 1, List()),
         Atom("Ccc", "Dummy to keep ns open", "", 1, NoValue, None, List(), List()),
@@ -384,7 +384,7 @@ object AddNsAttr extends TestSuite with TreeSchema with TreeOps {
         Atom("Ccc", "Dummy to keep ns open", "", 1, NoValue, None, List(), List())
       )
 
-      Model(ValidatedModelElements(addNs(model, List("" -> "Aaa"), "ab", "Bbb", "attrB"))).toString ==> Model(List(
+      Model(VerifyRawModel(addNs(model, List("" -> "Aaa"), "ab", "Bbb", "attrB"))).toString ==> Model(List(
         Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List()),
         Bond("Aaa", "ac", "Ccc", 1, List()),
         Atom("Ccc", "Dummy to keep ns open", "", 1, NoValue, None, List(), List()),
@@ -402,7 +402,7 @@ object AddNsAttr extends TestSuite with TreeSchema with TreeOps {
         Atom("Ccc", "attrC", "String", 1, VarValue, None, List(), List())
       )
 
-      Model(ValidatedModelElements(addNs(model, List("" -> "Aaa"), "ad", "Ddd", "attrD"))).toString ==> Model(List(
+      Model(VerifyRawModel(addNs(model, List("" -> "Aaa"), "ad", "Ddd", "attrD"))).toString ==> Model(List(
         Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List()),
         Bond("Aaa", "ac", "Ccc", 1, List()),
         Atom("Ccc", "attrC", "String", 1, VarValue, None, List(), List()),
@@ -420,7 +420,7 @@ object AddNsAttr extends TestSuite with TreeSchema with TreeOps {
         Atom("Ccc", "attrC", "String", 1, VarValue, None, List(), List())
       )
 
-      Model(ValidatedModelElements(addNs(model, List("" -> "Aaa"), "ab", "Bbb", "attrB"))).toString ==> Model(List(
+      Model(VerifyRawModel(addNs(model, List("" -> "Aaa"), "ab", "Bbb", "attrB"))).toString ==> Model(List(
         Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List()),
         Bond("Aaa", "ac", "Ccc", 1, List()),
         Atom("Ccc", "attrC", "String", 1, VarValue, None, List(), List()),
@@ -441,7 +441,7 @@ object AddNsAttr extends TestSuite with TreeSchema with TreeOps {
         Atom("Ccc", "attrC", "String", 1, VarValue, None, List(), List())
       )
 
-      Model(ValidatedModelElements(addNs(model, Seq("" -> "Aaa", "ab" -> "Bbb"), "bd", "Ddd", "attrD"))).toString ==> Model(List(
+      Model(VerifyRawModel(addNs(model, Seq("" -> "Aaa", "ab" -> "Bbb"), "bd", "Ddd", "attrD"))).toString ==> Model(List(
         Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List()),
         Bond("Aaa", "ab", "Bbb", 1, List()),
         Atom("Bbb", "attrB", "String", 1, VarValue, None, List(), List()),
@@ -472,7 +472,7 @@ object AddNsAttr extends TestSuite with TreeSchema with TreeOps {
         Atom("Ccc", "attrC", "String", 1, VarValue, None, List(), List())
       )
 
-      Model(ValidatedModelElements(addNs(model, Seq("" -> "Aaa", "ab" -> "Bbb"), "bc", "Ccc", "attrC"))).toString ==> Model(List(
+      Model(VerifyRawModel(addNs(model, Seq("" -> "Aaa", "ab" -> "Bbb"), "bc", "Ccc", "attrC"))).toString ==> Model(List(
         Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List()),
         Bond("Aaa", "ab", "Bbb", 1, List()),
 

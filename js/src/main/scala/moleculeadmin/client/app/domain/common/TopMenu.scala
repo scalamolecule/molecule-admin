@@ -2,7 +2,7 @@ package moleculeadmin.client.app.domain.common
 
 import moleculeadmin.client.app.element.common.TopMenuElements
 import moleculeadmin.client.rxstuff.RxBindings
-import moleculeadmin.shared.x.inspiration.Path
+import moleculeadmin.shared.util.Path
 import org.scalajs.dom
 import org.scalajs.dom.document
 import org.scalajs.dom.html.{Anchor, Select}

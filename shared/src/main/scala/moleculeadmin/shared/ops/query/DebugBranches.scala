@@ -1,7 +1,7 @@
 package moleculeadmin.shared.ops.query
 
 import moleculeadmin.shared.api.QueryApi
-import moleculeadmin.shared.lib.molecule.ast.model._
+import molecule.ast.model._
 
 
 trait DebugBranches extends QueryApi with Base {

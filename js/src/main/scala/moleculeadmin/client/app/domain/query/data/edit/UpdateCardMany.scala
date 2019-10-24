@@ -89,15 +89,7 @@ case class UpdateCardMany[T](db: String,
       )
     }
 
-    val newStrs: List[String] = (if (attrType == "Date") {
-      if (vs.forall(v => Try(expandDateStr(v)).isSuccess)) {
-        vs.map(expandDateStr)
-      } else {
-        vs
-      }
-    } else {
-      vs
-    }).distinct.sorted
+    val newStrs: List[String] = vs.distinct.sorted
 
     val newVopt: Option[T] = {
       if (newStrs.isEmpty)

@@ -1,6 +1,6 @@
 package moleculeadmin.servertest.schema.withPartitions
 
-import moleculeadmin.shared.lib.molecule.util.Helpers
+import molecule.util.Helpers
 import moleculeadmin.shared.testdata.TreeSchema
 import sbtmolecule.Ast._
 import sbtmolecule.{DefinitionParser, SchemaTransaction}

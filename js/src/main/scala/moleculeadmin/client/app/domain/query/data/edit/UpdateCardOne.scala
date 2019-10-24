@@ -51,19 +51,7 @@ case class UpdateCardOne[T](db: String,
              isNum: Boolean): Unit = {
 
     val oldStr: String = oldVOpt.fold("")(_.toString)
-    val raw            = cell.innerHTML
-    val newStr: String = {
-      val formatedStr = _html2str(raw)
-      if (attrType == "Date")
-        Try(expandDateStr(formatedStr)) match {
-          case Success(dateStr) => dateStr
-          case Failure(_)       =>
-            // Catch wrongly formatted date in validation below
-            formatedStr
-        }
-      else
-        formatedStr
-    }
+    val newStr: String = _html2str(cell.innerHTML)
 
     // Optional value for in-memory Client value array
     val newVopt: Option[T] = {

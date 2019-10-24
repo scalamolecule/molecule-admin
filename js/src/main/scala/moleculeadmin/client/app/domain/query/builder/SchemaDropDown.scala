@@ -3,7 +3,7 @@ import moleculeadmin.client.app.element.query.SchemaDropdownElements
 import moleculeadmin.client.app.domain.query.QueryState.{modelElements, newQueryBuildup}
 import moleculeadmin.client.rxstuff.RxBindings
 import moleculeadmin.shared.ast.schema._
-import moleculeadmin.shared.lib.molecule.ast.model._
+import molecule.ast.model._
 import moleculeadmin.shared.ops.query.SchemaOps
 import org.scalajs.dom.html.UList
 import rx.{Ctx, Rx}

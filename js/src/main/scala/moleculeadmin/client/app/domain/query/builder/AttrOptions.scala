@@ -4,7 +4,7 @@ import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.jsdom.DropdownMenu
 import moleculeadmin.client.rxstuff.RxBindings
 import moleculeadmin.shared.ast.schema._
-import moleculeadmin.shared.lib.molecule.ast.model._
+import molecule.ast.model._
 import moleculeadmin.shared.ops.query.attr.{AttrOps, ModeOps}
 import org.scalajs.dom.html.{Div, Input, LI, Select}
 import org.scalajs.dom.raw.{Event, HTMLElement}

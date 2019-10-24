@@ -10,7 +10,7 @@ import molecule.api.out10._
 import moleculeadmin.servertest.ResetDbs
 import moleculeadmin.shared.ast.schema
 import moleculeadmin.shared.ast.schema._
-import moleculeadmin.shared.lib.molecule.util.Helpers
+import molecule.util.Helpers
 import moleculeadmin.shared.testdata.TreeSchema
 import utest._
 import scala.languageFeature.implicitConversions._

@@ -6,7 +6,7 @@ import molecule.facade.Conn
 import moleculeadmin.shared.api.BaseApi
 import moleculeadmin.shared.ast.query.{ColSetting, Favorite}
 import moleculeadmin.shared.ast.schema._
-import moleculeadmin.shared.lib.moleculeExtras.HelpersAdmin
+import moleculeadmin.shared.util.HelpersAdmin
 
 trait Base extends BaseApi with HelpersAdmin {
 

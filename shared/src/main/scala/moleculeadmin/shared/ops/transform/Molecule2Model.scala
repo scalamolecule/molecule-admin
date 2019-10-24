@@ -7,9 +7,9 @@ import moleculeadmin.shared.ast.schema.{Attr, Ns}
 import moleculeadmin.shared.ops.query.Base
 import moleculeadmin.shared.api.QueryApi
 import moleculeadmin.shared.ast.schema._
-import moleculeadmin.shared.lib.molecule.ast.model._
-import moleculeadmin.shared.lib.moleculeExtras.HelpersAdmin
+import molecule.ast.model._
 import moleculeadmin.shared.ops.query.Base
+import moleculeadmin.shared.util.HelpersAdmin
 import scala.collection.mutable.ListBuffer
 
 
