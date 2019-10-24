@@ -54,7 +54,7 @@ Individual test
 
 ```
 > sbt clean compile
-> moleculeAdminJS/fastOptJS
+> sbt moleculeAdminJS/fastOptJS
 ```
 
 
