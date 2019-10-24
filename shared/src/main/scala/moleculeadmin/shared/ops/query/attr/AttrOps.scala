@@ -1,12 +1,10 @@
 package moleculeadmin.shared.ops.query.attr
 
-import moleculeadmin.shared.api.QueryApi
-import moleculeadmin.shared.lib.molecule.ast.model._
-import moleculeadmin.shared.ops.query.{Base, DebugBranches}
+import molecule.ast.model._
+import moleculeadmin.shared.ops.query.DebugBranches
 
 
 trait AttrOps extends DebugBranches {
-
 
   def upsertAttr(model: Seq[Element],
                  path0: Seq[(String, String)],
@@ -21,13 +19,13 @@ trait AttrOps extends DebugBranches {
       case "Int"                    => input.toInt
       case "Long" | "ref" | "datom" => input.toLong
 
-      // Hacks for scalajs number handling
+      // Hack for scalajs decimal precision handling
       case "Float" | "Double" if input.contains('.') => "__n__" + input
 
       case "BigInt"     => BigInt(input)
       case "BigDecimal" => BigDecimal(input)
       case "Boolean"    => input.toBoolean
-      case "Date"       => new java.util.Date(input)
+      case "Date"       => str2date(input)
       case "UUID"       => java.util.UUID.fromString(input)
       case "URI"        => new java.net.URI(input)
       case _            => input
@@ -41,7 +39,7 @@ trait AttrOps extends DebugBranches {
       case "BigInt"                 => input.replaceAll(" ", "").split(',').map(n => BigInt(n))
       case "BigDecimal"             => input.replaceAll(" ", "").split(',').map(n => BigDecimal(n))
       case "Boolean"                => input.replaceAll(" ", "").split(',').map(_.toBoolean)
-      case "Date"                   => input.split(',').map(d => new java.util.Date(d))
+      case "Date"                   => input.split(',').map(d => str2date(d))
       case "UUID"                   => input.replaceAll(" ", "").split(',').map(u => java.util.UUID.fromString(u))
       case "URI"                    => input.replaceAll(" ", "").split(',').map(u => new java.net.URI(u))
       case _                        => input.replaceAll(" ", "").split(',')
@@ -170,7 +168,7 @@ trait AttrOps extends DebugBranches {
               additives.intersect(curAdditives :+ toggleAdditive)
 
             val newAdditiveAttrs: Seq[Element] = newAdditives.map {
-              case "orig"        => Atom(ns, attr, attrType, car, VarValue, None, Nil, Seq("edit"))
+              case "orig"           => Atom(ns, attr, attrType, car, VarValue, None, Nil, Seq("edit"))
               case "count"          => Atom(ns, attr, attrType, car, Fn("count", None))
               case "count-distinct" => Atom(ns, attr, attrType, car, Fn("count-distinct", None))
               case "sum"            => Atom(ns, attr, attrType, car, Fn("sum", None))

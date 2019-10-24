@@ -8,12 +8,11 @@ import moleculeadmin.client.app.domain.query.QueryState.{columns, offset, _}
 import moleculeadmin.client.autowire.queryWire
 import moleculeadmin.client.rxstuff.RxBindings
 import moleculeadmin.shared.ast.query.Filter
-import moleculeadmin.shared.lib.molecule
-import moleculeadmin.shared.lib.molecule.ast.model.{Atom, Model}
-import moleculeadmin.shared.lib.molecule.ast.query.QueryExpr
-import moleculeadmin.shared.lib.molecule.ops.QueryOps._
-import moleculeadmin.shared.lib.molecule.transform.{Model2Query, Query2String}
-import moleculeadmin.shared.lib.moleculeExtras.ValidatedModelElements
+import molecule.ast.model.{Atom, Model}
+import molecule.ast.query.QueryExpr
+import molecule.ops.QueryOps._
+import molecule.transform.{Model2Query, Query2String}
+import molecule.ops.VerifyRawModel
 import moleculeadmin.shared.ops.query.ModelOps
 import org.scalajs.dom.document
 import org.scalajs.dom.html.TableSection
@@ -51,7 +50,7 @@ case class DataTable(db: String)(implicit val ctx: Ctx.Owner)
     val resolve      = (expr: QueryExpr) => Query2String(query).p(expr)
     val rules        = if (query.i.rules.nonEmpty)
       Some("[" + (query.i.rules map resolve mkString " ") + "]") else None
-    val (l, ll, lll) = query.encodeInputs
+    val (l, ll, lll) = encodeInputs(query)
 
     // Fetch data from db asynchronously
     queryWire()
@@ -153,7 +152,7 @@ case class DataTable(db: String)(implicit val ctx: Ctx.Owner)
         // New model
         case elements =>
           //          println("----------- new ----------")
-          val elements1 = ValidatedModelElements(elements)
+          val elements1 = VerifyRawModel(elements)
           tree() = mkTree(mkModelTree(elements1))
           curMolecule() = model2molecule(elements1)
           columns() = getCols(elements)

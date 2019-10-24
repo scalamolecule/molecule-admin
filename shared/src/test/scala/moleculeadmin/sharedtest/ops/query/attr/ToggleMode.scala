@@ -1,6 +1,6 @@
 package moleculeadmin.sharedtest.ops.query.attr
 
-import moleculeadmin.shared.lib.molecule.ast.model._
+import molecule.ast.model._
 import moleculeadmin.shared.ops.query.attr.ModeOps
 import moleculeadmin.shared.testdata.TreeSchema
 import utest._

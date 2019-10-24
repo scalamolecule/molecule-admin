@@ -3,12 +3,16 @@ package moleculeadmin.shared.testdata
 import java.net.URI
 import java.util.Date
 import java.util.UUID._
-import moleculeadmin.shared.util.DateHandling
+import molecule.util.DateHandling
 
 
 trait ExampleData extends DateHandling {
 
-  def da(i: Int): Date = str2date("200" + i)
+  def da(i: Int): Date = {
+    // Alternate between winter/summer time to test daylight savings too
+    val month = i % 2 * 6 + 1
+    str2date((2000 + i).toString + "-" + month)
+  }
   def uu = randomUUID()
   def ur(i: Int) = new URI("uri" + i)
 

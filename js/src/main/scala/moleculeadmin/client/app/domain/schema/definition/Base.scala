@@ -3,7 +3,7 @@ import moleculeadmin.client.app.element.schema.DefinitionElements
 import moleculeadmin.client.app.domain.schema.SchemaState._
 import moleculeadmin.client.rxstuff.RxBindings
 import moleculeadmin.shared.api.BaseApi
-import moleculeadmin.shared.lib.moleculeExtras.HelpersAdmin
+import moleculeadmin.shared.util.HelpersAdmin
 import org.scalajs.dom.document
 import org.scalajs.dom.raw.Node
 import rx.Ctx

@@ -1,9 +1,9 @@
 package moleculeadmin.sharedtest2.ops.transform.conversion
 
 import moleculeadmin.shared.api.BaseApi
-import moleculeadmin.shared.lib.moleculeExtras.HelpersAdmin
 import moleculeadmin.shared.ops.transform.{Model2Molecule, Molecule2Model}
 import moleculeadmin.shared.testdata.SeattleSchema
+import moleculeadmin.shared.util.HelpersAdmin
 import utest._
 import scala.languageFeature.implicitConversions._
 

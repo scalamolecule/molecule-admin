@@ -1,14 +1,11 @@
-package moleculeadmin.shared.lib.moleculeExtras
+package moleculeadmin.shared.util
 
 import java.net.URI
-import java.text.SimpleDateFormat
-import java.time.format.DateTimeFormatter
-import java.time.{LocalDateTime, ZoneId, ZonedDateTime}
 import java.util.{Date, UUID}
-import moleculeadmin.shared.lib.molecule.util.Helpers
-import moleculeadmin.shared.util.DateHandling
+import molecule.ast.query.{CollectionBinding, InDataSource, InVar, Query, RelationBinding}
+import molecule.util.Helpers
 
-trait HelpersAdmin extends Helpers with DateHandling {
+trait HelpersAdmin extends Helpers  {
 
   val scalaKeywords = List("abstract", "case", "catch", "class", "def", "do", "else", "extends", "false", "final", "finally",
     "for", "forSome", "if", "implicit", "import", "lazy", "match", "new", "null", "object", "override", "package", "private",
@@ -169,49 +166,25 @@ trait HelpersAdmin extends Helpers with DateHandling {
     def low: String = if (cap.nonEmpty) firstLow(cap) else ""
   }
 
-  def cleanAttr(attr: String): String = attr.last match {
-    case '_' => attr.init
-    case '$' => attr.init
-    case _   => attr
-  }
+//  def cleanAttr(attr: String): String = attr.last match {
+//    case '_' => attr.init
+//    case '$' => attr.init
+//    case _   => attr
+//  }
 
-  override protected def cast(value: Any): String = value match {
-    case (a, b)                             => s"(${cast(a)}, ${cast(b)})"
-    case v: Long                            => v + "L"
-    case v: Float                           => v + "f"
-    case date: Date                         => "\"" + date2datomicInst(date) + "\""
-    case v: String if v.startsWith("__n__") => v.drop(5)
-    case v: String                          => "\"" + v + "\""
-    case v: UUID                            => "\"" + v + "\""
-    case v: URI                             => "\"" + v + "\""
-    case v                                  => v.toString
-  }
+//  protected def cast(value: Any): String = value match {
+//    case (a, b)                             => s"(${cast(a)}, ${cast(b)})"
+//    case v: Long                            => v + "L"
+//    case v: Float                           => v + "f"
+//    case date: Date                         => "\"" + date2str(date) + "\""
+//    case v: String if v.startsWith("__n__") => v.drop(5)
+//    case v: String                          => "\"" + v + "\""
+//    case v: UUID                            => "\"" + v + "\""
+//    case v: URI                             => "\"" + v + "\""
+//    case v                                  => v.toString
+//  }
 
-  final protected def os(opt: Option[Set[_]]): String = if (opt.isEmpty) "None" else s"""Some(${opt.get.map(cast)})"""
-
-
-//  final protected lazy val sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS XXX")
-//  protected def date2str(date: Date): String = sdf.format(date)
-
-  //
-  //
-  //  def date2str(date: Date): String =
-  //    new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS XXX").format(date)
-
-
-  //  val sdf2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
-  //  protected def date2(s: String): Date = sdf2.parse(s)
-
-  //  val sdf3 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-  //  def formatDate3(date: Date): String = sdf3.format(date)
-
-  //  val sdf4 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
-  //  def formatDate4(date: Date): String = sdf4.format(date)
-
-  //  val sdf5 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS XXX")
-  //  val sdf5 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
-  //  def formatDate5(date: Date): String = sdf5.format(date)
-
+//  final protected def os(opt: Option[Set[_]]): String = if (opt.isEmpty) "None" else s"""Some(${opt.get.map(cast)})"""
 
   def renderValue(v: Any): String = v match {
     case d: Date                            => date2str(d.asInstanceOf[Date])
@@ -261,5 +234,37 @@ trait HelpersAdmin extends Helpers with DateHandling {
 
   def thousands(i: Long): String =
     i.toString.reverse.grouped(3).mkString(" ").reverse
+
+
+  // Todo - hack to transmit input types because we can't transfer them typed with boopickle - maybe use upickle instead here?
+  def c(arg: Any): String = arg match {
+    case _: String     => "String"
+    case _: Int        => "Long"
+    case _: Long       => "Long"
+    case _: Float      => "Double"
+    case _: Double     => "Double"
+    case _: BigInt     => "BigInt"
+    case _: BigDecimal => "BigDecimal"
+    case _: Boolean    => "Boolean"
+    case _: Date       => "Date"
+    case _: UUID       => "UUID"
+    case _: URI        => "URI"
+  }
+
+  def encodeInputs(q: Query): (
+    Seq[(Int, (String, String))],
+      Seq[(Int, Seq[(String, String)])],
+      Seq[(Int, Seq[Seq[(String, String)]])]
+    ) = q.i.inputs.zipWithIndex.foldLeft(
+    Seq.empty[(Int, (String, String))],
+    Seq.empty[(Int, Seq[(String, String)])],
+    Seq.empty[(Int, Seq[Seq[(String, String)]])]
+  ) {
+    case ((l, ll, lll), (InVar(RelationBinding(_), argss), i))   => (l, ll, lll :+ (i, argss.map(v => v.map(w => (c(w), w.toString)))))
+    case ((l, ll, lll), (InVar(CollectionBinding(_), argss), i)) => (l, ll :+ (i, argss.head.map(v => (c(v), v.toString))), lll)
+    case ((l, ll, lll), (InVar(_, argss), i))                    => (l :+ (i, (c(argss.head.head), argss.head.head.toString)), ll, lll)
+    case ((l, ll, lll), (InDataSource(_, argss), i))             => (l :+ (i, (c(argss.head.head), argss.head.head.toString)), ll, lll)
+    case other                                                   => sys.error(s"[molecule.ops.QueryOps] UNEXPECTED inputs: $other")
+  }
 
 }

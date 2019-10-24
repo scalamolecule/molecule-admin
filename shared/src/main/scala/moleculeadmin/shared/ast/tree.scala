@@ -1,7 +1,7 @@
 package moleculeadmin.shared.ast
-import moleculeadmin.shared.lib.molecule.ast.model.GenericAtom
-import moleculeadmin.shared.lib.moleculeExtras.HelpersAdmin
+import molecule.ast.model.GenericAtom
 import moleculeadmin.shared.ast.schema._
+import moleculeadmin.shared.util.HelpersAdmin
 
 object tree extends HelpersAdmin {
 

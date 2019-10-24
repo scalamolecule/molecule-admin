@@ -1,7 +1,7 @@
 package moleculeadmin.client.app.element.query.datatable
 import moleculeadmin.client.app.element.AppElements
 import moleculeadmin.client.rxstuff.RxBindings
-import moleculeadmin.shared.util.DateHandling
+import molecule.util.DateHandling
 import org.scalajs.dom.html.{TableCell, TableRow}
 import org.scalajs.dom.raw.Node
 import org.scalajs.dom.window

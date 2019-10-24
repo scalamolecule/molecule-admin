@@ -2,7 +2,7 @@ package moleculeadmin.sharedtest2.ops.query.tree
 
 import moleculeadmin.shared.ast.schema._
 import moleculeadmin.shared.ast.tree.Tree
-import moleculeadmin.shared.lib.molecule.ast.model._
+import molecule.ast.model._
 import moleculeadmin.shared.ops.query.builder.TreeOps
 import moleculeadmin.shared.testdata.TreeSchema
 import utest._

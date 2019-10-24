@@ -29,8 +29,8 @@ case class GroupSave(db: String, col: Col)(implicit val ctx: Ctx.Owner)
 
   val Col(colIndex, _, nsAlias, nsFull, attr, attrType, colType, _, _, enums, _, _, _, _) = col
 
-  val attrFull   = s":$nsFull/${cleanAttr(attr)}"
-  val enumPrefix = if (enums.isEmpty) "" else s":$nsAlias.${cleanAttr(attr)}/"
+  val attrFull   = s":$nsFull/${clean(attr)}"
+  val enumPrefix = if (enums.isEmpty) "" else s":$nsAlias.${clean(attr)}/"
   val filterId   = "filter-" + colIndex
 
   // Start spinner since saving to db can take time

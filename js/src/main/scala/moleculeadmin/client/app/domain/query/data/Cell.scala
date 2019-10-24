@@ -175,8 +175,11 @@ abstract class Cell(db: String,
 
           case "date" =>
             (rowIndex: Int) =>
-              valueArray(rowIndex).fold(_tdNoEdit)(d =>
-                _tdOneDate(truncateDateStr(d)))
+              valueArray(rowIndex).fold(_tdNoEdit){d =>
+
+
+                _tdOneDate(truncateDateStr(d))
+              }
 
           case "big" =>
             (rowIndex: Int) =>

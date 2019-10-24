@@ -6,7 +6,7 @@ import moleculeadmin.client.autowire.schemaWire
 import moleculeadmin.client.rxstuff.RxBindings
 import moleculeadmin.shared.api.BaseApi
 import moleculeadmin.shared.ast.schema._
-import moleculeadmin.shared.lib.moleculeExtras.HelpersAdmin
+import moleculeadmin.shared.util.HelpersAdmin
 import org.scalajs.dom
 import org.scalajs.dom.Event
 import rx.{Ctx, Rx, Var}

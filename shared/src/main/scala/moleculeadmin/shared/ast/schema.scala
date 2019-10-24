@@ -1,5 +1,5 @@
 package moleculeadmin.shared.ast
-import moleculeadmin.shared.lib.moleculeExtras.HelpersAdmin
+import moleculeadmin.shared.util.HelpersAdmin
 
 object schema extends HelpersAdmin {
 

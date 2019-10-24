@@ -1,7 +1,7 @@
 package moleculeadmin.sharedtest2.ops.query.branch
 
-import moleculeadmin.shared.lib.molecule.ast.model._
-import moleculeadmin.shared.lib.moleculeExtras.ValidatedModelElements
+import molecule.ast.model._
+import molecule.ops.VerifyRawModel
 import moleculeadmin.shared.ops.query.builder.TreeOps
 import moleculeadmin.shared.testdata.TreeSchema
 import utest._
@@ -17,7 +17,7 @@ object AddNs extends TestSuite with TreeSchema with TreeOps {
         Atom("Aaa", "Dummy to keep ns open", "", 1, NoValue, None, List(), List())
       )
 
-      Model(ValidatedModelElements(addNs(model, List("" -> "Aaa"), "ab", "Bbb")(nsMap))).toString ==> Model(List(
+      Model(VerifyRawModel(addNs(model, List("" -> "Aaa"), "ab", "Bbb")(nsMap))).toString ==> Model(List(
         Bond("Aaa", "ab", "Bbb", 1, List()),
         Atom("Bbb", "Dummy to keep ns open", "", 1, NoValue, None, List(), List())
       )).toString
@@ -29,7 +29,7 @@ object AddNs extends TestSuite with TreeSchema with TreeOps {
         Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List())
       )
 
-      Model(ValidatedModelElements(addNs(model, List("" -> "Aaa"), "ab", "Bbb"))).toString ==> Model(List(
+      Model(VerifyRawModel(addNs(model, List("" -> "Aaa"), "ab", "Bbb"))).toString ==> Model(List(
         Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List()),
         Bond("Aaa", "ab", "Bbb", 1, List()),
         Atom("Bbb", "Dummy to keep ns open", "", 1, NoValue, None, List(), List())
@@ -43,7 +43,7 @@ object AddNs extends TestSuite with TreeSchema with TreeOps {
         Atom("Aaa", "ac", "ref", 1, VarValue, None, List(), List())
       )
 
-      Model(ValidatedModelElements(addNs(model, List("" -> "Aaa"), "ab", "Bbb"))).toString ==> Model(List(
+      Model(VerifyRawModel(addNs(model, List("" -> "Aaa"), "ab", "Bbb"))).toString ==> Model(List(
         Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List()),
         Atom("Aaa", "ac", "ref", 1, VarValue, None, List(), List()),
         Bond("Aaa", "ab", "Bbb", 1, List()),
@@ -58,7 +58,7 @@ object AddNs extends TestSuite with TreeSchema with TreeOps {
         Atom("Bbb", "Dummy to keep ns open", "", 1, NoValue, None, List(), List())
       )
 
-      Model(ValidatedModelElements(addNs(model, List("" -> "Aaa", "ab" -> "Bbb"), "bc", "Ccc"))).toString ==> Model(List(
+      Model(VerifyRawModel(addNs(model, List("" -> "Aaa", "ab" -> "Bbb"), "bc", "Ccc"))).toString ==> Model(List(
         Bond("Aaa", "ab", "Bbb", 1, List()),
         Bond("Bbb", "bc", "Ccc", 1, List()),
         Atom("Ccc", "Dummy to keep ns open", "", 1, NoValue, None, List(), List())
@@ -73,7 +73,7 @@ object AddNs extends TestSuite with TreeSchema with TreeOps {
         Atom("Bbb", "Dummy to keep ns open", "", 1, NoValue, None, List(), List())
       )
 
-      Model(ValidatedModelElements(addNs(model, List("" -> "Aaa", "ab" -> "Bbb"), "bc", "Ccc"))).toString ==> Model(List(
+      Model(VerifyRawModel(addNs(model, List("" -> "Aaa", "ab" -> "Bbb"), "bc", "Ccc"))).toString ==> Model(List(
         Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List()),
         Bond("Aaa", "ab", "Bbb", 1, List()),
         Bond("Bbb", "bc", "Ccc", 1, List()),
@@ -89,7 +89,7 @@ object AddNs extends TestSuite with TreeSchema with TreeOps {
         Atom("Bbb", "attrB", "String", 1, VarValue, None, List(), List())
       )
 
-      Model(ValidatedModelElements(addNs(model, List("" -> "Aaa", "ab" -> "Bbb"), "bc", "Ccc"))).toString ==> Model(List(
+      Model(VerifyRawModel(addNs(model, List("" -> "Aaa", "ab" -> "Bbb"), "bc", "Ccc"))).toString ==> Model(List(
         Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List()),
         Bond("Aaa", "ab", "Bbb", 1, List()),
         Atom("Bbb", "attrB", "String", 1, VarValue, None, List(), List()),
@@ -105,7 +105,7 @@ object AddNs extends TestSuite with TreeSchema with TreeOps {
         Atom("Ccc", "Dummy to keep ns open", "", 1, NoValue, None, List(), List())
       )
 
-      Model(ValidatedModelElements(addNs(model, List("" -> "Aaa"), "ad", "Ddd"))).toString ==> Model(List(
+      Model(VerifyRawModel(addNs(model, List("" -> "Aaa"), "ad", "Ddd"))).toString ==> Model(List(
         Bond("Aaa", "ac", "Ccc", 1, List()),
         Atom("Ccc", "Dummy to keep ns open", "", 1, NoValue, None, List(), List()),
         ReBond("Aaa"),
@@ -121,7 +121,7 @@ object AddNs extends TestSuite with TreeSchema with TreeOps {
         Atom("Ccc", "Dummy to keep ns open", "", 1, NoValue, None, List(), List())
       )
 
-      Model(ValidatedModelElements(addNs(model, List("" -> "Aaa"), "ab", "Bbb"))).toString ==> Model(List(
+      Model(VerifyRawModel(addNs(model, List("" -> "Aaa"), "ab", "Bbb"))).toString ==> Model(List(
         Bond("Aaa", "ac", "Ccc", 1, List()),
         Atom("Ccc", "Dummy to keep ns open", "", 1, NoValue, None, List(), List()),
         ReBond("Aaa"),
@@ -138,7 +138,7 @@ object AddNs extends TestSuite with TreeSchema with TreeOps {
         Atom("Ccc", "Dummy to keep ns open", "", 1, NoValue, None, List(), List())
       )
 
-      Model(ValidatedModelElements(addNs(model, List("" -> "Aaa"), "ad", "Ddd"))).toString ==> Model(List(
+      Model(VerifyRawModel(addNs(model, List("" -> "Aaa"), "ad", "Ddd"))).toString ==> Model(List(
         Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List()),
         Bond("Aaa", "ac", "Ccc", 1, List()),
         Atom("Ccc", "Dummy to keep ns open", "", 1, NoValue, None, List(), List()),
@@ -156,7 +156,7 @@ object AddNs extends TestSuite with TreeSchema with TreeOps {
         Atom("Ccc", "Dummy to keep ns open", "", 1, NoValue, None, List(), List())
       )
 
-      Model(ValidatedModelElements(addNs(model, List("" -> "Aaa"), "ab", "Bbb"))).toString ==> Model(List(
+      Model(VerifyRawModel(addNs(model, List("" -> "Aaa"), "ab", "Bbb"))).toString ==> Model(List(
         Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List()),
         Bond("Aaa", "ac", "Ccc", 1, List()),
         Atom("Ccc", "Dummy to keep ns open", "", 1, NoValue, None, List(), List()),

@@ -4,7 +4,7 @@ import scalatags.JsDom.all._
 import org.scalajs.dom.{Element, html}
 import org.scalajs.dom.html.{Div, Input, Select}
 import scalatags.JsDom
-import moleculeadmin.shared.lib.molecule.ast.model.{Eq, Fn, Value}
+import molecule.ast.model.{Eq, Fn, Value}
 
 
 trait DefinitionElements extends AppElements {

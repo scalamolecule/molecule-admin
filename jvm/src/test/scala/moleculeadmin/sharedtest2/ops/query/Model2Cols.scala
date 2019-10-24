@@ -1,7 +1,7 @@
 package moleculeadmin.sharedtest2.ops.query
 
 import moleculeadmin.shared.ast.query.Col
-import moleculeadmin.shared.lib.molecule.ast.model._
+import molecule.ast.model._
 import moleculeadmin.shared.ops.query.ColOps
 import moleculeadmin.shared.testdata.TreeSchema
 import utest._

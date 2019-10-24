@@ -1,19 +1,14 @@
 package moleculeadmin.client.inspiration
 
-import autowire._
 import java.nio.ByteBuffer
-import boopickle.Default.{Pickle, Pickler, Unpickle}
-import moleculeadmin.shared.x.inspiration.styles
+import autowire._
+import boopickle.Default.{Pickle, Pickler, Unpickle, _}
 import org.scalajs.dom
 import scalatags.JsDom
+import scalatags.JsDom.all._
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.scalajs.js.typedarray.{ArrayBuffer, TypedArrayBuffer}
-//import scalatags.JsDom
-import scalatags.JsDom.all._
-//import scalatags.Text.TypedTag
-import scalatags.JsDom._
-import boopickle.Default._
-import scala.concurrent.ExecutionContext.Implicits.global
 
 
 case class MyClient(repoName: String) extends autowire.Client[ByteBuffer, Pickler, Pickler] {

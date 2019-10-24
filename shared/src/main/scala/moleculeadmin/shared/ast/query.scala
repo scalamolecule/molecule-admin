@@ -1,8 +1,8 @@
 package moleculeadmin.shared.ast
 import moleculeadmin.shared.ast.schema.seq
 import moleculeadmin.shared.ast.tree.Tree
-import moleculeadmin.shared.lib.molecule.ast.model.Element
-import moleculeadmin.shared.lib.moleculeExtras.HelpersAdmin
+import molecule.ast.model.Element
+import moleculeadmin.shared.util.HelpersAdmin
 
 
 object query extends HelpersAdmin {

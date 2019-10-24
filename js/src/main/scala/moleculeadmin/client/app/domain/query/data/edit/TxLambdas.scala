@@ -5,7 +5,7 @@ import moleculeadmin.client.app.element.query.datatable.BodyElements
 import moleculeadmin.client.app.domain.query.QueryState.{curT, curTx, curTxInstant}
 import moleculeadmin.client.autowire.queryWire
 import moleculeadmin.shared.ast.query.{Col, QueryResult}
-import moleculeadmin.shared.util.DateHandling
+import molecule.util.DateHandling
 import org.scalajs.dom.html.TableCell
 import rx.Ctx
 import scalatags.JsDom

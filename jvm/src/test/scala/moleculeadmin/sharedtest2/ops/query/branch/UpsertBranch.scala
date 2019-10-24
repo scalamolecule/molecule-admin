@@ -1,6 +1,6 @@
 package moleculeadmin.sharedtest2.ops.query.branch
 
-import moleculeadmin.shared.lib.molecule.ast.model._
+import molecule.ast.model._
 import moleculeadmin.shared.ops.query.attr.AttrOps
 import moleculeadmin.shared.testdata.TreeSchema
 import moleculeadmin.sharedtest2.ops.query.attr.UpsertAttr.upsertAttr

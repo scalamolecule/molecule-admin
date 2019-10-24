@@ -9,6 +9,7 @@ import db.integration.MBrainzSchemaLowerToUpper1
 import db.migration.dsl.partition.b_Bb
 import db.migration.schema.{Partition1Schema, PartitionSchema}
 import molecule.api.out10._
+import molecule.boilerplate.attributes.EnumValue
 import molecule.facade.Conn
 import moleculeadmin.servertest.schema.withPartitions.Settings
 import moleculeadmin.shared.testdata.ExampleData
@@ -67,6 +68,8 @@ object ResetDbs extends TestSuite with ExampleData with Settings {
       "Tree",
       "mbrainz-1968-1973"
     ) else dbs0
+
+
 
     dbs.foreach {
 //      case "Clazzig" =>

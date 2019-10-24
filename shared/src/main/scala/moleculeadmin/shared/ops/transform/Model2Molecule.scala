@@ -2,10 +2,10 @@ package moleculeadmin.shared.ops.transform
 
 import java.util.Date
 import moleculeadmin.shared.api.QueryApi
-import moleculeadmin.shared.lib.molecule.ast.model
-import moleculeadmin.shared.lib.molecule.ast.model._
+import molecule.ast.model
+import molecule.ast.model._
+import molecule.util.DateHandling
 import moleculeadmin.shared.ops.query.Base
-import moleculeadmin.shared.util.DateHandling
 
 
 trait Model2Molecule extends QueryApi with Base with DateHandling {

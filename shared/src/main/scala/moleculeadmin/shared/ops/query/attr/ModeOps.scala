@@ -2,7 +2,7 @@ package moleculeadmin.shared.ops.query.attr
 
 import moleculeadmin.shared.api.QueryApi
 import moleculeadmin.shared.ast.schema.{Attr, Ns}
-import moleculeadmin.shared.lib.molecule.ast.model._
+import molecule.ast.model._
 import moleculeadmin.shared.ops.query.Base
 
 
