@@ -1,76 +1,109 @@
 package moleculeadmin.clienttest
-import java.time.{Instant, LocalDateTime, ZoneId}
-import java.util.{Date, TimeZone}
 import molecule.util.DateHandling
-import moleculeadmin.shared.Shared
+import moleculeadmin.client.app.domain.query.QueryState._
+import moleculeadmin.client.app.domain.query.data.groupedit.GroupEdit
+import moleculeadmin.client.rxstuff.RxBindings
+import moleculeadmin.shared.ast.query.{Col, Filter, QueryCache, QueryResult}
+import moleculeadmin.shared.ast.tree.Tree
+import rx.Ctx
 import utest._
+import scalatags.JsDom.all._
+import org.scalajs.dom.{Document, document}
+import scala.scalajs.js
+import scala.scalajs.js.annotation.JSGlobal
+import js.Dynamic.global
 
 // sbt> moleculeAdminJS/test
 // sbt> moleculeAdminJS/testOnly -- moleculeadmin.clienttest.TestJS
 
-object TestJS extends TestSuite with DateHandling {
-
-//  val d1 = new Date("2001-01-01")
-//  val d2 = new Date("2002-07-01")
-//
-//    lazy val zone           : ZoneId     = ZoneId.of(TimeZone.getDefault.getID)
-//
-//
-//  def daylight(ms: Long): Int = {
-//    if (zone.getRules.isDaylightSavings(Instant.ofEpochMilli(ms)))
-//      60 * 60 * 1000
-//    else
-//      0
+//@js.native
+//@JSGlobal
+//object TestDoc extends Document with js.Object {
+//  def main(args: Array[String]): Unit = {
+//    println("Hello world!")
 //  }
+//}
+
+object TestJS extends TestSuite with RxBindings with DateHandling {
+
+
+
+
+  implicit val ctx: Ctx.Owner = rx.Ctx.Owner.safe()
+
+  modelElements() = Nil
+
+  val str: List[Array[Option[String]]] = List(
+    Array(Some("a"), Some("b")),
+    Array(Some("a"), Some("b"))
+  )
+  val num: List[Array[Option[Double]]] = List(
+    Array(Some(1), Some(2))
+  )
+
+  columns() = List(
+    Col(0, 0, "Ns", "Ns", "e", "datom", "double", 1, false, Seq(), "", "", "", 0),
+    Col(1, 0, "Ns", "Ns", "str", "String", "string", 1, false, Seq(), "", "orig", "", 0),
+    Col(2, 0, "Ns", "Ns", "str", "String", "string", 1, false, Seq(), "", "edit", "", 0))
+
+  val qr = QueryResult(
+    str, num, Nil, Nil, Nil, Nil,
+    Map(
+      0 -> 0,
+      1 -> 0,
+      2 -> 1,
+    ),
+    2, 2, 0
+  )
+
+  queryCache() = Seq(QueryCache(
+    Nil,
+    Tree(Nil, Nil, Nil, Nil, Nil, Nil),
+    "",
+    qr,
+    columns.now,
+    Array(0, 1),
+    Map.empty[Int, Filter[_]],
+    Array.empty[Int]
+  ))
 
 
   val tests = Tests {
-    test("test") {
-      println("a", "b")
-      Shared.confirm("Test js")
-    }
-
 
     test("moleculeadmin/client/scalafiddle") {
 
+//      def go = println()
 
+      val page = html(
+        body(
+          "hi"
+          //script(s"QueryClient.load('CoreTest')")
+        )
+      )
 
-//      val zdt1 = LocalDateTime.of(2001, 1, 1, 0, 0).atZone(zone)
-//      val zdt2 = LocalDateTime.of(2002, 7, 1, 0, 0).atZone(zone)
+      println(js.typeOf(js.Dynamic.global))
+      js.typeOf(js.Dynamic.global.document) ==> "undefined"
+
+//      val doc = global.document
+//      val h1 = doc.createElement("h1")
+//      h1.innerHTML = "Test"
+//      doc.body.appendChild(h1)
 //
-//      println(zdt1)
-//      println(zdt2)
-////      val isDaylight = zone.getRules.isDaylightSavings(zdt1.toInstant)
-//      println(zone.getRules.isDaylightSavings(zdt1.toInstant))
-//      println(zone.getRules.isDaylightSavings(zdt2.toInstant))
 //
-//      println(zone.getRules.getDaylightSavings(zdt1.toInstant))
-//      println(zone.getRules.getDaylightSavings(zdt2.toInstant))
-
-
-
-//      def mkDate(month: Int): Date = {
-//        val inst = LocalDateTime.of(2001, month, 1, 15, 0).atZone(zone).toInstant
-//        val ms   = inst.getEpochSecond * 1000 + inst.getNano / 1000000
-//        new Date(ms - daylight(ms))
-//      }
-//      val d3 = mkDate(3)
-//      val d7 = mkDate(7)
 //
-//      println(date1)
-////      println(d2)
-//      println(d3)
-//      println(d7)
+////      doc.appendChild(page.render)
+//
+//
+//      doc.body.lastChild.tagName.toString ==> "H1"
+//      doc.body.lastChild.innerHTML.toString ==> "Test"
 
 
-      Seq(
-        "2019-01-11 15:00",
-        "2019-07-17 15:00"
-      ).foreach{d =>
-        println(d)
-        println(str2date(d))
-        println(date2str(str2date(d)))
-      }
+//      val col      = Col(2, 0, "Ns", "Ns", "str", "String", "string", 1, false, Seq(), "", "edit", "", 0)
+//      val filterId = "hi"
+
+      //GroupEdit(col, filterId).string()
+
+
     }
 
   }

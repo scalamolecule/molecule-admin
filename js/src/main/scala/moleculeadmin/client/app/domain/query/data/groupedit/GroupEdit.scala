@@ -4,21 +4,23 @@ import java.util.{Date, UUID}
 import moleculeadmin.client.app.domain.query.KeyEvents
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.domain.query.data.Indexes
+import moleculeadmin.client.app.domain.query.data.groupedit.ops.{AttrLambdas, AttrTokens, CalculateGroupEdit, ScalaCode, UpdateCells}
 import moleculeadmin.client.app.element.query.datatable.BodyElements
 import moleculeadmin.client.rxstuff.RxBindings
-import moleculeadmin.shared.ast.query.Col
+import moleculeadmin.client.scalafiddle.ScalafiddleApi
+import moleculeadmin.shared.ast.query
+import moleculeadmin.shared.ast.query.{Col, QueryResult}
 import moleculeadmin.shared.ops.query.ColOps
 import org.scalajs.dom.html.{LI, TableCell}
-import org.scalajs.dom.{Node, NodeList, document}
+import org.scalajs.dom.{Document, Node, NodeList, document}
 import rx.Ctx
-import moleculeadmin.client.scalafiddle.ScalafiddleApi
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
-import scala.collection.{GenMap, mutable}
+import scala.collection.immutable.Map
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js
-import scala.scalajs.js.{Dictionary, WrappedDictionary}
+import scala.scalajs.js.JSConverters._
 
 /*
   Float is treated as Double to avoid precision problems from ScalaJS
@@ -31,487 +33,103 @@ import scala.scalajs.js.{Dictionary, WrappedDictionary}
   all number types except Int):
   floats.map(v => (v + BigDecimal(0.1)).toDouble)
  */
-case class GroupEdit(col: Col,
-                     filterId: String)(implicit val ctx: Ctx.Owner)
-  extends RxBindings with ColOps with BodyElements with KeyEvents {
+case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
+  extends RxBindings with ColOps with BodyElements with KeyEvents with AttrTokens {
 
-  val Col(colIndex, _, nsAlias, nsFull, attr, attrType, colType, card, _, _,
+  val Col(colIndex, _, nsAlias, nsFull, attr, attrType, colType, card, _, enums,
   aggrType, expr, sortDir, sortPos) = col
 
-  val qr = queryCache.now.find(_.modelElements == modelElements.now).get.queryResult
 
-  val arrayIndexes = qr.arrayIndexes
+  // Build scala code elements for scalafiddle
 
+  val lhsTypesProcess       = new ListBuffer[String]
+  val lhsParamsTypesProcess = new ListBuffer[String]
+  val lhsTypes              = new ListBuffer[String]
+  val lhsParamsTypes        = new ListBuffer[String]
+  val lhsParams             = new ListBuffer[String]
+  val colTypes              = new ListBuffer[String]
+  val colIndexes            = new ListBuffer[Int]
 
-  def getAttrLambda(colType: String,
-                    colIndex: Int,
-                    attrType: String,
-                    opt: Boolean): Int => Any = colType match {
-    case "string" =>
-      val array = qr.str(arrayIndexes(colIndex))
-      if (opt)
-        attrType match {
-          case "String"     => (j: Int) => array(j)
-          case "Boolean"    => (j: Int) => array(j).fold(Option.empty[Boolean])(v => Some(v.toBoolean))
-          case "Date"       => (j: Int) => array(j).fold(Option.empty[Date])(v => Some(str2date(v)))
-          case "UUID"       => (j: Int) => array(j).fold(Option.empty[UUID])(v => Some(UUID.fromString(v)))
-          case "URI"        => (j: Int) => array(j).fold(Option.empty[URI])(v => Some(new URI(v)))
-          case "BigInt"     => (j: Int) => array(j)
-          case "BigDecimal" => (j: Int) => array(j)
-        }
-      else
-        attrType match {
-          case "String"     => (j: Int) => array(j).get
-          case "Boolean"    => (j: Int) => array(j).get.toBoolean
-          case "Date"       => (j: Int) => str2date(array(j).get)
-          case "UUID"       => (j: Int) => UUID.fromString(array(j).get)
-          case "URI"        => (j: Int) => new URI(array(j).get)
-          case "BigInt"     => (j: Int) => array(j).get
-          case "BigDecimal" => (j: Int) => array(j).get
-        }
-
-    case "double" =>
-      val array = qr.num(arrayIndexes(colIndex))
-      if (opt)
-        attrType match {
-          case "Int" => (j: Int) => array(j).fold(Option.empty[Int])(v => Some(v.toInt))
-          case _     => (j: Int) => array(j).fold(Option.empty[String])(v => Some(v.toString))
-        }
-      else
-        attrType match {
-          case "Int" => (j: Int) => array(j).get.toInt
-          case _     => (j: Int) => array(j).get.toString
-        }
-
-    case "listString" =>
-      val array = qr.listStr(arrayIndexes(colIndex))
-      if (opt)
-        attrType match {
-          case "String"     => (j: Int) => array(j)
-          case "Boolean"    => (j: Int) => array(j).fold(Option.empty[List[Boolean]])(vs => Some(vs.map(_.toBoolean)))
-          case "Date"       => (j: Int) => array(j).fold(Option.empty[List[Date]])(vs => Some(vs.map(v => str2date(v))))
-          case "UUID"       => (j: Int) => array(j).fold(Option.empty[List[UUID]])(vs => Some(vs.map(v => UUID.fromString(v))))
-          case "URI"        => (j: Int) => array(j).fold(Option.empty[List[URI]])(vs => Some(vs.map(v => new URI(v))))
-          case "BigInt"     => (j: Int) => array(j)
-          case "BigDecimal" => (j: Int) => array(j)
-        }
-      else
-        attrType match {
-          case "String"     => (j: Int) => array(j).get
-          case "Boolean"    => (j: Int) => array(j).get.map(_.toBoolean)
-//          case "Date"       => (j: Int) => array(j).get.map(v => str2date(v))
-          case "Date"       => (j: Int) => array(j).get.map{v =>
-
-            println("list date " + str2date(v))
-            println("list date " + v)
-            str2date(v)
-            v
-          }
-          case "UUID"       => (j: Int) => array(j).get.map(v => UUID.fromString(v))
-          case "URI"        => (j: Int) => array(j).get.map(v => new URI(v))
-          case "BigInt"     => (j: Int) => array(j).get
-          case "BigDecimal" => (j: Int) => array(j).get
-        }
-
-    case "listDouble" =>
-      val array = qr.listNum(arrayIndexes(colIndex))
-      if (opt)
-        attrType match {
-          case "Int" => (j: Int) => array(j).fold(Option.empty[List[Int]])(vs => Some(vs.map(_.toInt)))
-          case _     => (j: Int) => array(j).fold(Option.empty[List[String]])(vs => Some(vs.map(_.toString)))
-        }
-      else
-        attrType match {
-          case "Int" => (j: Int) => array(j).get.map(_.toInt)
-          case _     => (j: Int) => array(j).get.map(_.toString)
-        }
-
-    case "mapString" =>
-      val array = qr.mapStr(arrayIndexes(colIndex))
-      if (opt)
-        attrType match {
-          case "String"     => (j: Int) => array(j)
-          case "Boolean"    => (j: Int) =>
-            array(j)
-              .fold(Option.empty[Map[String, Boolean]])(pairs =>
-                Some(pairs.map { case (k, v) => k -> v.toBoolean }))
-          case "Date"       => (j: Int) =>
-            array(j)
-              .fold(Option.empty[Map[String, Date]])(pairs =>
-                Some(pairs.map { case (k, v) =>
-
-                  println("map date " + str2date(v))
-                  println("map date " + v)
-
-                  k -> str2date(v) }))
-          case "UUID"       => (j: Int) =>
-            array(j)
-              .fold(Option.empty[Map[String, UUID]])(pairs =>
-                Some(pairs.map { case (k, v) => k -> UUID.fromString(v) }))
-          case "URI"        => (j: Int) =>
-            array(j)
-              .fold(Option.empty[Map[String, URI]])(pairs =>
-                Some(pairs.map { case (k, v) => k -> new URI(v) }))
-          case "BigInt"     => (j: Int) => array(j)
-          case "BigDecimal" => (j: Int) => array(j)
-        }
-      else
-        attrType match {
-          case "String"     => (j: Int) => array(j).get
-          case "Boolean"    => (j: Int) => array(j).get.map { case (k, v) => k -> v.toBoolean }
-          case "Date"       => (j: Int) => array(j).get.map { case (k, v) => k -> str2date(v) }
-          case "UUID"       => (j: Int) => array(j).get.map { case (k, v) => k -> UUID.fromString(v) }
-          case "URI"        => (j: Int) => array(j).get.map { case (k, v) => k -> new URI(v) }
-          case "BigInt"     => (j: Int) => array(j).get
-          case "BigDecimal" => (j: Int) => array(j).get
-        }
-
-    case "mapDouble" =>
-      val array = qr.mapNum(arrayIndexes(colIndex))
-      if (opt)
-        attrType match {
-          case "Int" => (j: Int) =>
-            array(j)
-              .fold(Option.empty[Map[String, Int]])(pairs =>
-                Some(pairs.map { case (k, v) => k -> v.toInt }))
-          case _     => (j: Int) =>
-            array(j)
-              .fold(Option.empty[Map[String, String]])(pairs =>
-                Some(pairs.map { case (k, v) => k -> v.toString }))
-        }
-      else
-        attrType match {
-          case "Int" => (j: Int) => array(j).get.map { case (k, v) => k -> v.toInt }
-          case _     => (j: Int) => array(j).get.map { case (k, v) => k -> v.toString }
-        }
-  }
-
-  val lhsTypes       = new ListBuffer[String]
-  val lhsParamsTypes = new ListBuffer[String]
-  val lhsParams      = new ListBuffer[String]
-  val colTypes       = new ListBuffer[String]
-  val vars           = new ListBuffer[String]
-  val varAssignments = new ListBuffer[String]
-  val colIndexes     = new ListBuffer[Int]
-  val attrLambdas    = new ListBuffer[Int => Any]
-
-  def attrTokens(attr: String, tpe: String, card: Int)
-  : (String, String, String) = card match {
-    case 1 if attr.last == '$' =>
-      tpe match {
-        case "Long" | "datom" | "ref" => (
-          "Option[String)",
-          "Option[BigInt] = Option.empty[BigInt]",
-          s"_$attr.fold(Option.empty[BigInt])(v => Some(BigInt(v))"
-        )
-
-        case "Float" | "Double" => (
-          "Option[String]",
-          "Option[BigDecimal] = Option.empty[BigInt]",
-          s"_$attr.fold(Option.empty[BigDecimal])(v => Some(BigDecimal(v))"
-        )
-
-        // Int + String types
-        case _ => (
-          s"Option[$tpe]",
-          s"Option[$tpe] = Option.empty[$tpe]",
-          s"_$attr"
-        )
-      }
-
-    case 1 =>
-      tpe match {
-        case "Long" | "datom" | "ref" =>
-          ("String", "BigInt = BigInt(0)", s"BigInt(_$attr)")
-
-        case "Float" | "Double" =>
-          ("String", "BigDecimal = BigDecimal(0)", s"BigDecimal(_$attr)")
-
-        // Int + String types
-        case "Int"        => (tpe, "Int = 0", s"_$attr")
-        case "String"     => (tpe, """String = """"", s"_$attr")
-        case "Boolean"    => (tpe, "Boolean = false", s"_$attr")
-        case "Date"       => (tpe, "Date = new Date()", s"_$attr")
-        case "UUID"       => (tpe, "UUID = UUID.randomUUID()", s"_$attr")
-        case "URI"        => (tpe, """URI = new URI("")""", s"_$attr")
-        case "BigInt"     => ("String", "BigInt = BigInt(0)", s"BigInt(_$attr)")
-        case "BigDecimal" => ("String", "BigDecimal = BigDecimal(0)", s"BigDecimal(_$attr)")
-      }
-
-    case 2 =>
-      tpe match {
-        case "Int"                    => (
-          "List[Int]",
-          "js.Array[Int] = new js.Array()",
-          s"_$attr.toJSArray"
-        )
-        case "Long" | "datom" | "ref" => (
-          "List[String]",
-          "js.Array[BigInt] = new js.Array()",
-          s"_$attr.toJSArray.map(v => BigInt(v))"
-        )
-        case "Float" | "Double"       => (
-          "List[String]",
-          "js.Array[BigDecimal] = new js.Array()",
-          s"_$attr.toJSArray.map(v => BigDecimal(v))"
-        )
-        case "BigInt"                 => (
-          "List[String]",
-          "js.Array[BigInt] = new js.Array()",
-          s"_$attr.toJSArray.map(v => BigInt(v))"
-        )
-        case "BigDecimal"             => (
-          "List[String]",
-          "js.Array[BigDecimal] = new js.Array()",
-          s"_$attr.toJSArray.map(v => BigDecimal(v))"
-        )
-        case _                        => (
-          s"List[$tpe]",
-          s"js.Array[$tpe] = new js.Array()",
-          s"_$attr.toJSArray",
-        )
-      }
-
-    case 3 =>
-      tpe match {
-        case "Int"                    => (
-          "Map[String, Int]",
-          "js.Dictionary[Int] = js.Dictionary.empty[Int]",
-          s"_$attr.toJSDictionary"
-        )
-        case "Long" | "datom" | "ref" => (
-          "Map[String, String]",
-          "js.Dictionary[BigInt] = js.Dictionary.empty[BigInt]",
-          s"_$attr.toJSDictionary.map { case (k, v) => k -> BigInt(v) }"
-        )
-        case "Float" | "Double"       => (
-          "Map[String, String]",
-          "js.Dictionary[BigDecimal] = js.Dictionary.empty[BigDecimal]",
-          s"_$attr.toJSDictionary.map { case (k, v) => k -> BigDecimal(v) }"
-        )
-        case "BigInt"                 => (
-          "Map[String, String]",
-          "js.Dictionary[BigInt] = js.Dictionary.empty[BigInt]",
-          s"_$attr.toJSDictionary.map { case (k, v) => k -> BigInt(v) }"
-        )
-        case "BigDecimal"             => (
-          "Map[String, String]",
-          "js.Dictionary[BigDecimal] = js.Dictionary.empty[BigDecimal]",
-          s"_$attr.toJSDictionary.map { case (k, v) => k -> BigDecimal(v) }"
-        )
-        case _                        => (
-          s"Map[String, $tpe]",
-          s"""js.Dictionary[$tpe] = js.Dictionary.empty[$tpe]""",
-          s"_$attr.toJSDictionary",
-        )
-      }
-  }
-
-  columns.now.foreach {
+  columns.now.collect {
     case Col(colIndex, _, `nsAlias`, `nsFull`, attr, tpe, colType, card, _, _, _, attrExpr, _, _)
       if attrExpr != "edit" =>
-      val (tpe1, tpe2, assignment) = attrTokens(attr, tpe, card)
-      lhsTypes += tpe1
-      lhsParamsTypes += s"_$attr: $tpe1"
-      lhsParams += "_" + attr
-      vars += s"var $attr: $tpe2"
-      varAssignments += s"$attr = $assignment"
+      val (tpeProcess, tpeTransfer, paramConverter) = attrTokens(attr, tpe, card)
+      lhsTypesProcess += tpeProcess
+      lhsParamsTypesProcess += s"$attr: $tpeProcess"
+      lhsTypes += tpeTransfer
+      lhsParamsTypes += s"$attr: $tpeTransfer"
+      lhsParams += paramConverter
       colTypes += colType
       colIndexes += colIndex
-      attrLambdas += getAttrLambda(colType, colIndex, tpe, attr.last == '$')
 
     case Col(colIndex, _, nsAlias, _, attr, tpe, colType, card, _, _, _, attrExpr, _, _)
       if attrExpr != "edit" =>
-      val Ns_attr                  = nsAlias + "_" + attr
-      val (tpe1, tpe2, assignment) = attrTokens(Ns_attr, tpe, card)
-      lhsTypes += tpe1
-      lhsParamsTypes += s"_$Ns_attr: $tpe1"
-      lhsParams += "_" + Ns_attr
-      vars += s"var $Ns_attr: $tpe2"
-      varAssignments += s"$Ns_attr = $assignment"
+      val Ns_attr                                   = nsAlias + "_" + attr
+      val (tpeProcess, tpeTransfer, paramConverter) = attrTokens(Ns_attr, tpe, card)
+      lhsTypesProcess += tpeProcess
+      lhsParamsTypesProcess += s"$Ns_attr: $tpeProcess"
+      lhsTypes += tpeTransfer
+      lhsParamsTypes += s"$Ns_attr: $tpeTransfer"
+      lhsParams += paramConverter
       colTypes += colType
       colIndexes += colIndex
-      attrLambdas += getAttrLambda(colType, colIndex, tpe, attr.last == '$')
-
-    case other =>
-    //      throw new RuntimeException("Unexpected col: " + col)
   }
 
-  // Get entered scala right hand side code (before processing adds spinner!)
-  val rhs = _html2str(document.getElementById(filterId).innerHTML)
+  // Get input for scala right hand side code (before processing adds spinner!)
+  val rhs: String = _html2str(document.getElementById(filterId).innerHTML)
     .trim.replaceAllLiterally("\n", "\n      ")
 
   // Start spinner since compilation can take some seconds
   processing() = filterId
 
-  val origIndex = arrayIndexes(colIndex - 1)
-  val editIndex = arrayIndexes(colIndex)
+  val qr         : QueryResult     = queryCache.now.find(_.modelElements == modelElements.now).get.queryResult
+  val tableRows  : NodeList        = document.getElementById("tableBody").childNodes
+  val attrLambdas: Seq[Int => Any] = AttrLambdas(qr).get
+  val updateCells: UpdateCells     = UpdateCells(colIndex, attrType, card, tableRows)
 
-  val tableRows           = document.getElementById("tableBody").childNodes
-  var tableRowIndexOffset = offset.now
-  var tableRowIndexMax    = curLastRow
 
-  val sortCols                 = columns.now.filter(_.sortDir.nonEmpty)
-  val unfiltered               = filters.now.isEmpty
-  val (sortIndex, filterIndex) = Indexes(qr, sortCols, unfiltered).get
-  val lastRow                  = actualRowCount
-
-  val indexBridge: Int => Int = {
-    if (filterIndex.nonEmpty)
-      (i: Int) => filterIndex(i)
-    else if (sortIndex.nonEmpty)
-      (i: Int) => sortIndex(i)
-    else
-      (i: Int) => i
-  }
-
-  // Update visible cell values and mark edge color
-  def updateCellCardOne[ColType](cellBaseClass: String,
-                                 colValueToNode: ColType => Node
-                                ): (Int, Option[ColType], Option[ColType]) => Unit = {
-    var cells   : NodeList  = null
-    var editCell: TableCell = null
-    val editColIndex        = colIndex + 1
-    val formatValue         = attrType match {
-      case "Date" => (optV: Option[ColType]) =>
-        optV.fold(Option.empty[ColType])(v =>
-          Some(truncateDateStr(v.toString).asInstanceOf[ColType])
-        )
-      case _      => (optV: Option[ColType]) => optV
-    }
-    (tableRowIndex: Int,
-     oldVopt0: Option[ColType],
-     newVopt: Option[ColType]
-    ) => {
-      val oldVopt = formatValue(oldVopt0)
-      cells = tableRows.item(tableRowIndex).childNodes
-      editCell = cells.item(editColIndex).asInstanceOf[TableCell]
-      editCell.innerHTML = ""
-      newVopt match {
-        case None if oldVopt != newVopt =>
-          editCell.className = s"$cellBaseClass retract"
-        case None                       =>
-          editCell.className = cellBaseClass
-        case Some(v) if oldVopt.isEmpty =>
-          editCell.className = s"$cellBaseClass assert"
-          editCell.appendChild(colValueToNode(v))
-
-        case Some(v) if oldVopt != newVopt =>
-          editCell.className = s"$cellBaseClass update"
-          editCell.appendChild(colValueToNode(v))
-        case Some(v)                       =>
-          editCell.className = cellBaseClass
-          editCell.appendChild(colValueToNode(v))
-      }
-    }
-  }
-
-  def updateCellCardMany[ColType](cellBaseClass: String,
-                                  colValueToItems: ColType => Seq[TypedTag[LI]]
-                                 ): (Int, Option[ColType], Option[ColType]) => Unit = {
-    var cells   : NodeList  = null
-    var editCell: TableCell = null
-    val editColIndex        = colIndex + 1
-    val formatValue         = attrType match {
-      case "Date" if card == 3 => (optV: Option[ColType]) =>
-        optV.fold(Option.empty[ColType])(pairs =>
-          Some(
-            pairs.asInstanceOf[Map[String, String]]
-              .map { case (k, v) => {
-
-                println("--------------")
-                println("cell date 3: " + v)
-                println("cell date 3: " + truncateDateStr(v))
-                k -> truncateDateStr(v)
-              }
-              }
-          ).asInstanceOf[Option[ColType]]
-        )
-      case "Date"              => (optV: Option[ColType]) =>
-        optV.fold(Option.empty[ColType])(vs =>
-          Some(
-            vs.asInstanceOf[List[String]].map(v => {
-
-              println("--------------")
-              println("cell date 2: " + v)
-              println("cell date 2: " + truncateDateStr(v))
-              truncateDateStr(v)
-            })
-          ).asInstanceOf[Option[ColType]]
-        )
-      case _                   => (optV: Option[ColType]) => optV
-    }
-
-    (tableRowIndex: Int,
-     oldVopt0: Option[ColType],
-     newVopt: Option[ColType]
-    ) => {
-      val oldVopt = formatValue(oldVopt0)
-
-      println("oldVopt0: " + oldVopt0)
-      println("oldVopt : " + oldVopt)
-      println("newVopt : " + newVopt)
-      println("newVopt : " + formatValue(newVopt))
-
-      cells = tableRows.item(tableRowIndex).childNodes
-      editCell = cells.item(editColIndex).asInstanceOf[TableCell]
-      editCell.innerHTML = ""
-      newVopt match {
-        case None if oldVopt != newVopt    =>
-          editCell.className = s"$cellBaseClass retract"
-        case None                          =>
-          editCell.className = cellBaseClass
-        case Some(v) if oldVopt.isEmpty    =>
-          editCell.className = s"$cellBaseClass assert"
-          editCell.appendChild(ul(colValueToItems(v)).render)
-        case Some(v) if oldVopt != newVopt =>
-          editCell.className = s"$cellBaseClass update"
-          editCell.appendChild(ul(colValueToItems(v)).render)
-        case Some(v)                       =>
-          editCell.className = cellBaseClass
-          editCell.appendChild(ul(colValueToItems(v)).render)
-      }
-    }
-  }
-
-  def transformValues[ColType, Ret](arrays: List[Array[Option[ColType]]],
-                                    toColType: Ret => ColType,
-                                    updateCell: (Int, Option[ColType], Option[ColType]) => Unit
-                                   ): Unit = {
-    val origArray     = arrays(origIndex)
-    val editArray     = arrays(editIndex)
-    val processType   = attrType match {
-      case "Int"                    => "Int"
-      case "Long" | "datom" | "ref" => "BigInt"
-      case "Float" | "Double"       => "BigDecimal"
-      case _                        => attrType
-    }
-    val processed     = Seq("Long", "datom", "ref", "Float", "Double", "BigInt", "BigDecimal")
-    val transferType  = {
-      if (processed.contains(attrType))
-        "String"
-      else
-        attrType
-    }
-    val compiler      = ScalafiddleApi[Ret](
+  private def transformValues[ColType, Ret](arrays: List[Array[Option[ColType]]],
+                                            toColType: Ret => ColType,
+                                            updateCell: (Int, Option[ColType], Option[ColType]) => Unit
+                                           ): Unit = {
+    val scalaCode = ScalaCode(
       card,
+      lhsTypesProcess.mkString(", "),
+      lhsParamsTypesProcess.mkString(", "),
       lhsTypes.mkString(", "),
       lhsParamsTypes.mkString(", "),
-      vars.mkString("\n  "),
-      varAssignments.mkString("\n      "),
       lhsParams.mkString(", "),
       attrType,
-      processType,
-      transferType,
       rhs
-    )
-    var oldVopt       = Option.empty[ColType]
-    var newVopt       = Option.empty[ColType]
-    var i             = 0
-    var j             = 0
-    var tableRowIndex = 0
+    ).get
 
-    val resolve = {
+    println(scalaCode)
+
+    val scalafiddle              = ScalafiddleApi[Ret](scalaCode)
+    val arrayIndexes             = qr.arrayIndexes
+    val origArray                = arrays(arrayIndexes(colIndex - 1))
+    val editArray                = arrays(arrayIndexes(colIndex))
+    var oldVopt                  = Option.empty[ColType]
+    var newVopt                  = Option.empty[ColType]
+    val tableRowIndexOffset      = offset.now
+    val tableRowIndexMax         = curLastRow
+    val sortCols                 = columns.now.filter(_.sortDir.nonEmpty)
+    val unfiltered               = filters.now.isEmpty
+    val (sortIndex, filterIndex) = Indexes(qr, sortCols, unfiltered).get
+    val lastRow                  = actualRowCount
+    var j                        = 0
+    var tableRowIndex            = 0
+
+    val indexBridge: Int => Int = {
+      if (filterIndex.nonEmpty)
+        (i: Int) => filterIndex(i)
+      else if (sortIndex.nonEmpty)
+        (i: Int) => sortIndex(i)
+      else
+        (i: Int) => i
+    }
+
+    val resolve: (Int, Int => Ret) => Unit = {
       if (card == 1) {
         (i: Int, applyFn: Int => Ret) => {
           j = indexBridge(i)
@@ -532,15 +150,8 @@ case class GroupEdit(col: Col,
           oldVopt = origArray(j)
           newVopt = applyFn(j) match {
             case Nil => None
-            case vs  =>
-              println("lambda 0: " + vs)
-              println("lambda 1: " + toColType(vs))
-              Some(toColType(vs))
+            case vs  => Some(toColType(vs))
           }
-
-          println("x old: " + oldVopt)
-          println("x new: " + newVopt)
-
           if (i >= tableRowIndexOffset && i < tableRowIndexMax) {
             updateCell(tableRowIndex, oldVopt, newVopt)
             tableRowIndex += 1
@@ -550,221 +161,14 @@ case class GroupEdit(col: Col,
       }
     }
 
-    colIndexes.length match {
-      case 2 =>
-        val ListBuffer(v1, v2) = attrLambdas
-        compiler.lambda2.foreach { fn =>
-          val applyFn = (j: Int) => fn(v1(j), v2(j))
-          while (i < lastRow) {
-            resolve(i, applyFn)
-            i += 1
-          }
-        }
+    CalculateGroupEdit(colIndexes, attrLambdas, scalafiddle, lastRow, resolve)
 
-      case 3 =>
-        val ListBuffer(v1, v2, v3) = attrLambdas
-        compiler.lambda3.foreach { fn =>
-          val applyFn = (j: Int) => fn(v1(j), v2(j), v3(j))
-          while (i < lastRow) {
-            resolve(i, applyFn)
-            i += 1
-          }
-        }
-
-      case 4 =>
-        val ListBuffer(v1, v2, v3, v4) = attrLambdas
-        compiler.lambda4.foreach { fn =>
-          val applyFn = (j: Int) => fn(v1(j), v2(j), v3(j), v4(j))
-          while (i < lastRow) {
-            resolve(i, applyFn)
-            i += 1
-          }
-        }
-
-      case 5 =>
-        val ListBuffer(v1, v2, v3, v4, v5) = attrLambdas
-        compiler.lambda5.foreach { fn =>
-          val applyFn = (j: Int) => fn(v1(j), v2(j), v3(j), v4(j), v5(j))
-          while (i < lastRow) {
-            resolve(i, applyFn)
-            i += 1
-          }
-        }
-
-      case 6 =>
-        val ListBuffer(v1, v2, v3, v4, v5, v6) = attrLambdas
-        compiler.lambda6.foreach { fn =>
-          val applyFn = (j: Int) => fn(v1(j), v2(j), v3(j), v4(j), v5(j), v6(j))
-          while (i < lastRow) {
-            resolve(i, applyFn)
-            i += 1
-          }
-        }
-
-      case 7 =>
-        val ListBuffer(v1, v2, v3, v4, v5, v6, v7) = attrLambdas
-        compiler.lambda7.foreach { fn =>
-          val applyFn = (j: Int) => fn(v1(j), v2(j), v3(j), v4(j), v5(j), v6(j), v7(j))
-          while (i < lastRow) {
-            resolve(i, applyFn)
-            i += 1
-          }
-        }
-
-      case 8 =>
-        val ListBuffer(v1, v2, v3, v4, v5, v6, v7, v8) = attrLambdas
-        compiler.lambda8.foreach { fn =>
-          val applyFn = (j: Int) => fn(v1(j), v2(j), v3(j), v4(j), v5(j), v6(j), v7(j), v8(j))
-          while (i < lastRow) {
-            resolve(i, applyFn)
-            i += 1
-          }
-        }
-
-      case 9 =>
-        val ListBuffer(v1, v2, v3, v4, v5, v6, v7, v8, v9) = attrLambdas
-        compiler.lambda9.foreach { fn =>
-          val applyFn = (j: Int) => fn(v1(j), v2(j), v3(j), v4(j), v5(j), v6(j), v7(j), v8(j), v9(j))
-          while (i < lastRow) {
-            resolve(i, applyFn)
-            i += 1
-          }
-        }
-
-      case 10 =>
-        val ListBuffer(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10) = attrLambdas
-        compiler.lambda10.foreach { fn =>
-          val applyFn = (j: Int) => fn(v1(j), v2(j), v3(j), v4(j), v5(j), v6(j), v7(j), v8(j), v9(j), v10(j))
-          while (i < lastRow) {
-            resolve(i, applyFn)
-            i += 1
-          }
-        }
-
-      case 11 =>
-        val ListBuffer(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11) = attrLambdas
-        compiler.lambda11.foreach { fn =>
-          val applyFn = (j: Int) => fn(v1(j), v2(j), v3(j), v4(j), v5(j), v6(j), v7(j), v8(j), v9(j), v10(j), v11(j))
-          while (i < lastRow) {
-            resolve(i, applyFn)
-            i += 1
-          }
-        }
-
-      case 12 =>
-        val ListBuffer(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12) = attrLambdas
-        compiler.lambda12.foreach { fn =>
-          val applyFn = (j: Int) => fn(v1(j), v2(j), v3(j), v4(j), v5(j), v6(j), v7(j), v8(j), v9(j), v10(j), v11(j), v12(j))
-          while (i < lastRow) {
-            resolve(i, applyFn)
-            i += 1
-          }
-        }
-
-      case 13 =>
-        val ListBuffer(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13) = attrLambdas
-        compiler.lambda13.foreach { fn =>
-          val applyFn = (j: Int) => fn(v1(j), v2(j), v3(j), v4(j), v5(j), v6(j), v7(j), v8(j), v9(j), v10(j), v11(j), v12(j), v13(j))
-          while (i < lastRow) {
-            resolve(i, applyFn)
-            i += 1
-          }
-        }
-
-      case 14 =>
-        val ListBuffer(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14) = attrLambdas
-        compiler.lambda14.foreach { fn =>
-          val applyFn = (j: Int) => fn(v1(j), v2(j), v3(j), v4(j), v5(j), v6(j), v7(j), v8(j), v9(j), v10(j), v11(j), v12(j), v13(j), v14(j))
-          while (i < lastRow) {
-            resolve(i, applyFn)
-            i += 1
-          }
-        }
-
-      case 15 =>
-        val ListBuffer(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15) = attrLambdas
-        compiler.lambda15.foreach { fn =>
-          val applyFn = (j: Int) => fn(v1(j), v2(j), v3(j), v4(j), v5(j), v6(j), v7(j), v8(j), v9(j), v10(j), v11(j), v12(j), v13(j), v14(j), v15(j))
-          while (i < lastRow) {
-            resolve(i, applyFn)
-            i += 1
-          }
-        }
-
-      case 16 =>
-        val ListBuffer(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16) = attrLambdas
-        compiler.lambda16.foreach { fn =>
-          val applyFn = (j: Int) => fn(v1(j), v2(j), v3(j), v4(j), v5(j), v6(j), v7(j), v8(j), v9(j), v10(j), v11(j), v12(j), v13(j), v14(j), v15(j), v16(j))
-          while (i < lastRow) {
-            resolve(i, applyFn)
-            i += 1
-          }
-        }
-
-      case 17 =>
-        val ListBuffer(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17) = attrLambdas
-        compiler.lambda17.foreach { fn =>
-          val applyFn = (j: Int) => fn(v1(j), v2(j), v3(j), v4(j), v5(j), v6(j), v7(j), v8(j), v9(j), v10(j), v11(j), v12(j), v13(j), v14(j), v15(j), v16(j), v17(j))
-          while (i < lastRow) {
-            resolve(i, applyFn)
-            i += 1
-          }
-        }
-
-      case 18 =>
-        val ListBuffer(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18) = attrLambdas
-        compiler.lambda18.foreach { fn =>
-          val applyFn = (j: Int) => fn(v1(j), v2(j), v3(j), v4(j), v5(j), v6(j), v7(j), v8(j), v9(j), v10(j), v11(j), v12(j), v13(j), v14(j), v15(j), v16(j), v17(j), v18(j))
-          while (i < lastRow) {
-            resolve(i, applyFn)
-            i += 1
-          }
-        }
-
-      case 19 =>
-        val ListBuffer(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19) = attrLambdas
-        compiler.lambda19.foreach { fn =>
-          val applyFn = (j: Int) => fn(v1(j), v2(j), v3(j), v4(j), v5(j), v6(j), v7(j), v8(j), v9(j), v10(j), v11(j), v12(j), v13(j), v14(j), v15(j), v16(j), v17(j), v18(j), v19(j))
-          while (i < lastRow) {
-            resolve(i, applyFn)
-            i += 1
-          }
-        }
-
-      case 20 =>
-        val ListBuffer(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19, v20) = attrLambdas
-        compiler.lambda20.foreach { fn =>
-          val applyFn = (j: Int) => fn(v1(j), v2(j), v3(j), v4(j), v5(j), v6(j), v7(j), v8(j), v9(j), v10(j), v11(j), v12(j), v13(j), v14(j), v15(j), v16(j), v17(j), v18(j), v19(j), v20(j))
-          while (i < lastRow) {
-            resolve(i, applyFn)
-            i += 1
-          }
-        }
-
-      case 21 =>
-        val ListBuffer(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19, v20, v21) = attrLambdas
-        compiler.lambda21.foreach { fn =>
-          val applyFn = (j: Int) => fn(v1(j), v2(j), v3(j), v4(j), v5(j), v6(j), v7(j), v8(j), v9(j), v10(j), v11(j), v12(j), v13(j), v14(j), v15(j), v16(j), v17(j), v18(j), v19(j), v20(j), v21(j))
-          while (i < lastRow) {
-            resolve(i, applyFn)
-            i += 1
-          }
-        }
-
-      case 22 =>
-        val ListBuffer(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19, v20, v21, v22) = attrLambdas
-        compiler.lambda22.foreach { fn =>
-          val applyFn = (j: Int) => fn(v1(j), v2(j), v3(j), v4(j), v5(j), v6(j), v7(j), v8(j), v9(j), v10(j), v11(j), v12(j), v13(j), v14(j), v15(j), v16(j), v17(j), v18(j), v19(j), v20(j), v21(j), v22(j))
-          while (i < lastRow) {
-            resolve(i, applyFn)
-            i += 1
-          }
-        }
-    }
-
-    // Turn spinner off
+    // Group edit completed - stop spinner
     processing() = ""
   }
+
+
+  // Card one ------------------------------------------
 
   def string(): Unit = {
     val cellBaseClass  = if (attrType == "BigInt" || attrType == "BigDecimal")
@@ -780,7 +184,7 @@ case class GroupEdit(col: Col,
     transformValues(
       qr.str,
       toColType,
-      updateCellCardOne(cellBaseClass, colValueToNode),
+      updateCells.cardOne(cellBaseClass, colValueToNode),
     )
   }
 
@@ -788,9 +192,12 @@ case class GroupEdit(col: Col,
     transformValues[Double, String](
       qr.num,
       (s: String) => s.toDouble,
-      updateCellCardOne("num", (v: Double) => v.render),
+      updateCells.cardOne("num", (v: Double) => v.render),
     )
   }
+
+
+  // Card many ------------------------------------------
 
   def listString(): Unit = {
     val colValueToItems = attrType match {
@@ -801,24 +208,24 @@ case class GroupEdit(col: Col,
                        toColType: Ret => List[String]): Unit = transformValues(
       qr.listStr,
       toColType,
-      updateCellCardMany(cellBaseClass, colValueToItems)
+      updateCells.cardMany(cellBaseClass, colValueToItems)
     )
     attrType match {
-      case "String"     => transform("items", (vs: js.Array[String]) => vs.toList.distinct)
-      case "Boolean"    => transform("str", (vs: js.Array[Boolean]) => vs.toList.distinct.map(_.toString))
-      case "Date"       => transform("str", (vs: js.Array[Date]) => vs.toList.distinct.map(v => {
-        println("--------------")
-        println("transform date 2: " + v)
-        println("transform date 2: " + date2str(v))
-        println("transform date 2: " + date2str(v))
-//        println("transform date 2: " + date2str(v))
-        date2str(v)
-      }
-      ))
-      case "UUID"       => transform("str", (vs: js.Array[UUID]) => vs.toList.distinct.map(_.toString))
-      case "URI"        => transform("str", (vs: js.Array[URI]) => vs.toList.distinct.map(_.toString))
-      case "BigInt"     => transform("num", (vs: js.Array[String]) => vs.toList.distinct)
-      case "BigDecimal" => transform("num", (vs: js.Array[String]) => vs.toList.distinct)
+      case "String"  =>
+        transform(
+          if (enums.isEmpty) "items" else "str",
+          (vs: js.Array[String]) => vs.toList.distinct
+        )
+      case "Boolean" => transform("str", (vs: js.Array[Boolean]) =>
+        vs.toList.distinct.map(_.toString))
+      case "Date"    => transform("str", (vs: js.Array[js.Date]) =>
+        vs.toList.distinct.map(jsDate => date2str(new Date(jsDate.getTime.toLong))))
+      case "UUID"    => transform("str", (vs: js.Array[UUID]) =>
+        vs.toList.distinct.map(_.toString))
+      case "URI"     => transform("str", (vs: js.Array[URI]) =>
+        vs.toList.distinct.map(_.toString))
+      case _         => transform("num", (vs: js.Array[String]) =>
+        vs.toList.distinct)
     }
   }
 
@@ -830,9 +237,12 @@ case class GroupEdit(col: Col,
     transformValues(
       qr.listNum,
       toColType,
-      updateCellCardMany("num", (vs: List[Double]) => vs.sorted.map(li(_)))
+      updateCells.cardMany("num", (vs: List[Double]) => vs.sorted.map(li(_)))
     )
   }
+
+
+  // Card map ------------------------------------------
 
   def mapString(): Unit = {
     val colValueToItems = attrType match {
@@ -849,40 +259,31 @@ case class GroupEdit(col: Col,
                        toColType: Ret => Map[String, String]): Unit = transformValues(
       qr.mapStr,
       toColType,
-      updateCellCardMany(cellBaseClass, colValueToItems)
+      updateCells.cardMany(cellBaseClass, colValueToItems)
     )
     attrType match {
-      case "String"     =>
-        transform("items", (vs: js.Dictionary[String]) =>
-          vs.toMap)
-      case "Boolean"    =>
-        transform("str", (vs: js.Dictionary[Boolean]) =>
-          vs.toMap.map { case (k, v) => k -> v.toString })
-      case "Date"       =>
-        transform("str", (vs: js.Dictionary[Date]) =>
-          vs.toMap.map { case (k, v) => {
-
-            println("--------------")
-            println("transform date 3: " + v)
-            println("transform date 3: " + date2str(v))
-            println("transform date 3: " + date2str(v))
-//            println("transform date 3: " + date2str(v))
-
-            k -> date2str(v)
-          }
-          })
-      case "UUID"       =>
-        transform("str", (vs: js.Dictionary[UUID]) =>
-          vs.toMap.map { case (k, v) => k -> v.toString })
-      case "URI"        =>
-        transform("str", (vs: js.Dictionary[URI]) =>
-          vs.toMap.map { case (k, v) => k -> v.toString })
-      case "BigInt"     =>
-        transform("num", (vs: js.Dictionary[String]) =>
-          vs.toMap)
-      case "BigDecimal" =>
-        transform("num", (vs: js.Dictionary[String]) =>
-          vs.toMap)
+      case "String"  =>
+        transform("items",
+          (vs: js.Dictionary[String]) => vs.toMap)
+      case "Boolean" =>
+        transform("str",
+          (vs: js.Dictionary[Boolean]) =>
+            vs.toMap.map { case (k, v) => k -> v.toString })
+      case "Date"    =>
+        transform("str",
+          (vs: js.Dictionary[js.Date]) =>
+            vs.toMap.map {
+              case (k, jsDate) => k -> date2str(new Date(jsDate.getTime().toLong))
+            })
+      case "UUID"    =>
+        transform("str",
+          (vs: js.Dictionary[UUID]) => vs.toMap.map { case (k, v) => k -> v.toString })
+      case "URI"     =>
+        transform("str",
+          (vs: js.Dictionary[URI]) => vs.toMap.map { case (k, v) => k -> v.toString })
+      case _         =>
+        transform("str",
+          (vs: js.Dictionary[String]) => vs.toMap)
     }
   }
 
@@ -902,7 +303,7 @@ case class GroupEdit(col: Col,
     transformValues(
       qr.mapNum,
       toColType,
-      updateCellCardMany("str", colValueToItems)
+      updateCells.cardMany("str", colValueToItems)
     )
   }
 }

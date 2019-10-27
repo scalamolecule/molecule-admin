@@ -39,6 +39,7 @@ object QueryClient extends RxBindings with TreeOps with SchemaOps with ColOps
         // Set open snippets
         settings._1.foreach {
           case "showSnippets"      => showSnippets() = true
+          case "showHelp"          => showHelp() = true
           case "showMolecule"      => showMolecule() = true
           case "showFavorites"     => showFavorites() = true
           case "showCache"         => showCache() = true

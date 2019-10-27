@@ -277,11 +277,6 @@ abstract class Cell(db: String,
 
           case "date" if editable =>
             (rowIndex: Int) =>
-
-
-                println("date 2: " + valueArray(rowIndex))
-
-
               valueArray(rowIndex).fold(_tdNoEdit)(vs =>
                 _tdManyDateEdit(
                   vs, getCls("str", rowIndex), id(rowIndex), e,
@@ -407,11 +402,6 @@ abstract class Cell(db: String,
 
           case "date" if editable =>
             (rowIndex: Int) =>
-
-
-              println("date 3: " + valueArray(rowIndex))
-
-
               valueArray(rowIndex).fold(_tdNoEdit)(vs =>
                 _tdMapDateEdit(
                   vs, getCls("str", rowIndex), id(rowIndex), e,
