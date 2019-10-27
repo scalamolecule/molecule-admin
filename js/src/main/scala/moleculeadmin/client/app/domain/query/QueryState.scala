@@ -91,6 +91,7 @@ object QueryState {
 
   // Show snippet statuses
   val showSnippets      = Var(false)
+  val showHelp          = Var(false)
   val showMolecule      = Var(false)
   val showFavorites     = Var(false)
   val showCache         = Var(false)

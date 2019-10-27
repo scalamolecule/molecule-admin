@@ -33,7 +33,7 @@ object Settings {
   val js: Seq[Def.Setting[_]] = Seq(
     name := "client",
     libraryDependencies ++= Seq(
-      "org.scala-js" %%% "scalajs-dom" % "0.9.4",
+      "org.scala-js" %%% "scalajs-dom" % "0.9.7",
       "com.lihaoyi" %%% "scalarx" % "0.4.0",
       "io.github.cquiroz" %%% "scala-java-time" % "2.0.0-RC3",
       ("org.scalamolecule" %%% "molecule" % "0.20.0")

@@ -172,9 +172,9 @@ trait KeyEvents {
       if (document.activeElement == document.body) {
         if (!mod) {
           e.key match {
-            case "Escape"                          => toggleOff("favorites"); toggleOff("cache")
-            case "c"                               => toggleOff("favorites"); toggleCached()
-            case "f"                               => toggleOff("cache"); toggleFavorites()
+            case "Escape"                          => toggleOff("favorites"); toggleOff("cache"); toggleOff("shortcuts")
+            case "c"                               => toggleOff("favorites"); toggleOff("shortcuts"); toggleCached()
+            case "f"                               => toggleOff("cache"); toggleOff("shortcuts"); toggleFavorites()
             case "s"                               => toggleSnippets
             case "q" if modelElements.now.nonEmpty => toggleQuery
             case "m" if modelElements.now.nonEmpty => toggleMinimize
@@ -226,7 +226,10 @@ trait KeyEvents {
 
         } else if (e.getModifierState("Shift")) {
           e.key match {
-            case "?" => toggleShortcuts
+            case "?" =>
+              toggleOff("favorites")
+              toggleOff("cache");
+              toggleShortcuts
             case _   => ()
           }
 
