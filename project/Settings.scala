@@ -1,7 +1,7 @@
 import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
 import play.sbt.PlayImport.guice
 import sbt.Keys._
-import sbt.{Project, _}
+import sbt._
 
 
 object Settings {
@@ -17,8 +17,7 @@ object Settings {
       "UTF-8",
       "-feature",
       "-unchecked"
-    ),
-    testFrameworks += new TestFramework("utest.runner.Framework")
+    )
   )
 
   val shared: Seq[Def.Setting[_]] = Seq(
@@ -26,7 +25,7 @@ object Settings {
       "com.lihaoyi" %%% "scalatags" % "0.7.0",
       "com.lihaoyi" %%% "autowire" % "0.2.6",
       "com.lihaoyi" %%% "utest" % "0.7.1",
-      "io.suzaku" %%% "boopickle" % "1.3.0",
+      "io.suzaku" %%% "boopickle" % "1.3.0"
     )
   )
 
@@ -38,7 +37,8 @@ object Settings {
       "io.github.cquiroz" %%% "scala-java-time" % "2.0.0-RC3",
       ("org.scalamolecule" %%% "molecule" % "0.20.0")
         .exclude("com.datomic", "datomic-free")
-    )
+    ),
+    testFrameworks += new TestFramework("utest.runner.Framework")
   )
 
   val jvm: Seq[Def.Setting[_]] = Seq(
@@ -63,6 +63,7 @@ object Settings {
       "org.webjars" % "font-awesome" % "5.5.0",
       "org.webjars.bower" % "highlightjs" % "9.12.0",
       guice
-    ).map(_.exclude("org.slf4j", "slf4j-nop")) // necessary?
+    ).map(_.exclude("org.slf4j", "slf4j-nop")), // necessary?
+    testFrameworks += new TestFramework("utest.runner.Framework")
   )
 }

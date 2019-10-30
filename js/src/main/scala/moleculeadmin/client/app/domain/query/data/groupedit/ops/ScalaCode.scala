@@ -1,15 +1,12 @@
 package moleculeadmin.client.app.domain.query.data.groupedit.ops
+import moleculeadmin.client.app.domain.query.QueryState.columns
+import moleculeadmin.shared.ast.query.Col
+import scala.collection.mutable.ListBuffer
 
-case class ScalaCode(card: Int,
-                     lhsTypesProcess: String,
-                     lhsParamsTypesProcess: String,
-                     lhsTypes: String,
-                     lhsParamsTypes: String,
-                     lhsParams: String,
-                     attrType: String,
-//                     processType: String,
-//                     transferType: String,
-                     rhs0: String) {
+
+case class ScalaCode(col: Col, rhs0: String) extends TypeMappings {
+
+  val Col(_, _, nsAlias, nsFull, _, attrType, _, card, _, _, _, _, _, _) = col
 
   def get: String = card match {
     case 1 => card1
@@ -17,50 +14,196 @@ case class ScalaCode(card: Int,
     case 3 => card3
   }
 
+  // Build scala code elements for scalafiddle compilation
+
+  val lhsTypesProcess0       = new ListBuffer[String]
+  val lhsParamsTypesProcess0 = new ListBuffer[String]
+  val lhsTypes0              = new ListBuffer[String]
+  val lhsAssignments0        = new ListBuffer[String]
+  val lhsParamsTypes0        = new ListBuffer[String]
+  val lhsParams0             = new ListBuffer[String]
+
+  columns.now.collect {
+    case Col(_, _, `nsAlias`, `nsFull`, attr, tpe, _, card, _, _, _, attrExpr, _, _)
+      if attrExpr != "edit" =>
+      val (tpeProcess, tpeTransfer, paramConverter) = getTypeMappings(attr, tpe, card)
+
+      val d0 = if (tpe == "Date") "0" else ""
+      lhsTypesProcess0 += tpeProcess
+      lhsParamsTypesProcess0 += s"$attr$d0: $tpeProcess"
+      if (tpe == "Date")
+        lhsAssignments0 += s"val $attr = cloneDate($attr$d0)"
+      lhsTypes0 += tpeTransfer
+      lhsParamsTypes0 += s"$attr: $tpeTransfer"
+      lhsParams0 += paramConverter
+
+    case Col(_, _, nsAlias, _, attr, tpe, _, card, _, _, _, attrExpr, _, _)
+      if attrExpr != "edit" =>
+      val Ns_attr = nsAlias + "_" + attr
+
+      val (tpeProcess, tpeTransfer, paramConverter) = getTypeMappings(Ns_attr, tpe, card)
+
+      val d0 = if (tpe == "Date") "0" else ""
+      lhsTypesProcess0 += tpeProcess
+      lhsParamsTypesProcess0 += s"$Ns_attr$d0: $tpeProcess"
+      if (tpe == "Date")
+        lhsAssignments0 += s"val $Ns_attr = cloneDate($Ns_attr$d0)"
+      lhsTypes0 += tpeTransfer
+      lhsParamsTypes0 += s"$Ns_attr: $tpeTransfer"
+      lhsParams0 += paramConverter
+  }
+
+  val lhsTypesProcess      : String = lhsTypesProcess0.mkString(", ")
+  val lhsParamsTypesProcess: String = lhsParamsTypesProcess0.mkString(", ")
+  val lhsAssignments       : String = lhsAssignments0.mkString("\n      ", "\n      ", "")
+  val lhsTypes             : String = lhsTypes0.mkString(", ")
+  val lhsParamsTypes       : String = lhsParamsTypes0.mkString(", ")
+  val lhsParams            : String = lhsParams0.mkString(", ")
+
   val processed: Seq[String] =
     Seq("Long", "datom", "ref", "Float", "Double", "BigInt", "BigDecimal")
 
   val imports: String =
-    """import java.util.{Date, UUID}
-      |import java.net.URI""".stripMargin
+    """import scalajs.js
+      |import js.annotation.{JSExportTopLevel, JSExport}
+      |import js.JSConverters._
+      |import java.time._
+      |import java.util.{Date, UUID}
+      |import java.net.URI
+      |""".stripMargin
 
-
-  val processType  = attrType match {
+  val processType: String = attrType match {
     case "Int"                    => "Int"
     case "Long" | "datom" | "ref" => "BigInt"
     case "Float" | "Double"       => "BigDecimal"
-    case _                        => attrType
+    case "Date"                   => "LocalDateTime"
+    case _                        => attrType // Boolean, UUID, URI
   }
 
-  val transferType = {
+  val transferType: String = {
     if (processed.contains(attrType))
       "String"
     else if (attrType == "Date")
-      "js.Date"
+      "LocalDateTime"
     else
-      attrType
+      attrType // Boolean, UUID, URI
   }
 
   def card1: String = {
-    val rhs = if (rhs0.isEmpty) s"Option.empty[$transferType]" else rhs0
+    val rhs = if (rhs0.isEmpty) s"Option.empty[$processType]" else rhs0
+
+    val tpe: String = attrType match {
+      case "datom" | "ref" => "Long"
+      case t               => t
+    }
+
+    val noFloat: String =
+      "\"\"\"" + s"Float's not allowed in $tpe expression `$rhs0`" + "\"\"\""
+
+    val noDouble: String =
+      "\"\"\"" + s"Double's not allowed in $tpe expression `$rhs0`" + "\"\"\""
+
+    val noBigDecimal: String =
+      "\"\"\"" + s"BigDecimal's not allowed in $tpe expression `$rhs0`" + "\"\"\""
+
+    val useDouble =
+      "\"\"\"" + s"Please use Double instead of Float in expression " +
+        s"`$rhs0` to get correct floating point precision." + "\"\"\""
+
+    val implicits = attrType match {
+      case "Int" =>
+        s"""
+           |  implicit def bigInt2int(v: BigInt): Int = v.toString.toInt
+           |  implicit def float2int(v: Float): Int =
+           |    throw new IllegalArgumentException(
+           |      $noFloat
+           |    )
+           |  implicit def double2int(v: Double): Int =
+           |    throw new IllegalArgumentException(
+           |      $noDouble
+           |    )
+           |  implicit def bigDec2int(v: BigDecimal): Int =
+           |    throw new IllegalArgumentException(
+           |      $noBigDecimal
+           |    )""".stripMargin
+
+      case "Long" | "datom" | "ref" | "BigInt" =>
+        s"""
+           |  implicit def int2bigInt(v: Int): BigInt = BigInt(v)
+           |  implicit def long2bigInt(v: Long): BigInt = BigInt(v)
+           |  implicit def float2bigInt(v: Float): BigInt =
+           |    throw new IllegalArgumentException(
+           |      $noFloat
+           |    )
+           |  implicit def double2bigInt(v: Double): BigInt =
+           |    throw new IllegalArgumentException(
+           |      $noDouble
+           |    )
+           |  implicit def bigDec2bigInt(v: BigDecimal): BigInt =
+           |    throw new IllegalArgumentException(
+           |      $noBigDecimal
+           |    )""".stripMargin
+
+      case "Float" | "Double" | "BigDecimal" =>
+        s"""
+           |  implicit def int2bigDec(v: Int): BigDecimal = BigDecimal(v)
+           |  implicit def long2bigDec(v: Long): BigDecimal = BigDecimal(v)
+           |  implicit def bigInt2bigDec(v: BigInt): BigDecimal = BigDecimal(v)
+           |  implicit def float2bigDec(v: Float): BigDecimal =
+           |    throw new IllegalArgumentException(
+           |      $useDouble
+           |    )
+           |  implicit def double2bigDec(v: Double): BigDecimal = BigDecimal(v.toString)""".stripMargin
+
+      case "Date" =>
+        val q = "\"\"\""
+        s"""
+           |  implicit def str2ldt(s: String): LocalDateTime = {
+           |    val nano = $q(\\d{1,4})-(1[0-2]|0?[0-9])-(3[01]|[12][0-9]|0?[0-9])[T ]+(2[0-3]|1[0-9]|0?[0-9]):([1-5][0-9]|0?[0-9]):([1-5][0-9]|0?[0-9])\\.(\\d{1,9})$q.r
+           |    val sec  = $q(\\d{1,4})-(1[0-2]|0?[0-9])-(3[01]|[12][0-9]|0?[0-9])[T ]+(2[0-3]|1[0-9]|0?[0-9]):([1-5][0-9]|0?[0-9]):([1-5][0-9]|0?[0-9])$q.r
+           |    val min  = $q(\\d{1,4})-(1[0-2]|0?[0-9])-(3[01]|[12][0-9]|0?[0-9])[T ]+(2[0-3]|1[0-9]|0?[0-9]):([1-5][0-9]|0?[0-9])$q.r
+           |    val ymd  = $q(\\d{1,4})-(1[0-2]|0?[0-9])-(3[01]|[12][0-9]|0?[0-9])$q.r
+           |    try {
+           |      s match {
+           |        case nano(y, m, d, hh, mm, ss, n) => LocalDateTime.of(y.toInt, m.toInt, d.toInt, hh.toInt, mm.toInt, ss.toInt, n.padTo(9, '0').toInt)
+           |        case sec(y, m, d, hh, mm, ss)     => LocalDateTime.of(y.toInt, m.toInt, d.toInt, hh.toInt, mm.toInt, ss.toInt, 0)
+           |        case min(y, m, d, hh, mm)         => LocalDateTime.of(y.toInt, m.toInt, d.toInt, hh.toInt, mm.toInt, 0, 0)
+           |        case ymd(y, m, d)                 => LocalDateTime.of(y.toInt, m.toInt, d.toInt, 0, 0, 0, 0)
+           |        case other                        => throw new IllegalArgumentException("Unexpected date string: " + other)
+           |      }
+           |    } catch {
+           |      case e: Throwable =>
+           |        error = e.toString
+           |        LocalDateTime.MIN
+           |    }
+           |  }
+           |  // Ensure LocalDateTime objects have access to methods (why aren't they available without cloning?)
+           |  def cloneDate(d: LocalDateTime) = LocalDateTime.of(d.getYear, d.getMonth, d.getDayOfMonth, d.getHour, d.getMinute, d.getSecond, d.getNano)
+           |  """.stripMargin
+
+      case _ => "" // Boolean, UUID, URI
+    }
 
     // Keeping Option handling within scala boundary
-    s"""import scalajs.js.annotation.{JSExportTopLevel, JSExport}
-       |$imports
+    s"""$imports
        |@JSExportTopLevel("_EditLambda")
        |object _EditLambda {
+       |  var error = ""$implicits
        |  val process: ($lhsTypesProcess) => Option[$processType] = {
-       |    ($lhsParamsTypesProcess) => {
+       |    ($lhsParamsTypesProcess) => {$lhsAssignments
        |      $rhs
        |    }
        |  }
        |  @JSExport
        |  val lambda: ($lhsTypes) => String = {
        |    ($lhsParamsTypes) =>
-       |      // Poor man's Option
-       |      process($lhsParams).fold("__None__")(_.toString)
+       |      process($lhsParams).fold("__None__"){
+       |        case v if error.nonEmpty => "__ERR__" + error + "__ERR__" + v
+       |        case v                   => v.toString
+       |      }
        |  }
        |}""".stripMargin.trim
+
   }
 
 
@@ -139,10 +282,9 @@ case class ScalaCode(card: Int,
       case _ => ""
     }
 
-    s"""import scalajs.js
-       |import js.annotation.{JSExportTopLevel, JSExport}
+    s"""$imports
        |import js.JSConverters._
-       |$imports
+       |
        |@JSExportTopLevel("_EditLambda")
        |object _EditLambda {$implicits
        |  val process: ($lhsTypesProcess) => js.Array[$transferType] = {
@@ -258,10 +400,8 @@ case class ScalaCode(card: Int,
     }
 
     // Empty Option is simply treated as an empty Map.
-    s"""import scalajs.js
-       |import js.annotation.{JSExportTopLevel, JSExport}
-       |import js.JSConverters._
-       |$imports
+    s"""$imports
+       |
        |@JSExportTopLevel("_EditLambda")
        |object _EditLambda {
        |  $implicits

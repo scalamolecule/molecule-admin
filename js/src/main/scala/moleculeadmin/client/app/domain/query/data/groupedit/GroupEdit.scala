@@ -4,23 +4,18 @@ import java.util.{Date, UUID}
 import moleculeadmin.client.app.domain.query.KeyEvents
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.domain.query.data.Indexes
-import moleculeadmin.client.app.domain.query.data.groupedit.ops.{AttrLambdas, AttrTokens, CalculateGroupEdit, ScalaCode, UpdateCells}
+import moleculeadmin.client.app.domain.query.data.groupedit.ops._
 import moleculeadmin.client.app.element.query.datatable.BodyElements
 import moleculeadmin.client.rxstuff.RxBindings
 import moleculeadmin.client.scalafiddle.ScalafiddleApi
-import moleculeadmin.shared.ast.query
 import moleculeadmin.shared.ast.query.{Col, QueryResult}
 import moleculeadmin.shared.ops.query.ColOps
-import org.scalajs.dom.html.{LI, TableCell}
-import org.scalajs.dom.{Document, Node, NodeList, document}
+import org.scalajs.dom.{NodeList, document}
 import rx.Ctx
-import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
 import scala.collection.immutable.Map
 import scala.collection.mutable.ListBuffer
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js
-import scala.scalajs.js.JSConverters._
 
 /*
   Float is treated as Double to avoid precision problems from ScalaJS
@@ -34,45 +29,12 @@ import scala.scalajs.js.JSConverters._
   floats.map(v => (v + BigDecimal(0.1)).toDouble)
  */
 case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
-  extends RxBindings with ColOps with BodyElements with KeyEvents with AttrTokens {
+  extends RxBindings with ColOps with BodyElements with KeyEvents with TypeMappings {
 
-  val Col(colIndex, _, nsAlias, nsFull, attr, attrType, colType, card, _, enums,
-  aggrType, expr, sortDir, sortPos) = col
+  val Col(colIndex, _, _, _, _, attrType, _, card, _, enums, _, _, _, _) = col
 
-
-  // Build scala code elements for scalafiddle
-
-  val lhsTypesProcess       = new ListBuffer[String]
-  val lhsParamsTypesProcess = new ListBuffer[String]
-  val lhsTypes              = new ListBuffer[String]
-  val lhsParamsTypes        = new ListBuffer[String]
-  val lhsParams             = new ListBuffer[String]
-  val colTypes              = new ListBuffer[String]
-  val colIndexes            = new ListBuffer[Int]
-
-  columns.now.collect {
-    case Col(colIndex, _, `nsAlias`, `nsFull`, attr, tpe, colType, card, _, _, _, attrExpr, _, _)
-      if attrExpr != "edit" =>
-      val (tpeProcess, tpeTransfer, paramConverter) = attrTokens(attr, tpe, card)
-      lhsTypesProcess += tpeProcess
-      lhsParamsTypesProcess += s"$attr: $tpeProcess"
-      lhsTypes += tpeTransfer
-      lhsParamsTypes += s"$attr: $tpeTransfer"
-      lhsParams += paramConverter
-      colTypes += colType
-      colIndexes += colIndex
-
-    case Col(colIndex, _, nsAlias, _, attr, tpe, colType, card, _, _, _, attrExpr, _, _)
-      if attrExpr != "edit" =>
-      val Ns_attr                                   = nsAlias + "_" + attr
-      val (tpeProcess, tpeTransfer, paramConverter) = attrTokens(Ns_attr, tpe, card)
-      lhsTypesProcess += tpeProcess
-      lhsParamsTypesProcess += s"$Ns_attr: $tpeProcess"
-      lhsTypes += tpeTransfer
-      lhsParamsTypes += s"$Ns_attr: $tpeTransfer"
-      lhsParams += paramConverter
-      colTypes += colType
-      colIndexes += colIndex
+  val colIndexes: Seq[Int] = columns.now.collect {
+    case col if col.attrExpr != "edit" => col.colIndex
   }
 
   // Get input for scala right hand side code (before processing adds spinner!)
@@ -82,30 +44,23 @@ case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
   // Start spinner since compilation can take some seconds
   processing() = filterId
 
-  val qr         : QueryResult     = queryCache.now.find(_.modelElements == modelElements.now).get.queryResult
-  val tableRows  : NodeList        = document.getElementById("tableBody").childNodes
-  val attrLambdas: Seq[Int => Any] = AttrLambdas(qr).get
-  val updateCells: UpdateCells     = UpdateCells(colIndex, attrType, card, tableRows)
+  val qr: QueryResult =
+    queryCache.now.find(_.modelElements == modelElements.now).get.queryResult
+
+  val tableRows: NodeList = document.getElementById("tableBody").childNodes
+
+  val toTransferValueLambdas: Seq[Int => Any] = ToTransferValueLambdas(qr).get
+
+  val updateCells: UpdateCells = UpdateCells(colIndex, attrType, card, tableRows)
 
 
-  private def transformValues[ColType, Ret](arrays: List[Array[Option[ColType]]],
-                                            toColType: Ret => ColType,
-                                            updateCell: (Int, Option[ColType], Option[ColType]) => Unit
-                                           ): Unit = {
-    val scalaCode = ScalaCode(
-      card,
-      lhsTypesProcess.mkString(", "),
-      lhsParamsTypesProcess.mkString(", "),
-      lhsTypes.mkString(", "),
-      lhsParamsTypes.mkString(", "),
-      lhsParams.mkString(", "),
-      attrType,
-      rhs
-    ).get
-
-    println(scalaCode)
-
-    val scalafiddle              = ScalafiddleApi[Ret](scalaCode)
+  private def transformValues[ColType, TransferType](
+    arrays: List[Array[Option[ColType]]],
+    toColType: TransferType => ColType,
+    updateCell: (Int, Option[ColType], Option[ColType]) => Unit
+  ): Unit = {
+    val scalaCode                = ScalaCode(col, rhs).get
+    val scalafiddle              = ScalafiddleApi[TransferType](scalaCode)
     val arrayIndexes             = qr.arrayIndexes
     val origArray                = arrays(arrayIndexes(colIndex - 1))
     val editArray                = arrays(arrayIndexes(colIndex))
@@ -120,6 +75,8 @@ case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
     var j                        = 0
     var tableRowIndex            = 0
 
+    println(scalaCode)
+
     val indexBridge: Int => Int = {
       if (filterIndex.nonEmpty)
         (i: Int) => filterIndex(i)
@@ -129,12 +86,12 @@ case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
         (i: Int) => i
     }
 
-    val resolve: (Int, Int => Ret) => Unit = {
+    val resolve: (Int, Int => TransferType) => Unit = {
       if (card == 1) {
-        (i: Int, applyFn: Int => Ret) => {
+        (i: Int, toTransferType: Int => TransferType) => {
           j = indexBridge(i)
           oldVopt = origArray(j)
-          newVopt = applyFn(j) match {
+          newVopt = toTransferType(j) match {
             case "__None__" => None
             case s          => Some(toColType(s))
           }
@@ -145,10 +102,10 @@ case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
           editArray(j) = newVopt
         }
       } else {
-        (i: Int, applyFn: Int => Ret) => {
+        (i: Int, toTransferType: Int => TransferType) => {
           j = indexBridge(i)
           oldVopt = origArray(j)
-          newVopt = applyFn(j) match {
+          newVopt = toTransferType(j) match {
             case Nil => None
             case vs  => Some(toColType(vs))
           }
@@ -161,7 +118,7 @@ case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
       }
     }
 
-    CalculateGroupEdit(colIndexes, attrLambdas, scalafiddle, lastRow, resolve)
+    CalculateGroupEdit(colIndexes, toTransferValueLambdas, scalafiddle, lastRow, resolve)
 
     // Group edit completed - stop spinner
     processing() = ""
@@ -174,7 +131,9 @@ case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
     val cellBaseClass  = if (attrType == "BigInt" || attrType == "BigDecimal")
       "num" else "str"
     val toColType      = attrType match {
+
       case "Date" => (s: String) => date2str(new Date(s.toLong))
+
       case _      => (s: String) => s
     }
     val colValueToNode = attrType match {
@@ -189,7 +148,7 @@ case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
   }
 
   def double(): Unit = {
-    transformValues[Double, String](
+    transformValues(
       qr.num,
       (s: String) => s.toDouble,
       updateCells.cardOne("num", (v: Double) => v.render),
@@ -204,8 +163,10 @@ case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
       case "String" => (vs: List[String]) => vs.sorted.map(v => li(_str2frags(v)))
       case _        => (vs: List[String]) => vs.sorted.map(li(_))
     }
-    def transform[Ret](cellBaseClass: String,
-                       toColType: Ret => List[String]): Unit = transformValues(
+    def transform[Ret](
+      cellBaseClass: String,
+      toColType: Ret => List[String]
+    ): Unit = transformValues(
       qr.listStr,
       toColType,
       updateCells.cardMany(cellBaseClass, colValueToItems)
@@ -218,8 +179,10 @@ case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
         )
       case "Boolean" => transform("str", (vs: js.Array[Boolean]) =>
         vs.toList.distinct.map(_.toString))
+
       case "Date"    => transform("str", (vs: js.Array[js.Date]) =>
         vs.toList.distinct.map(jsDate => date2str(new Date(jsDate.getTime.toLong))))
+
       case "UUID"    => transform("str", (vs: js.Array[UUID]) =>
         vs.toList.distinct.map(_.toString))
       case "URI"     => transform("str", (vs: js.Array[URI]) =>
@@ -255,8 +218,10 @@ case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
           case (k, v) => li(k + " -> " + v.toString)
         }
     }
-    def transform[Ret](cellBaseClass: String,
-                       toColType: Ret => Map[String, String]): Unit = transformValues(
+    def transform[Ret](
+      cellBaseClass: String,
+      toColType: Ret => Map[String, String]
+    ): Unit = transformValues(
       qr.mapStr,
       toColType,
       updateCells.cardMany(cellBaseClass, colValueToItems)

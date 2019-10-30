@@ -1,37 +1,52 @@
 package moleculeadmin.client.app.domain.query.data.groupedit.ops
 
 
-trait AttrTokens {
+trait TypeMappings {
 
-  def attrTokens(attr: String, tpe: String, card: Int)
+  def getTypeMappings(attr: String, tpe: String, card: Int)
   : (String, String, String) = card match {
     case 1 if attr.last == '$' =>
       tpe match {
-        case "Long" | "datom" | "ref" => (
+        case "Long" | "datom" | "ref" | "BigInt" => (
           "Option[String)",
           "Option[String)",
           s"$attr.fold(Option.empty[BigInt])(v => Some(BigInt(v))"
         )
 
-        case "Float" | "Double" => (
+        case "Float" | "Double" | "BigDecimal" => (
           "Option[String]",
           "Option[String]",
           s"$attr.fold(Option.empty[BigDecimal])(v => Some(BigDecimal(v))"
+        )
+
+        case "Date" => (
+          s"Option[LocalDateTime]",
+          s"Option[LocalDateTime]",
+          attr
         )
 
         // Int + String types
         case _ => (
           s"Option[$tpe]",
           s"Option[$tpe]",
-          s"_$attr"
+          attr
         )
       }
 
     case 1 =>
       tpe match {
-        case "Long" | "datom" | "ref" | "BigInt" => ("BigInt", "String", s"BigInt($attr)")
-        case "Float" | "Double" | "BigDecimal"   => ("BigDecimal", "String", s"BigDecimal($attr)")
-        case _                                   => (tpe, tpe, attr)
+        case "Long" | "datom" | "ref" | "BigInt" =>
+          ("BigInt", "String", s"BigInt($attr)")
+
+        case "Float" | "Double" | "BigDecimal" =>
+          ("BigDecimal", "String", s"BigDecimal($attr)")
+
+        case "Date" =>
+          ("LocalDateTime", "LocalDateTime", attr)
+
+        case _ =>
+          (tpe, tpe, attr)
+
       }
 
     case 2 =>

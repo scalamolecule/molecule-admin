@@ -101,6 +101,8 @@ case class DataTableHead(db: String)(implicit val ctx: Ctx.Owner)
              |${s(2)}case Some(v) => Some(v)
              |${s(2)}case _${s(6)} => None
              |}""".stripMargin
+
+//          s"$attr.fold(None)(v => Some(v))"
         } else {
           s"Some($attr)"
         }
