@@ -23,19 +23,6 @@ import scala.scalajs.js
 
 case class ScalafiddleApi[Ret](scalaCode: String) {
 
-  def readCompilationResponse(jsonStr: String): CompilationResponse = {
-    val r = js.JSON.parse(jsonStr).asInstanceOf[CompilationResponseJS]
-    CompilationResponse(
-      if (r.jsCode.isEmpty) None else Some(r.jsCode(0)),
-      r.jsDeps,
-      r.cssDeps,
-      r.annotations.map { a =>
-        EditorAnnotation(a.row, a.col, a.text, a.tpe)
-      },
-      r.log
-    )
-  }
-
   def lambda2: Future[(Any, Any) => Ret] = getLambda[(Any, Any) => Ret]
   def lambda3: Future[(Any, Any, Any) => Ret] = getLambda[(Any, Any, Any) => Ret]
   def lambda4: Future[(Any, Any, Any, Any) => Ret] = getLambda[(Any, Any, Any, Any) => Ret]
@@ -64,30 +51,37 @@ case class ScalafiddleApi[Ret](scalaCode: String) {
     // post actual source code and get compilation result
     val startTime = System.currentTimeMillis()
     Ajax.post(
-      url = s"http://localhost:8880/compile?opt=fast",
+      url = "http://localhost:8880/compile?opt=fast",
       data = scalaCode
     ).map { res =>
-      val compileTime = (System.currentTimeMillis() - startTime)
-      println(s"Compilation took $compileTime ms")
-      val compilationResponse = readCompilationResponse(res.responseText)
-      val jsCode              = compilationResponse.jsCode.getOrElse("No js code...")
+      val compileTime = System.currentTimeMillis() - startTime
+      println(s"Compilation took $compileTime ms -------------------------------")
+      //      println(s"Compilation took $compileTime ms")
+      val compResponse = readCompilationResponse(res.responseText)
+      val jsCode       = compResponse.jsCode.getOrElse("No js code...")
 
       //      println(s"jsCode --------------\n" + jsCode)
-      if (compilationResponse.annotations.nonEmpty)
-        println(s"----- Compile error -----\n" +
-          compilationResponse.annotations.head.text.mkString("\n"))
+      if (compResponse.annotations.nonEmpty) {
+        println(s"----- Scala code: -----")
+        println(scalaCode)
+        println(s"----- Compile error -----")
+        println(compResponse.annotations.head.text.mkString("\n"))
+      }
 
-      // Bring ScalaFiddle into scope
+      // Evaluate js code to bring ScalaFiddle into js scope
       js.eval(jsCode)
 
       // Return js edit lambda
       js.eval("_EditLambda.lambda").asInstanceOf[Lambda]
 
-
     } recover {
       case e: dom.ext.AjaxException if e.xhr.status == 400 =>
-        println(s"Error: " + e.xhr.responseText)
-        js.eval("window.alert('Scalafiddle ajax error 400: " + e.xhr.responseText + "')")
+        val msg = s"Scalafiddle ajax error 400: " + e.xhr.responseText
+        println(msg)
+        println("Please try again (refresh if testing)" +
+          " - this seems to give a valid compiler.")
+        //        err(msg)
+        //        js.eval(s"window.alert('$msg')")
         throw e
 
       case e: dom.ext.AjaxException if e.xhr.status == 0 =>
@@ -107,5 +101,18 @@ case class ScalafiddleApi[Ret](scalaCode: String) {
         js.eval("window.alert('Scalafiddle error - see console for error msgs')")
         throw e
     }
+  }
+
+  private def readCompilationResponse(jsonStr: String): CompilationResponse = {
+    val r = js.JSON.parse(jsonStr).asInstanceOf[CompilationResponseJS]
+    CompilationResponse(
+      if (r.jsCode.isEmpty) None else Some(r.jsCode(0)),
+      r.jsDeps,
+      r.cssDeps,
+      r.annotations.map { a =>
+        EditorAnnotation(a.row, a.col, a.text, a.tpe)
+      },
+      r.log
+    )
   }
 }

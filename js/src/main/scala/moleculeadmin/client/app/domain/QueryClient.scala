@@ -1,11 +1,12 @@
 package moleculeadmin.client.app.domain
 import autowire._
 import boopickle.Default._
-import moleculeadmin.client.app.element.AppElements
 import moleculeadmin.client.app.domain.common.TopMenu
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.domain.query.data.DataTable
+import moleculeadmin.client.app.domain.query.data.groupedit.test.TestScalaFiddle
 import moleculeadmin.client.app.domain.query.{KeyEvents, QueryBuilder, QuerySubMenu, SnippetRender}
+import moleculeadmin.client.app.element.AppElements
 import moleculeadmin.client.autowire.queryWire
 import moleculeadmin.client.rxstuff.RxBindings
 import moleculeadmin.shared.ops.query.builder.TreeOps
@@ -30,6 +31,8 @@ object QueryClient extends RxBindings with TreeOps with SchemaOps with ColOps
   @JSExport
   def load(db: String): Unit = queryWire().loadMetaData(db).call().map {
     case (dbs, metaSchema, settings) =>
+
+      TestScalaFiddle
 
       nsMap = mkNsMap(metaSchema)
       snippetCellTypes = mkSnippetCellTypes(nsMap)
