@@ -1,15 +1,16 @@
 package moleculeadmin.client.app.domain.query.data.groupedit.ops
-import moleculeadmin.client.scalafiddle.ScalafiddleApi
+import moleculeadmin.client.scalafiddle.ScalaFiddle
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.scalajs.js
 
 object CalculateGroupEdit {
 
   def apply[TransferType](
     colIndexes: Seq[Int],
     toTransferValueLambdas: Seq[Int => Any],
-    scalafiddle: ScalafiddleApi[TransferType],
+    scalafiddle: ScalaFiddle[TransferType],
     lastRow: Int,
-    resolve: (Int, Int => TransferType) => Unit
+    resolve: (Int, Int => js.Tuple2[TransferType, String]) => Unit
   ): Unit = {
     var i = 0
     colIndexes.length match {

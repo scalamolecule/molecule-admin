@@ -1,21 +1,26 @@
 package moleculeadmin.client.app.domain.query.data.groupedit
+import java.io
 import java.net.URI
 import java.util.{Date, UUID}
 import moleculeadmin.client.app.domain.query.KeyEvents
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.domain.query.data.Indexes
-import moleculeadmin.client.app.domain.query.data.groupedit.ops._
+import moleculeadmin.client.app.domain.query.data.groupedit.ops.{GroupEditCodeException, _}
 import moleculeadmin.client.app.element.query.datatable.BodyElements
 import moleculeadmin.client.rxstuff.RxBindings
-import moleculeadmin.client.scalafiddle.ScalafiddleApi
+import moleculeadmin.client.scalafiddle.ScalaFiddle
 import moleculeadmin.shared.ast.query.{Col, QueryResult}
 import moleculeadmin.shared.ops.query.ColOps
-import org.scalajs.dom.{NodeList, document}
+import org.scalajs.dom.{Node, NodeList, document, window}
 import rx.Ctx
 import scalatags.JsDom.all._
+import scala.collection.immutable
 import scala.collection.immutable.Map
 import scala.collection.mutable.ListBuffer
 import scala.scalajs.js
+import scala.scalajs.js.UndefOr
+import scala.util.matching
+
 
 /*
   Float is treated as Double to avoid precision problems from ScalaJS
@@ -27,6 +32,9 @@ import scala.scalajs.js
   To get precision correct, use BigDecimal and cast to Double (used for
   all number types except Int):
   floats.map(v => (v + BigDecimal(0.1)).toDouble)
+
+  Mutable vars are used extensively here to minimize object creation
+  during edits of large number of values
  */
 case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
   extends RxBindings with ColOps with BodyElements with KeyEvents with TypeMappings {
@@ -38,8 +46,7 @@ case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
   }
 
   // Get input for scala right hand side code (before processing adds spinner!)
-  val rhs: String = _html2str(document.getElementById(filterId).innerHTML)
-    .trim.replaceAllLiterally("\n", "\n      ")
+  val rhs: String = _html2str(document.getElementById(filterId).innerHTML).trim
 
   // Start spinner since compilation can take some seconds
   processing() = filterId
@@ -60,7 +67,7 @@ case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
     updateCell: (Int, Option[ColType], Option[ColType]) => Unit
   ): Unit = {
     val scalaCode                = ScalaCode(col, rhs).get
-    val scalafiddle              = ScalafiddleApi[TransferType](scalaCode)
+    val scalaFiddle              = ScalaFiddle[TransferType](scalaCode)
     val arrayIndexes             = qr.arrayIndexes
     val origArray                = arrays(arrayIndexes(colIndex - 1))
     val editArray                = arrays(arrayIndexes(colIndex))
@@ -86,60 +93,71 @@ case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
         (i: Int) => i
     }
 
-    val resolve: (Int, Int => TransferType) => Unit = {
+    def alert(error: String): Nothing = {
+      println(scalaCode)
+      window.alert(error + " - see console for details")
+      throw new GroupEditCodeException(error)
+    }
+
+    def updateClient(i: Int): Unit = {
+      if (i >= tableRowIndexOffset && i < tableRowIndexMax) {
+        updateCell(tableRowIndex, oldVopt, newVopt)
+        tableRowIndex += 1
+      }
+    }
+
+    // Minimize object creation for large edits
+    val resolve: (Int, Int => js.Tuple2[TransferType, String]) => Unit = {
       if (card == 1) {
-        (i: Int, toTransferType: Int => TransferType) => {
+        (i: Int, toTransferType: Int => js.Tuple2[TransferType, String]) => {
           j = indexBridge(i)
           oldVopt = origArray(j)
           newVopt = toTransferType(j) match {
-            case "__None__" => None
-            case s          => Some(toColType(s))
+            case js.Tuple2(v, "")
+              if v.asInstanceOf[js.UndefOr[_]].isEmpty => None
+            case js.Tuple2(v, "")                      => Some(toColType(v))
+            case js.Tuple2(_, error)                   => alert(error)
           }
-          if (i >= tableRowIndexOffset && i < tableRowIndexMax) {
-            updateCell(tableRowIndex, oldVopt, newVopt)
-            tableRowIndex += 1
-          }
+          updateClient(i)
           editArray(j) = newVopt
         }
       } else {
-        (i: Int, toTransferType: Int => TransferType) => {
+        (i: Int, toTransferType: Int => js.Tuple2[TransferType, String]) => {
           j = indexBridge(i)
           oldVopt = origArray(j)
           newVopt = toTransferType(j) match {
-            case Nil => None
-            case vs  => Some(toColType(vs))
+            case js.Tuple2(Nil, "")  => None
+            case js.Tuple2(vs, "")   => Some(toColType(vs))
+            case js.Tuple2(_, error) => alert(error)
           }
-          if (i >= tableRowIndexOffset && i < tableRowIndexMax) {
-            updateCell(tableRowIndex, oldVopt, newVopt)
-            tableRowIndex += 1
-          }
+          updateClient(i)
           editArray(j) = newVopt
         }
       }
     }
 
-    CalculateGroupEdit(colIndexes, toTransferValueLambdas, scalafiddle, lastRow, resolve)
+    CalculateGroupEdit(colIndexes, toTransferValueLambdas, scalaFiddle, lastRow, resolve)
 
     // Group edit completed - stop spinner
     processing() = ""
   }
 
-
   // Card one ------------------------------------------
 
   def string(): Unit = {
-    val cellBaseClass  = if (attrType == "BigInt" || attrType == "BigDecimal")
+    val cellBaseClass                             = if (attrType == "BigInt" || attrType == "BigDecimal")
       "num" else "str"
-    val toColType      = attrType match {
+    val toColType     : UndefOr[String] => String = attrType match {
+      case "Date" => (s: js.UndefOr[String]) =>
+        date2str(new Date(s.toOption.get.toLong))
 
-      case "Date" => (s: String) => date2str(new Date(s.toLong))
-
-      case _      => (s: String) => s
+      case _ => (s: js.UndefOr[String]) => s.toOption.get
     }
-    val colValueToNode = attrType match {
+    val colValueToNode: String => Node            = attrType match {
       case "String" => (s: String) => _str2frags(s).render
       case _        => (s: String) => s.render
     }
+
     transformValues(
       qr.str,
       toColType,
@@ -150,7 +168,7 @@ case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
   def double(): Unit = {
     transformValues(
       qr.num,
-      (s: String) => s.toDouble,
+      (s: js.UndefOr[String]) => s.toOption.get.toDouble,
       updateCells.cardOne("num", (v: Double) => v.render),
     )
   }
@@ -180,14 +198,14 @@ case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
       case "Boolean" => transform("str", (vs: js.Array[Boolean]) =>
         vs.toList.distinct.map(_.toString))
 
-      case "Date"    => transform("str", (vs: js.Array[js.Date]) =>
+      case "Date" => transform("str", (vs: js.Array[js.Date]) =>
         vs.toList.distinct.map(jsDate => date2str(new Date(jsDate.getTime.toLong))))
 
-      case "UUID"    => transform("str", (vs: js.Array[UUID]) =>
+      case "UUID" => transform("str", (vs: js.Array[UUID]) =>
         vs.toList.distinct.map(_.toString))
-      case "URI"     => transform("str", (vs: js.Array[URI]) =>
+      case "URI"  => transform("str", (vs: js.Array[URI]) =>
         vs.toList.distinct.map(_.toString))
-      case _         => transform("num", (vs: js.Array[String]) =>
+      case _      => transform("num", (vs: js.Array[String]) =>
         vs.toList.distinct)
     }
   }

@@ -16,7 +16,7 @@ import org.scalajs.dom.html.{TableCell, TableHeaderCell, TableSection}
 import org.scalajs.dom.raw.Node
 import org.scalajs.dom.{MouseEvent, NodeList, document, window}
 import rx.{Ctx, Rx}
-import moleculeadmin.client.scalafiddle.ScalafiddleApi
+import moleculeadmin.client.scalafiddle.ScalaFiddle
 import scalatags.JsDom
 import scalatags.JsDom.all._
 import scala.collection.mutable.ListBuffer
@@ -26,7 +26,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 case class DataTableHead(db: String)(implicit val ctx: Ctx.Owner)
   extends RxBindings with ColOps with ModelOps
     with HeadElements with KeyEvents with FilterFactory
-    //    with ScalafiddleApi
     with AppElements {
 
   type keepBooPickleImport = PickleState
@@ -65,8 +64,8 @@ case class DataTableHead(db: String)(implicit val ctx: Ctx.Owner)
         case "double"     => GroupSave(db, col).double()
         case "listString" => GroupSave(db, col).listString()
         case "listDouble" => GroupSave(db, col).listDouble()
-//        case "mapString"  => GroupSave(db, col).mapString()
-//        case "mapDouble"  => GroupSave(db, col).mapDouble()
+        //        case "mapString"  => GroupSave(db, col).mapString()
+        //        case "mapDouble"  => GroupSave(db, col).mapDouble()
       }
     }
     val retract  = { _: MouseEvent =>
@@ -87,25 +86,23 @@ case class DataTableHead(db: String)(implicit val ctx: Ctx.Owner)
 
 
   def attrFilterCell(col: Col): JsDom.TypedTag[TableHeaderCell] = {
-    val Col(colIndex, _, _, _, attr, _, colType, card, _, _, _, attrExpr, _, _) = col
+    val Col(colIndex, _, _, _, attr, _, colType, card, opt, _, _, attrExpr, _, _) = col
 
     val filterId = "filter-" + colIndex
 
     def lambdaCell(): JsDom.TypedTag[TableHeaderCell] = {
       def s(i: Int) = "\u00a0" * i
-      val lambdaRaw   =
-        if (card > 1) {
-          attr
-        } else if (attr.last == '$') {
+      val lambdaRaw = card match {
+        case 1 if opt =>
           s"""$attr match {
              |${s(2)}case Some(v) => Some(v)
-             |${s(2)}case _${s(6)} => None
+             |${s(2)}case None${s(3)} => None
              |}""".stripMargin
+        case 1        => s"Some($attr)"
+        case 2        => clean(attr) + ".map(v => v)"
+        case 3        => clean(attr) + ".map { case (k, v) => (k, v) }"
+      }
 
-//          s"$attr.fold(None)(v => Some(v))"
-        } else {
-          s"Some($attr)"
-        }
       val applyLambda = { () =>
         // Only update after pressing Enter (so that paging doesn't initiates)
         if (editCellId.nonEmpty) {
