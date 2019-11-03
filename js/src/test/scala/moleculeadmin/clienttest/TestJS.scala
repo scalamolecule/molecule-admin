@@ -3,7 +3,7 @@ import molecule.util.DateHandling
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.domain.query.data.groupedit.ops.ScalaCode
 import moleculeadmin.client.rxstuff.RxBindings
-import moleculeadmin.client.scalafiddle.ScalafiddleApi
+import moleculeadmin.client.scalafiddle.ScalaFiddle
 import moleculeadmin.shared.ast.query.Col
 import org.scalajs.dom.ext.Ajax
 import org.scalajs.dom.html
@@ -41,18 +41,18 @@ object TestJS extends TestSuite with RxBindings with DateHandling {
 
     test("moleculeadmin/client/scalafiddle") {
 
-      val rhs                                 = "str + 1"
-      val scalaCode  : String                 = ScalaCode(editCol, rhs).get
-      val scalafiddle: ScalafiddleApi[String] = ScalafiddleApi[String](scalaCode)
-
-      val futFn: Future[(Any, Any) => String] = scalafiddle.lambda2
-
-      println("yeah")
-
-      futFn.foreach { fn =>
-        println(fn(7L, "a"))
-//        fn(7L, "a") ==> "a1"
-      }
+//      val rhs                                 = "str + 1"
+//      val scalaCode  : String              = ScalaCode(editCol, rhs).get
+//      val scalafiddle: ScalaFiddle[String] = ScalaFiddle[String](scalaCode)
+//
+//      val futFn: Future[(Any, Any) => String] = scalafiddle.lambda2
+//
+//      println("yeah")
+//
+//      futFn.foreach { fn =>
+//        println(fn(7L, "a"))
+////        fn(7L, "a") ==> "a1"
+//      }
 
 
 

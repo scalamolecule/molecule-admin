@@ -1,67 +1,51 @@
 package moleculeadmin.client.app.domain.query.data.groupedit.ops
 import moleculeadmin.client.app.domain.query.QueryState.columns
 import moleculeadmin.shared.ast.query.Col
+import moleculeadmin.shared.util.HelpersAdmin
 import scala.collection.mutable.ListBuffer
 
 
-case class ScalaCode(col: Col, rhs0: String) extends TypeMappings {
+case class ScalaCode(col: Col, rhs0: String)
+  extends ScalaCodeImplicits(col, rhs0) {
 
-  val Col(_, _, nsAlias, nsFull, _, attrType, _, card, _, _, _, _, _, _) = col
+  val maxAttrLength = columns.now.map(_.attr.length).max
 
   def get: String = card match {
     case 1 => card1
     case 2 => card2
     case 3 => card3
   }
+  def pad(attr: String): String = attr + " " * (maxAttrLength - attr.length)
 
   // Build scala code elements for scalafiddle compilation
-
-  val lhsTypesProcess0       = new ListBuffer[String]
-  val lhsParamsTypesProcess0 = new ListBuffer[String]
-  val lhsTypes0              = new ListBuffer[String]
-  val lhsAssignments0        = new ListBuffer[String]
-  val lhsParamsTypes0        = new ListBuffer[String]
-  val lhsParams0             = new ListBuffer[String]
+  val transferTypes0  = new ListBuffer[String]
+  val transferParams0 = new ListBuffer[String]
+  val conversions0    = new ListBuffer[String]
+  val processTypes0   = new ListBuffer[String]
+  val processParams0  = new ListBuffer[String]
 
   columns.now.collect {
-    case Col(_, _, `nsAlias`, `nsFull`, attr, tpe, _, card, _, _, _, attrExpr, _, _)
+    case Col(_, _, nsAlias1, nsFull1, attr0, tpe, _, card, _, _, _, attrExpr, _, _)
       if attrExpr != "edit" =>
-      val (tpeProcess, tpeTransfer, paramConverter) = getTypeMappings(attr, tpe, card)
 
-      val d0 = if (tpe == "Date") "0" else ""
-      lhsTypesProcess0 += tpeProcess
-      lhsParamsTypesProcess0 += s"$attr$d0: $tpeProcess"
-      if (tpe == "Date")
-        lhsAssignments0 += s"val $attr = cloneDate($attr$d0)"
-      lhsTypes0 += tpeTransfer
-      lhsParamsTypes0 += s"$attr: $tpeTransfer"
-      lhsParams0 += paramConverter
+      val attr1 = if (card > 1) clean(attr0) else attr0
+      val attr  = if (nsAlias1 == nsAlias && nsFull1 == nsFull)
+        attr1 else nsAlias + "_" + attr1
 
-    case Col(_, _, nsAlias, _, attr, tpe, _, card, _, _, _, attrExpr, _, _)
-      if attrExpr != "edit" =>
-      val Ns_attr = nsAlias + "_" + attr
+      val (transferType, processType, paramConverter) = getTypeMappings(attr, tpe, card)
 
-      val (tpeProcess, tpeTransfer, paramConverter) = getTypeMappings(Ns_attr, tpe, card)
-
-      val d0 = if (tpe == "Date") "0" else ""
-      lhsTypesProcess0 += tpeProcess
-      lhsParamsTypesProcess0 += s"$Ns_attr$d0: $tpeProcess"
-      if (tpe == "Date")
-        lhsAssignments0 += s"val $Ns_attr = cloneDate($Ns_attr$d0)"
-      lhsTypes0 += tpeTransfer
-      lhsParamsTypes0 += s"$Ns_attr: $tpeTransfer"
-      lhsParams0 += paramConverter
+      transferTypes0 += transferType
+      transferParams0 += s"$attr: $transferType"
+      conversions0 += paramConverter
+      processTypes0 += processType
+      processParams0 += s"$attr: $processType"
   }
 
-  val lhsTypesProcess      : String = lhsTypesProcess0.mkString(", ")
-  val lhsParamsTypesProcess: String = lhsParamsTypesProcess0.mkString(", ")
-  val lhsAssignments       : String = lhsAssignments0.mkString("\n      ", "\n      ", "")
-  val lhsTypes             : String = lhsTypes0.mkString(", ")
-  val lhsParamsTypes       : String = lhsParamsTypes0.mkString(", ")
-  val lhsParams            : String = lhsParams0.mkString(", ")
-
-  val processed: Seq[String] =
-    Seq("Long", "datom", "ref", "Float", "Double", "BigInt", "BigDecimal")
+  val transferTypes : String = transferTypes0.mkString(", ")
+  val transferParams: String = transferParams0.mkString(", ")
+  val conversions   : String = conversions0.mkString(",\n          ")
+  val processTypes  : String = processTypes0.mkString(", ")
+  val processParams : String = processParams0.mkString(", ")
 
   val imports: String =
     """import scalajs.js
@@ -72,364 +56,218 @@ case class ScalaCode(col: Col, rhs0: String) extends TypeMappings {
       |import java.net.URI
       |""".stripMargin
 
-  val processType: String = attrType match {
-    case "Int"                    => "Int"
-    case "Long" | "datom" | "ref" => "BigInt"
-    case "Float" | "Double"       => "BigDecimal"
-    case "Date"                   => "LocalDateTime"
-    case _                        => attrType // Boolean, UUID, URI
-  }
-
-  val transferType: String = {
-    if (processed.contains(attrType))
-      "String"
-    else if (attrType == "Date")
-      "LocalDateTime"
-    else
-      attrType // Boolean, UUID, URI
-  }
 
   def card1: String = {
-    val rhs = if (rhs0.isEmpty) s"Option.empty[$processType]" else rhs0
-
-    val tpe: String = attrType match {
-      case "datom" | "ref" => "Long"
-      case t               => t
-    }
-
-    val noFloat: String =
-      "\"\"\"" + s"Float's not allowed in $tpe expression `$rhs0`" + "\"\"\""
-
-    val noDouble: String =
-      "\"\"\"" + s"Double's not allowed in $tpe expression `$rhs0`" + "\"\"\""
-
-    val noBigDecimal: String =
-      "\"\"\"" + s"BigDecimal's not allowed in $tpe expression `$rhs0`" + "\"\"\""
-
-    val useDouble =
-      "\"\"\"" + s"Please use Double instead of Float in expression " +
-        s"`$rhs0` to get correct floating point precision." + "\"\"\""
-
     val implicits = attrType match {
-      case "Int" =>
-        s"""
-           |  implicit def bigInt2int(v: BigInt): Int = v.toString.toInt
-           |  implicit def float2int(v: Float): Int =
-           |    throw new IllegalArgumentException(
-           |      $noFloat
-           |    )
-           |  implicit def double2int(v: Double): Int =
-           |    throw new IllegalArgumentException(
-           |      $noDouble
-           |    )
-           |  implicit def bigDec2int(v: BigDecimal): Int =
-           |    throw new IllegalArgumentException(
-           |      $noBigDecimal
-           |    )""".stripMargin
+      case "Int" => Seq(
+        // whitelist
+        long2int,
+        bigInt2int,
+        // blacklist
+        float2intErr,
+        double2intErr,
+        bigDec2intErr).mkString("\n  ")
 
-      case "Long" | "datom" | "ref" | "BigInt" =>
-        s"""
-           |  implicit def int2bigInt(v: Int): BigInt = BigInt(v)
-           |  implicit def long2bigInt(v: Long): BigInt = BigInt(v)
-           |  implicit def float2bigInt(v: Float): BigInt =
-           |    throw new IllegalArgumentException(
-           |      $noFloat
-           |    )
-           |  implicit def double2bigInt(v: Double): BigInt =
-           |    throw new IllegalArgumentException(
-           |      $noDouble
-           |    )
-           |  implicit def bigDec2bigInt(v: BigDecimal): BigInt =
-           |    throw new IllegalArgumentException(
-           |      $noBigDecimal
-           |    )""".stripMargin
+      case "Long" | "datom" | "ref" | "BigInt" => Seq(
+        // whitelist
+        int2bigInt,
+        long2bigInt,
+        // blacklist
+        float2bigIntErr,
+        double2bigIntErr,
+        bigDec2bigIntErr).mkString("\n  ")
 
-      case "Float" | "Double" | "BigDecimal" =>
-        s"""
-           |  implicit def int2bigDec(v: Int): BigDecimal = BigDecimal(v)
-           |  implicit def long2bigDec(v: Long): BigDecimal = BigDecimal(v)
-           |  implicit def bigInt2bigDec(v: BigInt): BigDecimal = BigDecimal(v)
-           |  implicit def float2bigDec(v: Float): BigDecimal =
-           |    throw new IllegalArgumentException(
-           |      $useDouble
-           |    )
-           |  implicit def double2bigDec(v: Double): BigDecimal = BigDecimal(v.toString)""".stripMargin
+      case "Float" | "Double" | "BigDecimal" => Seq(
+        // whitelist
+        int2bigDec,
+        long2bigDec,
+        bigInt2bigDec,
+        double2bigDec,
+        // blacklist
+        float2bigDecErr).mkString("\n  ")
 
-      case "Date" =>
-        val q = "\"\"\""
-        s"""
-           |  implicit def str2ldt(s: String): LocalDateTime = {
-           |    val nano = $q(\\d{1,4})-(1[0-2]|0?[0-9])-(3[01]|[12][0-9]|0?[0-9])[T ]+(2[0-3]|1[0-9]|0?[0-9]):([1-5][0-9]|0?[0-9]):([1-5][0-9]|0?[0-9])\\.(\\d{1,9})$q.r
-           |    val sec  = $q(\\d{1,4})-(1[0-2]|0?[0-9])-(3[01]|[12][0-9]|0?[0-9])[T ]+(2[0-3]|1[0-9]|0?[0-9]):([1-5][0-9]|0?[0-9]):([1-5][0-9]|0?[0-9])$q.r
-           |    val min  = $q(\\d{1,4})-(1[0-2]|0?[0-9])-(3[01]|[12][0-9]|0?[0-9])[T ]+(2[0-3]|1[0-9]|0?[0-9]):([1-5][0-9]|0?[0-9])$q.r
-           |    val ymd  = $q(\\d{1,4})-(1[0-2]|0?[0-9])-(3[01]|[12][0-9]|0?[0-9])$q.r
-           |    try {
-           |      s match {
-           |        case nano(y, m, d, hh, mm, ss, n) => LocalDateTime.of(y.toInt, m.toInt, d.toInt, hh.toInt, mm.toInt, ss.toInt, n.padTo(9, '0').toInt)
-           |        case sec(y, m, d, hh, mm, ss)     => LocalDateTime.of(y.toInt, m.toInt, d.toInt, hh.toInt, mm.toInt, ss.toInt, 0)
-           |        case min(y, m, d, hh, mm)         => LocalDateTime.of(y.toInt, m.toInt, d.toInt, hh.toInt, mm.toInt, 0, 0)
-           |        case ymd(y, m, d)                 => LocalDateTime.of(y.toInt, m.toInt, d.toInt, 0, 0, 0, 0)
-           |        case other                        => throw new IllegalArgumentException("Unexpected date string: " + other)
-           |      }
-           |    } catch {
-           |      case e: Throwable =>
-           |        error = e.toString
-           |        LocalDateTime.MIN
-           |    }
-           |  }
-           |  // Ensure LocalDateTime objects have access to methods (why aren't they available without cloning?)
-           |  def cloneDate(d: LocalDateTime) = LocalDateTime.of(d.getYear, d.getMonth, d.getDayOfMonth, d.getHour, d.getMinute, d.getSecond, d.getNano)
-           |  """.stripMargin
-
-      case _ => "" // Boolean, UUID, URI
+      case "Date"               => dateImplicits
+      case "UUID"               => str2uuid
+      case "URI"                => str2uri
+      case "String" | "Boolean" => "" // no conversions needed
     }
 
-    // Keeping Option handling within scala boundary
     s"""$imports
-       |@JSExportTopLevel("_EditLambda")
-       |object _EditLambda {
-       |  var error = ""$implicits
-       |  val process: ($lhsTypesProcess) => Option[$processType] = {
-       |    ($lhsParamsTypesProcess) => {$lhsAssignments
+       |@JSExportTopLevel("ScalaFiddle")
+       |object ScalaFiddle {
+       |  $implicits
+       |  @JSExport
+       |  val lambda: ($transferTypes) => js.Tuple2[js.UndefOr[String], String] = {
+       |    ($transferParams) =>
+       |      try {
+       |        val result: Option[$processType] = process(
+       |          $conversions
+       |        )
+       |        js.Tuple2(result.map(_.toString).orUndefined, "")
+       |      } catch {
+       |        case e: Throwable => js.Tuple2(Option.empty[String].orUndefined, e.toString)
+       |      }
+       |  }
+       |
+       |  val process: ($processTypes) => Option[$processType] = {
+       |    ($processParams) => {
        |      $rhs
        |    }
        |  }
-       |  @JSExport
-       |  val lambda: ($lhsTypes) => String = {
-       |    ($lhsParamsTypes) =>
-       |      process($lhsParams).fold("__None__"){
-       |        case v if error.nonEmpty => "__ERR__" + error + "__ERR__" + v
-       |        case v                   => v.toString
-       |      }
-       |  }
        |}""".stripMargin.trim
-
   }
 
 
   def card2: String = {
-    val rhs = if (rhs0.isEmpty) s"new js.Array[$transferType]()" else rhs0
-
-    val baseImplicits =
-      s"""implicit def seqInt2arrayString(vs: Seq[Int]): js.Array[String] = {
-         |    val array = new js.Array[String]()
-         |    vs.foreach(v => array.push(v.toString))
-         |    array
-         |  }
-         |  implicit def seqLong2arrayString(vs: Seq[Long]): js.Array[String] = {
-         |    val array = new js.Array[String]()
-         |    vs.foreach(v => array.push(v.toString))
-         |    array
-         |  }""".stripMargin
-
     val implicits = attrType match {
-      case "Long" | "datom" | "ref" | "BigInt" =>
-        s"""
-           |  implicit class richArray(val a: js.Array[BigInt]) extends AnyVal {
-           |    def :+(v: BigInt) = { a.push(v); a }
-           |  }
-           |  $baseImplicits
-           |  implicit def seq${processType}2arrayString(vs: Seq[BigInt]): js.Array[String] = {
-           |    val array = new js.Array[String]()
-           |    vs.foreach(v => array.push(v.toString))
-           |    array
-           |  }
-           |  implicit def array${processType}2arrayString(vs: js.Array[BigInt]): js.Array[String] = {
-           |    val array = new js.Array[String]()
-           |    vs.foreach(v => array.push(v.toString))
-           |    array
-           |  }""".stripMargin
+      case "Int" => Seq(
+        //        seq2array,
+        //        seq2list,
 
-      case "Float" | "Double" | "BigDecimal" =>
-        s"""
-           |  implicit class richArray(val a: js.Array[BigDecimal]) extends AnyVal {
-           |    def :+(v: BigDecimal) = { a.push(v); a }
-           |  }
-           |  $baseImplicits
-           |  implicit def seqFloat2arrayString(vs: Seq[Float]): js.Array[String] = {
-           |    val array = new js.Array[String]()
-           |    vs.foreach(v => array.push(v.toString))
-           |    array
-           |  }
-           |  implicit def seqDouble2arrayString(vs: Seq[Double]): js.Array[String] = {
-           |    val array = new js.Array[String]()
-           |    vs.foreach(v => array.push(v.toString))
-           |    array
-           |  }
-           |  implicit def seqBigDecimal2arrayString(vs: Seq[BigDecimal]): js.Array[String] = {
-           |    val array = new js.Array[String]()
-           |    vs.foreach(v => array.push(v.toString))
-           |    array
-           |  }
-           |  implicit def arrayBigDecimal2arrayString(vs: js.Array[BigDecimal]): js.Array[String] = {
-           |    val array = new js.Array[String]()
-           |    vs.foreach(v => array.push(v.toString))
-           |    array
-           |  }""".stripMargin
+        //        bigInt2int,
 
-      case "Date" =>
-        s"""
-           |  implicit class richArray(val a: js.Array[js.Date]) extends AnyVal {
-           |    def :+(v: js.Date) = { a.push(v); a }
-           |    def :+(v: Date) = { a.push(new js.Date(v.getTime().toDouble)); a }
-           |  }
-           |  implicit def seqDate2arrayString(vs: Seq[Date]): js.Array[js.Date] = {
-           |    val array = new js.Array[js.Date]()
-           |    vs.foreach(v => array.push(new js.Date(v.getTime().toDouble)))
-           |    array
-           |  }""".stripMargin
+        float2intErr,
+        double2intErr,
+        bigDec2intErr,
+      ).mkString("\n  ")
 
-      case _ => ""
+      case "Long" | "datom" | "ref" | "BigInt" => Seq(
+        //    richArray,
+        seq2array,
+        seq2list,
+        //
+        //        intList2bigIntList,
+        //        bigIntList2intList,
+
+        float2bigIntErr,
+        double2bigIntErr,
+        bigDec2bigIntErr,
+        //        int2bigInt,
+        //
+        //
+        //        seqStr2listBigInt,
+        //        seqInt2arrayString,
+        //        seqLong2arrayString,
+        //        seqBigInt2arrayString,
+        //        arrayBigInt2arrayString,
+      ).mkString("\n  ")
+
+      case "Float" | "Double" | "BigDecimal" => Seq(
+        //    richArray,
+        seq2array,
+        seq2list,
+
+
+        //        bigInt2bigDec,
+        //        int2bigInt,
+        //        long2bigInt,
+
+
+        float2bigDecErr,
+
+
+        //        seqInt2arrayString,
+        //        seqLong2arrayString,
+        //        seqFloat2arrayString,
+        //        seqDouble2arrayString,
+        //        seqBigDec2arrayString,
+        //        arrayBigDec2arrayString,
+      ).mkString("\n  ")
+
+      case "String"  => Seq(seqStr2arrayString, seq2list).mkString("\n  ")
+      case "Boolean" => Seq(seq2array, seq2list).mkString("\n  ")
+      case "Date"    => Seq(seq2array, seq2list, dateImplicits).mkString("\n  ")
+      case "UUID"    => Seq(seq2array, seq2list, str2uuid).mkString("\n  ")
+      case "URI"     => Seq(seq2array, seq2list, str2uri).mkString("\n  ")
     }
 
     s"""$imports
-       |import js.JSConverters._
+       |@JSExportTopLevel("ScalaFiddle")
+       |object ScalaFiddle {
+       |  $implicits
        |
-       |@JSExportTopLevel("_EditLambda")
-       |object _EditLambda {$implicits
-       |  val process: ($lhsTypesProcess) => js.Array[$transferType] = {
-       |    ($lhsParamsTypesProcess) => {
+       |  @JSExport
+       |  val lambda: ($transferTypes) => js.Tuple2[js.Array[$processType], String] = {
+       |    ($transferParams) =>
+       |      try {
+       |        // implicit conversion from List to js.Array
+       |        val result: js.Array[$processType] = process(
+       |          $conversions
+       |        )
+       |        js.Tuple2(result, "")
+       |      } catch {
+       |        case e: Throwable => js.Tuple2(new js.Array[$processType](0), e.toString)
+       |      }
+       |  }
+       |
+       |  val process: ($processTypes) => List[$processType] = {
+       |    ($processParams) => {
        |      $rhs
        |    }
        |  }
-       |  @JSExport
-       |  val lambda: ($lhsTypes) => js.Array[$transferType] = {
-       |    ($lhsParamsTypes) =>
-       |      process($lhsParams)
-       |  }
-       |}""".stripMargin
+       |}""".stripMargin.trim
   }
 
 
   def card3: String = {
-    val rhs = if (rhs0.isEmpty) s"js.Dictionary.empty[$transferType]" else rhs0
-
-    val baseImplicits =
-      s"""implicit def mapInt2dictString(map: Map[String, Int]): js.Dictionary[String] = {
-         |    val dict = js.Dictionary.empty[String]
-         |    map.foreach { case (k, v) => dict(k) = v.toString }
-         |    dict
-         |  }
-         |  implicit def mapLong2dictString(map: Map[String, Long]): js.Dictionary[String] = {
-         |    val dict = js.Dictionary.empty[String]
-         |    map.foreach { case (k, v) => dict(k) = v.toString }
-         |    dict
-         |  }""".stripMargin
-
-
     val implicits = attrType match {
-      case "Long" | "datom" | "ref" | "BigInt" =>
-        s"""$baseImplicits
-           |  implicit def mapBigInt2dict(map: Map[String, BigInt]): js.Dictionary[String] = {
-           |    val dict = js.Dictionary.empty[String]
-           |    map.foreach { case (k, v) => dict(k) = v.toString }
-           |    dict
-           |  }
-           |  implicit def wrap2dict(pairs: js.WrappedDictionary[BigInt]): js.Dictionary[String] =  {
-           |    val dict = js.Dictionary.empty[String]
-           |    pairs.foreach { case (k, v) => dict(k) = v.toString }
-           |    dict
-           |  }
-           |  implicit def dictProcess2dictTransfer(dictProcess: js.Dictionary[BigInt]): js.Dictionary[String] = {
-           |    val dictTransfer = js.Dictionary.empty[String]
-           |    dictProcess.foreach { case (k, v) => dictTransfer(k) = v.toString }
-           |    dictTransfer
-           |  }""".stripMargin
+      case "Long" | "datom" | "ref" | "BigInt" => Seq(
+        mapInt2dictString,
+        mapLong2dictString,
+        mapBigInt2dict,
+        wrapBigInt2dict,
+        dictProcessBigInt2dictTransfer,
+      ).mkString("\n  ")
 
-      case "Float" | "Double" | "BigDecimal" =>
-        s"""$baseImplicits
-           |  implicit def mapFloat2dict(map: Map[String, Float]): js.Dictionary[String] = {
-           |    val dict = js.Dictionary.empty[String]
-           |    map.foreach { case (k, v) => dict(k) = v.toString }
-           |    dict
-           |  }
-           |  implicit def mapDouble2dict(map: Map[String, Double]): js.Dictionary[String] = {
-           |    val dict = js.Dictionary.empty[String]
-           |    map.foreach { case (k, v) => dict(k) = v.toString }
-           |    dict
-           |  }
-           |  implicit def mapBigDecimal2dict(map: Map[String, BigDecimal]): js.Dictionary[String] = {
-           |    val dict = js.Dictionary.empty[String]
-           |    map.foreach { case (k, v) => dict(k) = v.toString }
-           |    dict
-           |  }
-           |  implicit def wrap2dict(wrap: js.WrappedDictionary[BigDecimal]): js.Dictionary[String] =  {
-           |    val dict = js.Dictionary.empty[String]
-           |    wrap.foreach { case (k, v) => dict(k) = v.toString }
-           |    dict
-           |  }
-           |  implicit def dictProcess2dictTransfer(dictProcess: js.Dictionary[BigDecimal]): js.Dictionary[String] = {
-           |    val dictTransfer = js.Dictionary.empty[String]
-           |    dictProcess.foreach { case (k, v) => dictTransfer(k) = v.toString }
-           |    dictTransfer
-           |  }""".stripMargin
+      case "Float" | "Double" | "BigDecimal" => Seq(
+        mapInt2dictString,
+        mapLong2dictString,
+        mapFloat2dict,
+        mapDouble2dict,
+        mapBigDec2dict,
+        wrapBigDec2dict,
+        dictProcessBigDec2dictTransfer,
+      ).mkString("\n  ")
 
-      case "Date" =>
-        s"""implicit def map2dict(map: Map[String, Date]): js.Dictionary[js.Date] =  {
-           |    val dict = js.Dictionary.empty[js.Date]
-           |    map.foreach { case (k, v) => dict(k) = (new js.Date(v.getTime().toDouble)) }
-           |    dict
-           |  }
-           |  implicit def wrap2dict(wrap: js.WrappedDictionary[Date]): js.Dictionary[js.Date] =  {
-           |    val dict = js.Dictionary.empty[js.Date]
-           |    wrap.foreach { case (k, v) => dict(k) = (new js.Date(v.getTime().toDouble)) }
-           |    dict
-           |  }
-           |  implicit def dictProcess2dictTransfer(dictProcess: js.Dictionary[Date]): js.Dictionary[js.Date] =  {
-           |    val dictTransfer = js.Dictionary.empty[js.Date]
-           |    dictProcess.foreach { case (k, v) => dictTransfer(k) = (new js.Date(v.getTime().toDouble)) }
-           |    dictTransfer
-           |  }""".stripMargin
+      case "Date" => Seq(
+        mapDate2dict,
+        wrapDate2dict,
+        dictProcessDate2dictTransfer,
+      ).mkString("\n  ")
 
-      case _ =>
-        s"""implicit def map2dict(map: Map[String, $processType]): js.Dictionary[$transferType] =  {
-           |    val dict = js.Dictionary.empty[$transferType]
-           |    map.foreach { case (k, v) => dict(k) = v }
-           |    dict
-           |  }
-           |  implicit def wrap2dict(wrap: js.WrappedDictionary[$processType]): js.Dictionary[$transferType] =  {
-           |    val dict = js.Dictionary.empty[$transferType]
-           |    wrap.foreach { case (k, v) => dict(k) = v }
-           |    dict
-           |  }
-           |  implicit def dictProcess2dictTransfer(dictProcess: js.Dictionary[$processType]): js.Dictionary[$transferType] =  {
-           |    val dictTransfer = js.Dictionary.empty[$transferType]
-           |    dictProcess.foreach { case (k, v) => dictTransfer(k) = v }
-           |    dictTransfer
-           |  }""".stripMargin
+      case _ => Seq(
+        map2dict,
+        wrap2dict,
+        dictProcess2dictTransfer,
+      ).mkString("\n  ")
     }
 
     // Empty Option is simply treated as an empty Map.
     s"""$imports
        |
-       |@JSExportTopLevel("_EditLambda")
-       |object _EditLambda {
+       |@JSExportTopLevel("ScalaFiddle")
+       |object ScalaFiddle {
+       |  $mapImplicits
        |  $implicits
-       |  implicit class richDict(val dict: js.Dictionary[$processType]) extends AnyVal {
-       |    def :+(pair: (String, $processType)) = { dict(pair._1) = pair._2; dict }
+       |
+       |  @JSExport
+       |  val lambda: ($transferTypes) => js.Dictionary[$transferType] = {
+       |    ($transferParams) =>
+       |      try {
+       |        // implicit conversion from List to js.Dictionary
+       |        val result: js.Dictionary[$processType] = process(
+       |          $conversions
+       |        )
+       |        js.Tuple2(result, "")
+       |      } catch {
+       |        case e: Throwable => js.Tuple2(js.Dictionary.empty[$processType], e.toString)
+       |      }
        |  }
-       |  implicit def otherMap2dict(otherMap: Map[_, _]): js.Dictionary[$transferType] =  {
-       |    if (otherMap.isEmpty) {
-       |      js.Dictionary.empty[$transferType]
-       |    } else {
-       |      val (k, v) = otherMap.head
-       |      val err = if (!k.isInstanceOf[String] || !v.isInstanceOf[$processType])
-       |        "Map should be of type Map[Strings, $processType]. Found: " + otherMap
-       |      else
-       |        "Unexpected Map: " + otherMap
-       |      org.scalajs.dom.window.alert(err)
-       |      throw new RuntimeException(err)
-       |    }
-       |  }
-       |  val process: ($lhsTypesProcess) => js.Dictionary[$transferType] = {
-       |    ($lhsParamsTypesProcess) => {
+       |
+       |  val process: ($processTypes) => js.Dictionary[$transferType] = {
+       |    ($processParams) => {
        |      $rhs
        |    }
-       |  }
-       |  @JSExport
-       |  val lambda: ($lhsTypes) => js.Dictionary[$transferType] = {
-       |    ($lhsParamsTypes) =>
-       |      process($lhsParams)
        |  }
        |}""".stripMargin
   }

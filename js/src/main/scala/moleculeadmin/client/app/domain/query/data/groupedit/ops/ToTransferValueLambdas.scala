@@ -1,5 +1,6 @@
 package moleculeadmin.client.app.domain.query.data.groupedit.ops
 import java.net.URI
+import java.time.LocalDateTime
 import java.util.{Date, UUID}
 import molecule.util.DateHandling
 import moleculeadmin.client.app.domain.query.QueryState.columns
@@ -8,6 +9,7 @@ import moleculeadmin.shared.util.HelpersAdmin
 import scala.collection.immutable.Map
 import scala.scalajs.js
 import scala.scalajs.js.JSConverters._
+import scala.scalajs.js.UndefOr
 
 case class ToTransferValueLambdas(qr: QueryResult) extends HelpersAdmin {
 
@@ -31,17 +33,17 @@ case class ToTransferValueLambdas(qr: QueryResult) extends HelpersAdmin {
       if (opt)
         attrType match {
           case "String"                => (j: Int) =>
-            array(j)
+            array(j).orUndefined
           case "Boolean"               => (j: Int) =>
-            array(j).fold(Option.empty[Boolean])(v => Some(v.toBoolean))
+            array(j).fold(Option.empty[Boolean])(v => Some(v.toBoolean)).orUndefined
           case "Date"                  => (j: Int) =>
-            array(j).fold(Option.empty[Date])(v => Some(str2date(v)))
+            array(j).fold(Option.empty[Date])(v => Some(str2date(v))).orUndefined
           case "UUID"                  => (j: Int) =>
-            array(j).fold(Option.empty[UUID])(v => Some(UUID.fromString(v)))
+            array(j).fold(Option.empty[UUID])(v => Some(UUID.fromString(v))).orUndefined
           case "URI"                   => (j: Int) =>
-            array(j).fold(Option.empty[URI])(v => Some(new URI(v)))
+            array(j).fold(Option.empty[URI])(v => Some(new URI(v))).orUndefined
           case "BigInt" | "BigDecimal" => (j: Int) =>
-            array(j)
+            array(j).orUndefined
         }
       else
         attrType match {
@@ -49,11 +51,8 @@ case class ToTransferValueLambdas(qr: QueryResult) extends HelpersAdmin {
             array(j).get
           case "Boolean"               => (j: Int) =>
             array(j).get.toBoolean
-
           case "Date"                  => (j: Int) =>
-            str2date(array(j).get)
-//            str2ldt(array(j).get)
-
+            str2ldt(array(j).get)
           case "UUID"                  => (j: Int) =>
             UUID.fromString(array(j).get)
           case "URI"                   => (j: Int) =>
@@ -67,9 +66,9 @@ case class ToTransferValueLambdas(qr: QueryResult) extends HelpersAdmin {
       if (opt)
         attrType match {
           case "Int" => (j: Int) =>
-            array(j).fold(Option.empty[Int])(v => Some(v.toInt))
+            array(j).fold(Option.empty[Int])(v => Some(v.toInt)).orUndefined
           case _     => (j: Int) =>
-            array(j).fold(Option.empty[String])(v => Some(v.toString))
+            array(j).fold(Option.empty[String])(v => Some(v.toString)).orUndefined
         }
       else
         attrType match {
@@ -79,66 +78,55 @@ case class ToTransferValueLambdas(qr: QueryResult) extends HelpersAdmin {
 
     case "listString" =>
       val array = qr.listStr(arrayIndexes(colIndex))
+      attrType match {
+        case "String" => (j: Int) =>
+          array(j).fold(new js.Array[String](0))(_.toJSArray)
 
+        case "Boolean" => (j: Int) =>
+          array(j).fold(new js.Array[Boolean](0))(vs =>
+            vs.map(_.toBoolean).toJSArray)
 
-      if (opt)
-        attrType match {
-          case "String"                => (j: Int) =>
-            array(j)
-          case "Boolean"               => (j: Int) =>
-            array(j).fold(Option.empty[List[Boolean]])(vs =>
-              Some(vs.map(_.toBoolean)))
-          case "Date"                  => (j: Int) =>
-            array(j).fold(Option.empty[List[Date]])(vs =>
-              Some(vs.map(v => str2date(v))))
-          case "UUID"                  => (j: Int) =>
-            array(j).fold(Option.empty[List[UUID]])(vs =>
-              Some(vs.map(v => UUID.fromString(v))))
-          case "URI"                   => (j: Int) =>
-            array(j).fold(Option.empty[List[URI]])(vs =>
-              Some(vs.map(v => new URI(v))))
-          case "BigInt" | "BigDecimal" => (j: Int) =>
-            array(j)
-        }
-      else
-        attrType match {
-          case "String"                => (j: Int) =>
-            array(j).get.toJSArray
-          case "Boolean"               => (j: Int) =>
-            array(j).get.map(_.toBoolean).toJSArray
-          case "Date"                  => (j: Int) =>
-            array(j).get.map(v =>
-              new js.Date(str2date(v).getTime.toDouble)).toJSArray
-          case "UUID"                  => (j: Int) =>
-            array(j).get.map(v => UUID.fromString(v)).toJSArray
-          case "URI"                   => (j: Int) =>
-            array(j).get.map(v => new URI(v)).toJSArray
-          case "BigInt" | "BigDecimal" => (j: Int) =>
-            array(j).get.toJSArray
-        }
+        case "Date" => (j: Int) =>
+          array(j).fold(new js.Array[LocalDateTime](0))(vs =>
+            vs.map(str2ldt).toJSArray)
+
+        case "UUID" => (j: Int) =>
+          array(j).fold(new js.Array[UUID](0))(vs =>
+            vs.map(UUID.fromString).toJSArray)
+
+        case "URI" => (j: Int) =>
+          array(j).fold(new js.Array[URI](0))(vs =>
+            vs.map(new URI(_)).toJSArray)
+
+        case "BigInt" => (j: Int) =>
+          array(j).fold(new js.Array[BigInt](0))(vs =>
+            vs.map(BigInt(_)).toJSArray)
+
+        case "BigDecimal" => (j: Int) =>
+          array(j).fold(new js.Array[BigDecimal](0))(vs =>
+            vs.map(BigDecimal(_)).toJSArray)
+      }
 
     case "listDouble" =>
       val array = qr.listNum(arrayIndexes(colIndex))
-      if (opt)
-        attrType match {
-          case "Int" => (j: Int) =>
-            array(j).fold(Option.empty[List[Int]])(vs =>
-              Some(vs.map(_.toInt)))
-          case _     => (j: Int) =>
-            array(j).fold(Option.empty[List[String]])(vs =>
-              Some(vs.map(_.toString)))
-        }
-      else
-        attrType match {
-          case "Int" => (j: Int) => array(j).get.map(_.toInt).toJSArray
-          case _     => (j: Int) => array(j).get.map(_.toString).toJSArray
-        }
+      attrType match {
+        case "Int" => (j: Int) =>
+          array(j).fold(new js.Array[Int](0))(vs =>
+            vs.map(_.toInt).toJSArray)
+
+        // Long, Float, Double are transferred as String (for BigInt/BigDecimal)
+        case "Long" => (j: Int) =>
+          array(j).fold(new js.Array[String](0))(vs =>
+            vs.map(_.toString).toJSArray)
+      }
 
     case "mapString" =>
       val array = qr.mapStr(arrayIndexes(colIndex))
       if (opt)
         attrType match {
-          case "String"                => (j: Int) => array(j).toJSArray
+          case "String"                => (j: Int) =>
+            //            val x: Option[Map[String, String]] = array(j)
+            array(j).toJSArray
           case "Boolean"               => (j: Int) =>
             array(j)
               .fold(Option.empty[Map[String, Boolean]])(pairs =>

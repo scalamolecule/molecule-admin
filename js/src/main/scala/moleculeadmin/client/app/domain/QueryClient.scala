@@ -4,7 +4,7 @@ import boopickle.Default._
 import moleculeadmin.client.app.domain.common.TopMenu
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.domain.query.data.DataTable
-import moleculeadmin.client.app.domain.query.data.groupedit.test.TestScalaFiddle
+import moleculeadmin.client.app.domain.query.data.groupedit.compileTest.TestScalaFiddle
 import moleculeadmin.client.app.domain.query.{KeyEvents, QueryBuilder, QuerySubMenu, SnippetRender}
 import moleculeadmin.client.app.element.AppElements
 import moleculeadmin.client.autowire.queryWire
