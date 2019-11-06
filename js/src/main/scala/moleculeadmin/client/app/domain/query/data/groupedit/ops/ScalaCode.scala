@@ -1,7 +1,6 @@
 package moleculeadmin.client.app.domain.query.data.groupedit.ops
 import moleculeadmin.client.app.domain.query.QueryState.columns
 import moleculeadmin.shared.ast.query.Col
-import moleculeadmin.shared.util.HelpersAdmin
 import scala.collection.mutable.ListBuffer
 
 
@@ -91,7 +90,6 @@ case class ScalaCode(col: Col, rhs0: String)
        |@JSExportTopLevel("ScalaFiddle")
        |object ScalaFiddle {
        |  $implicits
-       |
        |  @JSExport
        |  val lambda: ($transferTypes) => js.Tuple2[js.UndefOr[String], String] = {
        |    ($transferParams) =>
@@ -143,7 +141,6 @@ case class ScalaCode(col: Col, rhs0: String)
        |@JSExportTopLevel("ScalaFiddle")
        |object ScalaFiddle {
        |  $implicits
-       |
        |  @JSExport
        |  val lambda: ($transferTypes) => js.Tuple2[js.Array[String], String] = {
        |    ($transferParams) =>

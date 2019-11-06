@@ -33,7 +33,7 @@ object QueryClient extends RxBindings with TreeOps with SchemaOps with ColOps
     case (dbs, metaSchema, settings) =>
 
       // Uncomment to test dynamic ScalaFiddle compilation
-      // TestScalaFiddle
+//       TestScalaFiddle
 
       nsMap = mkNsMap(metaSchema)
       snippetCellTypes = mkSnippetCellTypes(nsMap)

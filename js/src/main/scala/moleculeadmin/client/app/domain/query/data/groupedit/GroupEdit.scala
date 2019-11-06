@@ -144,9 +144,6 @@ case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
     val cellBaseClass = if (attrType == "BigInt" || attrType == "BigDecimal")
       "num" else "str"
 
-    val toColType: UndefOr[String] => String =
-      (s: js.UndefOr[String]) => s.toOption.get
-
     val colValueToNode: String => Node = attrType match {
       case "String" => (s: String) => _str2frags(s).render
       case _        => (s: String) => s.render
@@ -154,7 +151,7 @@ case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
 
     transformValues(
       qr.str,
-      toColType,
+      (s: js.UndefOr[String]) => s.toOption.get,
       updateCells.cardOne(cellBaseClass, colValueToNode),
     )
   }
@@ -171,42 +168,26 @@ case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
   // Card many ------------------------------------------
 
   def listString(): Unit = {
+    val cellBaseClass   = attrType match {
+      case "String" if enums.isEmpty                      => "items"
+      case "String" | "Boolean" | "Date" | "UUID" | "URI" => "str"
+      case "BigInt" | "BigDecimal"                        => "num"
+    }
     val colValueToItems = attrType match {
       case "String" => (vs: List[String]) => vs.sorted.map(v => li(_str2frags(v)))
       case _        => (vs: List[String]) => vs.sorted.map(li(_))
     }
-    def transform[Ret](
-      cellBaseClass: String,
-      toColType: Ret => List[String]
-    ): Unit = transformValues(
+    transformValues(
       qr.listStr,
-      toColType,
+      (vs: js.Array[String]) => vs.toList.distinct,
       updateCells.cardMany(cellBaseClass, colValueToItems)
     )
-    attrType match {
-      case "String"  => transform(if (enums.isEmpty) "items" else "str",
-        (vs: js.Array[String]) => vs.toList.distinct)
-      case "Boolean" => transform("str", (vs: js.Array[Boolean]) =>
-        vs.toList.distinct.map(_.toString))
-      case "Date"    => transform("str", (vs: js.Array[js.Date]) =>
-        vs.toList.distinct.map(jsDate => date2str(new Date(jsDate.getTime.toLong))))
-      case "UUID"    => transform("str", (vs: js.Array[UUID]) =>
-        vs.toList.distinct.map(_.toString))
-      case "URI"     => transform("str", (vs: js.Array[URI]) =>
-        vs.toList.distinct.map(_.toString))
-      case _         => transform("num", (vs: js.Array[String]) =>
-        vs.toList.distinct)
-    }
   }
 
   def listDouble(): Unit = {
-    val toColType = attrType match {
-      case "Int" => (vs: js.Array[Int]) => vs.toList.distinct.map(_.toDouble)
-      case _     => (vs: js.Array[String]) => vs.toList.distinct.map(_.toDouble)
-    }
     transformValues(
       qr.listNum,
-      toColType,
+      (vs: js.Array[String]) => vs.toList.distinct.map(_.toDouble),
       updateCells.cardMany("num", (vs: List[Double]) => vs.sorted.map(li(_)))
     )
   }
@@ -215,6 +196,7 @@ case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
   // Card map ------------------------------------------
 
   def mapString(): Unit = {
+    val cellBaseClass   = if (attrType == "String") "items" else "str"
     val colValueToItems = attrType match {
       case "String" => (vs: Map[String, String]) =>
         vs.toList.sortBy(_._1).map {
@@ -225,56 +207,21 @@ case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
           case (k, v) => li(k + " -> " + v.toString)
         }
     }
-    def transform[Ret](
-      cellBaseClass: String,
-      toColType: Ret => Map[String, String]
-    ): Unit = transformValues(
+    transformValues(
       qr.mapStr,
-      toColType,
+      (vs: js.Dictionary[String]) => vs.toMap,
       updateCells.cardMany(cellBaseClass, colValueToItems)
     )
-    attrType match {
-      case "String"  =>
-        transform("items",
-          (vs: js.Dictionary[String]) => vs.toMap)
-      case "Boolean" =>
-        transform("str",
-          (vs: js.Dictionary[Boolean]) =>
-            vs.toMap.map { case (k, v) => k -> v.toString })
-      case "Date"    =>
-        transform("str",
-          (vs: js.Dictionary[js.Date]) =>
-            vs.toMap.map {
-              case (k, jsDate) => k -> date2str(new Date(jsDate.getTime().toLong))
-            })
-      case "UUID"    =>
-        transform("str",
-          (vs: js.Dictionary[UUID]) => vs.toMap.map { case (k, v) => k -> v.toString })
-      case "URI"     =>
-        transform("str",
-          (vs: js.Dictionary[URI]) => vs.toMap.map { case (k, v) => k -> v.toString })
-      case _         =>
-        transform("str",
-          (vs: js.Dictionary[String]) => vs.toMap)
-    }
   }
 
   def mapDouble(): Unit = {
-    val toColType       = attrType match {
-      case "Int" =>
-        (vs: js.Dictionary[Int]) =>
-          vs.toMap.map { case (k, v) => k -> v.toDouble }
-      case _     =>
-        (vs: js.Dictionary[String]) =>
-          vs.toMap.map { case (k, v) => k -> v.toDouble }
-    }
     val colValueToItems =
       (vs: Map[String, Double]) =>
         vs.toList.sortBy(_._1).map { case (k, v) => li(k + " -> " + v) }
 
     transformValues(
       qr.mapNum,
-      toColType,
+      (vs: js.Dictionary[String]) => vs.toMap.map { case (k, v) => k -> v.toDouble },
       updateCells.cardMany("str", colValueToItems)
     )
   }

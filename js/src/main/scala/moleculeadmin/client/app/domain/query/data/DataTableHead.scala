@@ -9,7 +9,7 @@ import moleculeadmin.client.app.element.AppElements
 import moleculeadmin.client.app.element.query.datatable.HeadElements
 import moleculeadmin.client.autowire.queryWire
 import moleculeadmin.client.rxstuff.RxBindings
-import moleculeadmin.shared.ast.query.Col
+import moleculeadmin.shared.ast.query.{Col, QueryResult}
 import moleculeadmin.shared.ops.query.data.FilterFactory
 import moleculeadmin.shared.ops.query.{ColOps, ModelOps}
 import org.scalajs.dom.html.{TableCell, TableHeaderCell, TableSection}
@@ -74,6 +74,8 @@ case class DataTableHead(db: String)(implicit val ctx: Ctx.Owner)
     }
     val cancel   = { _: MouseEvent =>
       println("cancel... " + attr)
+      resetEditColToOrigColCache(colIndex, colType)
+      // remove edit column from model and redraw
       modelElements() = toggleEdit(modelElements.now, colIndex, nsFull, attr)
     }
     if (sortable) {
@@ -84,11 +86,40 @@ case class DataTableHead(db: String)(implicit val ctx: Ctx.Owner)
     }
   }
 
+  def resetEditColToOrigColCache(colIndex: Int, colType: String) = {
+    val curQueryCache   =
+      queryCache.now.find(_.modelElements == modelElements.now).get
+
+    val qr: QueryResult = curQueryCache.queryResult
+    val arrayIndexes    = qr.arrayIndexes
+
+    def revert[T](arrays: List[Array[Option[T]]]): List[Array[Option[T]]] = {
+      val origColIndex = arrayIndexes(colIndex - 1)
+      val editColIndex = arrayIndexes(colIndex)
+      arrays.zipWithIndex.map {
+        case (_, `editColIndex`) => arrays(origColIndex)
+        case (a, _)              => a
+      }
+    }
+
+    val origQueryResult = colType match {
+      case "string"     => qr.copy(str = revert(qr.str))
+      case "double"     => qr.copy(num = revert(qr.num))
+      case "listString" => qr.copy(listStr = revert(qr.listStr))
+      case "listDouble" => qr.copy(listNum = revert(qr.listNum))
+      case "mapString"  => qr.copy(mapStr = revert(qr.mapStr))
+      case "mapDouble"  => qr.copy(mapNum = revert(qr.mapNum))
+    }
+    queryCache() = curQueryCache.copy(queryResult = origQueryResult) +:
+      queryCache.now.filterNot(_.modelElements == modelElements.now)
+  }
+
 
   def attrFilterCell(col: Col): JsDom.TypedTag[TableHeaderCell] = {
     val Col(colIndex, _, _, _, attr, _, colType, card, opt, _, _, attrExpr, _, _) = col
 
-    val filterId = "filter-" + colIndex
+    val filterId  = "filter-" + colIndex
+    val cleanAttr = clean(attr)
 
     def lambdaCell(): JsDom.TypedTag[TableHeaderCell] = {
       def s(i: Int) = "\u00a0" * i
@@ -99,8 +130,11 @@ case class DataTableHead(db: String)(implicit val ctx: Ctx.Owner)
              |${s(2)}case None${s(3)} => None
              |}""".stripMargin
         case 1        => s"Some($attr)"
-        case 2        => clean(attr) + ".map(v => v)"
-        case 3        => clean(attr) + ".map { case (k, v) => (k, v) }"
+        case 2        => s"$cleanAttr.map(v => v)"
+        case 3        =>
+          s"""$cleanAttr.map {
+             |${s(2)}case (k, v) => (k, v)
+             |}""".stripMargin
       }
 
       val applyLambda = { () =>

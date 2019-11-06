@@ -72,46 +72,6 @@ object Card3 extends TestScalaFiddle {
     Compiler(Col(2, 0, "Ns", "Ns", "intMap", "Int", "mapDouble", 3), testData)
   }
 
-  //  implicit def mapAny2mapBigInt(l: Map[String, Any]): Map[String, BigInt] = l.map {
-  //    case (k, n: Int)    => k -> BigInt(n)
-  //    case (k, n: Long)   => k -> BigInt(n)
-  //    case (k, n: BigInt) => k -> n
-  //    case pair           => throw new IllegalArgumentException("Invalid String/BigInt pair " + pair + " of type " + pair.getClass)
-  //  }
-  //  implicit def mapAnyLong2mapBigInt(l: Map[String, Any]): Map[String, BigInt] = l.map {
-  //    case (k, n: Int)                         => k -> BigInt(n)
-  //    case (k, n: Long)                        => k -> BigInt(n)
-  //    case (k, n: BigInt) if n < Long.MinValue => throw new IllegalArgumentException("Number value is too small to be a Long: " + n)
-  //    case (k, n: BigInt) if n > Long.MaxValue => throw new IllegalArgumentException("Number value is too big to be a Long: " + n)
-  //    case (k, n: BigInt)                      => k -> n
-  //    case pair                                => throw new IllegalArgumentException("Invalid String/Long pair " + pair + " of type " + pair.getClass)
-  //  }
-  //  implicit def mapAny2mapBigDec(l: Map[String, Any]): Map[String, BigDecimal] = l.map {
-  //    case (k, n: Int)        => k -> BigDecimal(n)
-  //    case (k, n: Long)       => k -> BigDecimal(n)
-  //    case (k, n: BigInt)     => k -> BigDecimal(n)
-  //    case (k, n: Double)     => k -> BigDecimal(n)
-  //    case (k, n: BigDecimal) => k -> n
-  //    case pair               => throw new IllegalArgumentException("Invalid String/BigDecimal pair " + pair + " of type " + pair.getClass)
-  //  }
-  //
-  //  implicit def mapAnyLDT2mapLDT(l: Map[String, Any]): Map[String, LocalDateTime] = l.map {
-  //    case (k, s: String)        => k -> str2ldt(s)
-  //    case (k, d: LocalDateTime) => k -> d
-  //    case pair                  => throw new IllegalArgumentException("Invalid String/LocalDateValue pair " + pair + " of type " + pair.getClass)
-  //  }
-  //
-  //  implicit def mapAny2mapUUID(l: Map[String, Any]): Map[String, UUID] = l.map {
-  //    case (k, s: String) => k -> UUID.fromString(s)
-  //    case (k, u: UUID)   => k -> u
-  //    case pair           => throw new IllegalArgumentException("Invalid String/UUID pair " + pair + " of type " + pair.getClass)
-  //  }
-  //  implicit def mapAny2mapURI(l: Map[String, Any]): Map[String, URI] = l.map {
-  //    case (k, s: String) => k -> new URI(s)
-  //    case (k, u: URI)    => k -> u
-  //    case pair           => throw new IllegalArgumentException("Invalid String/URI pair " + pair + " of type " + pair.getClass)
-  //  }
-
 
   def longMap(): Unit = {
     val testData = List(
@@ -361,6 +321,7 @@ object Card3 extends TestScalaFiddle {
       (emptyMap, "Map(a -> 2001-03-05T07:09:11)", """Map("a" -> "2001-3-5 7:9:11")"""),
 
       (oneDate, "Map(a -> 2001-03-05T07:09:11)", "dateMap"),
+      (oneDate, "Map(a -> 2301-03-05T07:09:11)", "dateMap.map { case (k, v) => (k, v.plusYears(300)) }"),
       (oneDate, "Map(a -> 2001-03-05T07:09:11)", """Map("a" -> dateMap.head._2)"""),
       (oneDate, "Map(a -> 2001-03-05T07:09:12)", """Map("a" -> dateMap.head._2.plusSeconds(1))"""),
 
