@@ -32,7 +32,8 @@ object QueryClient extends RxBindings with TreeOps with SchemaOps with ColOps
   def load(db: String): Unit = queryWire().loadMetaData(db).call().map {
     case (dbs, metaSchema, settings) =>
 
-      TestScalaFiddle
+      // Uncomment to test dynamic ScalaFiddle compilation
+      // TestScalaFiddle
 
       nsMap = mkNsMap(metaSchema)
       snippetCellTypes = mkSnippetCellTypes(nsMap)

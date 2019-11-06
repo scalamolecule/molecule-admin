@@ -1,13 +1,7 @@
 package moleculeadmin.client.app.domain.query.data.groupedit.compileTest
-import moleculeadmin.client.app.domain.query.data.groupedit.compileTest.Card1.testCount
-import moleculeadmin.client.scalafiddle.ScalaFiddle
 import moleculeadmin.shared.ast.query.Col
 import moleculeadmin.shared.testdata.ExampleData
 import moleculeadmin.shared.util.HelpersAdmin
-import scala.concurrent.Future
-import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.scalajs.js
 
 trait TestScalaFiddle extends HelpersAdmin with ExampleData {
 
@@ -21,10 +15,24 @@ trait TestScalaFiddle extends HelpersAdmin with ExampleData {
 
 object TestScalaFiddle {
 
-  // OBS: make sure to scroll up in the browser console output
-  // to see eventual errors (since all tests run in parallel)
+  /*
+  OBS:
+  Comment out specific test groups below to test multiple compilations against
+  a running scalafiddle-core router and server (See the ScalaFiddle.scala for
+  more details on running those).
 
-  // Isolate tests of interest by commenting out others
+  Each test data line in a test group contains 3 elements:
+  - initial data
+  - expected data
+  - Right hand side of a Scala lambda expression
+
+  The Scala expression is sent to ScalaFiddle, compiled to JS and then applied
+  to the initial data and the result is compared to the expected data.
+
+  Note that initially the ScalaFiddle server with send back error-400's for
+  all calls except the current one. Then just refresh until all code snippets
+  have been cached.
+  */
 
   val card1 = Card1
   //  card1.int()
@@ -32,26 +40,36 @@ object TestScalaFiddle {
   //  card1.bigInt()
   //  card1.float()
   //  card1.double()
-  //  card1.bigDecimal()
+  //  card1.bigDec()
   //  card1.string()
   //  card1.bool()
   //  card1.date()
   //  card1.uuid()
   //  card1.uri()
 
-
   val card2 = Card2
-  card2.ints()
-  //    card2.longs()
-  //    card2.bigInts()
-  //    card2.floats()
-  //    card2.doubles()
-  //    card2.bigDecimals()
-  //    card2.strings()
-  //    card2.bools()
-  //    card2.dates()
-  //    card2.uuids()
-  //    card2.uris()
+  //  card2.ints()
+  //  card2.longs()
+  //  card2.bigInts()
+  //  card2.floats()
+  //  card2.doubles()
+  //  card2.bigDec()
+  //  card2.strings()
+  //  card2.bools()
+  //  card2.dates()
+  //  card2.uuids()
+  //  card2.uris()
 
-
+  val card3 = Card3
+  //  card3.intMap()
+  //  card3.longMap()
+  //  card3.bigIntMap()
+  //  card3.floatMap()
+  //  card3.doubleMap()
+  //  card3.bigDecimalMap()
+  //  card3.stringMap()
+  //  card3.boolMap()
+  //  card3.dateMap()
+  //  card3.uuidMap()
+  //  card3.uriMap()
 }

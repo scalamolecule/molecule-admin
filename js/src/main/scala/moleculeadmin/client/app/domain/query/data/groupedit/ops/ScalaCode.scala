@@ -25,17 +25,24 @@ case class ScalaCode(col: Col, rhs0: String)
   val processParams0  = new ListBuffer[String]
 
   columns.now.collect {
-    case Col(_, _, nsAlias1, nsFull1, attr0, tpe, _, card, _, _, _, attrExpr, _, _)
+    case Col(_, _, nsAlias1, nsFull1, attr0, tpe, _, card, opt, _, _, attrExpr, _, _)
       if attrExpr != "edit" =>
 
       val attr1 = if (card > 1) clean(attr0) else attr0
       val attr  = if (nsAlias1 == nsAlias && nsFull1 == nsFull)
         attr1 else nsAlias + "_" + attr1
 
-      val (transferType, processType, paramConverter) = getTypeMappings(attr, tpe, card)
+      val (processType, paramConverter) = getTypeMappings(attr, tpe, card)
 
+      val transferType = card match {
+        case 1 if opt => "js.UndefOr[String]"
+        case 1        => "String"
+        case 2        => "js.Array[String]"
+        case 3        => "js.Dictionary[String]"
+      }
       transferTypes0 += transferType
       transferParams0 += s"$attr: $transferType"
+
       conversions0 += paramConverter
       processTypes0 += processType
       processParams0 += s"$attr: $processType"
@@ -59,24 +66,7 @@ case class ScalaCode(col: Col, rhs0: String)
 
   def card1: String = {
     val implicits = attrType match {
-      case "Int" => Seq(
-        // whitelist
-        long2int,
-        bigInt2int,
-        // blacklist
-        float2intErr,
-        double2intErr,
-        bigDec2intErr).mkString("\n  ")
-
-      case "Long" | "datom" | "ref" | "BigInt" => Seq(
-        // whitelist
-        int2bigInt,
-        long2bigInt,
-        // blacklist
-        float2bigIntErr,
-        double2bigIntErr,
-        bigDec2bigIntErr).mkString("\n  ")
-
+      // Exclude using Float
       case "Float" | "Double" | "BigDecimal" => Seq(
         // whitelist
         int2bigDec,
@@ -86,16 +76,22 @@ case class ScalaCode(col: Col, rhs0: String)
         // blacklist
         float2bigDecErr).mkString("\n  ")
 
-      case "Date"               => dateImplicits
-      case "UUID"               => str2uuid
-      case "URI"                => str2uri
-      case "String" | "Boolean" => "" // no conversions needed
+      case "Date" => dateImplicits
+      case "UUID" => str2uuid
+      case "URI"  => str2uri
+      case _      => "" // no conversions
     }
+
+    val mapToString = if (attrType == "Date")
+      "v => v.withNano(v.getNano/1000000*1000000).toString"
+    else
+      "_.toString"
 
     s"""$imports
        |@JSExportTopLevel("ScalaFiddle")
        |object ScalaFiddle {
        |  $implicits
+       |
        |  @JSExport
        |  val lambda: ($transferTypes) => js.Tuple2[js.UndefOr[String], String] = {
        |    ($transferParams) =>
@@ -103,7 +99,7 @@ case class ScalaCode(col: Col, rhs0: String)
        |        val result: Option[$processType] = process(
        |          $conversions
        |        )
-       |        js.Tuple2(result.map(_.toString).orUndefined, "")
+       |        js.Tuple2(result.map($mapToString).orUndefined, "")
        |      } catch {
        |        case e: Throwable => js.Tuple2(Option.empty[String].orUndefined, e.toString)
        |      }
@@ -119,67 +115,29 @@ case class ScalaCode(col: Col, rhs0: String)
 
 
   def card2: String = {
-    val implicits = attrType match {
-      case "Int" => Seq(
-        //        seq2array,
-        //        seq2list,
+    val decImplicits = Seq(
+      iter2arr,
+      int2bigDec,
+      long2bigDec,
+      bigInt2bigDec,
+      double2bigDec,
+      float2bigDecErr,
+      iterAny2iterBigDec,
+    )
 
-        //        bigInt2int,
-
-        float2intErr,
-        double2intErr,
-        bigDec2intErr,
-      ).mkString("\n  ")
-
-      case "Long" | "datom" | "ref" | "BigInt" => Seq(
-        //    richArray,
-        seq2array,
-        seq2list,
-        //
-        //        intList2bigIntList,
-        //        bigIntList2intList,
-
-        float2bigIntErr,
-        double2bigIntErr,
-        bigDec2bigIntErr,
-        //        int2bigInt,
-        //
-        //
-        //        seqStr2listBigInt,
-        //        seqInt2arrayString,
-        //        seqLong2arrayString,
-        //        seqBigInt2arrayString,
-        //        arrayBigInt2arrayString,
-      ).mkString("\n  ")
-
-      case "Float" | "Double" | "BigDecimal" => Seq(
-        //    richArray,
-        seq2array,
-        seq2list,
-
-
-        //        bigInt2bigDec,
-        //        int2bigInt,
-        //        long2bigInt,
-
-
-        float2bigDecErr,
-
-
-        //        seqInt2arrayString,
-        //        seqLong2arrayString,
-        //        seqFloat2arrayString,
-        //        seqDouble2arrayString,
-        //        seqBigDec2arrayString,
-        //        arrayBigDec2arrayString,
-      ).mkString("\n  ")
-
-      case "String"  => Seq(seqStr2arrayString, seq2list).mkString("\n  ")
-      case "Boolean" => Seq(seq2array, seq2list).mkString("\n  ")
-      case "Date"    => Seq(seq2array, seq2list, dateImplicits).mkString("\n  ")
-      case "UUID"    => Seq(seq2array, seq2list, str2uuid).mkString("\n  ")
-      case "URI"     => Seq(seq2array, seq2list, str2uri).mkString("\n  ")
-    }
+    val implicits = (attrType match {
+      case "String"                 => Seq(iterStr2arr)
+      case "Int"                    => Seq(iter2arr)
+      case "Long" | "datom" | "ref" => Seq(iter2arr, iterAnyLong2iterBigInt)
+      case "BigInt"                 => Seq(iter2arr, iterAny2iterBigInt)
+      case "Float"                  => decImplicits
+      case "Double"                 => decImplicits
+      case "BigDecimal"             => decImplicits
+      case "Boolean"                => Seq(iter2arr)
+      case "Date"                   => Seq(iterLDT2arr, dateImplicits, iterAnyLDT2iterLDT)
+      case "UUID"                   => Seq(iter2arr, str2uuid, iterAny2iterUUID)
+      case "URI"                    => Seq(iter2arr, str2uri, iterAny2iterURI)
+    }).mkString("\n  ")
 
     s"""$imports
        |@JSExportTopLevel("ScalaFiddle")
@@ -187,20 +145,20 @@ case class ScalaCode(col: Col, rhs0: String)
        |  $implicits
        |
        |  @JSExport
-       |  val lambda: ($transferTypes) => js.Tuple2[js.Array[$processType], String] = {
+       |  val lambda: ($transferTypes) => js.Tuple2[js.Array[String], String] = {
        |    ($transferParams) =>
        |      try {
-       |        // implicit conversion from List to js.Array
-       |        val result: js.Array[$processType] = process(
+       |        val result: Iterable[$processType] = process(
        |          $conversions
        |        )
+       |        // implicit conversion from Iterable[$processType] to js.Array[String]
        |        js.Tuple2(result, "")
        |      } catch {
-       |        case e: Throwable => js.Tuple2(new js.Array[$processType](0), e.toString)
+       |        case e: Throwable => js.Tuple2(new js.Array[String](0), e.toString)
        |      }
        |  }
        |
-       |  val process: ($processTypes) => List[$processType] = {
+       |  val process: ($processTypes) => Iterable[$processType] = {
        |    ($processParams) => {
        |      $rhs
        |    }
@@ -210,61 +168,50 @@ case class ScalaCode(col: Col, rhs0: String)
 
 
   def card3: String = {
-    val implicits = attrType match {
-      case "Long" | "datom" | "ref" | "BigInt" => Seq(
-        mapInt2dictString,
-        mapLong2dictString,
-        mapBigInt2dict,
-        wrapBigInt2dict,
-        dictProcessBigInt2dictTransfer,
-      ).mkString("\n  ")
+    val decImplicits = Seq(
+      map2dict,
+      int2bigDec,
+      long2bigDec,
+      bigInt2bigDec,
+      double2bigDec,
+      float2bigDecErr,
+      mapAny2mapBigDec,
+    )
 
-      case "Float" | "Double" | "BigDecimal" => Seq(
-        mapInt2dictString,
-        mapLong2dictString,
-        mapFloat2dict,
-        mapDouble2dict,
-        mapBigDec2dict,
-        wrapBigDec2dict,
-        dictProcessBigDec2dictTransfer,
-      ).mkString("\n  ")
-
-      case "Date" => Seq(
-        mapDate2dict,
-        wrapDate2dict,
-        dictProcessDate2dictTransfer,
-      ).mkString("\n  ")
-
-      case _ => Seq(
-        map2dict,
-        wrap2dict,
-        dictProcess2dictTransfer,
-      ).mkString("\n  ")
-    }
+    val implicits = (attrType match {
+      case "String"                 => Seq(mapStr2dict)
+      case "Int"                    => Seq(map2dict)
+      case "Long" | "datom" | "ref" => Seq(map2dict, mapAnyLong2mapBigInt)
+      case "BigInt"                 => Seq(map2dict, mapAny2mapBigInt)
+      case "Float"                  => decImplicits
+      case "Double"                 => decImplicits
+      case "BigDecimal"             => decImplicits
+      case "Boolean"                => Seq(map2dict)
+      case "Date"                   => Seq(mapLDT2dict, dateImplicits, mapAnyLDT2mapLDT)
+      case "UUID"                   => Seq(map2dict, str2uuid, mapAny2mapUUID)
+      case "URI"                    => Seq(map2dict, str2uri, mapAny2mapURI)
+    }).mkString("\n  ")
 
     // Empty Option is simply treated as an empty Map.
     s"""$imports
-       |
        |@JSExportTopLevel("ScalaFiddle")
        |object ScalaFiddle {
-       |  $mapImplicits
        |  $implicits
-       |
        |  @JSExport
-       |  val lambda: ($transferTypes) => js.Dictionary[$transferType] = {
+       |  val lambda: ($transferTypes) => js.Tuple2[js.Dictionary[String], String] = {
        |    ($transferParams) =>
        |      try {
-       |        // implicit conversion from List to js.Dictionary
-       |        val result: js.Dictionary[$processType] = process(
+       |        val result: Map[String, $processType] = process(
        |          $conversions
        |        )
+       |        // `result` implicitly converted from Map[String, $processType] to js.Dictionary[String]
        |        js.Tuple2(result, "")
        |      } catch {
-       |        case e: Throwable => js.Tuple2(js.Dictionary.empty[$processType], e.toString)
+       |        case e: Throwable => js.Tuple2(js.Dictionary.empty[String], e.toString)
        |      }
        |  }
        |
-       |  val process: ($processTypes) => js.Dictionary[$transferType] = {
+       |  val process: ($processTypes) => Map[String, $processType] = {
        |    ($processParams) => {
        |      $rhs
        |    }
