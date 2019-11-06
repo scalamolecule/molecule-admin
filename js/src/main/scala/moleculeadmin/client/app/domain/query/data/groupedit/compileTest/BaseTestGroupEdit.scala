@@ -7,7 +7,7 @@ class BaseTestGroupEdit(col: Col) extends TestScalaFiddle {
 
   val Col(_, _, _, _, attr, attrType, _, _, _, _, _, _, _, _) = col
 
-  val optional  = attr.last == '$'
+  val optional = attr.last == '$'
 
   columns() = List(
     eCol,
@@ -25,18 +25,18 @@ class BaseTestGroupEdit(col: Col) extends TestScalaFiddle {
   ): Unit = {
 
 
-    val attrStr    = attr + " " * (15 - attr.length)
-    val errMsg     = error.replaceAllLiterally("\n", "\n       ")
-    val rhsStr     = rhs.replaceAllLiterally("\n", "\n                 ")
+    val attrStr = attr + " " * (15 - attr.length)
+    val errMsg  = error.replaceAllLiterally("\n", "\n       ")
+    val rhsStr  = rhs.replaceAllLiterally("\n", "\n                 ")
 
-//        println("----------------")
-//        println(newValue)
-//        println(error)
-//        println("----------------")
-//        println(expected)
-//        println(errCompare)
-//        println("----------------")
-//        println(rhs)
+    //        println("----------------")
+    //        println(newValue)
+    //        println(error)
+    //        println("----------------")
+    //        println(expected)
+    //        println(errCompare)
+    //        println("----------------")
+    //        println(rhs)
 
     if (newValue == expected) {
       println(
