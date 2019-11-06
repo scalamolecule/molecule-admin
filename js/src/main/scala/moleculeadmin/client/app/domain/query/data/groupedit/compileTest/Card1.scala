@@ -1,7 +1,6 @@
 package moleculeadmin.client.app.domain.query.data.groupedit.compileTest
 
 import java.time.LocalDateTime
-import java.util.UUID
 import moleculeadmin.client.app.domain.query.data.groupedit.ops.ScalaCode
 import moleculeadmin.client.scalafiddle.ScalaFiddle
 import moleculeadmin.shared.ast.query.Col
@@ -12,9 +11,9 @@ import scala.scalajs.js.JSConverters._
 
 object Card1 extends TestScalaFiddle {
 
-  case class Compiler[AttrTransferType](
+  case class Compiler(
     col: Col,
-    testData: List[(Option[AttrTransferType], String, String)]
+    testData: List[(Option[String], String, String)]
   ) extends BaseTestGroupEdit(col) {
     val mandatory = !optional
     val attrOpt   = if (optional) attr else attr + "$"
@@ -51,8 +50,8 @@ object Card1 extends TestScalaFiddle {
         val scalaCode: String = ScalaCode(col, rhs).get
         //        println(scalaCode)
 
-        ScalaFiddle[js.UndefOr[AttrTransferType]](scalaCode).lambda2.foreach { lambda =>
-          def process[T](input: T): (Option[AttrTransferType], String) = {
+        ScalaFiddle[js.UndefOr[String]](scalaCode).lambda2.foreach { lambda =>
+          def process[T](input: T): (Option[String], String) = {
             lambda(eid, input) match {
               case js.Tuple2(v, "") if v.isEmpty => (None, "")
               case js.Tuple2(v, "")              => (v.toOption, "")
@@ -79,43 +78,39 @@ object Card1 extends TestScalaFiddle {
 
   def int(): Unit = {
     val testData = List(
+      // Only Int's accepted.
+      //      (Some("1"), "None", "Some(2L)"),
+      //      (Some("1"), "None", "Some(BigInt(2))"),
+      //      (Some("1"), "None", "Some(1.1f)"),
+      //      (Some("1"), "None", "Some(1.1)"),
+      //      (Some("1"), "None", "Some(BigDecimal(1.1))"),
+
       (None, "None", ""),
       (None, "None", "None"),
 
-      // blacklist types
-      (Some(1), s"$iae Float not allowed in Int expression `Some(4.2f)`", "Some(4.2f)"),
-      (Some(1), s"$iae Double not allowed in Int expression `Some(4.2)`", "Some(4.2)"),
-      (Some(1), s"$iae BigDecimal not allowed in Int expression `Some(BigDecimal(4.2)`)", "Some(BigDecimal(4.2))"),
-
-      // whitelist types
-      (Some(1), "Some(1)", "Some(1)"),
-      (Some(1), "Some(1)", "Some(1L)"),
-      (Some(1), "Some(1)", "Some(BigInt(1))"),
-
-      (Some(1), "Some(2)", "Some(int + 1)"),
-      (Some(1), "Some(2)", "Some(int + 1L)"),
-      (Some(1), "Some(2)", "Some(int + BigInt(1))"),
+      (Some("1"), "Some(2)", "Some(2)"),
+      (Some("1"), "Some(2)", "Some(int + 1)"),
 
       // We can pattern match Int attr against Int value since Int's are not converted to BigInt
-      (Some(1), "Some(2)",
+      (Some("1"), "Some(2)",
         """int match {
           |  case 1 => Some(2)
           |  case _ => None
           |}""".stripMargin),
 
-      (Some(1), "Some(3)",
+      (Some("1"), "Some(3)",
         """int match {
           |  case v if v > 5 => Some(2)
           |  case v          => Some(v * 3)
           |}""".stripMargin),
 
-      (Some(1), "Some(2)",
+      (Some("1"), "Some(2)",
         """int$ match {
           |  case Some(1) => Some(2)
           |  case _       => None
           |}""".stripMargin),
 
-      (Some(1), "Some(3)",
+      (Some("1"), "Some(3)",
         """int$ match {
           |  case None    => Some(2)
           |  case Some(v) => Some(v + 2)
@@ -128,33 +123,38 @@ object Card1 extends TestScalaFiddle {
           |}""".stripMargin),
     )
     Compiler(Col(2, 0, "Ns", "Ns", "int", "Int", "double", 1), testData)
-    Compiler(Col(2, 0, "Ns", "Ns", "int$", "Int", "double", 1), testData)
+    Compiler(Col(2, 0, "Ns", "Ns", "int$", "Int", "double", 1, true), testData)
   }
 
 
   def long(): Unit = {
     val testData = List(
+      // Floating point number types non-compatible
+      //      (Some("1"), "Some(1.0)", "Some(1.0f)"),
+      //      (Some("1"), "Some(1.0)", "Some(1.0)"),
+      //      (Some("1"), "Some(1.0)", "Some(BigDecimal(1.0))"),
+
       (None, "None", ""),
       (None, "None", "None"),
 
-      // blacklist types
-      (Some("1"), s"$iae Float not allowed in Long expression `Some(4.2f)`", "Some(4.2f)"),
-      (Some("1"), s"$iae Double not allowed in Long expression `Some(4.2)`", "Some(4.2)"),
-      (Some("1"), s"$iae BigDecimal not allowed in Long expression `Some(BigDecimal(4.2)`)", "Some(BigDecimal(4.2))"),
-
-      // whitelist types
-      (Some("1"), "Some(1)", "Some(1)"),
-      (Some("1"), "Some(1)", "Some(1L)"),
-      (Some("1"), "Some(1)", "Some(BigInt(1))"),
+      (Some("1"), "Some(2)", "Some(2)"),
+      (Some("1"), "Some(2)", "Some(2L)"),
+      (Some("1"), "Some(2)", "Some(BigInt(2))"),
 
       (Some("1"), "Some(2)", "Some(long + 1)"),
       (Some("1"), "Some(2)", "Some(long + 1L)"),
+      (Some("1"), "Some(2)", "Some(long + e)"),
       (Some("1"), "Some(2)", "Some(long + BigInt(1))"),
 
-      //      // Can't pattern match BigInt (`long` converted) with Int value directly
+      (Some("1"), "Some(2)", "Some(1 + long)"),
+      (Some("1"), "Some(2)", "Some(1L + long)"),
+      (Some("1"), "Some(2)", "Some(e + long)"),
+      (Some("1"), "Some(2)", "Some(BigInt(1) + long)"),
+
+      //      // Can't pattern match BigInt (`long` converted) with Int/Long value directly
       //      (Some("1"), "Some(2)",
       //        """long match {
-      //          |  case 1 => Some(2)
+      //          |  case 1 => Some(2L)
       //          |  case _ => None
       //          |}""".stripMargin),
 
@@ -165,7 +165,7 @@ object Card1 extends TestScalaFiddle {
           |  case _           => None
           |}""".stripMargin),
 
-      //      // Can't pattern match BigInt (`long` converted) with Int value directly
+      //      // Can't pattern match BigInt (`long` converted) with Int/Long value directly
       //      (Some("1"), "Some(2)",
       //        """long$ match {
       //          |  case Some(1) => Some(2)
@@ -191,30 +191,29 @@ object Card1 extends TestScalaFiddle {
           |}""".stripMargin),
     )
     Compiler(Col(2, 0, "Ns", "Ns", "long", "Long", "double", 1), testData)
-    Compiler(Col(2, 0, "Ns", "Ns", "long$", "Long", "double", 1), testData)
+    Compiler(Col(2, 0, "Ns", "Ns", "long$", "Long", "double", 1, true), testData)
   }
 
 
   def bigInt(): Unit = {
     val testData = List(
+      // Floating point number types non-compatible
+      //      (Some("1"), "Some(1.0)", "Some(1.0f)"),
+      //      (Some("1"), "Some(1.0)", "Some(1.0)"),
+      //      (Some("1"), "Some(1.0)", "Some(BigDecimal(1.0))"),
+
       (None, "None", ""),
       (None, "None", "None"),
 
-      // blacklist types
-      (Some("1"), s"$iae Float not allowed in BigInt expression `Some(4.2f)`", "Some(4.2f)"),
-      (Some("1"), s"$iae Double not allowed in BigInt expression `Some(4.2)`", "Some(4.2)"),
-      (Some("1"), s"$iae BigDecimal not allowed in BigInt expression `Some(BigDecimal(4.2)`)", "Some(BigDecimal(4.2))"),
-
-      // whitelist types
-      (Some("1"), "Some(1)", "Some(1)"),
-      (Some("1"), "Some(1)", "Some(1L)"),
-      (Some("1"), "Some(1)", "Some(BigInt(1))"),
+      (Some("1"), "Some(2)", "Some(2)"),
+      (Some("1"), "Some(2)", "Some(2L)"),
+      (Some("1"), "Some(2)", "Some(BigInt(2))"),
 
       (Some("1"), "Some(2)", "Some(bigInt + 1)"),
       (Some("1"), "Some(2)", "Some(bigInt + 1L)"),
       (Some("1"), "Some(2)", "Some(bigInt + BigInt(1))"),
 
-      //      // Can't pattern match BigInt (`int` converted) with Int value directly
+      //      // Can't pattern match BigInt
       //      (Some("1"), "Some(2)",
       //        """bigInt match {
       //          |  case 1 => Some(2)
@@ -228,7 +227,7 @@ object Card1 extends TestScalaFiddle {
           |  case _           => None
           |}""".stripMargin),
 
-      //      // Can't pattern match BigInt (`int` converted) with Int value directly
+      //      // Can't pattern match BigInt
       //      (Some("1"), "Some(2)",
       //        """bigInt$ match {
       //          |  case Some(1) => Some(2)
@@ -254,24 +253,23 @@ object Card1 extends TestScalaFiddle {
           |}""".stripMargin),
     )
     Compiler(Col(2, 0, "Ns", "Ns", "bigInt", "BigInt", "double", 1), testData)
-    Compiler(Col(2, 0, "Ns", "Ns", "bigInt$", "BigInt", "double", 1), testData)
+    Compiler(Col(2, 0, "Ns", "Ns", "bigInt$", "BigInt", "double", 1, true), testData)
   }
 
 
   def float(): Unit = {
     val testData = List(
-      (None, "None", ""),
-      (None, "None", "None"),
-
       // blacklist types
       (Some("1"), s"$iae Please use Double instead of Float in expression `Some(4.2f)` to get correct floating point precision.", "Some(4.2f)"),
 
-      // whitelist types
-      (Some("1.1"), "Some(1)", "Some(1)"),
-      (Some("1.1"), "Some(1)", "Some(1L)"),
-      (Some("1.1"), "Some(1)", "Some(BigInt(1))"),
-      (Some("1.1"), "Some(1.2)", "Some(1.2)"),
-      (Some("1.1"), "Some(1.2)", "Some(BigDecimal(1.2))"),
+      (None, "None", ""),
+      (None, "None", "None"),
+
+      (Some("1.1"), "Some(2)", "Some(2)"),
+      (Some("1.1"), "Some(2)", "Some(2L)"),
+      (Some("1.1"), "Some(2)", "Some(BigInt(2))"),
+      (Some("1.1"), "Some(2.1)", "Some(2.1)"),
+      (Some("1.1"), "Some(2.1)", "Some(BigDecimal(2.1))"),
 
       (Some("1.1"), "Some(2.1)", "Some(float + 1)"),
       (Some("1.1"), "Some(2.1)", "Some(float + 1L)"),
@@ -279,7 +277,7 @@ object Card1 extends TestScalaFiddle {
       (Some("1.1"), "Some(2.3)", "Some(float + 1.2)"),
       (Some("1.1"), "Some(2.3)", "Some(float + BigDecimal(1.2))"),
 
-      //      // Can't pattern match BigInt (`float` converted) with Double value directly
+      //      // Can't pattern match BigDecimal (`float` converted) with Float/Double value directly
       //      (Some("1.1"), "Some(2.3)",
       //        """float match {
       //          |  case 1.1 => Some(2.3)
@@ -293,7 +291,7 @@ object Card1 extends TestScalaFiddle {
           |  case _             => None
           |}""".stripMargin),
 
-      //      // Can't pattern match BigInt (`float` converted) with Double value directly
+      //      // Can't pattern match BigDecimal (`float` converted) with Float/Double value directly
       //      (Some("1.1"), "Some(2.3)",
       //        """float$ match {
       //          |  case Some(1.1) => Some(2.3)
@@ -319,7 +317,7 @@ object Card1 extends TestScalaFiddle {
           |}""".stripMargin),
     )
     Compiler(Col(2, 0, "Ns", "Ns", "float", "Float", "double", 1), testData)
-    Compiler(Col(2, 0, "Ns", "Ns", "float$", "Float", "double", 1), testData)
+    Compiler(Col(2, 0, "Ns", "Ns", "float$", "Float", "double", 1, true), testData)
   }
 
 
@@ -332,11 +330,11 @@ object Card1 extends TestScalaFiddle {
       (Some("1"), s"$iae Please use Double instead of Float in expression `Some(4.2f)` to get correct floating point precision.", "Some(4.2f)"),
 
       // whitelist types
-      (Some("1.1"), "Some(1)", "Some(1)"),
-      (Some("1.1"), "Some(1)", "Some(1L)"),
-      (Some("1.1"), "Some(1)", "Some(BigInt(1))"),
-      (Some("1.1"), "Some(1.2)", "Some(1.2)"),
-      (Some("1.1"), "Some(1.2)", "Some(BigDecimal(1.2))"),
+      (Some("1.1"), "Some(2)", "Some(2)"),
+      (Some("1.1"), "Some(2)", "Some(2L)"),
+      (Some("1.1"), "Some(2)", "Some(BigInt(2))"),
+      (Some("1.1"), "Some(2.1)", "Some(2.1)"),
+      (Some("1.1"), "Some(2.1)", "Some(BigDecimal(2.1))"),
 
       (Some("1.1"), "Some(2.1)", "Some(double + 1)"),
       (Some("1.1"), "Some(2.1)", "Some(double + 1L)"),
@@ -344,7 +342,7 @@ object Card1 extends TestScalaFiddle {
       (Some("1.1"), "Some(2.3)", "Some(double + 1.2)"),
       (Some("1.1"), "Some(2.3)", "Some(double + BigDecimal(1.2))"),
 
-      //      // Can't pattern match BigInt (`double` converted) with Double value directly
+      //      // Can't pattern match BigDecimal (`double` converted) with Float/Double value directly
       //      (Some("1.1"), "Some(2.3)",
       //        """double match {
       //          |  case 1.1 => Some(2.3)
@@ -358,7 +356,7 @@ object Card1 extends TestScalaFiddle {
           |  case _             => None
           |}""".stripMargin),
 
-      //      // Can't pattern match BigInt (`double` converted) with Double value directly
+      //      // Can't pattern match BigDecimal (`double` converted) with Float/Double value directly
       //      (Some("1.1"), "Some(2.3)",
       //        """double$ match {
       //          |  case Some(1.1) => Some(2.3)
@@ -384,11 +382,11 @@ object Card1 extends TestScalaFiddle {
           |}""".stripMargin),
     )
     Compiler(Col(2, 0, "Ns", "Ns", "double", "Double", "double", 1), testData)
-    Compiler(Col(2, 0, "Ns", "Ns", "double$", "Double", "double", 1), testData)
+    Compiler(Col(2, 0, "Ns", "Ns", "double$", "Double", "double", 1, true), testData)
   }
 
 
-  def bigDecimal(): Unit = {
+  def bigDec(): Unit = {
     val testData = List(
       (None, "None", ""),
       (None, "None", "None"),
@@ -397,11 +395,11 @@ object Card1 extends TestScalaFiddle {
       (Some("1"), s"$iae Please use Double instead of Float in expression `Some(4.2f)` to get correct floating point precision.", "Some(4.2f)"),
 
       // whitelist types
-      (Some("1.1"), "Some(1)", "Some(1)"),
-      (Some("1.1"), "Some(1)", "Some(1L)"),
-      (Some("1.1"), "Some(1)", "Some(BigInt(1))"),
-      (Some("1.1"), "Some(1.2)", "Some(1.2)"),
-      (Some("1.1"), "Some(1.2)", "Some(BigDecimal(1.2))"),
+      (Some("1.1"), "Some(2)", "Some(2)"),
+      (Some("1.1"), "Some(2)", "Some(2L)"),
+      (Some("1.1"), "Some(2)", "Some(BigInt(2))"),
+      (Some("1.1"), "Some(2.1)", "Some(2.1)"),
+      (Some("1.1"), "Some(2.1)", "Some(BigDecimal(2.1))"),
 
       (Some("1.1"), "Some(2.1)", "Some(bigDec + 1)"),
       (Some("1.1"), "Some(2.1)", "Some(bigDec + 1L)"),
@@ -409,7 +407,7 @@ object Card1 extends TestScalaFiddle {
       (Some("1.1"), "Some(2.3)", "Some(bigDec + 1.2)"),
       (Some("1.1"), "Some(2.3)", "Some(bigDec + BigDecimal(1.2))"),
 
-      //      // Can't pattern match BigInt (`bigDec` converted) with Double value directly
+      //      // Can't pattern match BigDecimal
       //      (Some("1.1"), "Some(2.3)",
       //        """bigDec match {
       //          |  case 1.1 => Some(2.3)
@@ -423,7 +421,7 @@ object Card1 extends TestScalaFiddle {
           |  case _             => None
           |}""".stripMargin),
 
-      //      // Can't pattern match BigInt (`bigDec` converted) with Double value directly
+      //      // Can't pattern match BigDecimal
       //      (Some("1.1"), "Some(2.3)",
       //        """bigDec$ match {
       //          |  case Some(1.1) => Some(2.3)
@@ -449,7 +447,7 @@ object Card1 extends TestScalaFiddle {
           |}""".stripMargin),
     )
     Compiler(Col(2, 0, "Ns", "Ns", "bigDec", "BigDecimal", "double", 1), testData)
-    Compiler(Col(2, 0, "Ns", "Ns", "bigDec$", "BigDecimal", "double", 1), testData)
+    Compiler(Col(2, 0, "Ns", "Ns", "bigDec$", "BigDecimal", "double", 1, true), testData)
   }
 
 
@@ -499,7 +497,7 @@ object Card1 extends TestScalaFiddle {
       (Some("a3"), "Some(aaa)", """Some(str.init * 3)"""),
     )
     Compiler(Col(2, 0, "Ns", "Ns", "str", "String", "string", 1), testData)
-    Compiler(Col(2, 0, "Ns", "Ns", "str$", "String", "string", 1), testData)
+    Compiler(Col(2, 0, "Ns", "Ns", "str$", "String", "string", 1, true), testData)
   }
 
 
@@ -507,52 +505,56 @@ object Card1 extends TestScalaFiddle {
     val testData = List(
       (None, "None", ""),
       (None, "None", "None"),
-      (Some(true), "Some(false)", "Some(false)"),
-      (Some(true), "Some(true)", "Some(bool)"),
-      (Some(true), "Some(false)", "Some(!bool)"),
-      (Some(true), "Some(false)", "Some(bool && 7 == 8)"),
-      (Some(true), "Some(true)", "Some(bool || 7 == 8)"),
+      (Some("true"), "Some(false)", "Some(false)"),
+      (Some("true"), "Some(true)", "Some(bool)"),
+      (Some("true"), "Some(false)", "Some(!bool)"),
+      (Some("true"), "Some(false)", "Some(bool && 7 == 8)"),
+      (Some("true"), "Some(true)", "Some(bool || 7 == 8)"),
     )
     Compiler(Col(2, 0, "Ns", "Ns", "bool", "Boolean", "string", 1), testData)
-    Compiler(Col(2, 0, "Ns", "Ns", "bool$", "Boolean", "string", 1), testData)
+    Compiler(Col(2, 0, "Ns", "Ns", "bool$", "Boolean", "string", 1, true), testData)
   }
 
 
   def date(): Unit = {
-    val someDate = Some(LocalDateTime.of(2001, 3, 5, 7, 9, 11))
-    val now      = LocalDateTime.now()
+    val someDate = Some(LocalDateTime.of(2001, 3, 5, 7, 9, 11).toString)
+    val nowDate  = LocalDateTime.now()
+    val now      = nowDate.toString
     def p(s: Int, i: Int = 2): String = i match {
       case 2 => "%02d".format(s)
       case 3 => "%03d".format(s)
       case 4 => "%04d".format(s)
     }
-    def y: Int = now.getYear
-    def m: String = p(now.getMonthValue)
-    def d: String = p(now.getDayOfMonth)
-    def hh: String = p(now.getHour)
-    def mm: String = p(now.getMinute)
+    def y: Int = nowDate.getYear
+    def m: String = p(nowDate.getMonthValue)
+    def d: String = p(nowDate.getDayOfMonth)
+    def hh: String = p(nowDate.getHour)
+    def mm: String = p(nowDate.getMinute)
 
     val testData = List(
       (None, "None", ""),
       (None, "None", "None"),
       (None, "None", "date$"),
-      (None, "Some(2001-03-05T00:00)", """Some("2001-03-05")"""),
 
-      (Some(LocalDateTime.of(2001, 3, 5, 7, 9, 11, 100000000)), "Some(2001-03-05T07:09:11.100)", "Some(date)"),
-      (Some(LocalDateTime.of(2001, 3, 5, 7, 9, 11, 10000000)), "Some(2001-03-05T07:09:11.010)", "Some(date)"),
-      (Some(LocalDateTime.of(2001, 3, 5, 7, 9, 11, 1000000)), "Some(2001-03-05T07:09:11.001)", "Some(date)"),
-      (Some(LocalDateTime.of(2001, 3, 5, 7, 9, 11, 0)), "Some(2001-03-05T07:09:11)", "Some(date)"),
-      (Some(LocalDateTime.of(2001, 3, 5, 7, 9, 11)), "Some(2001-03-05T07:09:11)", "Some(date)"),
-      (Some(LocalDateTime.of(2001, 3, 5, 7, 9, 11)), "Some(2001-03-05T07:09:11)", "Some(date)"),
-      (Some(LocalDateTime.of(2001, 3, 5, 7, 9, 1)), "Some(2001-03-05T07:09:01)", "Some(date)"),
-      (Some(LocalDateTime.of(2001, 3, 5, 7, 9, 0)), "Some(2001-03-05T07:09)", "Some(date)"),
-      (Some(LocalDateTime.of(2001, 3, 5, 7, 9)), "Some(2001-03-05T07:09)", "Some(date)"),
-      (Some(LocalDateTime.of(2001, 3, 5, 7, 9)), "Some(2001-03-05T07:09)", "Some(date)"),
-      (Some(LocalDateTime.of(2001, 3, 5, 7, 0)), "Some(2001-03-05T07:00)", "Some(date)"),
-      (Some(LocalDateTime.of(2001, 3, 5, 0, 0)), "Some(2001-03-05T00:00)", "Some(date)"),
+      (Some(LocalDateTime.of(2001, 3, 5, 7, 9, 11, 100000000).toString), "Some(2001-03-05T07:09:11.100)", "Some(date)"),
+      (Some(LocalDateTime.of(2001, 3, 5, 7, 9, 11, 10000000).toString), "Some(2001-03-05T07:09:11.010)", "Some(date)"),
+      (Some(LocalDateTime.of(2001, 3, 5, 7, 9, 11, 1000000).toString), "Some(2001-03-05T07:09:11.001)", "Some(date)"),
+      (Some(LocalDateTime.of(2001, 3, 5, 7, 9, 11, 0).toString), "Some(2001-03-05T07:09:11)", "Some(date)"),
+      (Some(LocalDateTime.of(2001, 3, 5, 7, 9, 11).toString), "Some(2001-03-05T07:09:11)", "Some(date)"),
+      (Some(LocalDateTime.of(2001, 3, 5, 7, 9, 11).toString), "Some(2001-03-05T07:09:11)", "Some(date)"),
+      (Some(LocalDateTime.of(2001, 3, 5, 7, 9, 1).toString), "Some(2001-03-05T07:09:01)", "Some(date)"),
+      (Some(LocalDateTime.of(2001, 3, 5, 7, 9, 0).toString), "Some(2001-03-05T07:09)", "Some(date)"),
+      (Some(LocalDateTime.of(2001, 3, 5, 7, 9).toString), "Some(2001-03-05T07:09)", "Some(date)"),
+      (Some(LocalDateTime.of(2001, 3, 5, 7, 9).toString), "Some(2001-03-05T07:09)", "Some(date)"),
+      (Some(LocalDateTime.of(2001, 3, 5, 7, 0).toString), "Some(2001-03-05T07:00)", "Some(date)"),
+      (Some(LocalDateTime.of(2001, 3, 5, 0, 0).toString), "Some(2001-03-05T00:00)", "Some(date)"),
 
+      // Construct LocalDateTime with String
       (None, "Some(2001-03-05T07:09:11.100)", """Some("2001-3-5 7:9:11.1")"""),
+      (None, "Some(2001-03-05T07:09:11.100)", """Some("2001-3-5 7:9:11.10")"""),
+      (None, "Some(2001-03-05T07:09:11.100)", """Some("2001-3-5 7:9:11.100")"""),
       (None, "Some(2001-03-05T07:09:11.010)", """Some("2001-3-5 7:9:11.01")"""),
+      (None, "Some(2001-03-05T07:09:11.010)", """Some("2001-3-5 7:9:11.010")"""),
       (None, "Some(2001-03-05T07:09:11.001)", """Some("2001-3-5 7:9:11.001")"""),
       (None, "Some(2001-03-05T07:09:11)", """Some("2001-03-05 07:09:11.000")"""),
       (None, "Some(2001-03-05T07:09:11)", """Some("2001-3-5 7:9:11.00")"""),
@@ -567,8 +569,39 @@ object Card1 extends TestScalaFiddle {
       (None, "Some(2001-03-05T07:00)", """Some("2001-3-5 7:0")"""),
       (None, "Some(2001-03-05T00:00)", """Some("2001-3-5 0:0")"""),
       (None, "Some(2001-03-05T00:00)", """Some("2001-3-5")"""),
+      (None, "Some(2001-03-01T00:00)", """Some("2001-3")"""),
+      (None, "Some(2001-01-01T00:00)", """Some("2001")"""),
 
-      (someDate, "Some(2001-03-05T07:09:11)", "Some(date)"),
+      (None, s"$iae Please provide a non-empty date string", """Some("")"""),
+      (None, s"$iae Non-valid date string: `2001.3.5`. " +
+        s"Expected form for a full date is `2001-03-05 07:09:11.123`", """Some("2001.3.5")"""),
+
+      // Construct LocalDateTime with `LocalDateTime.of(...)`
+      (None, "Some(2001-03-05T07:09:11.123)", "Some(LocalDateTime.of(2001, 3, 5, 7, 9, 11, 123 * 1000 * 1000))"),
+      (None, "Some(2001-03-05T07:09:11)", "Some(LocalDateTime.of(2001, 3, 5, 7, 9, 11))"),
+      (None, "Some(2001-03-05T07:09)", "Some(LocalDateTime.of(2001, 3, 5, 7, 9))"),
+      (None, "Some(2001-03-05T00:00)", "Some(LocalDateTime.of(2001, 3, 5, 0, 0))"),
+
+      // Convenience LocalDateTime constructor
+      (None, "Some(2001-03-05T07:09:11.123)", "Some(d(2001, 3, 5, 7, 9, 11, 123))"),
+      (None, "Some(2001-03-05T07:09:11.012)", "Some(d(2001, 3, 5, 7, 9, 11, 12))"),
+      (None, "Some(2001-03-05T07:09:11.001)", "Some(d(2001, 3, 5, 7, 9, 11, 1))"),
+      (None, "Some(2001-03-05T07:09:11)", "Some(d(2001, 3, 5, 7, 9, 11))"),
+      (None, "Some(2001-03-05T07:09)", "Some(d(2001, 3, 5, 7, 9))"),
+      (None, "Some(2001-03-05T07:00)", "Some(d(2001, 3, 5, 7))"),
+      (None, "Some(2001-03-05T00:00)", "Some(d(2001, 3, 5))"),
+      (None, "Some(2001-03-01T00:00)", "Some(d(2001, 3))"),
+      (None, "Some(2001-01-01T00:00)", "Some(d(2001))"),
+
+      // LocalDateTime's are stored in Datomic as Date's having only
+      // millisecond precision, so only ms precision is preserved:
+      (None, "Some(2001-03-05T07:09:11.123)", "Some(LocalDateTime.of(2001, 3, 5, 7, 9, 11, 123456789))"),
+      (None, "Some(2001-03-05T07:09:11.012)", "Some(LocalDateTime.of(2001, 3, 5, 7, 9, 11, 12345678))"),
+      (None, "Some(2001-03-05T07:09:11.001)", "Some(LocalDateTime.of(2001, 3, 5, 7, 9, 11, 1234567))"),
+      (None, "Some(2001-03-05T07:09:11)", "Some(LocalDateTime.of(2001, 3, 5, 7, 9, 11, 123456))"),
+
+      (None, s"$iae Milliseconds should be in range 0-999. Found: -1", "Some(d(2001, 3, 5, 7, 9, 11, -1))"),
+      (None, s"$iae Milliseconds should be in range 0-999. Found: 2000", "Some(d(2001, 3, 5, 7, 9, 11, 2000))"),
 
       // Adjust backwards in time
       (someDate, "Some(2000-03-05T07:09:11)", "Some(date.minusYears(1))"),
@@ -579,7 +612,7 @@ object Card1 extends TestScalaFiddle {
       (someDate, "Some(2001-03-05T07:08:11)", "Some(date.minusMinutes(1))"),
       (someDate, "Some(2001-03-05T07:09:10)", "Some(date.minusSeconds(1))"),
       (someDate, "Some(2001-03-05T07:09:10.900)", "Some(date.minusNanos(100 * 1000 * 1000))"),
-      (Some(LocalDateTime.of(2002, 1, 1, 0, 0)), "Some(2001-12-31T23:59:59)", "Some(date.minusSeconds(1))"),
+      (Some(LocalDateTime.of(2002, 1, 1, 0, 0).toString), "Some(2001-12-31T23:59:59)", "Some(date.minusSeconds(1))"),
 
       // Set time
       (someDate, "Some(2000-03-05T07:09:11)", "Some(date.withYear(2000))"),
@@ -599,38 +632,36 @@ object Card1 extends TestScalaFiddle {
       (someDate, "Some(2001-03-05T07:10:11)", "Some(date.plusMinutes(1))"),
       (someDate, "Some(2001-03-05T07:09:12)", "Some(date.plusSeconds(1))"),
       (someDate, "Some(2001-03-05T07:09:11.123)", "Some(date.plusNanos(123 * 1000 * 1000))"),
-      (Some(LocalDateTime.of(2001, 12, 31, 23, 59, 59)), "Some(2002-01-01T00:00)", "Some(date.plusSeconds(1))"),
+      (Some(LocalDateTime.of(2001, 12, 31, 23, 59, 59).toString), "Some(2002-01-01T00:00)", "Some(date.plusSeconds(1))"),
 
       // Now
       // Might fail if executed on each side of hour/minute change
       (Some(now), s"Some($y-$m-${d}T$hh:00)", "Some(LocalDateTime.now().withMinute(0).withSecond(0).withNano(0))"),
       (Some(now), s"Some($y-$m-${d}T$hh:$mm)", "Some(LocalDateTime.now().withSecond(0).withNano(0))"),
-
-      (Some(LocalDateTime.of(2001, 7, 1, 0, 0)), "Some(" + date2str(date1) + "T00:00)", "Some(date)"),
     )
 
     Compiler(Col(2, 0, "Ns", "Ns", "date", "Date", "string", 1), testData)
-    Compiler(Col(2, 0, "Ns", "Ns", "date$", "Date", "string", 1), testData)
+    Compiler(Col(2, 0, "Ns", "Ns", "date$", "Date", "string", 1, true), testData)
   }
 
 
   def uuid(): Unit = {
-    // Use stable uuid's to allow compiler to cache
-    val uuid1    = UUID.fromString("aba20f8e-8e79-475c-b8d1-df11f57b29ba")
-    val uuid2    = UUID.fromString("b0924388-9c1b-4ce4-92ac-7b8d2b01beec")
+    val uuid1    = "aba20f8e-8e79-475c-b8d1-df11f57b29ba"
+    val uuid2    = "b0924388-9c1b-4ce4-92ac-7b8d2b01beec"
     val testData = List(
       (None, "None", ""),
       (None, "None", "None"),
-      (Some(uuid1), "Some(" + uuid1.toString + ")", "Some(uuid)"),
-      (Some(uuid2), "Some(" + uuid2.toString + ")", s"""Some("$uuid2")"""),
+      (Some(uuid1), s"Some($uuid1)", "Some(uuid)"),
+      (Some(uuid2), s"Some($uuid2)", s"""Some("$uuid2")"""),
     )
     Compiler(Col(2, 0, "Ns", "Ns", "uuid", "UUID", "string", 1), testData)
-    Compiler(Col(2, 0, "Ns", "Ns", "uuid$", "UUID", "string", 1), testData)
+    Compiler(Col(2, 0, "Ns", "Ns", "uuid$", "UUID", "string", 1, true), testData)
   }
 
 
   def uri(): Unit = {
-
+    val uri1     = "uri1"
+    val uri2     = "uri2"
     val testData = List(
       (None, "None", ""),
       (None, "None", "None"),
@@ -638,6 +669,6 @@ object Card1 extends TestScalaFiddle {
       (Some(uri2), "Some(" + uri2.toString + ")", s"""Some("$uri2")"""),
     )
     Compiler(Col(2, 0, "Ns", "Ns", "uri", "URI", "string", 1), testData)
-    Compiler(Col(2, 0, "Ns", "Ns", "uri$", "URI", "string", 1), testData)
+    Compiler(Col(2, 0, "Ns", "Ns", "uri$", "URI", "string", 1, true), testData)
   }
 }

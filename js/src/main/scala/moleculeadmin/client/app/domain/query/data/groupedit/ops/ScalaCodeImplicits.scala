@@ -21,8 +21,8 @@ abstract class ScalaCodeImplicits(col: Col, rhs0: String) extends TypeMappings {
   }
 
   val transferType: String = {
-    val processed = Seq("Long", "datom", "ref", "Float", "Double", "BigInt", "BigDecimal")
-    if (processed.contains(attrType))
+    val convertedTypes = Seq("Long", "datom", "ref", "Float", "Double", "BigInt", "BigDecimal")
+    if (convertedTypes.contains(attrType))
       "String"
     else if (attrType == "Date")
       "LocalDateTime"
@@ -54,65 +54,27 @@ abstract class ScalaCodeImplicits(col: Col, rhs0: String) extends TypeMappings {
     case t               => t
   }
 
+  val noLong    = q + s"Long not allowed in $tpe expression `$rhs`" + q
   val noFloat   = q + s"Float not allowed in $tpe expression `$rhs`" + q
   val noDouble  = q + s"Double not allowed in $tpe expression `$rhs`" + q
   val noBigDec  = q + s"BigDecimal not allowed in $tpe expression `$rhs`" + q
   val useDouble = q + s"Please use Double instead of Float in expression `$rhs` to get correct floating point precision." + q
 
-  // floating point -> Int error
+  // preventing Float
+  val int2bigDec    = "implicit def int2bigDec(v: Int): BigDecimal = BigDecimal(v)"
+  val long2bigDec   = "implicit def long2bigDec(v: Long): BigDecimal = BigDecimal(v)"
+  val bigInt2bigDec = "implicit def bigInt2bigDec(v: BigInt): BigDecimal = BigDecimal(v)"
+  val double2bigDec = "implicit def double2bigDec(v: Double): BigDecimal = BigDecimal(v)"
 
-  val float2intErr  =
-    s"""implicit def float2int(v: Float): Int =
-       |    throw new IllegalArgumentException(
-       |      $noFloat
-       |    )""".stripMargin
-  val double2intErr =
-    s"""implicit def double2int(v: Double): Int =
-       |    throw new IllegalArgumentException(
-       |      $noDouble
-       |    )""".stripMargin
-  val bigDec2intErr =
-    s"""implicit def bigDec2int(v: BigDecimal): Int =
-       |    throw new IllegalArgumentException(
-       |      $noBigDec
-       |    )""".stripMargin
-
-  // floating point -> BigInt error
-
-  val float2bigIntErr  =
-    s"""implicit def float2bigInt(v: Float): BigInt =
-       |    throw new IllegalArgumentException(
-       |      $noFloat
-       |    )""".stripMargin
-  val double2bigIntErr =
-    s"""implicit def double2bigInt(v: Double): BigInt =
-       |    throw new IllegalArgumentException(
-       |      $noDouble
-       |    )""".stripMargin
-  val bigDec2bigIntErr =
-    s"""implicit def bigDec2bigInt(v: BigDecimal): BigInt =
-       |    throw new IllegalArgumentException(
-       |      $noBigDec
-       |    )""".stripMargin
-
-  // Float -> BigDecimal error
+  val int2bigInt    = "implicit def int2bigInt(v: Int): BigInt = BigInt(v)"
+  val long2bigInt   = "implicit def long2bigInt(v: Long): BigInt = BigInt(v)"
+  val double2bigInt = "implicit def double2bigInt(v: Double): BigInt = BigInt(v.toString)"
 
   val float2bigDecErr =
     s"""implicit def float2bigDec(v: Float): BigDecimal =
        |    throw new IllegalArgumentException(
        |      $useDouble
        |    )""".stripMargin
-
-  val long2int   = "implicit def long2int(v: Long): Int = v.toInt"
-  val bigInt2int = "implicit def bigInt2int(v: BigInt): Int = v.toString.toInt"
-
-  val int2bigInt  = "implicit def int2bigInt(v: Int): BigInt = BigInt(v)"
-  val long2bigInt = "implicit def long2bigInt(v: Long): BigInt = BigInt(v)"
-
-  val int2bigDec    = "implicit def int2bigDec(v: Int): BigDecimal = BigDecimal(v)"
-  val long2bigDec   = "implicit def long2bigDec(v: Long): BigDecimal = BigDecimal(v)"
-  val bigInt2bigDec = "implicit def bigInt2bigDec(v: BigInt): BigDecimal = BigDecimal(v)"
-  val double2bigDec = "implicit def double2bigDec(v: Double): BigDecimal = BigDecimal(v)"
 
   val str2uuid = "implicit def str2uuid(s: String): UUID = UUID.fromString(s)"
   val str2uri  = "implicit def str2uri(s: String): URI = new URI(s)"
@@ -123,241 +85,236 @@ abstract class ScalaCodeImplicits(col: Col, rhs0: String) extends TypeMappings {
        |    val sec  = $q(\\d{1,4})-(1[0-2]|0?[0-9])-(3[01]|[12][0-9]|0?[0-9])[T ]+(2[0-3]|1[0-9]|0?[0-9]):([1-5][0-9]|0?[0-9]):([1-5][0-9]|0?[0-9])$q.r
        |    val min  = $q(\\d{1,4})-(1[0-2]|0?[0-9])-(3[01]|[12][0-9]|0?[0-9])[T ]+(2[0-3]|1[0-9]|0?[0-9]):([1-5][0-9]|0?[0-9])$q.r
        |    val ymd  = $q(\\d{1,4})-(1[0-2]|0?[0-9])-(3[01]|[12][0-9]|0?[0-9])$q.r
+       |    val ym   = $q(\\d{1,4})-(1[0-2]|0?[0-9])$q.r
+       |    val year = $q(\\d{1,4})$q.r
        |    s.trim match {
-       |      case msec(y, m, d, hh, mm, ss, ms) => LocalDateTime.of(y.toInt, m.toInt, d.toInt, hh.toInt, mm.toInt, ss.toInt, ms.padTo(3, '0').toInt * 1000 * 1000)
+       |      case msec(y, m, d, hh, mm, ss, ms) => LocalDateTime.of(y.toInt, m.toInt, d.toInt, hh.toInt, mm.toInt, ss.toInt, ms.padTo(3, '0').toInt * 1000000)
        |      case sec(y, m, d, hh, mm, ss)      => LocalDateTime.of(y.toInt, m.toInt, d.toInt, hh.toInt, mm.toInt, ss.toInt, 0)
        |      case min(y, m, d, hh, mm)          => LocalDateTime.of(y.toInt, m.toInt, d.toInt, hh.toInt, mm.toInt, 0, 0)
        |      case ymd(y, m, d)                  => LocalDateTime.of(y.toInt, m.toInt, d.toInt, 0, 0, 0, 0)
-       |      case ""                            => throw new IllegalArgumentException(s"Please provide a non-empty date string")
-       |      case other                         => throw new IllegalArgumentException(s"Non-valid date string: `$$other`")
+       |      case ym(y, m)                      => LocalDateTime.of(y.toInt, m.toInt, 1, 0, 0, 0, 0)
+       |      case year(y)                       => LocalDateTime.of(y.toInt, 1, 1, 0, 0, 0, 0)
+       |      case ""                            =>
+       |        throw new IllegalArgumentException(s"Please provide a non-empty date string")
+       |      case other                         =>
+       |        throw new IllegalArgumentException(s"Non-valid date string: `$$other`. " +
+       |          "Expected form for a full date is `2001-03-05 07:09:11.123`")
        |    }
        |  }
-       |  // Ensure LocalDateTime objects have access to methods (why aren't they available without cloning?)
-       |  def cloneDate(d: LocalDateTime) = LocalDateTime.of(d.getYear, d.getMonth, d.getDayOfMonth, d.getHour, d.getMinute, d.getSecond, d.getNano)
-       |""".stripMargin
-
-  val intList2bigIntList = "implicit def intList2bigIntList(vs: List[Int]): List[BigInt] = vs.map(BigInt(_))"
-  val bigIntList2intList = "implicit def bigIntList2intList(vs: List[BigInt]): List[Int] = vs.map(_.toString.toInt)"
+       |  // Convenience LocalDateTime constructor
+       |  def d(
+       |    y: Int,
+       |    m: Int = 1,
+       |    d: Int = 1,
+       |    hh: Int = 0,
+       |    mm: Int = 0,
+       |    ss: Int = 0,
+       |    ms: Int = 0
+       |  ) = {
+       |    if (ms > 999 || ms < 0)
+       |      throw new IllegalArgumentException(s"Milliseconds should be in range 0-999. Found: $$ms")
+       |    else
+       |      LocalDateTime.of(y, m, d, hh, mm, ss, ms * 1000 * 1000)
+       |  }""".stripMargin
 
 
   // Card 2 ====================================================
 
-  val seq2array =
-    s"""implicit def seq2array(vs: Seq[$processType]): js.Array[$processType] = {
-       |    val array = new js.Array[$processType]()
+  val iterAny2iterBigInt =
+    s"""implicit def iterAny2iterBigInt(l: Iterable[Any]): Iterable[BigInt] = l.map {
+       |    case n: Int    => BigInt(n)
+       |    case n: Long   => BigInt(n)
+       |    case n: BigInt => n
+       |    case v         =>
+       |      throw new IllegalArgumentException(
+       |        "Invalid BigInt value " + v + " of type " + v.getClass +
+       |        ". Value can be of type Int, Long or BigInt."
+       |      )
+       |  }""".stripMargin
+
+  val iterAnyLong2iterBigInt =
+    s"""implicit def iterAnyLong2iterBigInt(l: Iterable[Any]): Iterable[BigInt] = l.map {
+       |    case n: Int                         => BigInt(n)
+       |    case n: Long                        => BigInt(n)
+       |    case n: BigInt if n < Long.MinValue => throw new IllegalArgumentException("Number is too small to be a Long: " + n)
+       |    case n: BigInt if n > Long.MaxValue => throw new IllegalArgumentException("Number is too big to be a Long: " + n)
+       |    case n: BigInt                      => n
+       |    case v                              =>
+       |      throw new IllegalArgumentException(
+       |        "Invalid Long value " + v + " of type " + v.getClass +
+       |        ". Value can be of type Int, Long or BigInt."
+       |      )
+       |  }""".stripMargin
+
+  val iterAny2iterBigDec =
+    s"""implicit def iterAny2iterBigDec(l: Iterable[Any]): Iterable[BigDecimal] = l.map {
+       |    case n: Int        => BigDecimal(n)
+       |    case n: Long       => BigDecimal(n)
+       |    case n: BigInt     => BigDecimal(n)
+       |    case n: Double     => BigDecimal(n)
+       |    case n: BigDecimal => n
+       |    case v             =>
+       |      throw new IllegalArgumentException(
+       |        "Invalid BigDecimal value " + v + " of type " + v.getClass +
+       |        ". Value can be of type Int, Long, BigInt, Double or BigDecimal."
+       |      )
+       |  }""".stripMargin
+
+  val iterAnyLDT2iterLDT =
+    s"""implicit def iterAnyLDT2iterLDT(l: Iterable[Any]): Iterable[LocalDateTime] = l.map {
+       |    case s: String        => str2ldt(s)
+       |    case d: LocalDateTime => d
+       |    case v                =>
+       |      throw new IllegalArgumentException(
+       |        "Invalid LocalDateValue value " + v + " of type " + v.getClass +
+       |        ". Value can be of type String or LocalDateTime."
+       |      )
+       |  }""".stripMargin
+
+  val iterAny2iterUUID =
+    s"""implicit def iterAny2iterUUID(l: Iterable[Any]): Iterable[UUID] = l.map {
+       |    case s: String => UUID.fromString(s)
+       |    case u: UUID   => u
+       |    case v         =>
+       |      throw new IllegalArgumentException(
+       |        "Invalid UUID value " + v + " of type " + v.getClass +
+       |        ". Value can be of type String or UUID."
+       |      )
+       |  }""".stripMargin
+
+  val iterAny2iterURI =
+    s"""implicit def iterAny2iterURI(l: Iterable[Any]): Iterable[URI] = l.map {
+       |    case s: String => new URI(s)
+       |    case u: URI    => u
+       |    case v         =>
+       |      throw new IllegalArgumentException(
+       |        "Invalid URI value " + v + " of type " + v.getClass +
+       |        ". Value can be of type String or URI."
+       |      )
+       |  }""".stripMargin
+
+
+  // From processType to transferType
+
+  val iter2arr =
+    s"""implicit def iter2arr(vs: Iterable[$processType]): js.Array[String] = {
+       |    val array = new js.Array[String]()
+       |    vs.foreach(v => array.push(v.toString))
+       |    array
+       |  }""".stripMargin
+
+
+  val iterStr2arr =
+    s"""implicit def iterStr2arr(vs: Iterable[String]): js.Array[String] = {
+       |    val array = new js.Array[String]()
        |    vs.foreach(v => array.push(v))
        |    array
        |  }""".stripMargin
 
-  val seq2list =
-    s"""implicit def seq2list(vs: Seq[$processType]): List[$processType] = {
-       |    vs.toList
-       |  }""".stripMargin
-
-  val richArray =
-    s"""implicit class richArray(val a: js.Array[BigInt]) extends AnyVal {
-       |    def :+(v: BigInt) = { a.push(v); a }
-       |  }""".stripMargin
-
-  val seqStr2listBigInt =
-    s"""implicit def seqStr2listBigInt(vs: Seq[$processType]): List[$processType] = {
-       |    vs.toList
-       |  }""".stripMargin
-
-  val seqInt2arrayString =
-    s"""implicit def seqInt2arrayString(vs: Seq[Int]): js.Array[String] = {
+  val iterLDT2arr =
+    s"""implicit def iterLDT2arr(vs: Iterable[$processType]): js.Array[String] = {
        |    val array = new js.Array[String]()
-       |    vs.foreach(v => array.push(v.toString))
-       |    array
-       |  }""".stripMargin
-
-  val seqLong2arrayString =
-    s"""implicit def seqLong2arrayString(vs: Seq[Long]): js.Array[String] = {
-       |    val array = new js.Array[String]()
-       |    vs.foreach(v => array.push(v.toString))
-       |    array
-       |  }""".stripMargin
-
-  val seqBigInt2arrayString =
-    s"""implicit def seqBigInt2arrayString(vs: Seq[BigInt]): js.Array[String] = {
-       |    val array = new js.Array[String]()
-       |    vs.foreach(v => array.push(v.toString))
-       |    array
-       |  }""".stripMargin
-
-  val arrayBigInt2arrayString =
-    s"""implicit def arrayBigInt2arrayString(vs: js.Array[BigInt]): js.Array[String] = {
-       |    val array = new js.Array[String]()
-       |    vs.foreach(v => array.push(v.toString))
-       |    array
-       |  }""".stripMargin
-
-  val seqFloat2arrayString =
-    s"""implicit def seqFloat2arrayString(vs: Seq[Float]): js.Array[String] = {
-       |    val array = new js.Array[String]()
-       |    vs.foreach(v => array.push(v.toString))
-       |    array
-       |  }""".stripMargin
-
-  val seqDouble2arrayString =
-    s"""implicit def seqDouble2arrayString(vs: Seq[Double]): js.Array[String] = {
-       |    val array = new js.Array[String]()
-       |    vs.foreach(v => array.push(v.toString))
-       |    array
-       |  }""".stripMargin
-
-  val seqBigDec2arrayString =
-    s"""implicit def seqBigDecimal2arrayString(vs: Seq[BigDecimal]): js.Array[String] = {
-       |    val array = new js.Array[String]()
-       |    vs.foreach(v => array.push(v.toString))
-       |    array
-       |  }""".stripMargin
-
-  val arrayBigDec2arrayString =
-    s"""implicit def arrayBigDecimal2arrayString(vs: js.Array[BigDecimal]): js.Array[String] = {
-       |    val array = new js.Array[String]()
-       |    vs.foreach(v => array.push(v.toString))
-       |    array
-       |  }""".stripMargin
-
-  val seqStr2arrayString =
-    s"""implicit def seqStr2arrayString(vs: Seq[String]): js.Array[String] = {
-       |    val array = new js.Array[String]()
-       |    vs.foreach(v => array.push(v))
+       |    vs.foreach(v => array.push(v.withNano(v.getNano/1000000*1000000).toString))
        |    array
        |  }""".stripMargin
 
 
   // Card 3 ====================================================
 
-  val dictProcess2dictTransfer =
-    s"""implicit def dictProcess2dictTransfer(dictProcess: js.Dictionary[$processType]): js.Dictionary[$transferType] =  {
-       |    val dictTransfer = js.Dictionary.empty[$transferType]
-       |    dictProcess.foreach { case (k, v) => dictTransfer(k) = v }
-       |    dictTransfer
+  val mapAny2mapBigInt =
+    s"""implicit def mapAny2mapBigInt(l: Map[String, Any]): Map[String, BigInt] = l.map {
+       |    case (k, n: Int)    => k -> BigInt(n)
+       |    case (k, n: Long)   => k -> BigInt(n)
+       |    case (k, n: BigInt) => k -> n
+       |    case (k, v)         =>
+       |      throw new IllegalArgumentException(
+       |        "Invalid String/BigInt pair (" + k + " -> " + v + ") of types " + k.getClass + "/" + v.getClass +
+       |        ". Key should be a String and value of type Int, Long or BigInt."
+       |      )
        |  }""".stripMargin
 
-  val mapImplicits =
-    s"""implicit class richDict(val dict: js.Dictionary[$processType]) extends AnyVal {
-       |    def :+(pair: (String, $processType)) = { dict(pair._1) = pair._2; dict }
-       |  }
-       |  implicit def otherMap2dict(otherMap: Map[_, _]): js.Dictionary[$transferType] =  {
-       |    if (otherMap.isEmpty) {
-       |      js.Dictionary.empty[$transferType]
-       |    } else {
-       |      val (k, v) = otherMap.head
-       |      val err = if (!k.isInstanceOf[String] || !v.isInstanceOf[$processType])
-       |        "Map should be of type Map[Strings, $processType]. Found: " + otherMap
-       |      else
-       |        "Unexpected Map: " + otherMap
-       |      org.scalajs.dom.window.alert(err)
-       |      throw new RuntimeException(err)
-       |    }
+  val mapAnyLong2mapBigInt =
+    s"""implicit def mapAnyLong2mapBigInt(l: Map[String, Any]): Map[String, BigInt] = l.map {
+       |    case (k, n: Int)                         => k -> BigInt(n)
+       |    case (k, n: Long)                        => k -> BigInt(n)
+       |    case (k, n: BigInt) if n < Long.MinValue => throw new IllegalArgumentException("Number value is too small to be a Long: " + n)
+       |    case (k, n: BigInt) if n > Long.MaxValue => throw new IllegalArgumentException("Number value is too big to be a Long: " + n)
+       |    case (k, n: BigInt)                      => k -> n
+       |    case (k, v)                                =>
+       |      throw new IllegalArgumentException(
+       |        "Invalid String/Long pair (" + k + " -> " + v + ") of types " + k.getClass + "/" + v.getClass +
+       |        ". Key should be a String and value of type Int, Long or BigInt."
+       |      )
+       |  }""".stripMargin
+
+  val mapAny2mapBigDec =
+    s"""implicit def mapAny2mapBigDec(l: Map[String, Any]): Map[String, BigDecimal] = l.map {
+       |    case (k, n: Int)        => k -> BigDecimal(n)
+       |    case (k, n: Long)       => k -> BigDecimal(n)
+       |    case (k, n: BigInt)     => k -> BigDecimal(n)
+       |    case (k, n: Double)     => k -> BigDecimal(n)
+       |    case (k, n: BigDecimal) => k -> n
+       |    case (k, v)             =>
+       |      throw new IllegalArgumentException(
+       |        "Invalid String/BigDecimal pair (" + k + " -> " + v + ") of types " + k.getClass + "/" + v.getClass +
+       |        ". Key should be a String and value of type Int, Long, BigInt, Double or BigDecimal."
+       |      )
+       |  }""".stripMargin
+
+  val mapAnyLDT2mapLDT =
+    s"""implicit def mapAnyLDT2mapLDT(l: Map[String, Any]): Map[String, LocalDateTime] = l.map {
+       |    case (k, s: String)        => k -> str2ldt(s)
+       |    case (k, d: LocalDateTime) => k -> d
+       |    case (k, v)                =>
+       |      throw new IllegalArgumentException(
+       |        "Invalid String/LocalDateValue pair (" + k + " -> " + v + ") of types " + k.getClass + "/" + v.getClass +
+       |        ". Key should be a String and value of type String or LocalDateTime."
+       |      )
+       |  }""".stripMargin
+
+  val mapAny2mapUUID =
+    s"""implicit def mapAny2mapUUID(l: Map[String, Any]): Map[String, UUID] = l.map {
+       |    case (k, s: String) => k -> UUID.fromString(s)
+       |    case (k, u: UUID)   => k -> u
+       |    case (k, v)         =>
+       |      throw new IllegalArgumentException(
+       |        "Invalid String/UUID pair (" + k + " -> " + v + ") of types " + k.getClass + "/" + v.getClass +
+       |        ". Key should be a String and value of type String or UUID."
+       |      )
+       |  }""".stripMargin
+
+  val mapAny2mapURI =
+    s"""implicit def mapAny2mapURI(l: Map[String, Any]): Map[String, URI] = l.map {
+       |    case (k, s: String) => k -> new URI(s)
+       |    case (k, u: URI)    => k -> u
+       |    case (k, v)         =>
+       |      throw new IllegalArgumentException(
+       |        "Invalid String/URI pair (" + k + " -> " + v + ") of types " + k.getClass + "/" + v.getClass +
+       |        ". Key should be a String and value of type String or URI."
+       |      )
        |  }""".stripMargin
 
 
-  val mapInt2dictString =
-    s"""implicit def mapInt2dictString(map: Map[String, Int]): js.Dictionary[String] = {
-       |    val dict = js.Dictionary.empty[String]
-       |    map.foreach { case (k, v) => dict(k) = v.toString }
-       |    dict
-       |  }""".stripMargin
-
-  val mapLong2dictString =
-    s"""implicit def mapLong2dictString(map: Map[String, Long]): js.Dictionary[String] = {
-       |    val dict = js.Dictionary.empty[String]
-       |    map.foreach { case (k, v) => dict(k) = v.toString }
-       |    dict
-       |  }""".stripMargin
-
-  val mapBigInt2dict =
-    s"""implicit def mapBigInt2dict(map: Map[String, BigInt]): js.Dictionary[String] = {
-       |    val dict = js.Dictionary.empty[String]
-       |    map.foreach { case (k, v) => dict(k) = v.toString }
-       |    dict
-       |  }""".stripMargin
-
-  val wrapBigInt2dict =
-    s"""implicit def wrapBigInt2dict(pairs: js.WrappedDictionary[BigInt]): js.Dictionary[String] =  {
-       |    val dict = js.Dictionary.empty[String]
-       |    pairs.foreach { case (k, v) => dict(k) = v.toString }
-       |    dict
-       |  }""".stripMargin
-
-  val dictProcessBigInt2dictTransfer =
-    s"""implicit def dictProcessBigInt2dictTransfer(dictProcess: js.Dictionary[BigInt]): js.Dictionary[String] = {
-       |    val dictTransfer = js.Dictionary.empty[String]
-       |    dictProcess.foreach { case (k, v) => dictTransfer(k) = v.toString }
-       |    dictTransfer
-       |  }""".stripMargin
-
-  val mapFloat2dict =
-    s"""implicit def mapFloat2dict(map: Map[String, Float]): js.Dictionary[String] = {
-       |    val dict = js.Dictionary.empty[String]
-       |    map.foreach { case (k, v) => dict(k) = v.toString }
-       |    dict
-       |  }""".stripMargin
-
-  val mapDouble2dict =
-    s"""implicit def mapDouble2dict(map: Map[String, Double]): js.Dictionary[String] = {
-       |    val dict = js.Dictionary.empty[String]
-       |    map.foreach { case (k, v) => dict(k) = v.toString }
-       |    dict
-       |  }""".stripMargin
-
-  val mapBigDec2dict =
-    s"""implicit def mapBigDecimal2dict(map: Map[String, BigDecimal]): js.Dictionary[String] = {
-       |    val dict = js.Dictionary.empty[String]
-       |    map.foreach { case (k, v) => dict(k) = v.toString }
-       |    dict
-       |  }""".stripMargin
-
-  val wrapBigDec2dict =
-    s"""implicit def wrapBigDec2dict(wrap: js.WrappedDictionary[BigDecimal]): js.Dictionary[String] =  {
-       |    val dict = js.Dictionary.empty[String]
-       |    wrap.foreach { case (k, v) => dict(k) = v.toString }
-       |    dict
-       |  }""".stripMargin
-
-  val dictProcessBigDec2dictTransfer =
-    s"""implicit def dictProcessBigDec2dictTransfer(dictProcess: js.Dictionary[BigDecimal]): js.Dictionary[String] = {
-       |    val dictTransfer = js.Dictionary.empty[String]
-       |    dictProcess.foreach { case (k, v) => dictTransfer(k) = v.toString }
-       |    dictTransfer
-       |  }""".stripMargin
-
-  val mapDate2dict =
-    s"""implicit def mapDate2dict(map: Map[String, Date]): js.Dictionary[js.Date] =  {
-       |    val dict = js.Dictionary.empty[js.Date]
-       |    map.foreach { case (k, v) => dict(k) = (new js.Date(v.getTime().toDouble)) }
-       |    dict
-       |  }""".stripMargin
-
-  val wrapDate2dict =
-    s"""implicit def wrapDate2dict(wrap: js.WrappedDictionary[Date]): js.Dictionary[js.Date] =  {
-       |    val dict = js.Dictionary.empty[js.Date]
-       |    wrap.foreach { case (k, v) => dict(k) = (new js.Date(v.getTime().toDouble)) }
-       |    dict
-       |  }""".stripMargin
-
-  val dictProcessDate2dictTransfer =
-    s"""implicit def dictProcessDate2dictTransfer(dictProcess: js.Dictionary[Date]): js.Dictionary[js.Date] =  {
-       |    val dictTransfer = js.Dictionary.empty[js.Date]
-       |    dictProcess.foreach { case (k, v) => dictTransfer(k) = (new js.Date(v.getTime().toDouble)) }
-       |    dictTransfer
-       |  }""".stripMargin
+  // From processType to transferType
 
   val map2dict =
-    s"""implicit def map2dict(map: Map[String, $processType]): js.Dictionary[$transferType] =  {
-       |    val dict = js.Dictionary.empty[$transferType]
-       |    map.foreach { case (k, v) => dict(k) = v }
+    s"""implicit def map2dict(m: Map[String, $processType]): js.Dictionary[String] =  {
+       |    val dict = js.Dictionary.empty[String]
+       |    m.foreach { case (k, v) => dict(k) = v.toString }
        |    dict
        |  }""".stripMargin
 
-  val wrap2dict =
-    s"""implicit def wrap2dict(wrap: js.WrappedDictionary[$processType]): js.Dictionary[$transferType] =  {
-       |    val dict = js.Dictionary.empty[$transferType]
-       |    wrap.foreach { case (k, v) => dict(k) = v }
+  val mapStr2dict =
+    s"""implicit def map2dict(mapOfString: Map[String, $processType]): js.Dictionary[String] =  {
+       |    val dict = js.Dictionary.empty[String]
+       |    mapOfString.foreach { case (k, v) => dict(k) = v }
+       |    dict
+       |  }""".stripMargin
+
+  val mapLDT2dict =
+    s"""implicit def mapDate2dict(map: Map[String, LocalDateTime]): js.Dictionary[String] =  {
+       |    val dict = js.Dictionary.empty[String]
+       |    map.foreach { case (k, v) => dict(k) = v.withNano(v.getNano/1000000*1000000).toString }
        |    dict
        |  }""".stripMargin
 }

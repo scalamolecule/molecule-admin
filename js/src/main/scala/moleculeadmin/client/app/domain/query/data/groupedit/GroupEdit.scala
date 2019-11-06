@@ -1,11 +1,10 @@
 package moleculeadmin.client.app.domain.query.data.groupedit
-import java.io
 import java.net.URI
 import java.util.{Date, UUID}
 import moleculeadmin.client.app.domain.query.KeyEvents
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.domain.query.data.Indexes
-import moleculeadmin.client.app.domain.query.data.groupedit.ops.{GroupEditCodeException, _}
+import moleculeadmin.client.app.domain.query.data.groupedit.ops._
 import moleculeadmin.client.app.element.query.datatable.BodyElements
 import moleculeadmin.client.rxstuff.RxBindings
 import moleculeadmin.client.scalafiddle.ScalaFiddle
@@ -14,12 +13,9 @@ import moleculeadmin.shared.ops.query.ColOps
 import org.scalajs.dom.{Node, NodeList, document, window}
 import rx.Ctx
 import scalatags.JsDom.all._
-import scala.collection.immutable
 import scala.collection.immutable.Map
-import scala.collection.mutable.ListBuffer
 import scala.scalajs.js
 import scala.scalajs.js.UndefOr
-import scala.util.matching
 
 
 /*
@@ -56,7 +52,7 @@ case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
 
   val tableRows: NodeList = document.getElementById("tableBody").childNodes
 
-  val toTransferValueLambdas: Seq[Int => Any] = ToTransferValueLambdas(qr).get
+  val colType2StringLambdas: Seq[Int => Any] = ColType2TransferTypeLambdas(qr).get
 
   val updateCells: UpdateCells = UpdateCells(colIndex, attrType, card, tableRows)
 
@@ -136,7 +132,7 @@ case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
       }
     }
 
-    CalculateGroupEdit(colIndexes, toTransferValueLambdas, scalaFiddle, lastRow, resolve)
+    CalculateGroupEdit(colIndexes, colType2StringLambdas, scalaFiddle, lastRow, resolve)
 
     // Group edit completed - stop spinner
     processing() = ""
@@ -145,15 +141,13 @@ case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
   // Card one ------------------------------------------
 
   def string(): Unit = {
-    val cellBaseClass                             = if (attrType == "BigInt" || attrType == "BigDecimal")
+    val cellBaseClass = if (attrType == "BigInt" || attrType == "BigDecimal")
       "num" else "str"
-    val toColType     : UndefOr[String] => String = attrType match {
-      case "Date" => (s: js.UndefOr[String]) =>
-        date2str(new Date(s.toOption.get.toLong))
 
-      case _ => (s: js.UndefOr[String]) => s.toOption.get
-    }
-    val colValueToNode: String => Node            = attrType match {
+    val toColType: UndefOr[String] => String =
+      (s: js.UndefOr[String]) => s.toOption.get
+
+    val colValueToNode: String => Node = attrType match {
       case "String" => (s: String) => _str2frags(s).render
       case _        => (s: String) => s.render
     }
@@ -190,22 +184,17 @@ case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
       updateCells.cardMany(cellBaseClass, colValueToItems)
     )
     attrType match {
-      case "String"  =>
-        transform(
-          if (enums.isEmpty) "items" else "str",
-          (vs: js.Array[String]) => vs.toList.distinct
-        )
+      case "String"  => transform(if (enums.isEmpty) "items" else "str",
+        (vs: js.Array[String]) => vs.toList.distinct)
       case "Boolean" => transform("str", (vs: js.Array[Boolean]) =>
         vs.toList.distinct.map(_.toString))
-
-      case "Date" => transform("str", (vs: js.Array[js.Date]) =>
+      case "Date"    => transform("str", (vs: js.Array[js.Date]) =>
         vs.toList.distinct.map(jsDate => date2str(new Date(jsDate.getTime.toLong))))
-
-      case "UUID" => transform("str", (vs: js.Array[UUID]) =>
+      case "UUID"    => transform("str", (vs: js.Array[UUID]) =>
         vs.toList.distinct.map(_.toString))
-      case "URI"  => transform("str", (vs: js.Array[URI]) =>
+      case "URI"     => transform("str", (vs: js.Array[URI]) =>
         vs.toList.distinct.map(_.toString))
-      case _      => transform("num", (vs: js.Array[String]) =>
+      case _         => transform("num", (vs: js.Array[String]) =>
         vs.toList.distinct)
     }
   }

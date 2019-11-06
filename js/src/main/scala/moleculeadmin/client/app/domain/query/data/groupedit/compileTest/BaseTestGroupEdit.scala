@@ -1,10 +1,9 @@
 package moleculeadmin.client.app.domain.query.data.groupedit.compileTest
 import moleculeadmin.client.app.domain.query.QueryState.columns
-import moleculeadmin.client.app.domain.query.data.groupedit.compileTest.Card1.eCol
 import moleculeadmin.shared.ast.query.Col
 
 
-class BaseTestGroupEdit(col: Col) {
+class BaseTestGroupEdit(col: Col) extends TestScalaFiddle {
 
   val Col(_, _, _, _, attr, attrType, _, _, _, _, _, _, _, _) = col
 
@@ -29,16 +28,15 @@ class BaseTestGroupEdit(col: Col) {
     val attrStr    = attr + " " * (15 - attr.length)
     val errMsg     = error.replaceAllLiterally("\n", "\n       ")
     val rhsStr     = rhs.replaceAllLiterally("\n", "\n                 ")
-    val errCompare = error.split('\n').head.takeWhile(_ != '`')
 
-    //    println("----------------")
-    //    println(newValue)
-    //    println(error)
-    //    println("----------------")
-    //    println(expected)
-    //    println(errCompare)
-    //    println("----------------")
-    //    println(rhs)
+//        println("----------------")
+//        println(newValue)
+//        println(error)
+//        println("----------------")
+//        println(expected)
+//        println(errCompare)
+//        println("----------------")
+//        println(rhs)
 
     if (newValue == expected) {
       println(
@@ -46,7 +44,7 @@ class BaseTestGroupEdit(col: Col) {
            |rhs            : $rhsStr
            |Expected result: $newValue$errMsg
            |""".stripMargin)
-    } else if (error.nonEmpty && expected.startsWith(errCompare)) {
+    } else if (error.nonEmpty && error == expected) {
       println(
         s"""$attrStr: $input
            |rhs            : $rhsStr
