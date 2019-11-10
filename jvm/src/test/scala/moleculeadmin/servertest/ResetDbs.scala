@@ -29,24 +29,19 @@ object ResetDbs extends TestSuite with ExampleData with Settings {
   val base     = "datomic:free://localhost:4334"
 
   val tests = Tests {
-    test("Reset meta data") {
-      //      resetDbs()
-      resetDbs(Seq("CoreTest"))
-      populateCoreTest(Conn("datomic:free://localhost:4334/CoreTest"))
-    }
-
-    //    test("Reset and poplulate databases") {
+    //    test("Reset all") {
     //      resetDbs()
-    //
+    //    }
+    //    test("Reset all and poplulate") {
+    //      resetDbs()
     //      populateCoreTest(Conn("datomic:free://localhost:4334/CoreTest"))
     //      populatePartition(Conn("datomic:free://localhost:4334/Partition"))
     //      populateTree(Conn("datomic:free://localhost:4334/Tree"))
     //    }
-    //
-    //    test("Reset CoreTest") {
-    //      resetDbs(Seq("CoreTest"))
-    //      populateCoreTest(Conn("datomic:free://localhost:4334/CoreTest"))
-    //    }
+    test("Reset CoreTest") {
+      resetDbs(Seq("CoreTest"))
+      populateCoreTest(Conn("datomic:free://localhost:4334/CoreTest"))
+    }
   }
 
   def resetDbs(dbs0: Seq[String] = Nil): Unit = {
@@ -61,7 +56,7 @@ object ResetDbs extends TestSuite with ExampleData with Settings {
     }
 
     val dbs = if (dbs0.isEmpty) List(
-//      "Clazzig",
+      //      "Clazzig",
       "CoreTest",
       "Partition",
       "Partition1",
@@ -70,12 +65,11 @@ object ResetDbs extends TestSuite with ExampleData with Settings {
     ) else dbs0
 
 
-
     dbs.foreach {
-//      case "Clazzig" =>
-//        if (debug) println("- Clazzig")
-//        val defFilePath = home / 'clazzig / 'clazzig / 'clazzig / 'server / 'app / 'db / 'schema / "ClazzigDefinition.scala"
-//        DefFile("Clazzig", Some(defFilePath.toString)).saveToMetaDb
+      //      case "Clazzig" =>
+      //        if (debug) println("- Clazzig")
+      //        val defFilePath = home / 'clazzig / 'clazzig / 'clazzig / 'server / 'app / 'db / 'schema / "ClazzigDefinition.scala"
+      //        DefFile("Clazzig", Some(defFilePath.toString)).saveToMetaDb
 
       case "CoreTest" =>
         if (debug) println("- CoreTest")
@@ -174,7 +168,7 @@ object ResetDbs extends TestSuite with ExampleData with Settings {
     Ns.int(46).refs1(r2).save
     Ns.int(48).refs1(r3).save
 
-    Ns.int.Parent.int insert List((1,11), (2, 22))
+    Ns.int.Parent.int insert List((1, 11), (2, 22))
 
     Ns.int(42).dates(date1).save
 

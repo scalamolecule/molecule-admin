@@ -78,7 +78,7 @@ case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
     var j                        = 0
     var tableRowIndex            = 0
 
-    println(scalaCode)
+//    println(scalaCode)
 
     val indexBridge: Int => Int = {
       if (filterIndex.nonEmpty)

@@ -17,24 +17,25 @@ import scala.util.{Failure, Success, Try}
 /**
  * @tparam T String / Double
  **/
-case class UpdateCardOne[T](db: String,
-                            cols: Seq[Col],
-                            qr: QueryResult,
-                            origArray: Array[Option[T]],
-                            valueArray: Array[Option[T]],
-                            baseClass: String,
-                            colType: String,
-                            rowIndex: Int,
-                            colIndex: Int,
-                            related: Int,
-                            nsAlias: String,
-                            nsFull: String,
-                            attrName: String,
-                            attrType: String,
-                            card: Int,
-                            enums: Seq[String],
-                            expr: String
-                           )(implicit ctx: Ctx.Owner)
+case class UpdateCardOne[T](
+  db: String,
+  cols: Seq[Col],
+  qr: QueryResult,
+  origArray: Array[Option[T]],
+  valueArray: Array[Option[T]],
+  baseClass: String,
+  colType: String,
+  rowIndex: Int,
+  colIndex: Int,
+  related: Int,
+  nsAlias: String,
+  nsFull: String,
+  attrName: String,
+  attrType: String,
+  card: Int,
+  enums: Seq[String],
+  expr: String
+)(implicit ctx: Ctx.Owner)
   extends UpdateClient[T](
     db, cols, qr, origArray, valueArray, baseClass,
     colType, rowIndex, colIndex, related,
@@ -43,12 +44,14 @@ case class UpdateCardOne[T](db: String,
 
   type keepBooPickleImport = PickleState
 
-  def update(cellId: String,
-             cell: TableCell,
-             row: TableRow,
-             eid: Long,
-             oldVOpt: Option[T],
-             isNum: Boolean): Unit = {
+  def update(
+    cellId: String,
+    cell: TableCell,
+    row: TableRow,
+    eid: Long,
+    oldVOpt: Option[T],
+    isNum: Boolean
+  ): Unit = {
 
     val oldStr: String = oldVOpt.fold("")(_.toString)
     val newStr: String = _html2str(cell.innerHTML)
@@ -155,7 +158,7 @@ case class UpdateCardOne[T](db: String,
             Seq((eid, Nil, Seq(value)))
           else
             Seq((eid, Seq(value), Nil))
-          queryWire().updateStr(db, attrFull, attrType, data, enumPrefix).call()
+          queryWire().updateStr(db, attrFull, attrType, enumPrefix, data).call()
         }
         save.map {
           case Right((t, tx, txInstant)) =>

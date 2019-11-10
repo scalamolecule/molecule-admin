@@ -17,24 +17,25 @@ import scala.util.Try
 /**
  * @tparam T Map[String, String] / Map[String, Double]
  **/
-case class UpdateCardMap[T](db: String,
-                            cols: Seq[Col],
-                            qr: QueryResult,
-                            origArray: Array[Option[T]],
-                            valueArray: Array[Option[T]],
-                            baseClass: String,
-                            colType: String,
-                            rowIndex: Int,
-                            colIndex: Int,
-                            related: Int,
-                            nsAlias: String,
-                            nsFull: String,
-                            attr: String,
-                            attrType: String,
-                            card: Int,
-                            enums: Seq[String],
-                            expr: String
-                           )(implicit ctx: Ctx.Owner)
+case class UpdateCardMap[T](
+  db: String,
+  cols: Seq[Col],
+  qr: QueryResult,
+  origArray: Array[Option[T]],
+  valueArray: Array[Option[T]],
+  baseClass: String,
+  colType: String,
+  rowIndex: Int,
+  colIndex: Int,
+  related: Int,
+  nsAlias: String,
+  nsFull: String,
+  attr: String,
+  attrType: String,
+  card: Int,
+  enums: Seq[String],
+  expr: String
+)(implicit ctx: Ctx.Owner)
   extends UpdateClient[T](
     db, cols, qr, origArray, valueArray, baseClass,
     colType, rowIndex, colIndex, related,
@@ -43,18 +44,21 @@ case class UpdateCardMap[T](db: String,
 
   type keepBooPickleImport = PickleState
 
-  def update(cellId: String,
-             cell: TableCell,
-             row: TableRow,
-             eid: Long,
-             oldVopt: Option[T],
-             isNum: Boolean): Unit = {
+  def update(
+    cellId: String,
+    cell: TableCell,
+    row: TableRow,
+    eid: Long,
+    oldVopt: Option[T],
+    isNum: Boolean
+  ): Unit = {
 
-    val oldPairs: List[(String, String)] = oldVopt.fold(List.empty[(String, String)]) {
-      case vs: Map[_, _] =>
-        vs.map { case (k, v) => (k.toString, v.toString) }
-          .toList.distinct.sortBy(_._1)
-    }
+    val oldPairs: List[(String, String)] =
+      oldVopt.fold(List.empty[(String, String)]) {
+        case vs: Map[_, _] =>
+          vs.map { case (k, v) => (k.toString, v.toString) }
+            .toList.distinct.sortBy(_._1)
+      }
 
     val raw = cell.innerHTML
 
@@ -90,8 +94,14 @@ case class UpdateCardMap[T](db: String,
     val newPairs: List[(String, String)] = vs.map { pair =>
       val k = pair.substring(0, pair.indexOf("->")).trim
       val v = pair.substring(pair.indexOf("->") + 2).trim
-      (k, v)
-    }.sortBy(_._1)
+      if (attrType == "Date")
+        (k, truncateDateStr(v))
+      else
+        (k, v)
+    }.toMap.toList // remove pairs with duplicate keys
+      .sortBy(_._1)
+
+    println(newPairs)
 
     val newVopt: Option[T] = {
       if (newPairs.isEmpty)
@@ -118,14 +128,14 @@ case class UpdateCardMap[T](db: String,
       cell.appendChild(ul(items).render)
     }
 
+    val retracts = oldPairs.diff(newPairs).map { case (k, v) => s"$k@$v" }
+    val asserts  = newPairs.diff(oldPairs).map { case (k, v) => s"$k@$v" }
+
     if (editCellId.nonEmpty
       && editCellId == cell.id
       && eid > 0
       && oldPairs != newPairs
     ) {
-      val retracts = oldPairs.diff(newPairs).map { case (k, v) => s"$k@$v" }
-      val asserts  = newPairs.diff(oldPairs).map { case (k, v) => s"$k@$v" }
-
       val newKeys       = newPairs.map(_._1)
       val duplicateKeys = newKeys.length - newKeys.distinct.length
 
@@ -166,16 +176,9 @@ case class UpdateCardMap[T](db: String,
         // Update value cell
         redrawCell()
 
-        val (retracts1, asserts1) = if (attrType == "Date") {
-          (
-            oldPairs.diff(newPairs).map { case (k, v) => k + "@" + expandDateStr(v) },
-            newPairs.diff(oldPairs).map { case (k, v) => k + "@" + expandDateStr(v) }
-          )
-        } else (retracts, asserts)
-
         // update db
-        val data = Seq((eid, retracts1, asserts1))
-        queryWire().updateStr(db, attrFull, "String", data).call().map {
+        val data = Seq((eid, retracts, asserts))
+        queryWire().updateStr(db, attrFull, "String", "", data).call().map {
           case Right((t, tx, txInstant)) =>
             updateClient(
               t, tx, txInstant,
