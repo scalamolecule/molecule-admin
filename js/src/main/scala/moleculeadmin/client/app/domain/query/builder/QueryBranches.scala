@@ -119,11 +119,7 @@ case class QueryBranches(selection: String)(implicit val ctx: Ctx.Owner)
   }
 
   def dynRender: Rx.Dynamic[JsDom.TypedTag[HTMLElement]] = tree.map {
-    case Tree(Nil, _, _, _, _, _) =>
-      //      println("Empty Tree...")
-      span()
-    case topTree                  =>
-      //      println("QueryBranches...")
-      renderBranches(Seq(topTree))
+    case Tree(Nil, _, _, _, _, _) => span()
+    case topTree                  => renderBranches(Seq(topTree))
   }
 }

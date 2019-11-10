@@ -2,7 +2,7 @@ package moleculeadmin.client.app.element
 
 import moleculeadmin.client.jsdom.Bootstrap
 import moleculeadmin.client.jsdom.Bootstrap
-import org.scalajs.dom.document
+import org.scalajs.dom.{document, window}
 import org.scalajs.dom.html.{Div, Element, LI, Span, TableCell, TableRow, UList}
 import scalatags.JsDom
 import scalatags.JsDom.TypedTag
@@ -102,6 +102,19 @@ trait AppElements extends Bootstrap {
 
     }
     list
+  }
+
+
+  val noEdit = onclick := { () =>
+    window.alert(
+      "Namespace must have an entity id `e` column first to allow editing."
+    )
+  }
+
+  val noAggrEdit = onclick := { () =>
+    window.alert(
+      "Entity id, aggregates and transaction values can't be edited."
+    )
   }
 
   def mapRow(k: String, vCell: TypedTag[TableCell]): TypedTag[TableRow] =

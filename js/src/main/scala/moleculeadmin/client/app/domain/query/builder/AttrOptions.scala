@@ -14,42 +14,46 @@ import scalatags.JsDom._
 import scalatags.JsDom.all.{div, label, span, _}
 
 
-case class AttrOptions(i: Int,
-                       refAttr: String,
-                       nsFull: String,
-                       attr: String,
-                       car: Int,
-                       attrType: String,
-                       attrValue: Value,
-                       enums: Option[Set[String]],
-                       options: Option[Set[String]],
-                       doc: Option[String],
-                       topValues: Seq[TopValue],
-                       selAttrs: Seq[GenericAtom],
-                       attrClass: String,
-                       path: Seq[(String, String)],
-                       manyAsterisk: String,
-                       additives: Seq[String]
-                      )(implicit val ctx: Ctx.Owner)
-  extends RxBindings with ModeOps with AttrOps with DropdownMenu with AttrOptElements {
+case class AttrOptions(
+  i: Int,
+  refAttr: String,
+  nsFull: String,
+  attr: String,
+  car: Int,
+  attrType: String,
+  attrValue: Value,
+  enums: Option[Set[String]],
+  options: Option[Set[String]],
+  doc: Option[String],
+  topValues: Seq[TopValue],
+  selAttrs: Seq[GenericAtom],
+  attrClass: String,
+  path: Seq[(String, String)],
+  manyAsterisk: String,
+  additives: Seq[String]
+)(implicit val ctx: Ctx.Owner)
+  extends RxBindings
+    with ModeOps with AttrOps with DropdownMenu with AttrOptElements {
 
   // Form validation flags
   var validInput = true
   var curFn      = ""
 
-  val fulltext: Boolean = if (attrType == "String") options.getOrElse(Set.empty[String]).contains("fulltext") else false
+  val fulltext: Boolean = if (attrType == "String")
+    options.getOrElse(Set.empty[String]).contains("fulltext") else false
   def id_(id: String): String = s"$refAttr-$nsFull-$attr-$id-$i"
 
 
   def keepSettingsOpen: Unit = {
-    val settings: HTMLElement = document.getElementById(id_("settings")).asInstanceOf[HTMLElement]
+    val settings: HTMLElement =
+      document.getElementById(id_("settings")).asInstanceOf[HTMLElement]
     settings.setAttribute("style", "display:block")
     settings.addEventListener("mouseleave", (_: MouseEvent) =>
       settings.setAttribute("style", "")
     )
   }
 
-  // Inputs -----------------------------------------------------------------------------
+  // Inputs --------------------------------------------------------------------
 
   val inputValue: Input = _inputValue(id_("value"),
     attrValue match {
@@ -60,7 +64,8 @@ case class AttrOptions(i: Int,
       case Lt(v)        => value := renderValue(v)
       case Ge(v)        => value := renderValue(v)
       case Le(v)        => value := renderValue(v)
-      case _            => placeholder := s"        $attr: " + (if (attrType == "datom") "Long" else attrType)
+      case _            => placeholder :=
+        s"        $attr: " + (if (attrType == "datom") "Long" else attrType)
     }
   ).render
 
@@ -73,7 +78,8 @@ case class AttrOptions(i: Int,
       case Lt(v)        => value := renderValue(v)
       case Ge(v)        => value := renderValue(v)
       case Le(v)        => value := renderValue(v)
-      case _            => placeholder := s"        $attr: " + (if (attrType == "datom") "Long" else attrType)
+      case _            => placeholder :=
+        s"        $attr: " + (if (attrType == "datom") "Long" else attrType)
     }
   ).render
 
@@ -83,8 +89,9 @@ case class AttrOptions(i: Int,
   val inputSample: Input = _inputNum("Sample", id_("sample"), "sample", attrValue)
 
   val operandSelector: Select = {
-    val ops0                                = Seq("=", "!=", "<", ">", "<=", ">=")
-    val ops                                 = if (fulltext) "Word =" +: ops0 else ops0
+    val ops0 = Seq("=", "!=", "<", ">", "<=", ">=")
+    val ops  = if (fulltext) "Word =" +: ops0 else ops0
+
     val selectedOperand                     = attrValue match {
       case Fulltext(_) => "Word ="
       case Eq(_)       => "="
@@ -110,10 +117,11 @@ case class AttrOptions(i: Int,
   // Actions -----------------------------------------------------------------------------
 
   def update(): Unit = {
-    def updateInput(fn: String, input: Input): Unit = upsertAttr(modelElements.now, path, attr, attrType, car, enums, fn, input.value) match {
-      case Left(err)           => window.alert(err); input.select()
-      case Right(updatedModel) => modelElements() = updatedModel
-    }
+    def updateInput(fn: String, input: Input): Unit =
+      upsertAttr(modelElements.now, path, attr, attrType, car, enums, fn, input.value) match {
+        case Left(err)           => window.alert(err); input.select()
+        case Right(updatedModel) => modelElements() = updatedModel
+      }
     val op = operandSelector.value
     curFn match {
       case "min"    => updateInput("min", inputMin)
@@ -140,10 +148,11 @@ case class AttrOptions(i: Int,
       document.getElementById(id_("mode-mandatory")).asInstanceOf[Input].checked = true
     }
     if (inputValue.value.nonEmpty) {
-      validInput = validate(operandSelector.value, attrType, inputValue.value) match {
-        case Some(err) => window.alert(err); false
-        case None      => inputValue.focus(); true
-      }
+      validInput =
+        validate(operandSelector.value, attrType, inputValue.value) match {
+          case Some(err) => window.alert(err); false
+          case None      => inputValue.focus(); true
+        }
     }
   }
 
@@ -168,7 +177,10 @@ case class AttrOptions(i: Int,
       val checked = attrClass.split('-').last == m
       _radio("mode", id_(s"mode-$m"), m, label, actions, checked)
     }
-    def closeInputs: Unit = document.getElementById(id_("inputs")).setAttribute("style", "display:none")
+    def closeInputs: Unit =
+      document
+        .getElementById(id_("inputs"))
+        .setAttribute("style", "display:none")
 
 
     if (attrType == "datom") {
@@ -257,15 +269,20 @@ case class AttrOptions(i: Int,
               case _        => ","
             }
             val newValues = attrValue match {
-              case Eq(vs) if vs.map(_.toString).contains(v.toString) => vs.filterNot(_.toString == v).mkString(sep)
-              case Eq(vs) if !topValueCheckBox0.render.checked       => (vs :+ v).mkString(sep)
-              case _                                                 => v
-            }
-            modelElements() = upsertAttr(modelElements.now, path, attr, attrType, car, enums, "=", newValues) match {
-              case Right(updatedModel) => updatedModel
-              case Left(err)           => throw new RuntimeException("auch!")
+              case Eq(vs) if vs.map(_.toString).contains(v.toString) =>
+                vs.filterNot(_.toString == v).mkString(sep)
 
+              case Eq(vs) if !topValueCheckBox0.render.checked =>
+                (vs :+ v).mkString(sep)
+
+              case _ => v
             }
+            modelElements() =
+              upsertAttr(modelElements.now, path, attr, attrType, car, enums, "=", newValues) match {
+                case Right(updatedModel) => updatedModel
+                case Left(err)           => throw new RuntimeException("auch!")
+
+              }
             keepSettingsOpen
           }
           // Add onchange action

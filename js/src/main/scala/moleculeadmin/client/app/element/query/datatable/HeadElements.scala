@@ -35,14 +35,15 @@ trait HeadElements extends ColOps with AppElements with RxBindings {
     if (sortPos == 0) () else span(sortPos)
   )
 
-  private def attrMenu(attribute: String,
-                       card: Int,
-                       expr: String,
-                       edit: MouseEvent => Unit,
-                       save: MouseEvent => Unit,
-                       cancel: MouseEvent => Unit,
-                       retract: MouseEvent => Unit,
-                      ): TypedTag[UList] = {
+  private def attrMenu(
+    attribute: String,
+    card: Int,
+    expr: String,
+    edit: MouseEvent => Unit,
+    save: MouseEvent => Unit,
+    cancel: MouseEvent => Unit,
+    retract: MouseEvent => Unit,
+  ): TypedTag[UList] = {
     val items = if (attribute == "e") {
       Seq(
         a(href := "#", cls := "dropdown-item", "Star"),
@@ -91,40 +92,42 @@ trait HeadElements extends ColOps with AppElements with RxBindings {
     )
   }
 
-  def _attrHeader(attribute: String,
-                  card: Int,
-                  expr: String,
-
-                  edit: MouseEvent => Unit,
-                  save: MouseEvent => Unit,
-                  cancel: MouseEvent => Unit,
-                  retract: MouseEvent => Unit,
-                 ): TypedTag[TableHeaderCell] = {
-    if (expr == "orig") {
+  def _attrHeader(
+    attribute: String,
+    card: Int,
+    expr: String,
+    editable: Boolean,
+    edit: MouseEvent => Unit,
+    save: MouseEvent => Unit,
+    cancel: MouseEvent => Unit,
+    retract: MouseEvent => Unit,
+  ): TypedTag[TableHeaderCell] = {
+    if (expr == "orig" || !editable) {
       th(
         verticalAlign.middle,
         paddingLeft := 6,
         paddingRight := 6,
-        attribute
+        attribute,
+        noEdit
       )
     } else {
       th(attrMenu(attribute, card, expr, edit, save, cancel, retract))
     }
   }
 
-  def _attrHeaderSortable(attribute: String,
-                          card: Int,
-                          expr: String,
-                          sortDir: String,
-                          sortPos: Int,
-                          sortCallback: MouseEvent => Unit,
-                          editable: Boolean,
-                          edit: MouseEvent => Unit,
-                          save: MouseEvent => Unit,
-                          cancel: MouseEvent => Unit,
-                          retract: MouseEvent => Unit,
-
-                         ): TypedTag[TableHeaderCell] = {
+  def _attrHeaderSortable(
+    attribute: String,
+    card: Int,
+    expr: String,
+    sortDir: String,
+    sortPos: Int,
+    sortCallback: MouseEvent => Unit,
+    editable: Boolean,
+    edit: MouseEvent => Unit,
+    save: MouseEvent => Unit,
+    cancel: MouseEvent => Unit,
+    retract: MouseEvent => Unit,
+  ): TypedTag[TableHeaderCell] = {
     val headerCell = {
       if (expr == "orig") {
         td(
@@ -192,10 +195,11 @@ trait HeadElements extends ColOps with AppElements with RxBindings {
   }
 
 
-  def _attrFilterCell(filterId: String,
-                      rawFilter: String,
-                      doFilter: () => Unit
-                     )(implicit ctx: Ctx.Owner): TypedTag[TableHeaderCell] = {
+  def _attrFilterCell(
+    filterId: String,
+    rawFilter: String,
+    doFilter: () => Unit
+  )(implicit ctx: Ctx.Owner): TypedTag[TableHeaderCell] = {
     val htmlFilter: Seq[Frag] = if (rawFilter.contains("\n"))
       rawFilter.split("\n").toSeq.flatMap(s => Seq(StringFrag(s), br)).init
     else
@@ -209,11 +213,12 @@ trait HeadElements extends ColOps with AppElements with RxBindings {
     )
   }
 
-  def _attrLambdaCell(filterId: String,
-                      lambdaRaw: String,
-                      applyLambda: () => Unit,
-                      skipSpin: () => Unit,
-                     )(implicit ctx: Ctx.Owner): TypedTag[TableHeaderCell] = {
+  def _attrLambdaCell(
+    filterId: String,
+    lambdaRaw: String,
+    applyLambda: () => Unit,
+    skipSpin: () => Unit,
+  )(implicit ctx: Ctx.Owner): TypedTag[TableHeaderCell] = {
     val lambdaHtml: Seq[Frag] =
       lambdaRaw.split("\n").toSeq.flatMap(s => Seq(StringFrag(s), br)).init
     th(

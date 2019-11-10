@@ -41,14 +41,14 @@ trait QueryApi extends BaseApi {
   def updateStr(db: String,
                 attrFull: String,
                 attrType: String,
-                data: Seq[(Long, Seq[String], Seq[String])],
                 enumPrefix: String = "",
+                data: Seq[(Long, Seq[String], Seq[String])]
                ): Either[String, (Long, Long, String)] = ???
 
   def updateNum(db: String,
                 attrFull: String,
                 attrType: String,
-                data: Seq[(Long, Seq[Double], Seq[Double])],
+                data: Seq[(Long, Seq[Double], Seq[Double])]
                ): Either[String, (Long, Long, String)] = ???
 
 }

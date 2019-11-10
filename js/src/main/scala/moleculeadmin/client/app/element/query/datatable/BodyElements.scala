@@ -20,18 +20,6 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     cells
   ).render
 
-  val noEdit = onclick := { () =>
-    window.alert(
-      "Namespace must have an entity id `e` column first to allow editing."
-    )
-  }
-
-  val noAggrEdit = onclick := { () =>
-    window.alert(
-      "Entity id, aggregates and transaction values can't be edited."
-    )
-  }
-
 
   // Card one ======================================================
 
@@ -396,13 +384,7 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
                      save: () => Unit): TypedTag[TableCell] =
     _tdMapEdit(cellClass, cellId, eid, save,
       vs.toSeq.sortBy(_._1),
-      (k: String, v: String) => {
-//        println("--------------")
-//        println("raw date 3: " + v)
-//        println("raw date 3: " + truncateDateStr(v))
-//        println("raw date 3: " + expandDateStr(v))
-//        k + " -> " + truncateDateStr(v)})
-        k + " -> " + v}
+      (k: String, v: String) => k + " -> " + truncateDateStr(v)
     )
 
   def _tdMapStrOtherEdit(vs: Map[String, String],
@@ -427,16 +409,19 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
 
 
   def _tdMapStr(vs: Map[String, String]): TypedTag[TableCell] =
-    mapCell(vs.toSeq.sortBy(_._1), (v: String) => td(_str2frags(v)))
+    mapCell(vs.toSeq.sortBy(_._1), (v: String) => td(_str2frags(v)))(noEdit)
 
   def _tdMapDate(vs: Map[String, String]): TypedTag[TableCell] =
-    mapCell(vs.toSeq.sortBy(_._1), (v: String) => td(truncateDateStr(v)))
+    mapCell(vs.toSeq.sortBy(_._1), (v: String) => td(
+      truncateDateStr(v)
+//      v
+    ))(noEdit)
 
   def _tdMapStrOther(vs: Map[String, String]): TypedTag[TableCell] =
-    mapCell(vs.toSeq.sortBy(_._1), (v: String) => td(v))
+    mapCell(vs.toSeq.sortBy(_._1), (v: String) => td(v))(noEdit)
 
   def _tdMapDouble(vs: Map[String, Double]): TypedTag[TableCell] =
-    mapCell(vs.toSeq.sortBy(_._1), (v: Double) => td(v))
+    mapCell(vs.toSeq.sortBy(_._1), (v: Double) => td(v))(noEdit)
 
 
   // Hard-coding each combination to make row rendering as fast as possible

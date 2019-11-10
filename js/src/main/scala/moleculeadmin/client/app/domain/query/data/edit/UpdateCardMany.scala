@@ -16,25 +16,26 @@ import scala.util.Try
 /**
  * @tparam T List[String] / List[Double]
  **/
-case class UpdateCardMany[T](db: String,
-                             cols: Seq[Col],
-                             qr: QueryResult,
-                             origArray: Array[Option[T]],
-                             valueArray: Array[Option[T]],
-                             baseClass: String,
-                             colType: String,
-                             rowIndex: Int,
-                             colIndex: Int,
-                             related: Int,
-                             nsAlias: String,
-                             nsFull: String,
-                             attr: String,
-                             attrType: String,
-                             card: Int,
-                             enums: Seq[String],
-                             cellType: String,
-                             expr: String
-                            )(implicit ctx: Ctx.Owner)
+case class UpdateCardMany[T](
+  db: String,
+  cols: Seq[Col],
+  qr: QueryResult,
+  origArray: Array[Option[T]],
+  valueArray: Array[Option[T]],
+  baseClass: String,
+  colType: String,
+  rowIndex: Int,
+  colIndex: Int,
+  related: Int,
+  nsAlias: String,
+  nsFull: String,
+  attr: String,
+  attrType: String,
+  card: Int,
+  enums: Seq[String],
+  cellType: String,
+  expr: String
+)(implicit ctx: Ctx.Owner)
   extends UpdateClient[T](
     db, cols, qr, origArray, valueArray, baseClass,
     colType, rowIndex, colIndex, related,
@@ -43,12 +44,14 @@ case class UpdateCardMany[T](db: String,
 
   type keepBooPickleImport = PickleState
 
-  def update(cellId: String,
-             cell: TableCell,
-             row: TableRow,
-             eid: Long,
-             oldVOpt: Option[T],
-             isNum: Boolean): Unit = {
+  def update(
+    cellId: String,
+    cell: TableCell,
+    row: TableRow,
+    eid: Long,
+    oldVOpt: Option[T],
+    isNum: Boolean
+  ): Unit = {
 
     val oldStrs: List[String] = oldVOpt.fold(List.empty[String]) {
       case vs: List[_] =>
@@ -164,7 +167,7 @@ case class UpdateCardMany[T](db: String,
           queryWire().updateNum(db, attrFull, attrType, data).call()
         } else {
           val data = Seq((eid, retracts, asserts))
-          queryWire().updateStr(db, attrFull, attrType, data, enumPrefix).call()
+          queryWire().updateStr(db, attrFull, attrType, enumPrefix, data).call()
         }
         save.map {
           case Right((t, tx, txInstant)) =>

@@ -36,7 +36,6 @@ class Query extends QueryApi with Base {
     case ("BigDecimal", v) => BigDecimal(v).asInstanceOf[Object]
     case ("Boolean", v)    => v.toBoolean.asInstanceOf[Object]
     case ("Date", v)       => str2date(v).asInstanceOf[Object]
-//    case ("Date", v)       => datomicStr2date(v).asInstanceOf[Object]
     case ("UUID", v)       => java.util.UUID.fromString(v).asInstanceOf[Object]
     case ("URI", v)        => new java.net.URI(v).asInstanceOf[Object]
     case _                 => sys.error("Unexpected input pair to cast")
@@ -53,14 +52,16 @@ class Query extends QueryApi with Base {
   }
 
 
-  override def query(db: String,
-                     datalogQuery: String,
-                     rules: Option[String],
-                     l: Seq[(Int, (String, String))],
-                     ll: Seq[(Int, Seq[(String, String)])],
-                     lll: Seq[(Int, Seq[Seq[(String, String)]])],
-                     maxRows: Int,
-                     cols: Seq[Col]): Either[Seq[String], QueryResult] = try {
+  override def query(
+    db: String,
+    datalogQuery: String,
+    rules: Option[String],
+    l: Seq[(Int, (String, String))],
+    ll: Seq[(Int, Seq[(String, String)])],
+    lll: Seq[(Int, Seq[Seq[(String, String)]])],
+    maxRows: Int,
+    cols: Seq[Col]
+  ): Either[Seq[String], QueryResult] = try {
 
     val conn      = Conn(base + "/" + db)
     val allInputs = if (rules.isEmpty)
@@ -121,10 +122,11 @@ class Query extends QueryApi with Base {
   private def ident(conn: Conn, e: jLong): String =
     conn.db.entity(e).get(":db/ident").toString
 
-  override def getTxData(db: String,
-                         tx: Long,
-                         enumAttrs: Seq[String]
-                        ): Array[(Long, String, String, Boolean)] = {
+  override def getTxData(
+    db: String,
+    tx: Long,
+    enumAttrs: Seq[String]
+  ): Array[(Long, String, String, Boolean)] = {
     val conn   = Conn(base + "/" + db)
     val result = datomic.Peer.q(
       """[:find ?e ?aStr ?v ?op
@@ -160,9 +162,11 @@ class Query extends QueryApi with Base {
     rows.sortBy(t => (t._1, t._2, t._4, t._3))
   }
 
-  override def getEntityHistory(db: String,
-                                eid: Long,
-                                enumAttrs: Seq[String])
+  override def getEntityHistory(
+    db: String,
+    eid: Long,
+    enumAttrs: Seq[String]
+  )
   : List[(Long, Long, String, Boolean, String, String)] = {
     implicit val conn = Conn(base + "/" + db)
     Ns(eid).t.tx.txInstant.op.a.v.getHistory.map {
@@ -188,7 +192,7 @@ class Query extends QueryApi with Base {
 
   override def getTTxFromTxInstant(db: String, txInstantStr: String): (Long, Long) = {
     val rawConn   = Conn(base + "/" + db).datomicConn
-//    val txInstant = str2dateLocal(txInstantStr)
+    //    val txInstant = str2dateLocal(txInstantStr)
     val txInstant = str2date(txInstantStr)
     val result    = datomic.Peer.q(
       """[:find ?t ?tx
@@ -294,7 +298,6 @@ class Query extends QueryApi with Base {
     tpe match {
       case "String"     => (v: String) => enumPrefix + v
       case "Boolean"    => (v: String) => v.toBoolean
-//      case "Date"       => (v: String) => date2(v)
       case "Date"       => (v: String) => str2date(v)
       case "UUID"       => (v: String) => UUID.fromString(v)
       case "URI"        => (v: String) => new URI(v)
@@ -311,12 +314,13 @@ class Query extends QueryApi with Base {
   }
 
 
-  def update[T](db: String,
-                attrFull: String,
-                attrType: String,
-                data: Seq[(Long, Seq[T], Seq[T])],
-                cast: T => Any,
-               ): Either[String, (Long, Long, String)] = {
+  def update[T](
+    db: String,
+    attrFull: String,
+    attrType: String,
+    data: Seq[(Long, Seq[T], Seq[T])],
+    cast: T => Any,
+  ): Either[String, (Long, Long, String)] = {
     implicit val conn = Conn(base + "/" + db)
     val stmtss = data.map {
       case (eid, retracts, asserts) =>
@@ -333,23 +337,23 @@ class Query extends QueryApi with Base {
     }
   }
 
-  override def updateStr(db: String,
-                         attrFull: String,
-                         attrType: String,
-                         data: Seq[(Long, Seq[String], Seq[String])],
-                         enumPrefix: String,
-                        ): Either[String, (Long, Long, String)] = {
-    val cast = getStrCaster(attrType, enumPrefix)
-    update(db, attrFull, attrFull, data, cast)
+  override def updateStr(
+    db: String,
+    attrFull: String,
+    attrType: String,
+    enumPrefix: String,
+    data: Seq[(Long, Seq[String], Seq[String])]
+  ): Either[String, (Long, Long, String)] = {
+    update(db, attrFull, attrFull, data, getStrCaster(attrType, enumPrefix))
   }
 
 
-  override def updateNum(db: String,
-                         attrFull: String,
-                         attrType: String,
-                         data: Seq[(Long, Seq[Double], Seq[Double])],
-                        ): Either[String, (Long, Long, String)] = {
-    val cast = getNumCaster(attrType)
-    update(db, attrFull, attrFull, data, cast)
+  override def updateNum(
+    db: String,
+    attrFull: String,
+    attrType: String,
+    data: Seq[(Long, Seq[Double], Seq[Double])],
+  ): Either[String, (Long, Long, String)] = {
+    update(db, attrFull, attrFull, data, getNumCaster(attrType))
   }
 }

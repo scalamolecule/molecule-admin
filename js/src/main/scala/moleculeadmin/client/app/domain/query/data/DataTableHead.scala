@@ -64,8 +64,8 @@ case class DataTableHead(db: String)(implicit val ctx: Ctx.Owner)
         case "double"     => GroupSave(db, col).double()
         case "listString" => GroupSave(db, col).listString()
         case "listDouble" => GroupSave(db, col).listDouble()
-        //        case "mapString"  => GroupSave(db, col).mapString()
-        //        case "mapDouble"  => GroupSave(db, col).mapDouble()
+        case "mapString"  => GroupSave(db, col).mapString()
+        case "mapDouble"  => GroupSave(db, col).mapDouble()
       }
     }
     val retract  = { _: MouseEvent =>
@@ -82,12 +82,12 @@ case class DataTableHead(db: String)(implicit val ctx: Ctx.Owner)
       _attrHeaderSortable(attr, card, expr, sortDir, sortPos, sort,
         editable, edit, save, cancel, retract)
     } else {
-      _attrHeader(attr, card, expr, edit, save, cancel, retract)
+      _attrHeader(attr, card, expr, editable, edit, save, cancel, retract)
     }
   }
 
   def resetEditColToOrigColCache(colIndex: Int, colType: String) = {
-    val curQueryCache   =
+    val curQueryCache =
       queryCache.now.find(_.modelElements == modelElements.now).get
 
     val qr: QueryResult = curQueryCache.queryResult
