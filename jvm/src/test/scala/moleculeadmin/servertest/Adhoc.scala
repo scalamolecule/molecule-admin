@@ -21,6 +21,20 @@ object Adhoc extends TestSuite
     test("Adhoc") {
 
 //      implicit val conn = Conn(base + "/CoreTest")
+      implicit val conn = Conn(base + "/mbrainz-1968-1973")
+
+//      val eid = 716881581322888L
+      val eid = 17592186072911L
+
+      Schema.a.get.sorted foreach println
+
+      println(Schema.a(":Release/country").get)
+      println(Schema.a(":country/US").get)
+
+
+      println(eid.touchQuoted)
+
+//      Ns(eid).t.tx.txInstant.op.a.v.getHistory.sortBy(_._5) foreach println
 
     }
   }

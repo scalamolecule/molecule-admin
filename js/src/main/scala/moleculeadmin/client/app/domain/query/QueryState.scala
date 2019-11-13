@@ -3,6 +3,7 @@ import moleculeadmin.shared.ast.query.{Col, Favorite, Filter, QueryCache}
 import moleculeadmin.shared.ast.schema.Ns
 import moleculeadmin.shared.ast.tree.Tree
 import molecule.ast.model.Element
+import moleculeadmin.client.app.domain.query.data.RowBuilder
 import rx.Var
 import scalatags.JsDom.all.s
 import scala.collection.mutable.ListBuffer
@@ -48,7 +49,7 @@ object QueryState {
   var rowCount    = 0
   val maxRows     = Var(-1)
   val offset      = Var(0)
-  val limit       = Var(10)
+  val limit       = Var(50)
 
   var editCellId = ""
 
@@ -59,12 +60,16 @@ object QueryState {
   var queryCache = Var(Seq.empty[QueryCache])
 
   // Avoiding re-creating sort index array during paging
-  var cachedCols      = Seq.empty[Col]
-  var cachedSortIndex = Array.empty[Int]
+  var cachedCols       = Seq.empty[Col]
+  var cachedSortIndex  = Array.empty[Int]
+  var cachedRowBuilder = Option.empty[RowBuilder]
 
   // Avoiding re-creating index array during paging
   var cachedFilters     = Map.empty[Int, Filter[_]]
   var cachedFilterIndex = Array.empty[Int]
+
+  enumAttrs.contains(7)
+  cachedFilterIndex.contains(7)
 
   // Track maxRows change
   var savedMaxRows = -1
@@ -82,6 +87,12 @@ object QueryState {
   val curEntity         = Var(0L)
   var curAttrs          = Seq.empty[String]
   val entityHistorySort = Var("tx")
+  var curStars          = List.empty[Long]
+  var curFlags          = List.empty[Long]
+  var curChecks         = List.empty[Long]
+
+  //  curStar.contains(7L)
+  //  Array(1) ++= Array(2)
 
   // Transactions
   val curTxD       = Var((0L, 0L, ""))
