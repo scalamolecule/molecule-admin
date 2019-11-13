@@ -262,7 +262,11 @@ case class AttributeForm(db: String,
     val attrNameErr = err("attr-name-err")
     val attrDocErr  = err("attr-doc-err")
 
-    def helpSymbol(txt: String) = i(cls := "fas fa-question-circle pointer", color := "#aaa", onclick := { () => window.alert(txt) })
+    def helpSymbol(txt: String) =
+      i(
+        cls := "fas fa-question-circle pointer", color := "#aaa",
+        onclick := { () => window.alert(txt) }
+      )
     val helpTypeCreate = helpSymbol("""Bidirectional types ("bi", "biEdge") not yet implemented in Molecule-Admin.""".stripMargin)
     val helpTypeUpdate = helpSymbol(if (attrType0 == "ref")
       """Only the referenced namespace of a ref attribute can be altered.

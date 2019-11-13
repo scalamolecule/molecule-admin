@@ -2,21 +2,26 @@ package moleculeadmin.client.app.domain.query.data
 
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.domain.query.data.edit.{TxLambdas, Update, UpdateCardMany, UpdateCardMap, UpdateCardOne}
+import moleculeadmin.client.app.domain.query.marker
+import moleculeadmin.client.app.domain.query.marker.Star
 import moleculeadmin.client.app.element.query.datatable.BodyElements
 import moleculeadmin.shared.ast.query.{QueryResult, _}
 import moleculeadmin.shared.ops.query.ColOps
-import org.scalajs.dom.html.{TableCell, TableRow, TableSection}
-import org.scalajs.dom.{Element, document}
+import org.scalajs.dom.html.{Element, TableCell, TableRow, TableSection}
+import org.scalajs.dom.document
 import rx.Ctx
+import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
 import scalatags.{JsDom, generic}
+import scala.collection.immutable
 
 
-abstract class Cell(db: String,
-                    tableBody: TableSection,
-                    cols: Seq[Col],
-                    qr: QueryResult
-                   )(implicit ctx: Ctx.Owner)
+abstract class Cell(
+  db: String,
+  tableBody: TableSection,
+  cols: Seq[Col],
+  qr: QueryResult
+)(implicit ctx: Ctx.Owner)
   extends TxLambdas(db) with Update with BodyElements with ColOps {
 
   // current entity id for updates of subsequent attributes on each row
@@ -28,8 +33,8 @@ abstract class Cell(db: String,
     val Col(_, related, nsAlias, nsFull, attr, attrType, colType,
     card, _, enums, _, expr, _, _) = cols(colIndex)
 
-    val noCount    = expr != "count" && expr != "count-distinct"
-    val aggregates = Seq(
+    lazy val noCount    = expr != "count" && expr != "count-distinct"
+    lazy val aggregates = Seq(
       "count", "count-distinct", "sum", "avg", "median", "variance", "stddev"
     )
 
@@ -49,7 +54,7 @@ abstract class Cell(db: String,
     // e has to be first within namespace to allow editing
     val groupEdit = expr == "edit"
     val editable  = groupEdit || isEditable(cols, colIndex, nsAlias, nsFull)
-    val showAll = expr == "orig" || expr == "edit"
+    lazy val showAll   = expr == "orig" || expr == "edit"
 
     def id: Int => String = idBase(colIndex)
 
@@ -58,11 +63,12 @@ abstract class Cell(db: String,
      *           cardinality 2: List[String] / List[Double]
      *           cardinality 3: Map[String, String] / Map[String, Double]
      **/
-    def save[T](origArray: Array[Option[T]],
-                valueArray: Array[Option[T]],
-                rowIndex: Int,
-                baseClass: String
-               ): () => Unit = {
+    def save[T](
+      origArray: Array[Option[T]],
+      valueArray: Array[Option[T]],
+      rowIndex: Int,
+      baseClass: String
+    ): () => Unit = {
       () => {
         val cellId : String    = idBase(colIndex)(rowIndex)
         val oldVOpt: Option[T] = valueArray(rowIndex)
@@ -98,9 +104,10 @@ abstract class Cell(db: String,
         Array.empty[Option[T]]
     }
 
-    def getClassLambda[T](origArray: Array[Option[T]],
-                          valueArray: Array[Option[T]]
-                         ): (String, Int) => String = {
+    def getClassLambda[T](
+      origArray: Array[Option[T]],
+      valueArray: Array[Option[T]]
+    ): (String, Int) => String = {
       if (groupEdit)
         (baseClass: String, rowIndex: Int) => {
           val oldV = origArray(rowIndex)
@@ -118,7 +125,9 @@ abstract class Cell(db: String,
         (baseClass: String, _: Int) => baseClass
     }
 
-    import scala.scalajs.js.Date
+    lazy val eColIndexes = cols.collect {
+      case Col(colIndex, _, _, _, "e", _, _, _, _, _, _, _, _, _) => colIndex + 1
+    }
 
     colType match {
 
@@ -175,7 +184,7 @@ abstract class Cell(db: String,
 
           case "date" =>
             (rowIndex: Int) =>
-              valueArray(rowIndex).fold(_tdNoEdit){d =>
+              valueArray(rowIndex).fold(_tdNoEdit) { d =>
 
 
                 _tdOneDate(truncateDateStr(d))
@@ -197,17 +206,64 @@ abstract class Cell(db: String,
 
 
       case "double" =>
+
+
+        def toggleFlag(eid: Long, elem: Element): Unit = {
+          val on = curFlags.contains(eid)
+          if (on) {
+            elem.className = "far fa-star starOff"
+            curFlags = curFlags.filterNot(_ == eid)
+          } else {
+            elem.className = "fas fa-star starOn"
+            curFlags = eid :: curFlags
+          }
+        }
+        def toggleCheck(eid: Long, elem: Element): Unit = {
+          val on = curFlags.contains(eid)
+          if (on) {
+            elem.className = "far fa-star starOff"
+            curFlags = curFlags.filterNot(_ == eid)
+          } else {
+            elem.className = "fas fa-star starOn"
+            curFlags = eid :: curFlags
+          }
+        }
+
         val origArray  = getOrigArray(qr.num)
         val valueArray = qr.num(arrayIndex)
-
-        val getCls = getClassLambda(origArray, valueArray)
-
+        val getCls     = getClassLambda(origArray, valueArray)
         cellType match {
           case "eid" =>
+
+
             (rowIndex: Int) =>
               // Set entity id for updates of subsequent attribute values
               e = valueArray(rowIndex).fold(0L)(_.toLong)
-              _tdOneEid(e, curEntity, (eid: Long) => () => curEntity() = eid)
+              val eid     = e
+              val star = Star(tableBody, eColIndexes, eid)
+
+//              val starred = if (curStars.contains(e))
+//                "fas fa-star starOn" else "far fa-star starOff"
+//              val flagged = if (curFlags.contains(e))
+//                "fas fa-flag flagOn" else "far fa-flag flagOff"
+//              val checked = if (curChecks.contains(e))
+//                "oi oi-check checkOn" else "fas fa-check checkOff"
+              _tdOneEid(
+                eid,
+                curEntity,
+                () => curEntity() = eid,
+//                star.curCls,
+//                () => star.toggle,
+//
+//                "far fa-flag flagOff",
+////                flagged,
+//                (elem: Element) => toggleFlag(eid, elem),
+//
+//                "fas fa-check checkOff",
+////                checked,
+//                (elem: Element) => toggleCheck(eid, elem),
+              )
+
 
           case "ref" if groupEdit =>
             (rowIndex: Int) =>
@@ -348,7 +404,7 @@ abstract class Cell(db: String,
                   save(origArray, valueArray, rowIndex, "")
                 )
               )
-          case "ref" if editable =>
+          case "ref" if editable  =>
             println("_tdManyRefEdit")
             (rowIndex: Int) =>
               valueArray(rowIndex).fold(_tdNoEdit)(vs =>
@@ -363,10 +419,10 @@ abstract class Cell(db: String,
               )
 
           case "ref" =>
-              (rowIndex: Int) =>
-                valueArray(rowIndex).fold(_tdNoEdit)(vs =>
-                  _tdManyRef(vs, curEntity,
-                    (eid: Long) => () => curEntity() = eid, true))
+            (rowIndex: Int) =>
+              valueArray(rowIndex).fold(_tdNoEdit)(vs =>
+                _tdManyRef(vs, curEntity,
+                  (eid: Long) => () => curEntity() = eid, true))
 
           case _ if editable =>
             (rowIndex: Int) =>

@@ -9,7 +9,8 @@ import scalatags.JsDom
 import scalatags.JsDom.all._
 
 
-case class QuerySubMenu(db: String)(implicit val ctx: Ctx.Owner) extends RxBindings with SubMenuElements {
+case class QuerySubMenu(db: String)(implicit val ctx: Ctx.Owner)
+  extends RxBindings with SubMenuElements {
 
   _maxRowsSelector.onchange = _ => {
     maxRows() = _maxRowsSelector.value.toInt
@@ -17,6 +18,8 @@ case class QuerySubMenu(db: String)(implicit val ctx: Ctx.Owner) extends RxBindi
   }
 
   def dynRender: Rx.Dynamic[JsDom.TypedTag[Span]] = Rx {
+    // Update whenever cache updates
+    queryCache()
     span(
       _maxRowsSelector,
       ul(cls := "nav nav-pills",

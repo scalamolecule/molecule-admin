@@ -10,9 +10,13 @@ import rx.{Ctx, Rx}
 case class DataTableBodyFoot(db: String)(implicit val ctx: Ctx.Owner)
   extends RxBindings with KeyEvents {
 
-  def populate(tableBody: TableSection,
-               tableFoot: TableSection,
-               optQueryResult: Option[QueryResult] = None): Unit = Rx {
+  cachedRowBuilder = None
+
+  def populate(
+    tableBody: TableSection,
+    tableFoot: TableSection,
+    optQueryResult: Option[QueryResult] = None
+  ): Unit = Rx {
     //    println("---- body ----")
 
     // triggers
@@ -43,7 +47,12 @@ case class DataTableBodyFoot(db: String)(implicit val ctx: Ctx.Owner)
 
     // Populate table body and foot
     tableBody.innerHTML = ""
-    RowBuilder(db, tableBody, columns.now, queryResult, sortIndex, filterIndex).append()
+    val rowBuilder = cachedRowBuilder.getOrElse {
+      val rb = RowBuilder(db, tableBody, columns.now, queryResult)
+      cachedRowBuilder = Some(rb)
+      rb
+    }
+    rowBuilder.append(sortIndex, filterIndex)
     DataTableFoot().populate(tableFoot)
   }
 }
