@@ -6,6 +6,7 @@ import molecule.ast.model.Element
 import moleculeadmin.client.app.domain.query.data.RowBuilder
 import rx.Var
 import scalatags.JsDom.all.s
+import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 
@@ -68,9 +69,6 @@ object QueryState {
   var cachedFilters     = Map.empty[Int, Filter[_]]
   var cachedFilterIndex = Array.empty[Int]
 
-  enumAttrs.contains(7)
-  cachedFilterIndex.contains(7)
-
   // Track maxRows change
   var savedMaxRows = -1
 
@@ -87,12 +85,20 @@ object QueryState {
   val curEntity         = Var(0L)
   var curAttrs          = Seq.empty[String]
   val entityHistorySort = Var("tx")
-  var curStars          = List.empty[Long]
-  var curFlags          = List.empty[Long]
-  var curChecks         = List.empty[Long]
 
-  //  curStar.contains(7L)
-  //  Array(1) ++= Array(2)
+  // colIndex + 1 -> (eid -> array indexes)
+  val curEntityIndexes = mutable.Map.empty[Int, mutable.LongMap[List[Int]]]
+
+  // For fast render on page scrolling
+  // colIndex + 1 -> array of marker status
+  val curStarIndexes  = mutable.Map.empty[Int, Array[Boolean]]
+  val curFlagIndexes  = mutable.Map.empty[Int, Array[Boolean]]
+  val curCheckIndexes = mutable.Map.empty[Int, Array[Boolean]]
+
+  // Marker On-values
+  var curStars  = List.empty[Long]
+  var curFlags  = List.empty[Long]
+  var curChecks = List.empty[Long]
 
   // Transactions
   val curTxD       = Var((0L, 0L, ""))

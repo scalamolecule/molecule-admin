@@ -12,7 +12,7 @@ import moleculeadmin.client.rxstuff.RxBindings
 import moleculeadmin.shared.ops.query.builder.TreeOps
 import moleculeadmin.shared.ops.query.{ColOps, SchemaOps}
 import moleculeadmin.shared.ops.transform.Model2Molecule
-import org.scalajs.dom.document
+import org.scalajs.dom.{document, window}
 import rx.{Ctx, Rx}
 import scalatags.JsDom.all._
 import scala.concurrent.ExecutionContext.Implicits.global

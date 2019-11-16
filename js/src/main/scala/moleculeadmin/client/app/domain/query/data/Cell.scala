@@ -3,17 +3,19 @@ package moleculeadmin.client.app.domain.query.data
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.domain.query.data.edit.{TxLambdas, Update, UpdateCardMany, UpdateCardMap, UpdateCardOne}
 import moleculeadmin.client.app.domain.query.marker
-import moleculeadmin.client.app.domain.query.marker.Star
+import moleculeadmin.client.app.domain.query.marker.Marker
 import moleculeadmin.client.app.element.query.datatable.BodyElements
 import moleculeadmin.shared.ast.query.{QueryResult, _}
 import moleculeadmin.shared.ops.query.ColOps
 import org.scalajs.dom.html.{Element, TableCell, TableRow, TableSection}
-import org.scalajs.dom.document
+import org.scalajs.dom.{document, window}
 import rx.Ctx
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
 import scalatags.{JsDom, generic}
-import scala.collection.immutable
+import scala.collection.{immutable, mutable}
+import scala.collection.immutable.{HashMap, LongMap}
+import scala.scalajs.js.Date
 
 
 abstract class Cell(
@@ -54,7 +56,7 @@ abstract class Cell(
     // e has to be first within namespace to allow editing
     val groupEdit = expr == "edit"
     val editable  = groupEdit || isEditable(cols, colIndex, nsAlias, nsFull)
-    lazy val showAll   = expr == "orig" || expr == "edit"
+    lazy val showAll = expr == "orig" || expr == "edit"
 
     def id: Int => String = idBase(colIndex)
 
@@ -72,7 +74,7 @@ abstract class Cell(
       () => {
         val cellId : String    = idBase(colIndex)(rowIndex)
         val oldVOpt: Option[T] = valueArray(rowIndex)
-        val isNum  : Boolean   = Seq("Int", "Long", "ref", "Float", "Double").contains(attrType)
+        val isNum  : Boolean   = Seq("Int", "Long", "ref", "datom", "Float", "Double").contains(attrType)
         val cell   : TableCell = document.getElementById(cellId).asInstanceOf[TableCell]
         val row    : TableRow  = cell.parentNode.asInstanceOf[TableRow]
         val eid    : Long      = cell.getAttribute("eid").toLong
@@ -128,6 +130,7 @@ abstract class Cell(
     lazy val eColIndexes = cols.collect {
       case Col(colIndex, _, _, _, "e", _, _, _, _, _, _, _, _, _) => colIndex + 1
     }
+
 
     colType match {
 
@@ -206,62 +209,55 @@ abstract class Cell(
 
 
       case "double" =>
-
-
-        def toggleFlag(eid: Long, elem: Element): Unit = {
-          val on = curFlags.contains(eid)
-          if (on) {
-            elem.className = "far fa-star starOff"
-            curFlags = curFlags.filterNot(_ == eid)
-          } else {
-            elem.className = "fas fa-star starOn"
-            curFlags = eid :: curFlags
-          }
-        }
-        def toggleCheck(eid: Long, elem: Element): Unit = {
-          val on = curFlags.contains(eid)
-          if (on) {
-            elem.className = "far fa-star starOff"
-            curFlags = curFlags.filterNot(_ == eid)
-          } else {
-            elem.className = "fas fa-star starOn"
-            curFlags = eid :: curFlags
-          }
-        }
-
         val origArray  = getOrigArray(qr.num)
         val valueArray = qr.num(arrayIndex)
         val getCls     = getClassLambda(origArray, valueArray)
         cellType match {
           case "eid" =>
+            val length = valueArray.length
 
+            val starIndex  = new Array[Boolean](length)
+            val flagIndex  = new Array[Boolean](length)
+            val checkIndex = new Array[Boolean](length)
+
+            val entityIndex = mutable.LongMap.empty[List[Int]]
+            var eid         = 0L
+            var i           = 0
+            while (i < length) {
+              eid = valueArray(i).get.toLong
+              entityIndex.get(eid) match {
+                case Some(ii) => entityIndex(eid) = i :: ii
+                case None     => entityIndex(eid) = i :: Nil
+              }
+              starIndex(i) = curStars.contains(eid)
+              flagIndex(i) = curFlags.contains(eid)
+              checkIndex(i) = curChecks.contains(eid)
+              i += 1
+            }
+
+            curEntityIndexes(colIndex + 1) = entityIndex
+            curStarIndexes(colIndex + 1) = starIndex
+            curFlagIndexes(colIndex + 1) = flagIndex
+            curCheckIndexes(colIndex + 1) = checkIndex
+
+            val star  = Marker(tableBody, eColIndexes, "star")
+            val flag  = Marker(tableBody, eColIndexes, "flag")
+            val check = Marker(tableBody, eColIndexes, "check")
 
             (rowIndex: Int) =>
               // Set entity id for updates of subsequent attribute values
               e = valueArray(rowIndex).fold(0L)(_.toLong)
-              val eid     = e
-              val star = Star(tableBody, eColIndexes, eid)
-
-//              val starred = if (curStars.contains(e))
-//                "fas fa-star starOn" else "far fa-star starOff"
-//              val flagged = if (curFlags.contains(e))
-//                "fas fa-flag flagOn" else "far fa-flag flagOff"
-//              val checked = if (curChecks.contains(e))
-//                "oi oi-check checkOn" else "fas fa-check checkOff"
+              val eid = e
               _tdOneEid(
                 eid,
                 curEntity,
                 () => curEntity() = eid,
-//                star.curCls,
-//                () => star.toggle,
-//
-//                "far fa-flag flagOff",
-////                flagged,
-//                (elem: Element) => toggleFlag(eid, elem),
-//
-//                "fas fa-check checkOff",
-////                checked,
-//                (elem: Element) => toggleCheck(eid, elem),
+                if (starIndex(rowIndex)) mark.starOn else mark.starOff,
+                if (flagIndex(rowIndex)) mark.flagOn else mark.flagOff,
+                if (checkIndex(rowIndex)) mark.checkOn else mark.checkOff,
+                () => star.toggle(eid, starIndex(rowIndex)),
+                () => flag.toggle(eid, flagIndex(rowIndex)),
+                () => check.toggle(eid, checkIndex(rowIndex)),
               )
 
 

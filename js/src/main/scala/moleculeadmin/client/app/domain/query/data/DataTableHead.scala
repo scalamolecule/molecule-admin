@@ -1,26 +1,21 @@
 package moleculeadmin.client.app.domain.query.data
 
-import autowire._
 import boopickle.Default._
 import moleculeadmin.client.app.domain.query.KeyEvents
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.domain.query.data.groupedit.{GroupEdit, GroupSave}
 import moleculeadmin.client.app.element.AppElements
 import moleculeadmin.client.app.element.query.datatable.HeadElements
-import moleculeadmin.client.autowire.queryWire
 import moleculeadmin.client.rxstuff.RxBindings
 import moleculeadmin.shared.ast.query.{Col, QueryResult}
 import moleculeadmin.shared.ops.query.data.FilterFactory
 import moleculeadmin.shared.ops.query.{ColOps, ModelOps}
-import org.scalajs.dom.html.{TableCell, TableHeaderCell, TableSection}
+import org.scalajs.dom.html.{TableHeaderCell, TableSection}
 import org.scalajs.dom.raw.Node
-import org.scalajs.dom.{MouseEvent, NodeList, document, window}
+import org.scalajs.dom.{MouseEvent, document, window}
 import rx.{Ctx, Rx}
-import moleculeadmin.client.scalafiddle.ScalaFiddle
 import scalatags.JsDom
 import scalatags.JsDom.all._
-import scala.collection.mutable.ListBuffer
-import scala.concurrent.ExecutionContext.Implicits.global
 
 
 case class DataTableHead(db: String)(implicit val ctx: Ctx.Owner)

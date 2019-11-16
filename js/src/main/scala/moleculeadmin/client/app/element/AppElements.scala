@@ -70,10 +70,11 @@ trait AppElements extends Bootstrap {
 
   val defaultSize = 3
 
-  protected def expandingList(items: Seq[TypedTag[LI]],
-                              showDisc: Boolean = false,
-                              max: Int = defaultSize
-                             ): UList = {
+  protected def expandingList(
+    items: Seq[TypedTag[LI]],
+    showDisc: Boolean = false,
+    max: Int = defaultSize
+  ): UList = {
     val list = if (showDisc)
       ul(items.take(max)).render
     else
@@ -104,6 +105,15 @@ trait AppElements extends Bootstrap {
     list
   }
 
+  object mark {
+    val starOn   = "fas fa-star starOn"
+    val starOff  = "far fa-star starOff"
+    val flagOn   = "fas fa-flag flagOn"
+    val flagOff  = "far fa-flag flagOff"
+//    val checkOn  = "oi oi-check checkOn"
+    val checkOn  = "fas fa-check-circle checkOn"
+    val checkOff = "fas fa-check checkOff"
+  }
 
   val noEdit = onclick := { () =>
     window.alert(
@@ -120,10 +130,11 @@ trait AppElements extends Bootstrap {
   def mapRow(k: String, vCell: TypedTag[TableCell]): TypedTag[TableRow] =
     tr(td(k), td("➜"), vCell)
 
-  def mapCell[T](rawPairs: Seq[(String, T)],
-                 processValue: T => TypedTag[TableCell],
-                 asserted: Boolean = true
-                ): TypedTag[TableCell] = {
+  def mapCell[T](
+    rawPairs: Seq[(String, T)],
+    processValue: T => TypedTag[TableCell],
+    asserted: Boolean = true
+  ): TypedTag[TableCell] = {
     td(
       if (asserted) () else cls := "retracted",
       table(cls := "mapPairs",

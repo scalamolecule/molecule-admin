@@ -124,8 +124,8 @@ trait FilterFactory extends RegexMatching with DateHandling {
 
 
   def predString(token: String): Option[String => Boolean] = {
-    val regexNoCase = Pattern.compile(".*", Pattern.CASE_INSENSITIVE)
-    val negRegEx = Pattern.compile("(?!.*)")
+    val regexNoCase    = Pattern.compile(".*", Pattern.CASE_INSENSITIVE)
+    val negRegEx       = Pattern.compile("(?!.*)")
     val negRegExNoCase = Pattern.compile("(?!.*)", Pattern.CASE_INSENSITIVE)
     token.trim match {
       case r"/(.*)$regex/?"   => Some(s => s.matches(regex))
@@ -138,9 +138,10 @@ trait FilterFactory extends RegexMatching with DateHandling {
     }
   }
 
-  def mergedPredicate[T](filterExpr: String,
-                         predicateFactory: String => Option[T => Boolean]
-                        ): Option[T => Boolean] = {
+  def mergedPredicate[T](
+    filterExpr: String,
+    predicateFactory: String => Option[T => Boolean]
+  ): Option[T => Boolean] = {
     val fns: Seq[T => Boolean] = (for {
       lines <- filterExpr.split('\n')
       token <- lines.split(',')
@@ -157,12 +158,12 @@ trait FilterFactory extends RegexMatching with DateHandling {
   }
 
 
-  //  private
-  def filter[T](colIndex: Int,
-                colType: String,
-                filterExpr: String,
-                predicateFactory: String => Option[T => Boolean]
-               ): Option[Filter[T]] = {
+  private def filter[T](
+    colIndex: Int,
+    colType: String,
+    filterExpr: String,
+    predicateFactory: String => Option[T => Boolean]
+  ): Option[Filter[T]] = {
     mergedPredicate(filterExpr, predicateFactory) match {
       case None       => Option.empty[Filter[T]]
       case Some(pred) => Some(Filter[T](colIndex, colType, filterExpr, pred))
@@ -182,8 +183,8 @@ trait FilterFactory extends RegexMatching with DateHandling {
           case _            => filter[String](colIndex, colType, filterExpr, predString)
         }
         case "double" | "listDouble" => attrType match {
-          case "Int" | "Long" | "ref" => filter[Double](colIndex, colType, filterExpr, predNumber)
-          case _                      => filter[Double](colIndex, colType, filterExpr, predDecimal)
+          case "Int" | "Long" | "ref" | "datom" => filter[Double](colIndex, colType, filterExpr, predNumber)
+          case _                                => filter[Double](colIndex, colType, filterExpr, predDecimal)
         }
         case _                       => None
       }
