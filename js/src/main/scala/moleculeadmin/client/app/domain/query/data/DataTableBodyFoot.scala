@@ -5,12 +5,14 @@ import moleculeadmin.client.rxstuff.RxBindings
 import moleculeadmin.shared.ast.query.{QueryCache, QueryResult}
 import org.scalajs.dom.html.TableSection
 import rx.{Ctx, Rx}
+import scala.scalajs.js.Date
 
 
 case class DataTableBodyFoot(db: String)(implicit val ctx: Ctx.Owner)
   extends RxBindings with KeyEvents {
 
   cachedRowBuilder = None
+  //  println("---- DataTableBodyFoot ----")
 
   def populate(
     tableBody: TableSection,
@@ -24,6 +26,8 @@ case class DataTableBodyFoot(db: String)(implicit val ctx: Ctx.Owner)
     filters()
     offset()
     limit()
+
+//    val t1 = new Date().getTime()
 
     val queryResult              = optQueryResult.getOrElse {
       // println("  cached queryResult")
@@ -52,7 +56,12 @@ case class DataTableBodyFoot(db: String)(implicit val ctx: Ctx.Owner)
       cachedRowBuilder = Some(rb)
       rb
     }
+
     rowBuilder.append(sortIndex, filterIndex)
+//    val t2 = new Date().getTime()
+
+//    println("t " + (t2 - t1))
+
     DataTableFoot().populate(tableFoot)
   }
 }

@@ -34,23 +34,26 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     eid: Long,
     curEntity: rx.Var[Long],
     mouseover: () => Unit,
-//    starCls: String, starToggle: () => Unit,
-//    flagCls: String, flagToggle: Element => Unit,
-//    checkCls: String, checkToggle: Element => Unit,
+    starCls: String,
+    flagCls: String,
+    checkCls: String,
+    starToggle: () => Unit,
+    flagToggle: () => Unit,
+    checkToggle: () => Unit,
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = {
     // markers
-//    val starElement  = i(cls := starCls).render
-//    val flagElement  = i(cls := flagCls).render
-//    val checkElement = i(cls := checkCls).render
-//    starElement.onclick = _ => starToggle()
-//    flagElement.onclick = _ => flagToggle(flagElement)
-//    checkElement.onclick = _ => checkToggle(checkElement)
+    val starElement  = i(cls := starCls).render
+    val flagElement  = i(cls := flagCls).render
+    val checkElement = i(cls := checkCls).render
+    starElement.onclick = _ => starToggle()
+    flagElement.onclick = _ => flagToggle()
+    checkElement.onclick = _ => checkToggle()
     td(
       cls := Rx(if (eid == curEntity()) "eidChosen" else "eid"),
       eid,
-//      starElement,
-//      flagElement,
-//      checkElement,
+      starElement,
+      flagElement,
+      checkElement,
       onmouseover := mouseover,
     )
   }

@@ -6,6 +6,7 @@ import org.scalajs.dom.raw.{HTMLInputElement, KeyboardEvent}
 import org.scalajs.dom.{Node, document, window}
 import rx.{Ctx, Rx}
 import scalatags.JsDom.all._
+import scala.scalajs.js.Date
 import scala.scalajs.js.timers.setTimeout
 
 
@@ -134,7 +135,7 @@ trait KeyEvents {
   }
 
   def useFavorite(i: Int)
-                 (implicit ctx: Ctx.Owner, nsMap: Map[String, Ns]) =
+    (implicit ctx: Ctx.Owner, nsMap: Map[String, Ns]) =
     if (i < favorites.now.size) {
       new Callbacks("").useFavorite(favorites.now.sortBy(_.molecule).apply(i))
     } else {
@@ -146,7 +147,6 @@ trait KeyEvents {
     if (i < queryCache.now.size) {
       modelElements() = queryCache.now.sortBy(_.molecule).apply(i).modelElements
     } else {
-      // Print soft error message to browser console
       window.alert(s"Only ${queryCache.now.size} queries cached.")
     }
 
@@ -162,17 +162,34 @@ trait KeyEvents {
       favoritesElement.getAttribute("style").endsWith("display:block;")
   }
 
-  var firstNumber  = -1
-  var secondNumber = -1
-  val numberMs     = 300 // todo: setting?
 
   def registerKeyEvents(implicit ctx: Ctx.Owner, nsMap: Map[String, Ns]) = Rx {
+    var firstNumber  = -1
+    var secondNumber = -1
+    val numberMs     = 300 // todo: setting?
+
+    var beginning   = 0.0
+    var i           = 0
+    var j           = 0
+    var t1          = 0.0
+    var t2          = 0.0
+    var delta       = 0.0
+    var tProcess    = 0.0
+    var keyRepeatMs = 0L
+    var avg         = 0.0
+    var ratio       = 0.0
+    var throttle    = 3
+
     document.onkeydown = { e: KeyboardEvent =>
       val mod = Seq("Control", "Alt", "Meta", "Shift").exists(m => e.getModifierState(m))
       if (document.activeElement == document.body) {
         if (!mod) {
           e.key match {
-            case "Escape"                          => toggleOff("favorites"); toggleOff("cache"); toggleOff("shortcuts")
+            case "Escape"                          =>
+              curEntity() = 0L
+              toggleOff("favorites")
+              toggleOff("cache")
+              toggleOff("shortcuts")
             case "c"                               => toggleOff("favorites"); toggleOff("shortcuts"); toggleCached()
             case "f"                               => toggleOff("cache"); toggleOff("shortcuts"); toggleFavorites()
             case "s"                               => toggleSnippets
@@ -252,10 +269,46 @@ trait KeyEvents {
           }
 
         } else if (e.getModifierState("Control")) {
-          e.key match {
-            case "ArrowLeft"  => prevPage
-            case "ArrowRight" => nextPage
-            case _            => ()
+          if (e.repeat) {
+
+            // Throttle paging for smooth rendering
+
+            if (beginning < 10000000) {
+              beginning = new Date().getTime
+            }
+
+            i += 1
+            if (keyRepeatMs == 0 && i == 3) {
+              // Measure duration of 2 key repeats and apply a rough
+              // factor of 40% for processing leaving 60% time to rendering
+              keyRepeatMs = ((new Date().getTime - beginning) / 2 * 0.4).round
+              println("keyRepeatInterval " + keyRepeatMs)
+            }
+
+            if (i % throttle == 0) {
+              t1 = new Date().getTime
+              e.key match {
+                case "ArrowLeft"  => prevPage
+                case "ArrowRight" =>
+                  nextPage
+                  j += 1
+                case _            => ()
+              }
+
+              t2 = new Date().getTime
+              delta = t2 - t1
+              tProcess = tProcess + delta
+              avg = (tProcess / j).round
+              ratio = avg / keyRepeatMs
+              throttle = ratio.ceil.toInt
+                            println(s"  $j  $delta    $avg    $ratio    $throttle    " + (t2 - beginning))
+            }
+          } else {
+            e.key match {
+              case "ArrowLeft"  => prevPage
+              case "ArrowRight" => nextPage
+              case _            => ()
+            }
           }
         }
 
@@ -291,12 +344,12 @@ trait KeyEvents {
             // Avoid deleting item code
             if (curCell.getAttribute("class") == "items") {
               // Find caret position in cell
-              val range = window.getSelection.getRangeAt(0)
+              val range         = window.getSelection.getRangeAt(0)
               val preCaretRange = range.cloneRange()
               preCaretRange.selectNodeContents(curCell)
               preCaretRange.setEnd(range.endContainer, range.endOffset)
               val caretOffset = preCaretRange.toString.length
-              if(caretOffset == 0) {
+              if (caretOffset == 0) {
                 // Prevent deleting first item
                 // (would break code structure that we depend on)
                 e.preventDefault()
@@ -305,8 +358,8 @@ trait KeyEvents {
 
           case "Enter" if e.getModifierState("Shift") =>
             val curCell = document.activeElement
-            val card = curCell.getAttribute("card")
-            val cls = curCell.getAttribute("class")
+            val card    = curCell.getAttribute("card")
+            val cls     = curCell.getAttribute("class")
             if (!(
               card != null && (card == "2" || card == "3") ||
                 cls != null && (cls == "str" || cls == "filter" || cls == "edit"))
