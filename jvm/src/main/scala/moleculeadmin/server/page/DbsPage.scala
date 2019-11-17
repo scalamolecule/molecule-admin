@@ -21,19 +21,6 @@ object DbsPage {
       link(rel := "stylesheet", href := routes.Assets.versioned("stylesheets/main2.css").url),
       script(tpe := "text/javascript", src := "versionedAssets/client-fastopt.js"),
     ),
-    //    body(
-//          bs.containerFluid(
-//            bs.row(
-//              display := "block",
-//              Snippet.logo,
-//              span("Molecule Admin", style := "margin-right: 20px; font-size: 20px")
-//            ),
-//            p(),
-//            bs.row(content)
-//          ),
-    //      script("DbsClient.load()")
-    //    )
-
     body(
       script("DbsClient.load()")
     )

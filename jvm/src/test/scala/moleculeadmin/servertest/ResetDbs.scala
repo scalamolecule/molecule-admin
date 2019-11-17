@@ -17,11 +17,11 @@ import moleculeadmin.server.utils.DefFile
 import utest._
 
 /*
-  /Users/mg/molecule/molecule-admin/jvm/src/main/scala/db/core/schema/CoreTestDefinition.scala
-  /Users/mg/molecule/molecule-admin/jvm/src/main/scala/db/migration/schema/PartitionDefinition.scala
-  /Users/mg/molecule/molecule-admin/jvm/src/main/scala/db/migration/schema/Partition1Definition.scala
-  /Users/mg/molecule/molecule-admin/jvm/src/main/scala/db/core/schema/TreeDefinition.scala
-  /Users/mg/molecule/molecule-admin/jvm/src/main/scala/db/integration/schema/MBrainzDefinition.scala
+  /Users/mg/molecule/molecule-admin/molecule-admin/jvm/src/main/scala/db/core/schema/CoreTestDefinition.scala
+  /Users/mg/molecule/molecule-admin/molecule-admin/jvm/src/main/scala/db/migration/schema/PartitionDefinition.scala
+  /Users/mg/molecule/molecule-admin/molecule-admin/jvm/src/main/scala/db/migration/schema/Partition1Definition.scala
+  /Users/mg/molecule/molecule-admin/molecule-admin/jvm/src/main/scala/db/core/schema/TreeDefinition.scala
+  /Users/mg/molecule/molecule-admin/molecule-admin/jvm/src/main/scala/db/integration/schema/MBrainzDefinition.scala
 */
 
 object ResetDbs extends TestSuite with ExampleData with Settings {
@@ -56,7 +56,6 @@ object ResetDbs extends TestSuite with ExampleData with Settings {
     }
 
     val dbs = if (dbs0.isEmpty) List(
-      //      "Clazzig",
       "CoreTest",
       "Partition",
       "Partition1",
@@ -66,11 +65,6 @@ object ResetDbs extends TestSuite with ExampleData with Settings {
 
 
     dbs.foreach {
-      //      case "Clazzig" =>
-      //        if (debug) println("- Clazzig")
-      //        val defFilePath = home / 'clazzig / 'clazzig / 'clazzig / 'server / 'app / 'db / 'schema / "ClazzigDefinition.scala"
-      //        DefFile("Clazzig", Some(defFilePath.toString)).saveToMetaDb
-
       case "CoreTest" =>
         if (debug) println("- CoreTest")
         write.over(coreDefFilePath, coreDefFile)
@@ -137,10 +131,6 @@ object ResetDbs extends TestSuite with ExampleData with Settings {
     Ns.bigDec insert bigDec1
     Ns.date insert List(
       date1,
-      new java.util.Date(8 - 1900, 1 - 1, 2, 2, 4, 5),
-      new java.util.Date(87 - 1900, 1 - 1, 2, 2, 4, 5),
-      new java.util.Date(876 - 1900, 1 - 1, 2, 2, 4, 5),
-      new java.util.Date(2010 - 1900, 11 - 1, 27, 22, 43, 51),
       str2date("2019-09-06 12:17:18.721"),
       str2date("2019-09-06 12:17:18.721 +01:00"),
       str2date("2019-09-06 12:17:18.721 +02:00"),

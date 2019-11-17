@@ -9,15 +9,12 @@ object MetaDefinition {
     trait Db {
       val name        = oneString.uniqueValue.doc("Database name")
       val isMolecular = oneBoolean.noHistory.doc("Marker for non-molecule db without definition file")
-
-      val codeRoot = oneString.noHistory.doc("Full path to root of source code files where db is used")
-
+      val codeRoot    = oneString.noHistory.doc("Full path to root of source code files where db is used")
       val defFilePath = oneString.noHistory.doc("Full path to definition file for database")
       val pkg         = oneString.noHistory.doc("Package of definition file")
       val inputArity  = oneInt.noHistory
       val outputArity = oneInt.noHistory
-
-      val partitions = many[Partition].isComponent.doc("Database owns Partitions")
+      val partitions  = many[Partition].isComponent.doc("Partitions in Database")
     }
 
     object Partition extends Partition
@@ -27,7 +24,7 @@ object MetaDefinition {
       val descr       = oneString.doc("Human short description of partition (used as comment above part in def file)")
       val namespaces  = many[Namespace].isComponent.doc("Partition owns Namespaces")
       val entityCount = oneInt.doc("Latest count of entities with asserted attributes of this partition")
-      val molecules   = manyBi[stats.Molecule.partitions.type].noHistory.doc("Molecules in code using this partition")
+      val molecules   = manyBi[stats.Molecule.partitions.type].doc("Molecules in code using this partition")
     }
 
     object Namespace extends Namespace
@@ -38,7 +35,7 @@ object MetaDefinition {
       val descr       = oneString.doc("Short description of namespace (used as comment above ns in def file)")
       val entityCount = oneInt.doc("Latest count of entities with asserted attributes of this namespace")
       val attrs       = many[Attribute].isComponent.doc("Attribute owns Attributes")
-      val molecules   = manyBi[stats.Molecule.namespaces.type].noHistory.doc("Molecules in code using this namespace")
+      val molecules   = manyBi[stats.Molecule.namespaces.type].doc("Molecules in code using this namespace")
     }
 
     object Attribute extends Attribute
@@ -58,7 +55,7 @@ object MetaDefinition {
       val entityCount        = oneInt.noHistory.doc("Latest count of entities with this attribute asserted")
       val distinctValueCount = oneInt.noHistory.doc("Latest count of distinct values")
       val descrAttr          = oneString.noHistory.doc("For ref attributes only: attr in referenced ns describing that ns")
-      val topValues          = many[stats.TopValue].isComponent.noHistory.doc("Latest Top 25 values (as strings)")
+      val topValues          = many[stats.TopValue].noHistory.isComponent.doc("Latest Top 25 values (as strings)")
 
       // Code stats
       val molecules = manyBi[stats.Molecule.attributes.type].noHistory.doc("Molecules in code using this attribute")
@@ -97,25 +94,28 @@ object MetaDefinition {
       val uuid       = oneUUID
       val username   = oneString
       val password   = oneString
-      val snippets   = manyString.noHistory.doc("Open snippets")
+      // Global settings for user
+      val showViews  = oneBoolean.noHistory.doc("Shown views into the db. Default: none")
+      val views      = manyString.noHistory.doc("Open views")
+      val maxRows    = oneInt.noHistory.doc("Maximum number of rows retrieved from db. Default: -1 (all)")
+      val limit      = oneInt.noHistory.doc("Rows per page. Default: 20")
+      // Db specific settings
       val dbSettings = many[DbSettings].noHistory.isComponent.doc("Multiple settings for multiple databases")
     }
-    trait GlobalSettings {
-      val maxRows      = oneInt.noHistory.doc("Maximum number of rows retrieved from db. Default: -1 (all)")
-      val limit        = oneInt.noHistory.doc("Rows per page. Default: 20")
-      val showSnippets = manyString.noHistory.doc("Snippets shown. Default: none")
-    }
     trait DbSettings {
-      val pos       = oneInt.noHistory.doc("Ordering position")
-      val name      = oneString.noHistory.doc("Optional name for this set of favorites")
-      val db        = one[meta.Db].noHistory.doc("Database")
-      val favorites = many[Favorite].isComponent.noHistory.doc("Saved molecules for this database/set")
+      val db      = one[meta.Db].noHistory.doc("Database")
+      val stars   = manyLong.noHistory.doc("Starred entity ids for this db")
+      val flagged = manyLong.noHistory.doc("Flagged entity ids for this db")
+      val checked = manyLong.noHistory.doc("Checked entity ids for this db")
+      val queries = many[Query].noHistory.isComponent.doc("Saved queries (molecules) for this db")
     }
-    trait Favorite {
-      val pos         = oneInt.noHistory.doc("Ordering position")
-      val name        = oneString.noHistory.doc("Optional user-friendly name for molecule query")
+    trait Query {
+      val pos         = oneInt.noHistory.doc("Ordering position among queries for primary namespace - starts at 1")
+      val name        = oneString.noHistory.doc("Optional user-friendly name of query")
+      val ns          = oneString.noHistory.doc("First/primary namespace in query")
+      val nss         = oneString.noHistory.doc("All namespaces in query")
       val molecule    = oneString.noHistory.doc("Molecule as text string. Model, cache etc will be derived from this.")
-      val colSettings = many[ColSetting].noHistory.isComponent.doc("")
+      val colSettings = many[ColSetting].noHistory.isComponent.doc("Column settings for query result")
     }
     trait ColSetting {
       val index    = oneInt.noHistory.doc("Column index")
@@ -125,10 +125,9 @@ object MetaDefinition {
       val filters  = many[Filter].noHistory.doc("Multiple filters to this query")
     }
     trait Filter {
-      val pos        = oneInt.noHistory.doc("Ordering position")
-      val name       = oneString.noHistory.doc("Optional user-friendly name for filter")
-      val filterExpr = oneString.noHistory.doc("Filter expression. Can be multiline.")
-      val jsCode     = oneString.noHistory.doc("Compiled js code with `fn`. `eval` this to get cached `fn`.")
+      val pos        = oneInt.noHistory.doc("Ordering position - starts at 1")
+      val name       = oneString.noHistory.doc("Optional filter name")
+      val filterExpr = oneString.noHistory.doc("Filter expression. Can be multi-line.")
     }
   }
 }

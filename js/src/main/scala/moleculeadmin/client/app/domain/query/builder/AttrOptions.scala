@@ -41,7 +41,8 @@ case class AttrOptions(
 
   val fulltext: Boolean = if (attrType == "String")
     options.getOrElse(Set.empty[String]).contains("fulltext") else false
-  def id_(id: String): String = s"$refAttr-$nsFull-$attr-$id-$i"
+
+  def id_(id: String): String = s"$path-$nsFull-$attr-$id-$i"
 
 
   def keepSettingsOpen: Unit = {
@@ -177,11 +178,11 @@ case class AttrOptions(
       val checked = attrClass.split('-').last == m
       _radio("mode", id_(s"mode-$m"), m, label, actions, checked)
     }
+
     def closeInputs: Unit =
       document
         .getElementById(id_("inputs"))
         .setAttribute("style", "display:none")
-
 
     if (attrType == "datom") {
       div(

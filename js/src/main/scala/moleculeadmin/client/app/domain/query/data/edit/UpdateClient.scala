@@ -94,7 +94,7 @@ abstract class UpdateClient[T](db: String,
     // Force marking the entity changed
     curEntity() = eid
 
-    // don't know why we need to poke curEntity twice to redraw Entity snippet...
+    // don't know why we need to poke curEntity twice to redraw Entity view...
     curEntity.recalc()
     entityHistorySort.recalc()
 

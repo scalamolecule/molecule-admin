@@ -31,17 +31,17 @@ case class ShortCuts()(implicit val ctx: Ctx.Owner)
     _subMenuShortcuts(
       _shortCutsTable("Keyboard shortcuts", 14,
         _square("?", "Toggle this shortcuts info", { () => hideShortcuts }),
-        _square("f", "Toggle Favorites menu", { () => toggleFavorites }),
-        _square("l", "Toggle Cache menu", { () => toggleCached }),
-        _square("s", "Toggle snippets", { () => toggleSnippets }),
-        _square("q", "Toggle query", { () => toggleQuery }),
+        _square("q", "Toggle Queries menu", { () => toggleQueriesMenu }),
+        _square("r", "Toggle Recent queries menu", { () => toggleRecentMenu }),
+        _square("v", "Toggle views", { () => toggleViews }),
+        _square("b", "Toggle Query Builder", { () => toggleQueryBuilder }),
         _square("m", "Minimize query to selected attributes", { () => toggleMinimize })
       ),
 
       _shortCutsTable("Attribute selections", 14,
         _circle("a", "Show all attributes", { () => toggleAttrSelectionA }),
-        _circle("r", "Show attributes without ref attributes", { () => toggleAttrSelectionR }),
-        _circle("v", "Show only attributes with values", { () => toggleAttrSelectionV })
+//        _circle("r", "Show attributes without ref attributes", { () => toggleAttrSelectionR }),
+//        _circle("v", "Show only attributes with values", { () => toggleAttrSelectionV })
       ),
 
       _shortCutsTable("Data scrolling", 2,

@@ -492,6 +492,28 @@ object Molecule2ModelTest extends TestSuite with TreeSchema with Helpers with Ex
         Generic("Ns", "tx", "datom", NoValue)
       ))
     }
+
+
+    test("edit2") {
+
+      import moleculeadmin.shared.testdata.mBrainzSchema
+      implicit val nsMap = mBrainzSchema.nsMap
+
+      Molecule2Model(
+        "Release.name.Country.e.name._Release.Labels.name.Country.e.name"
+      ) ==> Right(List(
+        Atom("Release", "name", "String", 1, VarValue, None, Seq(), Seq()),
+        Bond("Release", "country", "Country", 1, Seq()),
+        Generic("Country", "e", "datom", EntValue),
+        Atom("Country", "name", "String", 1, VarValue, None, Seq(), Seq()),
+        ReBond("Release"),
+        Bond("Release", "labels", "Label", 2, Seq()),
+        Atom("Label", "name", "String", 1, VarValue, None, Seq(), Seq()),
+        Bond("Label", "country", "Country", 1, Seq()),
+        Generic("Country", "e", "datom", EntValue),
+        Atom("Country", "name", "String", 1, VarValue, None, Seq(), Seq())
+      ))
+    }
   }
 }
 

@@ -5,7 +5,8 @@ import moleculeadmin.client.app.domain.common.TopMenu
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.domain.query.data.DataTable
 import moleculeadmin.client.app.domain.query.data.groupedit.compileTest.TestScalaFiddle
-import moleculeadmin.client.app.domain.query.{KeyEvents, QueryBuilder, QuerySubMenu, SnippetRender}
+//import moleculeadmin.client.app.domain.query.data.groupedit.compileTest.TestScalaFiddle
+import moleculeadmin.client.app.domain.query.{KeyEvents, QueryBuilder, QuerySubMenu, ViewsRender}
 import moleculeadmin.client.app.element.AppElements
 import moleculeadmin.client.autowire.queryWire
 import moleculeadmin.client.rxstuff.RxBindings
@@ -33,36 +34,36 @@ object QueryClient extends RxBindings with TreeOps with SchemaOps with ColOps
     case (dbs, metaSchema, settings) =>
 
       // Uncomment to test dynamic ScalaFiddle compilation
-//       TestScalaFiddle
+      //       TestScalaFiddle
 
       nsMap = mkNsMap(metaSchema)
-      snippetCellTypes = mkSnippetCellTypes(nsMap)
+      viewCellTypes = mkViewCellTypes(nsMap)
       enumAttrs = mkEnumAttrs(nsMap)
 
       Rx {
-        // Set open snippets
+        // Set open views
         settings._1.foreach {
-          case "showSnippets"      => showSnippets() = true
-          case "showHelp"          => showHelp() = true
-          case "showMolecule"      => showMolecule() = true
-          case "showFavorites"     => showFavorites() = true
-          case "showCache"         => showCache() = true
-          case "showDatalog"       => showDatalog() = true
-          case "showTransaction"   => showTransaction() = true
-          case "showEntity"        => showEntity() = true
-          case "showEntityHistory" => showEntityHistory() = true
-          case "showModel"         => showModel() = true
-          case "showQuery"         => showQuery() = true
-          case "showColumns"       => showColumns() = true
-          case "showTree1"         => showTree1() = true
-          case "showTree2"         => showTree2() = true
-          case "showTree3"         => showTree3() = true
-          case _                   =>
+          case "showViews"           => showViews() = true
+          case "showHelp"            => showHelp() = true
+          case "showMolecule"        => showMolecule() = true
+          case "showQueries"         => showQueries() = true
+          case "showRecentMolecules" => showRecentMolecules() = true
+          case "showDatalog"         => showDatalog() = true
+          case "showTransaction"     => showTransaction() = true
+          case "showEntity"          => showEntity() = true
+          case "showEntityHistory"   => showEntityHistory() = true
+          case "showMoleculeModel"   => showMoleculeModel() = true
+          case "showMoleculeQuery"   => showMoleculeQuery() = true
+          case "showColumns"         => showColumns() = true
+          case "showTree1"           => showTree1() = true
+          case "showTree2"           => showTree2() = true
+          case "showTree3"           => showTree3() = true
+          case _                     =>
         }
 
-        // Load favorites
-        favorites.now match {
-          case Nil => favorites() = settings._2
+        // Load saved queries
+        queries.now match {
+          case Nil => queries() = settings._2
           case _   =>
         }
       }
@@ -71,15 +72,14 @@ object QueryClient extends RxBindings with TreeOps with SchemaOps with ColOps
       document.body.appendChild(
         TopMenu(dbs, db, "query", QuerySubMenu(db).dynRender).render
       )
-      // make favorites available via key command
+      // make saved queries available via key command
       registerKeyEvents
       document.body.appendChild {
-        //        println("append all...")
         _containerFluid2(
           _row(
             QueryBuilder(db, metaSchema).rxElement,
             DataTable(db).rxElement,
-            SnippetRender(db).rxElement
+            ViewsRender(db).rxElement
           )
         ).render
       }

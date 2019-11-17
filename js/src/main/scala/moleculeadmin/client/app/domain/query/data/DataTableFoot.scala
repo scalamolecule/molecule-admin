@@ -1,17 +1,24 @@
 package moleculeadmin.client.app.domain.query.data
+import autowire._
+import boopickle.Default._
 import moleculeadmin.client.app.element.query.datatable.FootElements
 import moleculeadmin.client.app.domain.query.KeyEvents
 import moleculeadmin.client.app.domain.query.QueryState._
+import moleculeadmin.client.autowire.queryWire
 import moleculeadmin.client.rxstuff.RxBindings
 import moleculeadmin.shared.ops.query.ColOps
 import org.scalajs.dom.html.{TableRow, TableSection}
 import org.scalajs.dom.raw.Node
+import org.scalajs.dom.window
 import rx.{Ctx, Rx}
 import scalatags.JsDom.all._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 
 case class DataTableFoot()(implicit val ctx: Ctx.Owner)
   extends RxBindings with ColOps with FootElements with KeyEvents {
+
+  type keepBooPickleImport = PickleState
 
 
   def populate(tableFoot: TableSection): Rx.Dynamic[Node] = Rx {
@@ -22,6 +29,12 @@ case class DataTableFoot()(implicit val ctx: Ctx.Owner)
       offset.kill()
       offset() = 0
       limit() = limitSelector.value.toInt
+
+      // Asynchronously save setting
+      queryWire().saveLimitSetting(limit.now).call().foreach {
+        case Left(err) => window.alert(err)
+        case Right(_)  => println("Saved limit setting")
+      }
     }
     val footRow = tr(
       td(

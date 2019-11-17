@@ -1,5 +1,5 @@
 package moleculeadmin.client.app.domain.query
-import moleculeadmin.shared.ast.query.{Col, Favorite, Filter, QueryCache}
+import moleculeadmin.shared.ast.query.{Col, SavedQuery, Filter, QueryCache}
 import moleculeadmin.shared.ast.schema.Ns
 import moleculeadmin.shared.ast.tree.Tree
 import molecule.ast.model.Element
@@ -14,8 +14,8 @@ object QueryState {
 
   // Schema
   implicit var nsMap: Map[String, Ns] = Map.empty[String, Ns]
-  var snippetCellTypes = Map.empty[String, String]
-  var enumAttrs        = Seq.empty[String]
+  var viewCellTypes = Map.empty[String, String]
+  var enumAttrs     = Seq.empty[String]
 
 
   // What is being being processed now? Concatenates part/ns/attr/pos-number as a coordinate in the tree
@@ -50,14 +50,14 @@ object QueryState {
   var rowCount    = 0
   val maxRows     = Var(-1)
   val offset      = Var(0)
-  val limit       = Var(50)
+  val limit       = Var(5)
 
   var editCellId = ""
 
 
   // Caching -----------------------------------
 
-  // Re-use previous query results
+  // Re-use recent query results
   var queryCache = Var(Seq.empty[QueryCache])
 
   // Avoiding re-creating sort index array during paging
@@ -75,11 +75,11 @@ object QueryState {
   var changeArrays = Map.empty[Int, Array[Int]]
 
 
-  // Snippets --------------------------------
+  // Views --------------------------------
 
   val curMolecule = Var("")
 
-  val favorites = Var(Seq.empty[Favorite])
+  val queries = Var(Seq.empty[SavedQuery])
 
   // Entities
   val curEntity         = Var(0L)
@@ -106,22 +106,22 @@ object QueryState {
   val curTx        = Var(0L)
   val curTxInstant = Var("")
 
-  // Show snippet statuses
-  val showSnippets      = Var(false)
-  val showHelp          = Var(false)
-  val showMolecule      = Var(false)
-  val showFavorites     = Var(false)
-  val showCache         = Var(false)
-  val showDatalog       = Var(false)
-  val showTransaction   = Var(false)
-  val showEntity        = Var(false)
-  val showEntityHistory = Var(false)
+  // Show view statuses
+  val showViews           = Var(false)
+  val showHelp            = Var(false)
+  val showMolecule        = Var(false)
+  val showQueries         = Var(false)
+  val showRecentMolecules = Var(false)
+  val showDatalog         = Var(false)
+  val showTransaction     = Var(false)
+  val showEntity          = Var(false)
+  val showEntityHistory   = Var(false)
 
   // Debugging
-  val showModel   = Var(false)
-  val showQuery   = Var(false)
-  val showColumns = Var(false)
-  val showTree1   = Var(false)
-  val showTree2   = Var(false)
-  val showTree3   = Var(false)
+  val showMoleculeModel = Var(false)
+  val showMoleculeQuery = Var(false)
+  val showColumns       = Var(false)
+  val showTree1         = Var(false)
+  val showTree2         = Var(false)
+  val showTree3         = Var(false)
 }

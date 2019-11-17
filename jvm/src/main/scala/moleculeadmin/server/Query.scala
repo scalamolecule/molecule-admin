@@ -1,11 +1,9 @@
 package moleculeadmin.server
 
-import java.net.URI
-import java.time.ZoneOffset
-import java.util
-import java.util.{Date, UUID}
 import java.lang.{Long => jLong}
-import datomic.{Connection, Peer, Util}
+import java.net.URI
+import java.util.{Date, UUID}
+import datomic.{Peer, Util}
 import db.admin.dsl.meta._
 import db.core.dsl.coreTest.Ns
 import molecule.api.Entity
@@ -15,9 +13,9 @@ import molecule.ast.transactionModel.{Add, Retract}
 import molecule.facade.{Conn, TxReport}
 import moleculeadmin.server.query.Rows2QueryResult
 import moleculeadmin.shared.api.QueryApi
-import moleculeadmin.shared.ast.query.{Col, Favorite, QueryResult}
+import moleculeadmin.shared.ast.query.{Col, SavedQuery, QueryResult}
 import scala.collection.JavaConverters._
-import scala.collection.mutable.ListBuffer
+
 
 class Query extends QueryApi with Base {
 
@@ -218,7 +216,7 @@ class Query extends QueryApi with Base {
   }
 
 
-  override def addFavorite(db: String, favorite: Favorite): Either[String, String] = {
+  override def addQuery(db: String, savedQuery: SavedQuery): Either[String, String] = {
     implicit val conn = Conn(base + "/meta")
     withTransactor {
       try {
@@ -242,15 +240,15 @@ class Query extends QueryApi with Base {
             dbSettingsId1
         }
 
-        val Favorite(favMolecule, colSettings) = favorite
+        val SavedQuery(molecule1, colSettings) = savedQuery
 
-        if (user_DbSettings(dbSettingsId).Favorites.molecule.get.contains(favMolecule)) {
-          Left(s"`$favMolecule` is already a favorite molecule.")
+        if (user_DbSettings(dbSettingsId).Queries.molecule.get.contains(molecule1)) {
+          Left(s"`$molecule1` is already saved.")
         } else {
           val colSettings1  = colSettings.map(cs => (cs.index, cs.attrExpr, cs.sortDir, cs.sortPos))
           val colSettingIds = user_ColSetting.index.attrExpr.sortDir.sortPos.insert(colSettings1).eidSet
-          val newFavId      = user_Favorite.molecule(favMolecule).colSettings(colSettingIds).save.eid
-          user_DbSettings(dbSettingsId).favorites.assert(newFavId).update
+          val newFavId      = user_Query.molecule(molecule1).colSettings(colSettingIds).save.eid
+          user_DbSettings(dbSettingsId).queries.assert(newFavId).update
           Right("ok")
         }
       } catch {
@@ -259,15 +257,15 @@ class Query extends QueryApi with Base {
     }
   }
 
-  override def retractFavorite(db: String, favMolecule: String): Either[String, String] = {
+  override def retractQuery(db: String, favMolecule: String): Either[String, String] = {
     implicit val conn = Conn(base + "/meta")
     withTransactor {
       try {
-        user_User.username_("admin").DbSettings.Db.name_(db)._DbSettings.Favorites.e.molecule_(favMolecule).get match {
-          case Nil         => Left(s"Unexpectedly couldn't find favorite molecule `$favMolecule` in meta database.")
+        user_User.username_("admin").DbSettings.Db.name_(db)._DbSettings.Queries.e.molecule_(favMolecule).get match {
+          case Nil         => Left(s"Unexpectedly couldn't find saved molecule `$favMolecule` in meta database.")
           case List(favId) => favId.retract; Right("ok")
           case favIds      =>
-            Left(s"Unexpectedly found ${favIds.size} instances of favorite molecule `$favMolecule` in meta database.")
+            Left(s"Unexpectedly found ${favIds.size} instances of saved molecule `$favMolecule` in meta database.")
         }
       } catch {
         case t: Throwable => Left(t.getMessage)
@@ -275,7 +273,7 @@ class Query extends QueryApi with Base {
     }
   }
 
-  override def saveSnippetSettings(openSnippets: Seq[String]): Either[String, String] = {
+  override def saveViewSettings(openViews: Seq[String]): Either[String, String] = {
     implicit val conn = Conn(base + "/meta")
     withTransactor {
       try {
@@ -284,8 +282,44 @@ class Query extends QueryApi with Base {
           case List(eid) => eid
           case Nil       => user_User.username("admin").save.eid
         }
-        // Replace open snippets setting
-        user_User(userId).snippets(openSnippets).update
+        // Replace open views setting
+        user_User(userId).views(openViews).update
+        Right("ok")
+      } catch {
+        case t: Throwable => Left(t.getMessage)
+      }
+    }
+  }
+
+  override def saveMaxRowsSetting(maxRows: Int): Either[String, String] = {
+    implicit val conn = Conn(base + "/meta")
+    withTransactor {
+      try {
+        // Use admin for now
+        val userId = user_User.e.username_("admin").get match {
+          case List(eid) => eid
+          case Nil       => user_User.username("admin").save.eid
+        }
+        // Replace open views setting
+//        user_User(userId).views(openViews).update
+        Right("ok")
+      } catch {
+        case t: Throwable => Left(t.getMessage)
+      }
+    }
+  }
+
+  override def saveLimitSetting(limit: Int): Either[String, String] = {
+    implicit val conn = Conn(base + "/meta")
+    withTransactor {
+      try {
+        // Use admin for now
+        val userId = user_User.e.username_("admin").get match {
+          case List(eid) => eid
+          case Nil       => user_User.username("admin").save.eid
+        }
+        // Replace open views setting
+//        user_User(userId).views(openSnippets).update
         Right("ok")
       } catch {
         case t: Throwable => Left(t.getMessage)

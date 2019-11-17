@@ -50,14 +50,12 @@ object query extends HelpersAdmin {
    * @param colIndex   index in table
    * @param filterExpr filter expression including possible newlines
    * @param pred       Scala predicate to filter each value
-   * @param jsCode     JS code to `eval` when no typed Scala predicate
-   * */
+   **/
   case class Filter[T](
     colIndex: Int,
     colType: String,
     filterExpr: String,
-    pred: T => Boolean,
-    jsCode: String = ""
+    pred: T => Boolean
   )
 
 
@@ -72,7 +70,7 @@ object query extends HelpersAdmin {
     filterIndex: Array[Int]
   )
 
-  case class Favorite(
+  case class SavedQuery(
     molecule: String,
     colSettings: Seq[ColSetting]
   )
