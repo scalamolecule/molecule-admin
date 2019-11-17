@@ -240,9 +240,9 @@ abstract class Cell(
             curFlagIndexes(colIndex + 1) = flagIndex
             curCheckIndexes(colIndex + 1) = checkIndex
 
-            val star  = Marker(tableBody, eColIndexes, "star")
-            val flag  = Marker(tableBody, eColIndexes, "flag")
-            val check = Marker(tableBody, eColIndexes, "check")
+            val star  = Marker(db, tableBody, eColIndexes, "star")
+            val flag  = Marker(db, tableBody, eColIndexes, "flag")
+            val check = Marker(db, tableBody, eColIndexes, "check")
 
             (rowIndex: Int) =>
               // Set entity id for updates of subsequent attribute values

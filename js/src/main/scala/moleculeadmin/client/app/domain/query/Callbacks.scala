@@ -61,7 +61,7 @@ class Callbacks(db: String)(implicit ctx: Ctx.Owner) extends RxBindings {
             window.alert(s"Error adding query: $error")
             idle = true
           case Right(_)    =>
-            queries() = queries.now :+ query
+            savedQueries() = savedQueries.now :+ query
             idle = true
         }
       }
@@ -75,7 +75,7 @@ class Callbacks(db: String)(implicit ctx: Ctx.Owner) extends RxBindings {
             window.alert(s"Error retracting query: $error")
             idle = true
           case Right(_)    =>
-            queries() = queries.now.filterNot(_.molecule == molecule1)
+            savedQueries() = savedQueries.now.filterNot(_.molecule == molecule1)
             idle = true
         }
       }

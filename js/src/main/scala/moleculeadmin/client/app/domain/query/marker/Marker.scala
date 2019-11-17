@@ -1,14 +1,23 @@
 package moleculeadmin.client.app.domain.query.marker
-import moleculeadmin.client.app.domain.query.QueryState._
+import autowire._
+import boopickle.Default._
+import moleculeadmin.client.app.domain.query.QueryState.{dbSettingsIdOpt, _}
 import moleculeadmin.client.app.element.AppElements
+import moleculeadmin.client.autowire.queryWire
 import org.scalajs.dom.html.TableSection
 import org.scalajs.dom.raw.{Element, HTMLCollection}
+import org.scalajs.dom.window
+import scala.concurrent.ExecutionContext.Implicits.global
+
 
 case class Marker(
+  db: String,
   tableBody: TableSection,
   eColIndexes: Seq[Int],
   tpe: String
 ) extends AppElements {
+
+  type keepBooPickleImport = PickleState
 
   var (curMarkerIndexes, curMarker, onCls, offCls, iconIndex) = tpe match {
     case "star"  => (curStarIndexes, curStars, mark.starOn, mark.starOff, 0)
@@ -26,8 +35,15 @@ case class Marker(
       curMarker = curMarker.filterNot(_ == eid)
       offCls
     } else {
-      curMarker = eid :: curMarker
+      curMarker = curMarker + eid
       onCls
+    }
+
+    queryWire().toggleMarker(db, dbSettingsIdOpt, tpe, eid, isOn).call().foreach {
+      case Left(err)            => window.alert(err)
+      case Right(dbSettingsId1) =>
+        dbSettingsIdOpt = Some(dbSettingsId1)
+        println(s"Eid $eid $tpe: " + !isOn)
     }
 
     val rows      = tableBody.children
@@ -46,14 +62,16 @@ case class Marker(
           i += 1
         }
 
-        val entityIndex1 = curEntityIndexes(c1)(eid)
-        val markerIndex1 = curMarkerIndexes(c1)
+        val entityIndex1opt = curEntityIndexes(c1).get(eid)
+        val markerIndex1    = curMarkerIndexes(c1)
 
-        i = 0
-        while (i < entityIndex1.length) {
-          entityRow = entityIndex1(i)
-          markerIndex1(entityRow) = !markerIndex1(entityRow)
-          i += 1
+        entityIndex1opt.foreach { entityIndex1 =>
+          i = 0
+          while (i < entityIndex1.length) {
+            entityRow = entityIndex1(i)
+            markerIndex1(entityRow) = !markerIndex1(entityRow)
+            i += 1
+          }
         }
       }
 
@@ -72,22 +90,26 @@ case class Marker(
           i += 1
         }
 
-        val entityIndex1 = curEntityIndexes(c1)(eid)
-        val entityIndex2 = curEntityIndexes(c2)(eid)
-        val markerIndex1 = curMarkerIndexes(c1)
-        val markerIndex2 = curMarkerIndexes(c2)
+        val entityIndex1opt = curEntityIndexes(c1).get(eid)
+        val entityIndex2opt = curEntityIndexes(c2).get(eid)
+        val markerIndex1    = curMarkerIndexes(c1)
+        val markerIndex2    = curMarkerIndexes(c2)
 
-        i = 0
-        while (i < entityIndex1.length) {
-          entityRow = entityIndex1(i)
-          markerIndex1(entityRow) = !markerIndex1(entityRow)
-          i += 1
+        entityIndex1opt.foreach { entityIndex1 =>
+          i = 0
+          while (i < entityIndex1.length) {
+            entityRow = entityIndex1(i)
+            markerIndex1(entityRow) = !markerIndex1(entityRow)
+            i += 1
+          }
         }
-        i = 0
-        while (i < entityIndex2.length) {
-          entityRow = entityIndex2(i)
-          markerIndex2(entityRow) = !markerIndex2(entityRow)
-          i += 1
+        entityIndex2opt.foreach { entityIndex2 =>
+          i = 0
+          while (i < entityIndex2.length) {
+            entityRow = entityIndex2(i)
+            markerIndex2(entityRow) = !markerIndex2(entityRow)
+            i += 1
+          }
         }
       }
 
@@ -110,30 +132,36 @@ case class Marker(
           i += 1
         }
 
-        val entityIndex1 = curEntityIndexes(c1)(eid)
-        val entityIndex2 = curEntityIndexes(c2)(eid)
-        val entityIndex3 = curEntityIndexes(c3)(eid)
-        val markerIndex1 = curMarkerIndexes(c1)
-        val markerIndex2 = curMarkerIndexes(c2)
-        val markerIndex3 = curMarkerIndexes(c3)
+        val entityIndex1opt = curEntityIndexes(c1).get(eid)
+        val entityIndex2opt = curEntityIndexes(c2).get(eid)
+        val entityIndex3opt = curEntityIndexes(c3).get(eid)
+        val markerIndex1    = curMarkerIndexes(c1)
+        val markerIndex2    = curMarkerIndexes(c2)
+        val markerIndex3    = curMarkerIndexes(c3)
 
-        i = 0
-        while (i < entityIndex1.length) {
-          entityRow = entityIndex1(i)
-          markerIndex1(entityRow) = !markerIndex1(entityRow)
-          i += 1
+        entityIndex1opt.foreach { entityIndex1 =>
+          i = 0
+          while (i < entityIndex1.length) {
+            entityRow = entityIndex1(i)
+            markerIndex1(entityRow) = !markerIndex1(entityRow)
+            i += 1
+          }
         }
-        i = 0
-        while (i < entityIndex2.length) {
-          entityRow = entityIndex2(i)
-          markerIndex2(entityRow) = !markerIndex2(entityRow)
-          i += 1
+        entityIndex2opt.foreach { entityIndex2 =>
+          i = 0
+          while (i < entityIndex2.length) {
+            entityRow = entityIndex2(i)
+            markerIndex2(entityRow) = !markerIndex2(entityRow)
+            i += 1
+          }
         }
-        i = 0
-        while (i < entityIndex3.length) {
-          entityRow = entityIndex3(i)
-          markerIndex3(entityRow) = !markerIndex3(entityRow)
-          i += 1
+        entityIndex3opt.foreach { entityIndex3 =>
+          i = 0
+          while (i < entityIndex3.length) {
+            entityRow = entityIndex3(i)
+            markerIndex3(entityRow) = !markerIndex3(entityRow)
+            i += 1
+          }
         }
       }
 
@@ -160,38 +188,47 @@ case class Marker(
           i += 1
         }
 
-        val entityIndex1 = curEntityIndexes(c1)(eid)
-        val entityIndex2 = curEntityIndexes(c2)(eid)
-        val entityIndex3 = curEntityIndexes(c3)(eid)
-        val entityIndex4 = curEntityIndexes(c4)(eid)
-        val markerIndex1 = curMarkerIndexes(c1)
-        val markerIndex2 = curMarkerIndexes(c2)
-        val markerIndex3 = curMarkerIndexes(c3)
-        val markerIndex4 = curMarkerIndexes(c4)
+        val entityIndex1opt = curEntityIndexes(c1).get(eid)
+        val entityIndex2opt = curEntityIndexes(c2).get(eid)
+        val entityIndex3opt = curEntityIndexes(c3).get(eid)
+        val entityIndex4opt = curEntityIndexes(c4).get(eid)
+        val markerIndex1    = curMarkerIndexes(c1)
+        val markerIndex2    = curMarkerIndexes(c2)
+        val markerIndex3    = curMarkerIndexes(c3)
+        val markerIndex4    = curMarkerIndexes(c4)
 
-        i = 0
-        while (i < entityIndex1.length) {
-          entityRow = entityIndex1(i)
-          markerIndex1(entityRow) = !markerIndex1(entityRow)
-          i += 1
+        entityIndex1opt.foreach { entityIndex1 =>
+          i = 0
+          while (i < entityIndex1.length) {
+            entityRow = entityIndex1(i)
+            markerIndex1(entityRow) = !markerIndex1(entityRow)
+            i += 1
+          }
         }
-        i = 0
-        while (i < entityIndex2.length) {
-          entityRow = entityIndex2(i)
-          markerIndex2(entityRow) = !markerIndex2(entityRow)
-          i += 1
+
+        entityIndex2opt.foreach { entityIndex2 =>
+          i = 0
+          while (i < entityIndex2.length) {
+            entityRow = entityIndex2(i)
+            markerIndex2(entityRow) = !markerIndex2(entityRow)
+            i += 1
+          }
         }
-        i = 0
-        while (i < entityIndex3.length) {
-          entityRow = entityIndex3(i)
-          markerIndex3(entityRow) = !markerIndex3(entityRow)
-          i += 1
+        entityIndex3opt.foreach { entityIndex3 =>
+          i = 0
+          while (i < entityIndex3.length) {
+            entityRow = entityIndex3(i)
+            markerIndex3(entityRow) = !markerIndex3(entityRow)
+            i += 1
+          }
         }
-        i = 0
-        while (i < entityIndex4.length) {
-          entityRow = entityIndex4(i)
-          markerIndex4(entityRow) = !markerIndex4(entityRow)
-          i += 1
+        entityIndex4opt.foreach { entityIndex4 =>
+          i = 0
+          while (i < entityIndex4.length) {
+            entityRow = entityIndex4(i)
+            markerIndex4(entityRow) = !markerIndex4(entityRow)
+            i += 1
+          }
         }
       }
 
@@ -222,46 +259,56 @@ case class Marker(
           i += 1
         }
 
-        val entityIndex1 = curEntityIndexes(c1)(eid)
-        val entityIndex2 = curEntityIndexes(c2)(eid)
-        val entityIndex3 = curEntityIndexes(c3)(eid)
-        val entityIndex4 = curEntityIndexes(c4)(eid)
-        val entityIndex5 = curEntityIndexes(c5)(eid)
-        val markerIndex1 = curMarkerIndexes(c1)
-        val markerIndex2 = curMarkerIndexes(c2)
-        val markerIndex3 = curMarkerIndexes(c3)
-        val markerIndex4 = curMarkerIndexes(c4)
-        val markerIndex5 = curMarkerIndexes(c5)
+        val entityIndex1opt = curEntityIndexes(c1).get(eid)
+        val entityIndex2opt = curEntityIndexes(c2).get(eid)
+        val entityIndex3opt = curEntityIndexes(c3).get(eid)
+        val entityIndex4opt = curEntityIndexes(c4).get(eid)
+        val entityIndex5opt = curEntityIndexes(c5).get(eid)
+        val markerIndex1    = curMarkerIndexes(c1)
+        val markerIndex2    = curMarkerIndexes(c2)
+        val markerIndex3    = curMarkerIndexes(c3)
+        val markerIndex4    = curMarkerIndexes(c4)
+        val markerIndex5    = curMarkerIndexes(c5)
 
-        i = 0
-        while (i < entityIndex1.length) {
-          entityRow = entityIndex1(i)
-          markerIndex1(entityRow) = !markerIndex1(entityRow)
-          i += 1
+        entityIndex1opt.foreach { entityIndex1 =>
+          i = 0
+          while (i < entityIndex1.length) {
+            entityRow = entityIndex1(i)
+            markerIndex1(entityRow) = !markerIndex1(entityRow)
+            i += 1
+          }
         }
-        i = 0
-        while (i < entityIndex2.length) {
-          entityRow = entityIndex2(i)
-          markerIndex2(entityRow) = !markerIndex2(entityRow)
-          i += 1
+        entityIndex2opt.foreach { entityIndex2 =>
+          i = 0
+          while (i < entityIndex2.length) {
+            entityRow = entityIndex2(i)
+            markerIndex2(entityRow) = !markerIndex2(entityRow)
+            i += 1
+          }
         }
-        i = 0
-        while (i < entityIndex3.length) {
-          entityRow = entityIndex3(i)
-          markerIndex3(entityRow) = !markerIndex3(entityRow)
-          i += 1
+        entityIndex3opt.foreach { entityIndex3 =>
+          i = 0
+          while (i < entityIndex3.length) {
+            entityRow = entityIndex3(i)
+            markerIndex3(entityRow) = !markerIndex3(entityRow)
+            i += 1
+          }
         }
-        i = 0
-        while (i < entityIndex4.length) {
-          entityRow = entityIndex4(i)
-          markerIndex4(entityRow) = !markerIndex4(entityRow)
-          i += 1
+        entityIndex4opt.foreach { entityIndex4 =>
+          i = 0
+          while (i < entityIndex4.length) {
+            entityRow = entityIndex4(i)
+            markerIndex4(entityRow) = !markerIndex4(entityRow)
+            i += 1
+          }
         }
-        i = 0
-        while (i < entityIndex5.length) {
-          entityRow = entityIndex5(i)
-          markerIndex5(entityRow) = !markerIndex5(entityRow)
-          i += 1
+        entityIndex5opt.foreach { entityIndex5 =>
+          i = 0
+          while (i < entityIndex5.length) {
+            entityRow = entityIndex5(i)
+            markerIndex5(entityRow) = !markerIndex5(entityRow)
+            i += 1
+          }
         }
       }
 
@@ -296,54 +343,66 @@ case class Marker(
           i += 1
         }
 
-        val entityIndex1 = curEntityIndexes(c1)(eid)
-        val entityIndex2 = curEntityIndexes(c2)(eid)
-        val entityIndex3 = curEntityIndexes(c3)(eid)
-        val entityIndex4 = curEntityIndexes(c4)(eid)
-        val entityIndex5 = curEntityIndexes(c5)(eid)
-        val entityIndex6 = curEntityIndexes(c6)(eid)
-        val markerIndex1 = curMarkerIndexes(c1)
-        val markerIndex2 = curMarkerIndexes(c2)
-        val markerIndex3 = curMarkerIndexes(c3)
-        val markerIndex4 = curMarkerIndexes(c4)
-        val markerIndex5 = curMarkerIndexes(c5)
-        val markerIndex6 = curMarkerIndexes(c6)
+        val entityIndex1opt = curEntityIndexes(c1).get(eid)
+        val entityIndex2opt = curEntityIndexes(c2).get(eid)
+        val entityIndex3opt = curEntityIndexes(c3).get(eid)
+        val entityIndex4opt = curEntityIndexes(c4).get(eid)
+        val entityIndex5opt = curEntityIndexes(c5).get(eid)
+        val entityIndex6opt = curEntityIndexes(c6).get(eid)
+        val markerIndex1    = curMarkerIndexes(c1)
+        val markerIndex2    = curMarkerIndexes(c2)
+        val markerIndex3    = curMarkerIndexes(c3)
+        val markerIndex4    = curMarkerIndexes(c4)
+        val markerIndex5    = curMarkerIndexes(c5)
+        val markerIndex6    = curMarkerIndexes(c6)
 
-        i = 0
-        while (i < entityIndex1.length) {
-          entityRow = entityIndex1(i)
-          markerIndex1(entityRow) = !markerIndex1(entityRow)
-          i += 1
+        entityIndex1opt.foreach { entityIndex1 =>
+          i = 0
+          while (i < entityIndex1.length) {
+            entityRow = entityIndex1(i)
+            markerIndex1(entityRow) = !markerIndex1(entityRow)
+            i += 1
+          }
         }
-        i = 0
-        while (i < entityIndex2.length) {
-          entityRow = entityIndex2(i)
-          markerIndex2(entityRow) = !markerIndex2(entityRow)
-          i += 1
+        entityIndex2opt.foreach { entityIndex2 =>
+          i = 0
+          while (i < entityIndex2.length) {
+            entityRow = entityIndex2(i)
+            markerIndex2(entityRow) = !markerIndex2(entityRow)
+            i += 1
+          }
         }
-        i = 0
-        while (i < entityIndex3.length) {
-          entityRow = entityIndex3(i)
-          markerIndex3(entityRow) = !markerIndex3(entityRow)
-          i += 1
+        entityIndex3opt.foreach { entityIndex3 =>
+          i = 0
+          while (i < entityIndex3.length) {
+            entityRow = entityIndex3(i)
+            markerIndex3(entityRow) = !markerIndex3(entityRow)
+            i += 1
+          }
         }
-        i = 0
-        while (i < entityIndex4.length) {
-          entityRow = entityIndex4(i)
-          markerIndex4(entityRow) = !markerIndex4(entityRow)
-          i += 1
+        entityIndex4opt.foreach { entityIndex4 =>
+          i = 0
+          while (i < entityIndex4.length) {
+            entityRow = entityIndex4(i)
+            markerIndex4(entityRow) = !markerIndex4(entityRow)
+            i += 1
+          }
         }
-        i = 0
-        while (i < entityIndex5.length) {
-          entityRow = entityIndex5(i)
-          markerIndex5(entityRow) = !markerIndex5(entityRow)
-          i += 1
+        entityIndex5opt.foreach { entityIndex5 =>
+          i = 0
+          while (i < entityIndex5.length) {
+            entityRow = entityIndex5(i)
+            markerIndex5(entityRow) = !markerIndex5(entityRow)
+            i += 1
+          }
         }
-        i = 0
-        while (i < entityIndex6.length) {
-          entityRow = entityIndex6(i)
-          markerIndex6(entityRow) = !markerIndex6(entityRow)
-          i += 1
+        entityIndex6opt.foreach { entityIndex6 =>
+          i = 0
+          while (i < entityIndex6.length) {
+            entityRow = entityIndex6(i)
+            markerIndex6(entityRow) = !markerIndex6(entityRow)
+            i += 1
+          }
         }
       }
 
@@ -382,62 +441,76 @@ case class Marker(
           i += 1
         }
 
-        val entityIndex1 = curEntityIndexes(c1)(eid)
-        val entityIndex2 = curEntityIndexes(c2)(eid)
-        val entityIndex3 = curEntityIndexes(c3)(eid)
-        val entityIndex4 = curEntityIndexes(c4)(eid)
-        val entityIndex5 = curEntityIndexes(c5)(eid)
-        val entityIndex6 = curEntityIndexes(c6)(eid)
-        val entityIndex7 = curEntityIndexes(c7)(eid)
-        val markerIndex1 = curMarkerIndexes(c1)
-        val markerIndex2 = curMarkerIndexes(c2)
-        val markerIndex3 = curMarkerIndexes(c3)
-        val markerIndex4 = curMarkerIndexes(c4)
-        val markerIndex5 = curMarkerIndexes(c5)
-        val markerIndex6 = curMarkerIndexes(c6)
-        val markerIndex7 = curMarkerIndexes(c7)
+        val entityIndex1opt = curEntityIndexes(c1).get(eid)
+        val entityIndex2opt = curEntityIndexes(c2).get(eid)
+        val entityIndex3opt = curEntityIndexes(c3).get(eid)
+        val entityIndex4opt = curEntityIndexes(c4).get(eid)
+        val entityIndex5opt = curEntityIndexes(c5).get(eid)
+        val entityIndex6opt = curEntityIndexes(c6).get(eid)
+        val entityIndex7opt = curEntityIndexes(c7).get(eid)
+        val markerIndex1    = curMarkerIndexes(c1)
+        val markerIndex2    = curMarkerIndexes(c2)
+        val markerIndex3    = curMarkerIndexes(c3)
+        val markerIndex4    = curMarkerIndexes(c4)
+        val markerIndex5    = curMarkerIndexes(c5)
+        val markerIndex6    = curMarkerIndexes(c6)
+        val markerIndex7    = curMarkerIndexes(c7)
 
-        i = 0
-        while (i < entityIndex1.length) {
-          entityRow = entityIndex1(i)
-          markerIndex1(entityRow) = !markerIndex1(entityRow)
-          i += 1
+        entityIndex1opt.foreach { entityIndex1 =>
+          i = 0
+          while (i < entityIndex1.length) {
+            entityRow = entityIndex1(i)
+            markerIndex1(entityRow) = !markerIndex1(entityRow)
+            i += 1
+          }
         }
-        i = 0
-        while (i < entityIndex2.length) {
-          entityRow = entityIndex2(i)
-          markerIndex2(entityRow) = !markerIndex2(entityRow)
-          i += 1
+        entityIndex2opt.foreach { entityIndex2 =>
+          i = 0
+          while (i < entityIndex2.length) {
+            entityRow = entityIndex2(i)
+            markerIndex2(entityRow) = !markerIndex2(entityRow)
+            i += 1
+          }
         }
-        i = 0
-        while (i < entityIndex3.length) {
-          entityRow = entityIndex3(i)
-          markerIndex3(entityRow) = !markerIndex3(entityRow)
-          i += 1
+        entityIndex3opt.foreach { entityIndex3 =>
+          i = 0
+          while (i < entityIndex3.length) {
+            entityRow = entityIndex3(i)
+            markerIndex3(entityRow) = !markerIndex3(entityRow)
+            i += 1
+          }
         }
-        i = 0
-        while (i < entityIndex4.length) {
-          entityRow = entityIndex4(i)
-          markerIndex4(entityRow) = !markerIndex4(entityRow)
-          i += 1
+        entityIndex4opt.foreach { entityIndex4 =>
+          i = 0
+          while (i < entityIndex4.length) {
+            entityRow = entityIndex4(i)
+            markerIndex4(entityRow) = !markerIndex4(entityRow)
+            i += 1
+          }
         }
-        i = 0
-        while (i < entityIndex5.length) {
-          entityRow = entityIndex5(i)
-          markerIndex5(entityRow) = !markerIndex5(entityRow)
-          i += 1
+        entityIndex5opt.foreach { entityIndex5 =>
+          i = 0
+          while (i < entityIndex5.length) {
+            entityRow = entityIndex5(i)
+            markerIndex5(entityRow) = !markerIndex5(entityRow)
+            i += 1
+          }
         }
-        i = 0
-        while (i < entityIndex6.length) {
-          entityRow = entityIndex6(i)
-          markerIndex6(entityRow) = !markerIndex6(entityRow)
-          i += 1
+        entityIndex6opt.foreach { entityIndex6 =>
+          i = 0
+          while (i < entityIndex6.length) {
+            entityRow = entityIndex6(i)
+            markerIndex6(entityRow) = !markerIndex6(entityRow)
+            i += 1
+          }
         }
-        i = 0
-        while (i < entityIndex7.length) {
-          entityRow = entityIndex7(i)
-          markerIndex7(entityRow) = !markerIndex7(entityRow)
-          i += 1
+        entityIndex7opt.foreach { entityIndex7 =>
+          i = 0
+          while (i < entityIndex7.length) {
+            entityRow = entityIndex7(i)
+            markerIndex7(entityRow) = !markerIndex7(entityRow)
+            i += 1
+          }
         }
       }
 

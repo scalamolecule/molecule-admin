@@ -11,7 +11,7 @@ case class Queries(db: String)(implicit val ctx: Ctx.Owner)
 
   def dynRender = Rx {
     _subMenuQueries(
-      queries().sortBy(_.molecule),
+      savedQueries().sortBy(_.molecule),
       curMolecule.now,
       useQueryCallback,
       retractQueryCallback

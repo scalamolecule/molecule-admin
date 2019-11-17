@@ -4,8 +4,6 @@ import boopickle.Default._
 import moleculeadmin.client.app.domain.common.TopMenu
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.domain.query.data.DataTable
-import moleculeadmin.client.app.domain.query.data.groupedit.compileTest.TestScalaFiddle
-//import moleculeadmin.client.app.domain.query.data.groupedit.compileTest.TestScalaFiddle
 import moleculeadmin.client.app.domain.query.{KeyEvents, QueryBuilder, QuerySubMenu, ViewsRender}
 import moleculeadmin.client.app.element.AppElements
 import moleculeadmin.client.autowire.queryWire
@@ -13,7 +11,7 @@ import moleculeadmin.client.rxstuff.RxBindings
 import moleculeadmin.shared.ops.query.builder.TreeOps
 import moleculeadmin.shared.ops.query.{ColOps, SchemaOps}
 import moleculeadmin.shared.ops.transform.Model2Molecule
-import org.scalajs.dom.{document, window}
+import org.scalajs.dom.document
 import rx.{Ctx, Rx}
 import scalatags.JsDom.all._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -28,21 +26,28 @@ object QueryClient extends RxBindings with TreeOps with SchemaOps with ColOps
 
   implicit val ctx: Ctx.Owner = rx.Ctx.Owner.safe()
 
-
   @JSExport
   def load(db: String): Unit = queryWire().loadMetaData(db).call().map {
-    case (dbs, metaSchema, settings) =>
+    case (dbs, metaSchema, (settings, views, stars, flags, checks, queries)) =>
 
       // Uncomment to test dynamic ScalaFiddle compilation
+      //import moleculeadmin.client.app.domain.query.data.groupedit.compileTest.TestScalaFiddle
       //       TestScalaFiddle
 
       nsMap = mkNsMap(metaSchema)
       viewCellTypes = mkViewCellTypes(nsMap)
       enumAttrs = mkEnumAttrs(nsMap)
 
+
+      // Set saved settings
       Rx {
-        // Set open views
-        settings._1.foreach {
+        maxRows() = settings.getOrElse("maxRows", "-1").toInt
+        limit() = settings.getOrElse("limit", "20").toInt
+        savedQueries() = queries
+        curStars = stars
+        curFlags = flags
+        curChecks = checks
+        views.foreach {
           case "showViews"           => showViews() = true
           case "showHelp"            => showHelp() = true
           case "showMolecule"        => showMolecule() = true
@@ -59,12 +64,6 @@ object QueryClient extends RxBindings with TreeOps with SchemaOps with ColOps
           case "showTree2"           => showTree2() = true
           case "showTree3"           => showTree3() = true
           case _                     =>
-        }
-
-        // Load saved queries
-        queries.now match {
-          case Nil => queries() = settings._2
-          case _   =>
         }
       }
 

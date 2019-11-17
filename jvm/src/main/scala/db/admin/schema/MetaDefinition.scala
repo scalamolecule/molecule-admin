@@ -95,18 +95,16 @@ object MetaDefinition {
       val username   = oneString
       val password   = oneString
       // Global settings for user
-      val showViews  = oneBoolean.noHistory.doc("Shown views into the db. Default: none")
       val views      = manyString.noHistory.doc("Open views")
-      val maxRows    = oneInt.noHistory.doc("Maximum number of rows retrieved from db. Default: -1 (all)")
-      val limit      = oneInt.noHistory.doc("Rows per page. Default: 20")
+      val settings   = mapString.noHistory.doc("Key/setting pairs")
       // Db specific settings
       val dbSettings = many[DbSettings].noHistory.isComponent.doc("Multiple settings for multiple databases")
     }
     trait DbSettings {
       val db      = one[meta.Db].noHistory.doc("Database")
       val stars   = manyLong.noHistory.doc("Starred entity ids for this db")
-      val flagged = manyLong.noHistory.doc("Flagged entity ids for this db")
-      val checked = manyLong.noHistory.doc("Checked entity ids for this db")
+      val flags   = manyLong.noHistory.doc("Flagged entity ids for this db")
+      val checks  = manyLong.noHistory.doc("Checked entity ids for this db")
       val queries = many[Query].noHistory.isComponent.doc("Saved queries (molecules) for this db")
     }
     trait Query {

@@ -58,7 +58,7 @@ case class Views()(implicit val ctx: Ctx.Owner)
         }
 
         // Asynchronously save setting
-        queryWire().saveViewSettings(viewsSettings).call().foreach {
+        queryWire().saveOpenViews(viewsSettings).call().foreach {
           case Left(err) => window.alert(err)
           case Right(_)  =>
             println("Saved open views settings: " +

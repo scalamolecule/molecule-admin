@@ -17,6 +17,7 @@ import moleculeadmin.server.utils.DefFile
 import utest._
 
 /*
+
   /Users/mg/molecule/molecule-admin/molecule-admin/jvm/src/main/scala/db/core/schema/CoreTestDefinition.scala
   /Users/mg/molecule/molecule-admin/molecule-admin/jvm/src/main/scala/db/migration/schema/PartitionDefinition.scala
   /Users/mg/molecule/molecule-admin/molecule-admin/jvm/src/main/scala/db/migration/schema/Partition1Definition.scala

@@ -16,29 +16,69 @@ trait Base extends BaseApi with HelpersAdmin {
     meta_Db.name.isMolecular_(true).get.sorted
   }
 
-  def settings(db: String): (Set[String], Seq[SavedQuery]) = {
+  def settings(db: String): (
+    Map[String, String],
+      Set[String],
+      Set[Long],
+      Set[Long],
+      Set[Long],
+      Seq[SavedQuery]
+    ) = {
     implicit val conn = Conn(base + "/meta")
     // Use "admin" for now. Todo: users
-    val userId                 = user_User.e.username_("admin").get match {
+    val userId                     = user_User.e.username_("admin").get match {
       case List(eid) => eid
       case Nil       => user_User.username("admin").save.eid
     }
-    val dbId                   = meta_Db.e.name_(db).get.head
-    val openViews: Set[String] =
-      user_User(userId).views.get.headOption.getOrElse(Set.empty[String])
-    val queries                = user_User(userId)
-      .DbSettings.db_(dbId)
-      .Queries.molecule
+    val (_, settingsOpt, viewsOpt) = user_User(userId).username.settings$.views$.get.head
+    val (settings, views)          = (
+      settingsOpt.getOrElse(Map.empty[String, String]),
+      viewsOpt.getOrElse(Set.empty[String])
+    )
+
+    val dbId = meta_Db.e.name_(db).get.head
+
+    val dbSettingsId = user_User(userId).DbSettings.e.db_(dbId).get match {
+      case List(eid) => eid
+      case Nil       =>
+        val dbSettingsId1 = user_DbSettings.db(dbId).save.eid
+        user_User(userId).dbSettings.assert(dbSettingsId1).update
+        dbSettingsId1
+    }
+
+    val (_, starsOpt, flagsOpt, checksOpt, queryIdsOpt) =
+      user_DbSettings(dbSettingsId).db.stars$.flags$.checks$.queries$.get.head
+
+    val (stars, flags, checks) = (
+      starsOpt.getOrElse(Set.empty[Long]),
+      flagsOpt.getOrElse(Set.empty[Long]),
+      checksOpt.getOrElse(Set.empty[Long]),
+    )
+
+    val queries = queryIdsOpt.fold(Seq.empty[SavedQuery])(queryIds =>
+      user_Query(queryIds).molecule
       .ColSettings.*(user_ColSetting.index.attrExpr.sortDir.sortPos)
       .get.sortBy(_._1)
       .map {
         case (molecule, colSettings) =>
           SavedQuery(molecule, colSettings.map(ColSetting.tupled(_)))
       }
-    (openViews, queries)
+    )
+    (settings, views, stars, flags, checks, queries)
   }
 
-  override def loadMetaData(db: String): (Seq[String], MetaSchema, (Set[String], Seq[SavedQuery])) =
+  override def loadMetaData(db: String): (
+    Seq[String],
+      MetaSchema,
+      (
+        Map[String, String],
+          Set[String],
+          Set[Long],
+          Set[Long],
+          Set[Long],
+          Seq[SavedQuery]
+        )
+    ) =
     (dbNames(), getMetaSchema(db), settings(db))
 
   override def getMetaSchema(db: String): MetaSchema = {

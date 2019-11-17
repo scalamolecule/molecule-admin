@@ -143,11 +143,11 @@ trait KeyEvents {
 
   def useQuery(i: Int)
     (implicit ctx: Ctx.Owner, nsMap: Map[String, Ns]) =
-    if (i < queries.now.size) {
-      new Callbacks("").useQuery(queries.now.sortBy(_.molecule).apply(i))
+    if (i < savedQueries.now.size) {
+      new Callbacks("").useQuery(savedQueries.now.sortBy(_.molecule).apply(i))
     } else {
       // Print soft error message to browser console
-      window.alert(s"Only ${queries.now.size} queries saved.")
+      window.alert(s"Only ${savedQueries.now.size} queries saved.")
     }
 
   def useRecentMolecule(i: Int)(implicit ctx: Ctx.Owner): Unit =
@@ -245,7 +245,7 @@ trait KeyEvents {
                 }
               case _                                                         => ()
             }
-            case _                => ()
+            case _                        => ()
             //            case other => println(other)
           }
 
@@ -278,13 +278,10 @@ trait KeyEvents {
 
         } else if (e.getModifierState("Control")) {
           if (e.repeat) {
-
             // Throttle paging for smooth rendering
-
             if (beginning < 10000000) {
               beginning = new Date().getTime
             }
-
             i += 1
             if (keyRepeatMs == 0 && i == 3) {
               // Measure duration of 2 key repeats and apply a rough
@@ -302,14 +299,13 @@ trait KeyEvents {
                   j += 1
                 case _            => ()
               }
-
               t2 = new Date().getTime
               delta = t2 - t1
               tProcess = tProcess + delta
               avg = (tProcess / j).round
               ratio = avg / keyRepeatMs
               throttle = ratio.ceil.toInt
-              println(s"  $j  $delta    $avg    $ratio    $throttle    " + (t2 - beginning))
+              // println(s"  $j  $delta    $avg    $ratio    $throttle    " + (t2 - beginning))
             }
           } else {
             e.key match {
