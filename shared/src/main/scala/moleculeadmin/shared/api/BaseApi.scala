@@ -9,7 +9,16 @@ trait BaseApi {
 
   def dbNames(): Seq[String] = ???
 
-  def loadMetaData(db: String): (Seq[String], MetaSchema, (Set[String], Seq[SavedQuery])) = ???
+  def loadMetaData(db: String): (
+    Seq[String],
+      MetaSchema,
+      (Map[String, String],
+        Set[String],
+        Set[Long],
+        Set[Long],
+        Set[Long],
+        Seq[SavedQuery]
+        )) = ???
 
   def getMetaSchema(db: String): MetaSchema = ???
 

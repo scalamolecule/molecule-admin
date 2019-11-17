@@ -12,6 +12,9 @@ import scala.collection.mutable.ListBuffer
 
 object QueryState {
 
+  // Db settings id so that we can avoid looking it up on each marker toggle
+  var dbSettingsIdOpt = Option.empty[Long]
+
   // Schema
   implicit var nsMap: Map[String, Ns] = Map.empty[String, Ns]
   var viewCellTypes = Map.empty[String, String]
@@ -79,7 +82,7 @@ object QueryState {
 
   val curMolecule = Var("")
 
-  val queries = Var(Seq.empty[SavedQuery])
+  val savedQueries = Var(Seq.empty[SavedQuery])
 
   // Entities
   val curEntity         = Var(0L)
@@ -96,9 +99,9 @@ object QueryState {
   val curCheckIndexes = mutable.Map.empty[Int, Array[Boolean]]
 
   // Marker On-values
-  var curStars  = List.empty[Long]
-  var curFlags  = List.empty[Long]
-  var curChecks = List.empty[Long]
+  var curStars  = Set.empty[Long]
+  var curFlags  = Set.empty[Long]
+  var curChecks = Set.empty[Long]
 
   // Transactions
   val curTxD       = Var((0L, 0L, ""))

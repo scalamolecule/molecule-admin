@@ -6,15 +6,15 @@ import moleculeadmin.client.rxstuff.RxBindings
 import rx.{Ctx, Rx}
 
 
-case class Cache(db: String)(implicit val ctx: Ctx.Owner)
+case class RecentMolecules(db: String)(implicit val ctx: Ctx.Owner)
   extends Callbacks(db) with SubMenuElements {
 
   def dynRender = Rx {
-    _subMenuCache(
+    _subMenuRecent(
       queryCache.now.map(_.molecule).sorted,
       curMolecule.now,
       useRecentMoleculeCallback,
-      queries.now.map(_.molecule),
+      savedQueries.now.map(_.molecule),
       saveQueryCallback,
       removeRecentMoleculeCallback
     )

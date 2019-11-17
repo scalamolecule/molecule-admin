@@ -247,8 +247,8 @@ class Query extends QueryApi with Base {
         } else {
           val colSettings1  = colSettings.map(cs => (cs.index, cs.attrExpr, cs.sortDir, cs.sortPos))
           val colSettingIds = user_ColSetting.index.attrExpr.sortDir.sortPos.insert(colSettings1).eidSet
-          val newFavId      = user_Query.molecule(molecule1).colSettings(colSettingIds).save.eid
-          user_DbSettings(dbSettingsId).queries.assert(newFavId).update
+          val newQueryId    = user_Query.molecule(molecule1).colSettings(colSettingIds).save.eid
+          user_DbSettings(dbSettingsId).queries.assert(newQueryId).update
           Right("ok")
         }
       } catch {
@@ -257,15 +257,20 @@ class Query extends QueryApi with Base {
     }
   }
 
-  override def retractQuery(db: String, favMolecule: String): Either[String, String] = {
+  override def retractQuery(db: String, queryMolecule: String): Either[String, String] = {
     implicit val conn = Conn(base + "/meta")
     withTransactor {
       try {
-        user_User.username_("admin").DbSettings.Db.name_(db)._DbSettings.Queries.e.molecule_(favMolecule).get match {
-          case Nil         => Left(s"Unexpectedly couldn't find saved molecule `$favMolecule` in meta database.")
-          case List(favId) => favId.retract; Right("ok")
-          case favIds      =>
-            Left(s"Unexpectedly found ${favIds.size} instances of saved molecule `$favMolecule` in meta database.")
+        user_User.username_("admin")
+          .DbSettings.Db.name_(db)
+          ._DbSettings.Queries.e.molecule_(queryMolecule)
+          .get match {
+          case Nil           => Left(s"Unexpectedly couldn't find saved molecule `$queryMolecule` in meta database.")
+          case List(queryId) =>
+            queryId.retract
+            Right("ok")
+          case favIds        =>
+            Left(s"Unexpectedly found ${favIds.size} instances of saved molecule `$queryMolecule` in meta database.")
         }
       } catch {
         case t: Throwable => Left(t.getMessage)
@@ -273,7 +278,50 @@ class Query extends QueryApi with Base {
     }
   }
 
-  override def saveViewSettings(openViews: Seq[String]): Either[String, String] = {
+  override def toggleMarker(
+    db: String,
+    dbSettingsIdOpt: Option[Long],
+    tpe: String,
+    eid: Long,
+    isOn: Boolean
+  ): Either[String, Long] = {
+    implicit val conn = Conn(base + "/meta")
+    withTransactor {
+      try {
+        val dbSettingsId = dbSettingsIdOpt.getOrElse{
+          val userId = user_User.e.username_("admin").get match {
+            case List(eid) => eid
+            case Nil       => user_User.username("admin").save.eid
+          }
+          user_User(userId).DbSettings.e.Db.name_(db).get match {
+            case List(dbSettingsId) => dbSettingsId
+            case Nil                =>
+              val dbId = meta_Db.e.name_(db).get.head
+              user_DbSettings.db(dbId).save.eid
+          }
+        }
+
+        if (isOn) {
+          tpe match {
+            case "star"  => user_DbSettings(dbSettingsId).stars.retract(eid).update
+            case "flag"  => user_DbSettings(dbSettingsId).flags.retract(eid).update
+            case "check" => user_DbSettings(dbSettingsId).checks.retract(eid).update
+          }
+        } else {
+          tpe match {
+            case "star"  => user_DbSettings(dbSettingsId).stars.assert(eid).update
+            case "flag"  => user_DbSettings(dbSettingsId).flags.assert(eid).update
+            case "check" => user_DbSettings(dbSettingsId).checks.assert(eid).update
+          }
+        }
+        Right(dbSettingsId)
+      } catch {
+        case t: Throwable => Left(t.getMessage)
+      }
+    }
+  }
+
+  override def saveOpenViews(openViews: Seq[String]): Either[String, String] = {
     implicit val conn = Conn(base + "/meta")
     withTransactor {
       try {
@@ -291,7 +339,7 @@ class Query extends QueryApi with Base {
     }
   }
 
-  override def saveMaxRowsSetting(maxRows: Int): Either[String, String] = {
+  override def saveSetting(key: String, value: String): Either[String, String] = {
     implicit val conn = Conn(base + "/meta")
     withTransactor {
       try {
@@ -300,33 +348,14 @@ class Query extends QueryApi with Base {
           case List(eid) => eid
           case Nil       => user_User.username("admin").save.eid
         }
-        // Replace open views setting
-//        user_User(userId).views(openViews).update
+        // Save key/value setting
+        user_User(userId).settings.assert(key -> value).update
         Right("ok")
       } catch {
         case t: Throwable => Left(t.getMessage)
       }
     }
   }
-
-  override def saveLimitSetting(limit: Int): Either[String, String] = {
-    implicit val conn = Conn(base + "/meta")
-    withTransactor {
-      try {
-        // Use admin for now
-        val userId = user_User.e.username_("admin").get match {
-          case List(eid) => eid
-          case Nil       => user_User.username("admin").save.eid
-        }
-        // Replace open views setting
-//        user_User(userId).views(openSnippets).update
-        Right("ok")
-      } catch {
-        case t: Throwable => Left(t.getMessage)
-      }
-    }
-  }
-
 
   def getStrCaster(tpe: String, enumPrefix: String): String => Any = {
     tpe match {

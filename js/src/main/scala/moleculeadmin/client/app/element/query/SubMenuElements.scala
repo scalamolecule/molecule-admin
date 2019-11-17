@@ -1,12 +1,11 @@
 package moleculeadmin.client.app.element.query
+import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.element.AppElements
-import moleculeadmin.shared.styles.Color
-import org.scalajs.dom.html.{Div, LI, Span, Table, TableRow}
-import org.scalajs.dom.raw.HTMLElement
-import org.scalajs.dom.window
-import scalatags.JsDom.TypedTag
-import scalatags.JsDom.all.{table, td, _}
 import moleculeadmin.shared.ast.query.SavedQuery
+import org.scalajs.dom.html._
+import org.scalajs.dom.raw.HTMLElement
+import scalatags.JsDom.TypedTag
+import scalatags.JsDom.all._
 
 
 trait SubMenuElements extends AppElements {
@@ -14,20 +13,25 @@ trait SubMenuElements extends AppElements {
 
   val _maxRowsSelector = select(
     marginRight := 5,
-    Seq(
-      option(value := -1, "All"),
-      option(value := 25, "25"),
-      option(value := 50, "50"),
-      option(value := 100, "100"),
-      option(value := 500, "500"),
-      option(value := 1000, "1K"),
-      option(value := 5000, "5K"),
-      option(value := 10000, "10K"),
-      option(value := 50000, "50K"),
-      option(value := 100000, "100K"),
-      option(value := 500000, "500K"),
-      option(value := 1000000, "1M"),
-    )
+    for ((v, label) <- Seq(
+      (-1, "All"),
+      (25, "25"),
+      (50, "50"),
+      (100, "100"),
+      (500, "500"),
+      (1000, "1K"),
+      (5000, "5K"),
+      (10000, "10K"),
+      (50000, "50K"),
+      (100000, "100K"),
+      (500000, "500K"),
+      (1000000, "1M")
+    )) yield {
+      if (v == maxRows.now)
+        option(value := v, label, selected)
+      else
+        option(value := v, label)
+    }
   ).render
 
 
@@ -116,7 +120,7 @@ trait SubMenuElements extends AppElements {
     }
   )
 
-  def _subMenuCache(
+  def _subMenuRecent(
     recentMolecules: Seq[String],
     curMolecule: String,
     useRecentMolecule: String => () => Unit,
@@ -138,7 +142,7 @@ trait SubMenuElements extends AppElements {
   // Views --------------------------------------------------------------------
 
   def _subMenuViews(checkboxes: TypedTag[HTMLElement]*): TypedTag[LI] = li(cls := "dropdown",
-//    a(href := "#", span("V", textDecoration.underline), "iews"),
+    //    a(href := "#", span("V", textDecoration.underline), "iews"),
     a(href := "#", "Views"),
     div(
       cls := "dropdown-menu",

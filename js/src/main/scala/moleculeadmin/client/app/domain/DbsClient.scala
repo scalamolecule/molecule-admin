@@ -36,8 +36,9 @@ object DbsClient extends RxBindings with DbsElements {
   def reload2(dbs0: Future[DbsApi#Dbs]) = dbs0 map init
 
 
-  def validateDefFilePath(path: String) = {
-    val segments = path.split("/")
+  def validateDefFilePath(path0: String) = {
+    val path = path0.trim
+    val segments = path.trim.split("/")
 
     // Validate fastest evaluable mistakes first
     if (path.head != '/' || !path.contains("/")) {

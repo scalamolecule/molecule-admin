@@ -1,13 +1,13 @@
 package moleculeadmin.client.app.domain.query.data
 import autowire._
 import boopickle.Default._
-import moleculeadmin.client.app.element.query.datatable.FootElements
 import moleculeadmin.client.app.domain.query.KeyEvents
 import moleculeadmin.client.app.domain.query.QueryState._
+import moleculeadmin.client.app.element.query.datatable.FootElements
 import moleculeadmin.client.autowire.queryWire
 import moleculeadmin.client.rxstuff.RxBindings
 import moleculeadmin.shared.ops.query.ColOps
-import org.scalajs.dom.html.{TableRow, TableSection}
+import org.scalajs.dom.html.TableSection
 import org.scalajs.dom.raw.Node
 import org.scalajs.dom.window
 import rx.{Ctx, Rx}
@@ -20,7 +20,6 @@ case class DataTableFoot()(implicit val ctx: Ctx.Owner)
 
   type keepBooPickleImport = PickleState
 
-
   def populate(tableFoot: TableSection): Rx.Dynamic[Node] = Rx {
     //    println("---- foot ----")
     val limitSelector = _limitSelector(limit.now)
@@ -31,9 +30,9 @@ case class DataTableFoot()(implicit val ctx: Ctx.Owner)
       limit() = limitSelector.value.toInt
 
       // Asynchronously save setting
-      queryWire().saveLimitSetting(limit.now).call().foreach {
+      queryWire().saveSetting("limit", limit.now.toString).call().foreach {
         case Left(err) => window.alert(err)
-        case Right(_)  => println("Saved limit setting")
+        case Right(_)  => println("Saved limit setting: " + limit.now)
       }
     }
     val footRow = tr(
@@ -46,13 +45,9 @@ case class DataTableFoot()(implicit val ctx: Ctx.Owner)
         _lastPage(isLast)(onclick := { () => lastPage }),
         _rightSpace((offset.now + 1) + "-" + curLastRow, 7),
         _rightSpace("of", 7),
-        _rightSpace(thousands(actualRowCount), 7),
-
-        if (actualRowCount != rowCount &&
-          maxRows.now != -1 &&
-          rowCountAll > maxRows.now) {
-          _rightSpace("/ " + thousands(rowCount) +
-            " (" + thousands(rowCountAll) + " in total)", 7)
+        _rightSpace(thousands(actualRowCount), 12),
+        if (maxRows.now != -1 && rowCountAll > maxRows.now) {
+          _rightSpace(" ( " + thousands(rowCountAll) + " in total )", 7)
         } else if (actualRowCount != rowCount) {
           _rightSpace("/ " + thousands(rowCount), 7)
         } else ()

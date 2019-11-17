@@ -23,14 +23,14 @@ case class ViewsRender(db: String)(implicit val ctx: Ctx.Owner)
     val lines      = curMolecule.now.split("\n")
     val rows       = lines.length + 2
     val cols       = lines.map(_.length).max + 25
-    val alreadyFav = queries().exists(_.molecule == curMolecule.now)
+    val alreadyFav = savedQueries().exists(_.molecule == curMolecule.now)
     _moleculeView(rows, cols, curMolecule.now,
       saveQueryCallback(curMolecule.now), alreadyFav)
   }
 
   def queriesView: Rx.Dynamic[TypedTag[Element]] = Rx {
     _queriesView(
-      queries().sortBy(_.molecule),
+      savedQueries().sortBy(_.molecule),
       curMolecule.now,
       useQueryCallback,
       retractQueryCallback
@@ -43,7 +43,7 @@ case class ViewsRender(db: String)(implicit val ctx: Ctx.Owner)
     _recentMoleculesView(
       queryCache().map(_.molecule).sorted,
       curMolecule.now,
-      queries().map(_.molecule),
+      savedQueries().map(_.molecule),
       resetRecentMoleculesCallback,
       useRecentMoleculeCallback,
       saveQueryCallback,

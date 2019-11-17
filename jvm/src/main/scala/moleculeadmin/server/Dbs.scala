@@ -64,7 +64,7 @@ class Dbs extends DbsApi {
 
   def dbList(): Either[List[String], List[(String, Option[Boolean], Option[String])]] = try {
 
-    //  recreateDbFrom(MetaSchema, "localhost:4334/meta", "free")
+    // recreateDbFrom(MetaSchema, "localhost:4334/meta", "free")
 
 
     // 2. Prepare sync - get connection
@@ -118,47 +118,6 @@ class Dbs extends DbsApi {
     meta_Db(dbId).isMolecular().defFilePath().partitions().update
     dbs_()
   }
-
-  //  def resyncSchemaDef(db: String): Option[String] = {
-  //    implicit val conn = Conn(base + "/meta")
-  //    val path = meta_Db.name_(db).defFilePath.get.head
-  //
-  //    // Client validation
-  //    validateDefFilePath(path) match {
-  //      case Left(error)  => Some(error)
-  //      case Right(path1) =>
-  //        // Server validation
-  //        saveDefFilePath(db, path1) match {
-  //          case Left(error) => Some(error)
-  //          case Right(_)    => None
-  //        }
-  //    }
-  //  }
-
-  //  // List of validated dbs
-  //  def validatedDbs(): Dbs =
-  //    dbs() map {
-  //      // Confirmed non-molecular db
-  //      case (db, Some(false), _) => (db, Some(false), None)
-  //
-  //      // Confirmed molecular db
-  //      case (db, Some(true), Some(path)) =>
-  //        val defFile = new File(path)
-  //        if (!defFile.isFile) {
-  //          // 2d: Def file not found
-  //          (db, None, Some(s"Can't find: $path"))
-  //        } else {
-  //          // todo: check def file
-  //          // We have a likely def file
-  //          (db, Some(true), Some(path))
-  //        }
-  //      case (db, Some(true), None)       =>
-  //        // 2e: Missing def file path - set isMolecular to None
-  //        (db, None, None)
-  //
-  //      // Un-categorized db (could be non-molecular)
-  //      case (db, _, _) => (db, None, None)
-  //    }
 
 
   def saveDefFilePath(db: String, path: String): Either[String, Dbs] = {
