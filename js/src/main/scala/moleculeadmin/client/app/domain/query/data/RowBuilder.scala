@@ -14,6 +14,18 @@ case class RowBuilder(
 )(implicit ctx: Ctx.Owner)
   extends Cell(db, tableBody, cols, qr) {
 
+  def append(sortIndex: Array[Int], filterIndex: Array[Int]): Unit = {
+    val indexBridge: Int => Int = {
+      if (filterIndex.nonEmpty)
+        (i: Int) => filterIndex(i)
+      else if (sortIndex.nonEmpty)
+        (i: Int) => sortIndex(i)
+      else
+        (i: Int) => i
+    }
+    appender(offset.now, curLastRow, indexBridge)
+  }
+
   val appender = {
     cols.size match {
       case 1 =>
@@ -809,17 +821,4 @@ case class RowBuilder(
           }
     }
   }
-
-  def append(sortIndex: Array[Int], filterIndex: Array[Int]): Unit = {
-    val indexBridge: Int => Int = {
-      if (filterIndex.nonEmpty)
-        (i: Int) => filterIndex(i)
-      else if (sortIndex.nonEmpty)
-        (i: Int) => sortIndex(i)
-      else
-        (i: Int) => i
-    }
-    appender(offset.now, curLastRow, indexBridge)
-  }
-
 }

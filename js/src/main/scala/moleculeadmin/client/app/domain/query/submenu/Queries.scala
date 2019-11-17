@@ -6,15 +6,15 @@ import moleculeadmin.client.rxstuff.RxBindings
 import rx.{Ctx, Rx}
 
 
-case class Favorites(db: String)(implicit val ctx: Ctx.Owner)
-  extends Callbacks(db) with RxBindings with SubMenuElements {
+case class Queries(db: String)(implicit val ctx: Ctx.Owner)
+  extends Callbacks(db) with SubMenuElements {
 
   def dynRender = Rx {
-    _subMenuFavorites(
-      favorites().sortBy(_.molecule),
+    _subMenuQueries(
+      queries().sortBy(_.molecule),
       curMolecule.now,
-      useFavCallback,
-      retractFavCallback
+      useQueryCallback,
+      retractQueryCallback
     )
   }
 

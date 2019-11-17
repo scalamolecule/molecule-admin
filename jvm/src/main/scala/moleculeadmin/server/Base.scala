@@ -4,7 +4,7 @@ import molecule.api.Entity
 import molecule.api.out20._
 import molecule.facade.Conn
 import moleculeadmin.shared.api.BaseApi
-import moleculeadmin.shared.ast.query.{ColSetting, Favorite}
+import moleculeadmin.shared.ast.query.{ColSetting, SavedQuery}
 import moleculeadmin.shared.ast.schema._
 import moleculeadmin.shared.util.HelpersAdmin
 
@@ -16,23 +16,29 @@ trait Base extends BaseApi with HelpersAdmin {
     meta_Db.name.isMolecular_(true).get.sorted
   }
 
-  def settings(db: String): (Set[String], Seq[Favorite]) = {
+  def settings(db: String): (Set[String], Seq[SavedQuery]) = {
     implicit val conn = Conn(base + "/meta")
     // Use "admin" for now. Todo: users
-    val userId = user_User.e.username_("admin").get match {
+    val userId                 = user_User.e.username_("admin").get match {
       case List(eid) => eid
       case Nil       => user_User.username("admin").save.eid
     }
-    val dbId   = meta_Db.e.name_(db).get.head
-    val openSnippets: Set[String] = user_User(userId).snippets.get.headOption.getOrElse(Set.empty[String])
-    val favorites = user_User(userId).DbSettings.db_(dbId).Favorites.molecule.ColSettings.*(user_ColSetting.index.attrExpr.sortDir.sortPos)
-      .get.sortBy(_._1).map { case (molecule, colSettings) =>
-      Favorite(molecule, colSettings.map(ColSetting.tupled(_)))
-    }
-    (openSnippets, favorites)
+    val dbId                   = meta_Db.e.name_(db).get.head
+    val openViews: Set[String] =
+      user_User(userId).views.get.headOption.getOrElse(Set.empty[String])
+    val queries                = user_User(userId)
+      .DbSettings.db_(dbId)
+      .Queries.molecule
+      .ColSettings.*(user_ColSetting.index.attrExpr.sortDir.sortPos)
+      .get.sortBy(_._1)
+      .map {
+        case (molecule, colSettings) =>
+          SavedQuery(molecule, colSettings.map(ColSetting.tupled(_)))
+      }
+    (openViews, queries)
   }
 
-  override def loadMetaData(db: String): (Seq[String], MetaSchema, (Set[String], Seq[Favorite])) =
+  override def loadMetaData(db: String): (Seq[String], MetaSchema, (Set[String], Seq[SavedQuery])) =
     (dbNames(), getMetaSchema(db), settings(db))
 
   override def getMetaSchema(db: String): MetaSchema = {
@@ -79,7 +85,7 @@ trait Base extends BaseApi with HelpersAdmin {
               attrs <- ns.get(":meta_Namespace/attrs").asInstanceOf[Option[List[Map[String, Any]]]].toSeq
               attr <- attrs
             } yield {
-              val attrType = attr(":meta_Attribute/tpe").asInstanceOf[String].substring(20) // remove :meta_Attribute.tpe/
+              val attrType                 = attr(":meta_Attribute/tpe").asInstanceOf[String].substring(20) // remove :meta_Attribute.tpe/
               val maybeTopValues           = attr.get(":meta_Attribute/topValues").asInstanceOf[Option[List[Map[String, Any]]]]
               val card                     = attr(":meta_Attribute/card").asInstanceOf[Long].toInt
               val topValues: Seq[TopValue] = if (maybeTopValues.isEmpty) Nil else {

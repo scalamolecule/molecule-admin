@@ -36,11 +36,11 @@ trait KeyEvents {
     }
   }
 
-  def toggleCached(): Unit = toggle("cache")
-  def toggleFavorites(): Unit = toggle("favorites")
+  def toggleQueriesMenu(): Unit = toggle("queries")
+  def toggleRecentMenu(): Unit = toggle("recentMolecules")
   def toggleShortcuts(): Unit = toggle("shortcuts")
 
-  def toggleQuery(implicit ctx: Ctx.Owner): Rx.Dynamic[Unit] = Rx(
+  def toggleQueryBuilder(implicit ctx: Ctx.Owner): Rx.Dynamic[Unit] = Rx(
     if (selection.now == "q") {
       if (minimized) {
         selection() = "m"
@@ -85,7 +85,9 @@ trait KeyEvents {
     rowCount else cachedFilterIndex.length
 
   def isFirst: Boolean = offset.now == 0
+
   def isLast: Boolean = offset.now + limit.now >= actualRowCount
+
   def remainingRows: Int = actualRowCount - offset.now
   def curLastRow: Int = {
     val remainingRows1 = remainingRows
@@ -122,44 +124,49 @@ trait KeyEvents {
       offset() = offset.now + limit.now * chunkSize else lastPage
 
   def lastPage(implicit ctx: Ctx.Owner): Unit =
-    if (!isLast) offset() = {
-
-      val curRowCount1 = actualRowCount
-      curRowCount1 - curRowCount1 % limit.now
+    if (!isLast) {
+      offset() = {
+        val curRowCount1 = actualRowCount
+        val rest         = curRowCount1 % limit.now
+        if (rest == 0)
+          curRowCount1 - limit.now
+        else
+          curRowCount1 - rest
+      }
     }
 
-  def toggleSnippets(implicit ctx: Ctx.Owner): Unit = {
-    document.getElementById("checkbox-snippet-0")
-      .asInstanceOf[HTMLInputElement].checked = !showSnippets.now
-    showSnippets() = !showSnippets.now
+  def toggleViews(implicit ctx: Ctx.Owner): Unit = {
+    document.getElementById("checkbox-view-0")
+      .asInstanceOf[HTMLInputElement].checked = !showViews.now
+    showViews() = !showViews.now
   }
 
-  def useFavorite(i: Int)
+  def useQuery(i: Int)
     (implicit ctx: Ctx.Owner, nsMap: Map[String, Ns]) =
-    if (i < favorites.now.size) {
-      new Callbacks("").useFavorite(favorites.now.sortBy(_.molecule).apply(i))
+    if (i < queries.now.size) {
+      new Callbacks("").useQuery(queries.now.sortBy(_.molecule).apply(i))
     } else {
       // Print soft error message to browser console
-      window.alert(s"Only ${favorites.now.size} favorite molecules saved.")
+      window.alert(s"Only ${queries.now.size} queries saved.")
     }
 
-  def useCache(i: Int)(implicit ctx: Ctx.Owner): Unit =
+  def useRecentMolecule(i: Int)(implicit ctx: Ctx.Owner): Unit =
     if (i < queryCache.now.size) {
       modelElements() = queryCache.now.sortBy(_.molecule).apply(i).modelElements
     } else {
-      window.alert(s"Only ${queryCache.now.size} queries cached.")
+      window.alert(s"Only ${queryCache.now.size} previous queries.")
     }
 
 
-  def cacheOpen: Boolean = {
-    val cachedElement = document.getElementById("submenu-cache")
-    cachedElement != null &&
-      cachedElement.getAttribute("style").endsWith("display:block;")
+  def queriesOpen: Boolean = {
+    val queriesElement = document.getElementById("submenu-queries")
+    queriesElement != null &&
+      queriesElement.getAttribute("style").endsWith("display:block;")
   }
-  def favoritesOpen: Boolean = {
-    val favoritesElement = document.getElementById("submenu-favorites")
-    favoritesElement != null &&
-      favoritesElement.getAttribute("style").endsWith("display:block;")
+  def recentMoleculesOpen: Boolean = {
+    val recentElement = document.getElementById("submenu-recentMolecules")
+    recentElement != null &&
+      recentElement.getAttribute("style").endsWith("display:block;")
   }
 
 
@@ -168,6 +175,7 @@ trait KeyEvents {
     var secondNumber = -1
     val numberMs     = 300 // todo: setting?
 
+    // Page throttling params
     var beginning   = 0.0
     var i           = 0
     var j           = 0
@@ -187,18 +195,18 @@ trait KeyEvents {
           e.key match {
             case "Escape"                          =>
               curEntity() = 0L
-              toggleOff("favorites")
-              toggleOff("cache")
+              toggleOff("queries")
+              toggleOff("recentMolecules")
               toggleOff("shortcuts")
-            case "c"                               => toggleOff("favorites"); toggleOff("shortcuts"); toggleCached()
-            case "f"                               => toggleOff("cache"); toggleOff("shortcuts"); toggleFavorites()
-            case "s"                               => toggleSnippets
-            case "q" if modelElements.now.nonEmpty => toggleQuery
+            case "q"                               => toggleOff("recentMolecules"); toggleOff("shortcuts"); toggleQueriesMenu()
+            case "r"                               => toggleOff("queries"); toggleOff("shortcuts"); toggleRecentMenu()
+            case "v"                               => toggleViews
+            case "b" if modelElements.now.nonEmpty => toggleQueryBuilder
             case "m" if modelElements.now.nonEmpty => toggleMinimize
             case "a" if selection.now != "a"       => baseSelection = "a"; selection() = "a"
-            case "v" if selection.now != "v"       => baseSelection = "v"; selection() = "v"
-            case "r" if selection.now != "r"       => baseSelection = "r"; selection() = "r"
-            case n if favoritesOpen                => n match {
+            //            case "v" if selection.now != "v"       => baseSelection = "v"; selection() = "v"
+            //            case "r" if selection.now != "r" => baseSelection = "r"; selection() = "r"
+            case n if queriesOpen         => n match {
               case "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "0" =>
                 if (firstNumber == -1) {
                   firstNumber = n.toInt
@@ -208,7 +216,7 @@ trait KeyEvents {
                     else
                       firstNumber * 10 + secondNumber - 1
                     if (index >= 0)
-                      useFavorite(index)
+                      useQuery(index)
                     firstNumber = -1
                     secondNumber = -1
                   }
@@ -217,9 +225,9 @@ trait KeyEvents {
                 }
               case _                                                         => ()
             }
-            case n if cacheOpen                    => n match {
+            case n if recentMoleculesOpen => n match {
               case "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "0" =>
-                // todo: refactor out redundant functionality for favorites/cached
+                // todo: refactor out redundant functionality for queries/recent
                 if (firstNumber == -1) {
                   firstNumber = n.toInt
                   setTimeout(numberMs) {
@@ -228,7 +236,7 @@ trait KeyEvents {
                     else
                       firstNumber * 10 + secondNumber - 1
                     if (index > 0)
-                      useCache(index)
+                      useRecentMolecule(index)
                     firstNumber = -1
                     secondNumber = -1
                   }
@@ -237,15 +245,15 @@ trait KeyEvents {
                 }
               case _                                                         => ()
             }
-            case _                                 => ()
+            case _                => ()
             //            case other => println(other)
           }
 
         } else if (e.getModifierState("Shift")) {
           e.key match {
             case "?" =>
-              toggleOff("favorites")
-              toggleOff("cache");
+              toggleOff("queries")
+              toggleOff("recentMolecules");
               toggleShortcuts
             case _   => ()
           }
@@ -282,7 +290,7 @@ trait KeyEvents {
               // Measure duration of 2 key repeats and apply a rough
               // factor of 40% for processing leaving 60% time to rendering
               keyRepeatMs = ((new Date().getTime - beginning) / 2 * 0.4).round
-              println("keyRepeatInterval " + keyRepeatMs)
+              //              println("keyRepeatInterval " + keyRepeatMs)
             }
 
             if (i % throttle == 0) {
@@ -301,7 +309,7 @@ trait KeyEvents {
               avg = (tProcess / j).round
               ratio = avg / keyRepeatMs
               throttle = ratio.ceil.toInt
-                            println(s"  $j  $delta    $avg    $ratio    $throttle    " + (t2 - beginning))
+              println(s"  $j  $delta    $avg    $ratio    $throttle    " + (t2 - beginning))
             }
           } else {
             e.key match {

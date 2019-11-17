@@ -40,14 +40,17 @@ trait SchemaOps extends QueryApi with Base {
 
   def mkNsMap(metaSchema: MetaSchema): Map[String, Ns] = {
     val initialEntityAttr = Attr(0, "e", 1, "datom", None, None, None, None, None, None, None, None, Nil)
-    (for {
+    val nsMap             = (for {
       Part(_, _, _, _, nss) <- metaSchema.parts
       Ns(i, ns, nsFull, nsDescr, nsCount, attrs) <- nss
     } yield nsFull -> Ns(i, ns, nsFull, nsDescr, nsCount, initialEntityAttr +: attrs)).toMap
+
+    //    nsMap.map { case (ns, nsDef) => s""""$ns" -> $nsDef,""" } foreach println
+    nsMap
   }
 
 
-  def mkSnippetCellTypes(nsMap: Map[String, Ns]): Map[String, String] = {
+  def mkViewCellTypes(nsMap: Map[String, Ns]): Map[String, String] = {
     val attrs: Map[String, String] = for {
       (nsFull, nsDef) <- nsMap
       attr <- nsDef.attrs

@@ -1,6 +1,6 @@
 package moleculeadmin.shared.api
 
-import moleculeadmin.shared.ast.query.{Col, Favorite, QueryResult}
+import moleculeadmin.shared.ast.query.{Col, SavedQuery, QueryResult}
 import scala.collection.mutable.ListBuffer
 
 trait QueryApi extends BaseApi {
@@ -32,11 +32,15 @@ trait QueryApi extends BaseApi {
                        enumAttrs: Seq[String])
   : List[(Long, Long, String, Boolean, String, String)] = ???
 
-  def addFavorite(db: String, favorite: Favorite): Either[String, String] = ???
+  def addQuery(db: String, savedQuery: SavedQuery): Either[String, String] = ???
 
-  def retractFavorite(db: String, favMolecule: String): Either[String, String] = ???
+  def retractQuery(db: String, favMolecule: String): Either[String, String] = ???
 
-  def saveSnippetSettings(openSnippets: Seq[String]): Either[String, String] = ???
+  def saveViewSettings(openViews: Seq[String]): Either[String, String] = ???
+
+  def saveMaxRowsSetting(maxRows: Int): Either[String, String] = ???
+
+  def saveLimitSetting(limit: Int): Either[String, String] = ???
 
   def updateStr(db: String,
                 attrFull: String,

@@ -1,4 +1,4 @@
-package moleculeadmin.client.app.domain.query.snippet
+package moleculeadmin.client.app.domain.query.views
 
 import autowire._
 import boopickle.Default._
@@ -15,27 +15,27 @@ import scala.concurrent.ExecutionContext.Implicits.global
 case class Transaction(db: String)(implicit ctx: Ctx.Owner) extends Base(db) {
   override type keepBooPickleImport2 = PickleState
 
-  def snippet: Rx.Dynamic[TypedTag[Element]] = Rx {
+  def view: Rx.Dynamic[TypedTag[Element]] = Rx {
     curTx() match {
       case 0                         => // no entity id marked yet
       case tx if showTransaction.now =>
-        val snippet = document.getElementById("txSnippetTable")
-        if (snippet == null) {
+        val view = document.getElementById("txViewTable")
+        if (view == null) {
           // Start fresh
           curTx() = 0
         } else {
-          addTxRows("txSnippetTable", tx, 0)
+          addTxRows("txViewTable", tx, 0)
         }
-      case _                         => // don't update non-present txSnippet
+      case _                         => // don't update non-present txView
     }
-    _txSnippet("Point on tx id...")
+    _txView("Point on tx id...")
   }
 
   def addTxRows(parentElementId: String, tx: Long, level: Int): Unit = {
-    val snippetElement = document.getElementById(parentElementId)
-    if (snippetElement != null) {
+    val viewElement = document.getElementById(parentElementId)
+    if (viewElement != null) {
       queryWire().getTxData(db, tx, enumAttrs).call().foreach { data =>
-        snippetElement.innerHTML = ""
+        viewElement.innerHTML = ""
         var i        = 0
         var ePrev    = 0L
         var eCur     = 0L
@@ -47,7 +47,7 @@ case class Transaction(db: String)(implicit ctx: Ctx.Owner) extends Base(db) {
             eCur = e
             eCount += 1
           }
-          val cellType   = snippetCellTypes(attr)
+          val cellType   = viewCellTypes(attr)
           val vElementId = parentElementId + attr + v.take(20)
 
           val entityCell = if (i == 1)
@@ -59,7 +59,7 @@ case class Transaction(db: String)(implicit ctx: Ctx.Owner) extends Base(db) {
           val valueCell = getValueCell(cellType, vElementId, v, true, level, asserted)
           val attr1     = if (attrPrev != attr || ePrev != e) attr else ""
           val attrCell  = getAttrCell(attr1, cellType, vElementId, valueCell, true)
-          snippetElement.appendChild(
+          viewElement.appendChild(
             tr(
               if (i == 1)
                 cls := "first"

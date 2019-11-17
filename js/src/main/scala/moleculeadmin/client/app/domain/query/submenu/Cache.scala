@@ -7,16 +7,16 @@ import rx.{Ctx, Rx}
 
 
 case class Cache(db: String)(implicit val ctx: Ctx.Owner)
-  extends Callbacks(db) with RxBindings with SubMenuElements {
+  extends Callbacks(db) with SubMenuElements {
 
   def dynRender = Rx {
     _subMenuCache(
       queryCache.now.map(_.molecule).sorted,
       curMolecule.now,
-      useCachedCallback,
-      favorites.now.map(_.molecule),
-      addFavCallback,
-      removeCachedCallback
+      useRecentMoleculeCallback,
+      queries.now.map(_.molecule),
+      saveQueryCallback,
+      removeRecentMoleculeCallback
     )
   }
 }

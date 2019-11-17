@@ -1,5 +1,10 @@
 ### Some things to remember...
 
+Testing_
+- Test classes are not automatically compiled with `sbt clean compile`!
+  Running `sbt clean compile test` will compile test-classes too and then you can
+  test them too from IntelliJ
+
 Scala-js:
 - don't have play server running while testing in Intellij (double compiling)
 - be aware not to double-render because of implicit Rx double-wrapping

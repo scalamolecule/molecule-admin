@@ -43,8 +43,10 @@ case class DataTable(db: String)(implicit val ctx: Ctx.Owner)
     )
   )
 
-  def fetchAndPopulate(tableBody: TableSection,
-                       tableFoot: TableSection): Unit = {
+  def fetchAndPopulate(
+    tableBody: TableSection,
+    tableFoot: TableSection
+  ): Unit = {
     val (query, _)   = Model2Query(Model(modelElements.now))
     val datalogQuery = molecule.transform.Query2String(query).toMap
     val resolve      = (expr: QueryExpr) => Query2String(query).p(expr)
@@ -85,11 +87,10 @@ case class DataTable(db: String)(implicit val ctx: Ctx.Owner)
   }
 
   def rxElement: Rx.Dynamic[JsDom.TypedTag[HTMLElement]] = Rx {
-    //        println("---- table")
+    //    println("---- table")
 
     // Var's not to trigger this Rx
     // (`modelElements` is the main trigger)
-    columns.kill()
     filters.kill()
     offset.kill()
     limit.kill()
@@ -103,8 +104,6 @@ case class DataTable(db: String)(implicit val ctx: Ctx.Owner)
     maxRows()
     val maxRowsChanged = savedMaxRows != maxRows.now
     savedMaxRows = maxRows.now
-    //    println("maxRowsChanged: " + maxRowsChanged)
-    //    println("maxRows: " + maxRows.now)
 
     try {
       modelElements() match {

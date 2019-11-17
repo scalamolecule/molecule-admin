@@ -69,10 +69,12 @@ trait ModeOps extends QueryApi with Base {
   }
 
 
-  def setMode(model: Seq[Element],
-              path: Seq[(String, String)],
-              selAttr: String,
-              mode: String)(implicit nsMap: Map[String, Ns]): Seq[Element] = {
+  def setMode(
+    model: Seq[Element],
+    path: Seq[(String, String)],
+    selAttr: String,
+    mode: String
+  )(implicit nsMap: Map[String, Ns]): Seq[Element] = {
     val ns                      = path.last._2
     val (before, branch, after) = isolateBranch(model, path)
     val (prev, cur, sub)        = isolateAttr(branch, ns, selAttr)
@@ -125,6 +127,9 @@ trait ModeOps extends QueryApi with Base {
     }
 
     val result = prev ++ cur2 ++ sub
+
+    //    println("---------------------")
+    //    println("CUR 2: List(" + cur2.mkString("\n          ") + ")")
     //    println("---------------------")
     //    println("RES: List(" + (before ++ result ++ after).mkString("\n          ") + ")")
     before ++ result ++ after

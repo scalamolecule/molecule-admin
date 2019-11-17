@@ -1,9 +1,7 @@
 package moleculeadmin.shared.api
 
-import moleculeadmin.shared.ast.query.Favorite
-import moleculeadmin.shared.ast.schema.MetaSchema
-import moleculeadmin.shared.ast.query.Favorite
-import moleculeadmin.shared.ast.schema._
+import moleculeadmin.shared.ast.query.SavedQuery
+import moleculeadmin.shared.ast.schema.{MetaSchema, _}
 
 trait BaseApi {
 
@@ -11,7 +9,7 @@ trait BaseApi {
 
   def dbNames(): Seq[String] = ???
 
-  def loadMetaData(db: String): (Seq[String], MetaSchema, (Set[String], Seq[Favorite])) = ???
+  def loadMetaData(db: String): (Seq[String], MetaSchema, (Set[String], Seq[SavedQuery])) = ???
 
   def getMetaSchema(db: String): MetaSchema = ???
 

@@ -1,4 +1,4 @@
-package moleculeadmin.client.app.domain.query.snippet
+package moleculeadmin.client.app.domain.query.views
 import autowire._
 import boopickle.Default._
 import moleculeadmin.client.app.domain.query.QueryState._
@@ -14,16 +14,16 @@ import scala.concurrent.ExecutionContext.Implicits.global
 case class EntityHistory(db: String)(implicit ctx: Ctx.Owner) extends Base(db) {
   override type keepBooPickleImport2 = PickleState
 
-  def snippet: Rx.Dynamic[TypedTag[Element]] = Rx {
+  def view: Rx.Dynamic[TypedTag[Element]] = Rx {
     (curEntity(), entityHistorySort()) match {
       case (0, _)                               => // no entity id marked yet
       case (eid, sort) if showEntityHistory.now =>
-        val snippet = document.getElementById("entityHistoryEid")
-        if (snippet == null) {
+        val view = document.getElementById("entityHistoryEid")
+        if (view == null) {
           // Start fresh
           curEntity() = 0
         } else {
-          snippet.innerHTML = ""
+          view.innerHTML = ""
 
           val byTx = if (sort == "tx")
             span("tx")
@@ -39,22 +39,22 @@ case class EntityHistory(db: String)(implicit ctx: Ctx.Owner) extends Base(db) {
               entityHistorySort() = "attr"
             })
 
-          snippet.appendChild(
+          view.appendChild(
             span(byTx, " | ", byAttr, eid.toString).render
           )
-          addEntityHistoryRows("entityHistorySnippetTable", eid, sort)
+          addEntityHistoryRows("entityHistoryViewTable", eid, sort)
         }
-      case _                                    => // don't update non-present entitySnippet
+      case _                                    => // don't update non-present entityView
     }
-    _entityHistorySnippet("Point on entity id...")
+    _entityHistoryView("Point on entity id...")
   }
 
 
   def addEntityHistoryRows(parentElementId: String, eid: Long, sort: String): Unit = {
-    val snippetElement = document.getElementById(parentElementId)
-    if (snippetElement != null) {
+    val viewElement = document.getElementById(parentElementId)
+    if (viewElement != null) {
       queryWire().getEntityHistory(db, eid, enumAttrs).call().foreach { data =>
-        snippetElement.innerHTML = ""
+        viewElement.innerHTML = ""
         var i      = 0
         var txPrev = 0L
 
@@ -68,7 +68,7 @@ case class EntityHistory(db: String)(implicit ctx: Ctx.Owner) extends Base(db) {
                 txCur = tx
                 txCount += 1
               }
-              val cellType   = snippetCellTypes(attr)
+              val cellType   = viewCellTypes(attr)
               val vElementId = parentElementId + " " + attr + " " + i
 
               val txCell    = td(
@@ -82,7 +82,7 @@ case class EntityHistory(db: String)(implicit ctx: Ctx.Owner) extends Base(db) {
               )
               val valueCell = getValueCell(cellType, vElementId, v, true, 0, asserted)
               val attrCell  = getAttrCell(attr, cellType, vElementId, valueCell, true)
-              snippetElement.appendChild(
+              viewElement.appendChild(
                 tr(
                   if (txCount % 2 == 0)
                     cls := "even"
@@ -111,7 +111,7 @@ case class EntityHistory(db: String)(implicit ctx: Ctx.Owner) extends Base(db) {
                 attrCur = attr
                 attrCount += 1
               }
-              val cellType   = snippetCellTypes(attr)
+              val cellType   = viewCellTypes(attr)
               val vElementId = parentElementId + " " + attr + " " + i
               val txCell     = td(
                 s"$t / $tx",
@@ -124,7 +124,7 @@ case class EntityHistory(db: String)(implicit ctx: Ctx.Owner) extends Base(db) {
               )
               val valueCell  = getValueCell(cellType, vElementId, v, true, 0, asserted)
               val attrCell   = getAttrCell(attr, cellType, vElementId, valueCell, true)
-              snippetElement.appendChild(
+              viewElement.appendChild(
                 tr(
                   if (attrCount % 2 == 0)
                     cls := "even"

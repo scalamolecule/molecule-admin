@@ -1,9 +1,9 @@
-package moleculeadmin.client.app.domain.query.snippet
+package moleculeadmin.client.app.domain.query.views
 import autowire._
 import boopickle.Default._
 import moleculeadmin.client.app.domain.query.Callbacks
 import moleculeadmin.client.app.domain.query.QueryState._
-import moleculeadmin.client.app.element.query.SnippetElements
+import moleculeadmin.client.app.element.query.ViewElements
 import moleculeadmin.client.autowire.queryWire
 import moleculeadmin.client.rxstuff.RxBindings
 import moleculeadmin.shared.ops.query.ModelOps
@@ -17,21 +17,21 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 
 abstract class Base(db: String)(implicit val ctx: Ctx.Owner)
-  extends Callbacks(db) with RxBindings with SnippetElements with ModelOps with TreeOps {
+  extends Callbacks(db) with ViewElements with ModelOps with TreeOps {
   type keepBooPickleImport2 = PickleState
 
-  // Recursively add entity row to snippet
+  // Recursively add entity row to view
   def addEntityRows(parentElementId: String, eid: Long, txs: Boolean, level: Int): Unit = {
-    val snippetElement = document.getElementById(parentElementId)
-    if (snippetElement != null) {
+    val viewElement = document.getElementById(parentElementId)
+    if (viewElement != null) {
       queryWire().touchEntity(db, eid).call().foreach { data =>
-        snippetElement.innerHTML = ""
+        viewElement.innerHTML = ""
         data.foreach { case (attr, v) =>
-          val cellType   = snippetCellTypes(attr)
+          val cellType   = viewCellTypes(attr)
           val vElementId = parentElementId + attr + level
           val valueCell  = getValueCell(cellType, vElementId, v, txs, level)
           val attrCell   = getAttrCell(attr, cellType, vElementId, valueCell, txs)
-          snippetElement.appendChild(
+          viewElement.appendChild(
             tr(
               attrCell,
               valueCell

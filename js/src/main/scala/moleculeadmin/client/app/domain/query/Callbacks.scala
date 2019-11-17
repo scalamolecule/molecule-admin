@@ -1,10 +1,11 @@
 package moleculeadmin.client.app.domain.query
 import autowire._
 import boopickle.Default._
+import moleculeadmin.client.app.domain.QueryClient.getCols
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.autowire.queryWire
 import moleculeadmin.client.rxstuff.RxBindings
-import moleculeadmin.shared.ast.query.{Col, ColSetting, Favorite, QueryCache}
+import moleculeadmin.shared.ast.query.{Col, ColSetting, SavedQuery, QueryCache}
 import moleculeadmin.shared.ops.transform.Molecule2Model
 import org.scalajs.dom.window
 import rx.{Ctx, Rx}
@@ -19,77 +20,77 @@ class Callbacks(db: String)(implicit ctx: Ctx.Owner) extends RxBindings {
   var idle = true
 
 
-  // Cache ----------------------------------------------------------
+  // Recent molecules ----------------------------------------------------------
 
-  protected val resetCacheCallback: () => Unit =
+  protected val resetRecentMoleculesCallback: () => Unit =
     () => Rx {
       queryCache() = queryCache.now.take(1)
       modelElements.recalc()
     }
 
-  protected val useCachedCallback: String => () => Unit =
+  protected val useRecentMoleculeCallback: String => () => Unit =
     (molecule1: String) => () => Rx {
       modelElements() = queryCache.now.find(_.molecule == molecule1).get.modelElements
     }
 
-  protected val removeCachedCallback: String => () => Unit =
+  protected val removeRecentMoleculeCallback: String => () => Unit =
     (molecule1: String) => () => Rx {
       queryCache() = queryCache.now.filterNot(_.molecule == molecule1)
     }
 
 
-  // Favorites ----------------------------------------------------------
+  // Queries ----------------------------------------------------------
 
   def colSettings(columns: Seq[Col]): Seq[ColSetting] =
     columns.map(c => ColSetting(c.colIndex, c.attrExpr, c.sortDir, c.sortPos))
 
-  def getFavorite(molecule: String): Favorite =
+  def getQuery(molecule: String): SavedQuery =
     queryCache.now.find(_.molecule == molecule) match {
-      case Some(QueryCache(_, _, _, _, cols, _, _, _)) => Favorite(molecule, colSettings(cols))
+      case Some(QueryCache(_, _, _, _, cols, _, _, _)) => SavedQuery(molecule, colSettings(cols))
       case None                                  =>
-        throw new RuntimeException(s"Unexpectedly didn't find molecule `$molecule` in cache")
+        throw new RuntimeException(s"Unexpectedly didn't find query `$molecule` in cache")
     }
 
-  protected val addFavCallback    : String => () => Unit =
+  protected val saveQueryCallback   : String => () => Unit =
     (molecule1: String) => () => Rx {
       if (idle) {
         idle = false
-        val favorite = getFavorite(molecule1)
-        queryWire().addFavorite(db, favorite).call().foreach {
+        val query = getQuery(molecule1)
+        queryWire().addQuery(db, query).call().foreach {
           case Left(error) =>
-            window.alert(s"Error adding favorite: $error")
+            window.alert(s"Error adding query: $error")
             idle = true
           case Right(_)    =>
-            favorites() = favorites.now :+ favorite
+            queries() = queries.now :+ query
             idle = true
         }
       }
     }
-  protected val retractFavCallback: String => () => Unit =
+  protected val retractQueryCallback: String => () => Unit =
     (molecule1: String) => () => Rx {
       if (idle) {
         idle = false
-        queryWire().retractFavorite(db, molecule1).call().foreach {
+        queryWire().retractQuery(db, molecule1).call().foreach {
           case Left(error) =>
-            window.alert(s"Error retracting favorite: $error")
+            window.alert(s"Error retracting query: $error")
             idle = true
           case Right(_)    =>
-            favorites() = favorites.now.filterNot(_.molecule == molecule1)
+            queries() = queries.now.filterNot(_.molecule == molecule1)
             idle = true
         }
       }
     }
 
-  def useFavorite(favorite: Favorite) = Rx {
+  def useQuery(query: SavedQuery): Rx.Dynamic[Unit] = Rx {
     if (idle) {
       idle = false
-      Molecule2Model(favorite.molecule) match {
+      Molecule2Model(query.molecule) match {
         case Left(err)       =>
-          window.alert(s"Error using favorite: $err")
+          window.alert(s"Error using query: $err")
           idle = true
         case Right(elements) =>
           modelElements() = elements
-          val colSettings = favorite.colSettings.map(cs => cs.index -> cs).toMap
+          val colSettings = query.colSettings.map(cs => cs.index -> cs).toMap
           columns() = columns.now.map { column =>
             val ColSetting(index, expr, sort, sortPos) = colSettings(column.colIndex)
             column.copy(colIndex = index, attrExpr = expr, sortDir = sort, sortPos = sortPos)
@@ -99,6 +100,6 @@ class Callbacks(db: String)(implicit ctx: Ctx.Owner) extends RxBindings {
     }
   }
 
-  protected val useFavCallback: Favorite => () => Unit =
-    (favorite: Favorite) => () => useFavorite(favorite)
+  protected val useQueryCallback: SavedQuery => () => Unit =
+    (savedQuery: SavedQuery) => () => useQuery(savedQuery)
 }

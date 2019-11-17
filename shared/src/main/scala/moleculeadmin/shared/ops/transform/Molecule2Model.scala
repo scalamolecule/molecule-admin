@@ -162,6 +162,7 @@ class Molecule2Model(molecule0: String, nsMap: Map[String, Ns]) extends QueryApi
       if (backRefNss(curNsFull).contains(token)) {
         elements += ReBond(backRefNs)
         curNsFull = backRefNs
+        prevAttr = "" // reset when rebonding
       } else {
         // un-allowed backRef
         throw new IllegalArgumentException(
@@ -211,7 +212,7 @@ class Molecule2Model(molecule0: String, nsMap: Map[String, Ns]) extends QueryApi
     val aggrs           = Seq("count", "count-distinct", "sum", "avg", "median", "variance", "stddev")
     val (ns, prevAttr1) = (curNsFull, prevAttr)
     val updatedElements = elements.foldLeft(0, List.empty[Element]) {
-      case ((0, acc), a@Atom(`ns`, `prevAttr1`, _, _, Fn(fn, _), _, _, _))
+      case ((0, _), Atom(`ns`, `prevAttr1`, _, _, Fn(fn, _), _, _, _))
         if aggrs.contains(fn) =>
         throw new IllegalArgumentException(
           s"Expecting aggregate function after clean attribute:" +
@@ -236,13 +237,14 @@ class Molecule2Model(molecule0: String, nsMap: Map[String, Ns]) extends QueryApi
         case "e_" => throw new IllegalArgumentException(
           s"`e_` can only be tacit if an id is applied to it (`e_(12345L)`) in molecule: $molecule0")
         case _    =>
-          val a                   = attrDefs(curNsFull)(attr)
-          val (value, enumPrefix) = if (a.enums$.isDefined)
-            (EnumVal, Some(s":$curNsFull.$attr/")) else (VarValue, None)
-          if (attr == prevAttr)
+          val a = attrDefs(curNsFull)(attr)
+          if (attr == prevAttr) {
             addEdit(attr, a.tpe, a.card)
-          else
+          } else {
+            val (value, enumPrefix) = if (a.enums$.isDefined)
+              (EnumVal, Some(s":$curNsFull.$attr/")) else (VarValue, None)
             elements += Atom(curNsFull, attr, a.tpe, a.card, value, enumPrefix)
+          }
       }
       prevAttr = attr
     } else {
@@ -288,13 +290,15 @@ class Molecule2Model(molecule0: String, nsMap: Map[String, Ns]) extends QueryApi
     }
   }
 
-  def resolveComparison(attr: String,
-                        tpe: String,
-                        card: Int,
-                        expr: String,
-                        fn: Seq[Any] => Value,
-                        enumPrefix: Option[String],
-                        fulltext: Boolean = false): Unit = {
+  def resolveComparison(
+    attr: String,
+    tpe: String,
+    card: Int,
+    expr: String,
+    fn: Seq[Any] => Value,
+    enumPrefix: Option[String],
+    fulltext: Boolean = false
+  ): Unit = {
     expr.trim match {
       case "" => throw new IllegalArgumentException(
         s"Comparing an empty value to attribute `$attr` not allowed in molecule: $molecule0")

@@ -27,10 +27,7 @@ case class DataTableBodyFoot(db: String)(implicit val ctx: Ctx.Owner)
     offset()
     limit()
 
-//    val t1 = new Date().getTime()
-
     val queryResult              = optQueryResult.getOrElse {
-      // println("  cached queryResult")
       queryCache.now.find(_.modelElements == modelElements.now).get.queryResult
     }
     val sortCols                 = columns.now.filter(_.sortDir.nonEmpty)
@@ -56,12 +53,7 @@ case class DataTableBodyFoot(db: String)(implicit val ctx: Ctx.Owner)
       cachedRowBuilder = Some(rb)
       rb
     }
-
     rowBuilder.append(sortIndex, filterIndex)
-//    val t2 = new Date().getTime()
-
-//    println("t " + (t2 - t1))
-
     DataTableFoot().populate(tableFoot)
   }
 }

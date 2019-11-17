@@ -6,7 +6,7 @@ import org.scalajs.dom.raw.HTMLElement
 import org.scalajs.dom.window
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all.{table, td, _}
-import moleculeadmin.shared.ast.query.Favorite
+import moleculeadmin.shared.ast.query.SavedQuery
 
 
 trait SubMenuElements extends AppElements {
@@ -31,110 +31,115 @@ trait SubMenuElements extends AppElements {
   ).render
 
 
-  // Favorites --------------------------------------------------------------------
+  // Queries --------------------------------------------------------------------
 
-  def _favoritesTable(favorites: Seq[Favorite],
-                      curMolecule: String,
-                      useFavCallback: Favorite => () => Unit,
-                      retractFavCallback: String => () => Unit
-                     ): TypedTag[Table] = table(cls := "tableRowLink",
-    favorites.zipWithIndex.map {
-      case (Favorite(`curMolecule`, _), i) => tr(cls := "current",
+  def _queriesTable(
+    savedQueries: Seq[SavedQuery],
+    curMolecule: String,
+    useSavedQuery: SavedQuery => () => Unit,
+    retractSavedQuery: String => () => Unit
+  ): TypedTag[Table] = table(cls := "tableRowLink",
+    savedQueries.zipWithIndex.map {
+      case (SavedQuery(`curMolecule`, _), i) => tr(cls := "current",
         th(i + 1),
         td(curMolecule, paddingRight := 20),
         td(
           textAlign.right,
           a(cls := "discrete", href := "#",
             span(cls := "oi oi-x", fontSize := 9.px, color := "#888", paddingBottom := 6),
-            onclick := retractFavCallback(curMolecule)
+            onclick := retractSavedQuery(curMolecule)
           )
         )
       )
-      case (favorite, i)                   => tr(cls := "other",
-        th(i + 1, onclick := useFavCallback(favorite)),
-        td(favorite.molecule, paddingRight := 20, onclick := useFavCallback(favorite)),
+      case (query, i)                        => tr(cls := "other",
+        th(i + 1, onclick := useSavedQuery(query)),
+        td(query.molecule, paddingRight := 20, onclick := useSavedQuery(query)),
         td(
           textAlign.right,
           a(cls := "discrete", href := "#",
             span(cls := "oi oi-x", fontSize := 9.px, color := "#888", paddingBottom := 6),
-            onclick := retractFavCallback(favorite.molecule)
+            onclick := retractSavedQuery(query.molecule)
           )
         )
       )
     }
   )
 
-  def _subMenuFavorites(favorites: Seq[Favorite],
-                        curMolecule: String,
-                        useFavCallback: Favorite => () => Unit,
-                        retractFavCallback: String => () => Unit
-                       ): TypedTag[LI] = li(
+  def _subMenuQueries(
+    savedQueries: Seq[SavedQuery],
+    curMolecule: String,
+    useSavedQuery: SavedQuery => () => Unit,
+    retractSavedQuery: String => () => Unit
+  ): TypedTag[LI] = li(
     cls := "dropdown",
-    a(href := "#", span("F", textDecoration.underline), "avorites"),
+    a(href := "#", span("Q", textDecoration.underline), "ueries"),
     div(
       cls := "dropdown-menu",
-      id := "submenu-favorites",
+      id := "submenu-queries",
       paddingBottom := 5,
-      _favoritesTable(favorites, curMolecule, useFavCallback, retractFavCallback)
+      _queriesTable(savedQueries, curMolecule, useSavedQuery, retractSavedQuery)
     )
   )
 
 
-  // Cache --------------------------------------------------------------------
+  // Recent molecules --------------------------------------------------------------------
 
-  def _cacheList(molecules: Seq[String],
-                 curMolecule: String,
-                 useCachedCallback: String => () => Unit,
-                 curFavMolecules: Seq[String],
-                 addFavCallback: String => () => Unit,
-                 removeCachedCallback: String => () => Unit
-                ): TypedTag[Table] = table(cls := "tableRowLink",
-    molecules.zipWithIndex.map {
+  def _recentMoleculesList(
+    recentMolecules: Seq[String],
+    curMolecule: String,
+    useRecentMolecule: String => () => Unit,
+    savedMolecules: Seq[String],
+    saveQuery: String => () => Unit,
+    removeRecentMolecules: String => () => Unit
+  ): TypedTag[Table] = table(cls := "tableRowLink",
+    recentMolecules.zipWithIndex.map {
       case (m@`curMolecule`, i) => tr(cls := "current",
         th(i + 1),
         td(m, paddingRight := 20),
-        if (curFavMolecules.contains(m)) td("") else
-          td(textAlign.right, a(cls := "discrete", href := "#", "fav", onclick := addFavCallback(m))),
+        if (savedMolecules.contains(m)) td("") else
+          td(textAlign.right, a(cls := "discrete", href := "#", "fav", onclick := saveQuery(m))),
         td("")
       )
       case (m, i)               => tr(cls := "other",
-        th(i + 1, onclick := useCachedCallback(m)),
-        td(m, paddingRight := 20, onclick := useCachedCallback(m)),
-        if (curFavMolecules.contains(m)) td("") else
-          td(textAlign.right, a(cls := "discrete", href := "#", "fav", onclick := addFavCallback(m))),
+        th(i + 1, onclick := useRecentMolecule(m)),
+        td(m, paddingRight := 20, onclick := useRecentMolecule(m)),
+        if (savedMolecules.contains(m)) td("") else
+          td(textAlign.right, a(cls := "discrete", href := "#", "fav", onclick := saveQuery(m))),
         td(
           textAlign.right,
           a(cls := "discrete", href := "#",
             span(cls := "oi oi-x", fontSize := 9.px, color := "#888", paddingBottom := 6),
-            onclick := removeCachedCallback(m)
+            onclick := removeRecentMolecules(m)
           )
         )
       )
     }
   )
 
-  def _subMenuCache(molecules: Seq[String],
-                    curMolecule: String,
-                    useCachedCallback: String => () => Unit,
-                    curFavMolecules: Seq[String],
-                    addFavCallback: String => () => Unit,
-                    removeCachedCallback: String => () => Unit
-                   ): TypedTag[LI] = li(
+  def _subMenuCache(
+    recentMolecules: Seq[String],
+    curMolecule: String,
+    useRecentMolecule: String => () => Unit,
+    savedMolecules: Seq[String],
+    saveQuery: String => () => Unit,
+    removeRecentMolecules: String => () => Unit
+  ): TypedTag[LI] = li(
     cls := "dropdown",
-    a(href := "#", span("C", textDecoration.underline), "ache"),
+    a(href := "#", span("R", textDecoration.underline), "ecent"),
     div(
       cls := "dropdown-menu",
-      id := "submenu-cache",
+      id := "submenu-recentMolecules",
       paddingBottom := 5,
-      _cacheList(molecules, curMolecule, useCachedCallback, curFavMolecules, addFavCallback, removeCachedCallback)
+      _recentMoleculesList(recentMolecules, curMolecule, useRecentMolecule, savedMolecules, saveQuery, removeRecentMolecules)
     )
   )
 
 
-  // Snippets --------------------------------------------------------------------
+  // Views --------------------------------------------------------------------
 
-  def _subMenuSnippet(checkboxes: TypedTag[HTMLElement]*): TypedTag[LI] = li(cls := "dropdown",
-    a(href := "#", "Snippets"),
+  def _subMenuViews(checkboxes: TypedTag[HTMLElement]*): TypedTag[LI] = li(cls := "dropdown",
+//    a(href := "#", span("V", textDecoration.underline), "iews"),
+    a(href := "#", "Views"),
     div(
       cls := "dropdown-menu",
       width := 200,

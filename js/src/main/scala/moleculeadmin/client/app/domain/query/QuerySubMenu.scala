@@ -23,11 +23,11 @@ case class QuerySubMenu(db: String)(implicit val ctx: Ctx.Owner)
     span(
       _maxRowsSelector,
       ul(cls := "nav nav-pills",
-        Favorites(db).dynRender,
+        Queries(db).dynRender,
         if (modelElements().nonEmpty) {
           Seq(
             Cache(db).dynRender,
-            Snippets().dynRender,
+            Views().dynRender,
             ShortCuts().dynRender
           )
         } else ()

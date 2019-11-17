@@ -1,14 +1,14 @@
-package moleculeadmin.client.app.domain.query.snippet
+package moleculeadmin.client.app.domain.query.views
 import molecule.ast.model.Model
 import molecule.ops.QueryOps._
 import molecule.transform.Query2String
 import moleculeadmin.client.app.domain.query.QueryState._
-import moleculeadmin.client.app.element.query.SnippetElements
+import moleculeadmin.client.app.element.query.ViewElements
 import moleculeadmin.shared.ops.query.ModelOps
 import scalatags.JsDom.all._
 
 
-object Datalog extends ModelOps with SnippetElements {
+object Datalog extends ModelOps with ViewElements {
 
   def apply() = {
     if (emptyNamespaces(modelElements.now).nonEmpty) {
@@ -18,7 +18,7 @@ object Datalog extends ModelOps with SnippetElements {
       )
     } else {
       val q = molecule.transform.Model2Query(Model(modelElements.now))._1
-      _codeSnippet(
+      _codeView(
         "Datalog",
         "",
         molecule.transform.Query2String(q).multiLine(50),

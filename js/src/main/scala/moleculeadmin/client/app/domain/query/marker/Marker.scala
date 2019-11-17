@@ -1,7 +1,6 @@
 package moleculeadmin.client.app.domain.query.marker
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.element.AppElements
-import moleculeadmin.shared.ast.query.Col
 import org.scalajs.dom.html.TableSection
 import org.scalajs.dom.raw.{Element, HTMLCollection}
 
@@ -30,7 +29,6 @@ case class Marker(
       curMarker = eid :: curMarker
       onCls
     }
-
 
     val rows      = tableBody.children
     var i         = 0

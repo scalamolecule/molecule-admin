@@ -1,6 +1,6 @@
 package moleculeadmin.client.app.domain.query.data
 
-import boopickle.Default._
+//import boopickle.Default._
 import moleculeadmin.client.app.domain.query.KeyEvents
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.domain.query.data.groupedit.{GroupEdit, GroupSave}
@@ -23,7 +23,7 @@ case class DataTableHead(db: String)(implicit val ctx: Ctx.Owner)
     with HeadElements with KeyEvents with FilterFactory
     with AppElements {
 
-  type keepBooPickleImport = PickleState
+//  type keepBooPickleImport = PickleState
 
 
   def attrSortCell(col: Col): JsDom.TypedTag[TableHeaderCell] = {
@@ -199,7 +199,7 @@ case class DataTableHead(db: String)(implicit val ctx: Ctx.Owner)
       filterCells(colIndex) = attrFilterCell(col)
       colIndex += 1
     }
-    val toggleCell = _openCloseQueryBuilder(selection() == "q", () => toggleQuery)
+    val toggleCell = _openCloseQueryBuilder(selection() == "q", () => toggleQueryBuilder)
     val nsCells    = nss.map { case (ns, i) => th(colspan := i, ns) }
     tableHead.innerHTML = ""
     tableHead.appendChild(tr(toggleCell +: nsCells).render)
