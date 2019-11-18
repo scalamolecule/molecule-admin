@@ -1,12 +1,12 @@
 import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
-import play.sbt.PlayImport.{guice, specs2}
+import play.sbt.PlayImport.{PlayKeys, guice, specs2}
 import sbt.Keys._
 import sbt._
 
 
 object Settings {
 
-  val projects: Project => Project = _.settings(
+  val common: Seq[Def.Setting[_]] = Seq(
     name := "molecule-admin",
     organization := "org.scalamolecule",
     version := "0.6-SNAPSHOT",
@@ -20,29 +20,18 @@ object Settings {
     )
   )
 
-  val shared: Seq[Def.Setting[_]] = Seq(
-    libraryDependencies ++= Seq(
-      "com.lihaoyi" %%% "scalatags" % "0.7.0",
-      "com.lihaoyi" %%% "autowire" % "0.2.6",
-      "com.lihaoyi" %%% "utest" % "0.7.1",
-      "io.suzaku" %%% "boopickle" % "1.3.0"
-    ),
-    testFrameworks += new TestFramework("utest.runner.Framework")
-  )
-
-  val js: Seq[Def.Setting[_]] = Seq(
+  val client: Seq[Def.Setting[_]] = Seq(
     name := "client",
     libraryDependencies ++= Seq(
       "org.scala-js" %%% "scalajs-dom" % "0.9.7",
       "com.lihaoyi" %%% "scalarx" % "0.4.0",
       "io.github.cquiroz" %%% "scala-java-time" % "2.0.0-RC3",
-      ("org.scalamolecule" %%% "molecule" % "0.20.1")
-        .exclude("com.datomic", "datomic-free")
+//      ("org.scalamolecule" %%% "molecule" % "0.20.1")
+//        .exclude("com.datomic", "datomic-free")
     )
-//    testFrameworks += new TestFramework("utest.runner.Framework")
   )
 
-  val jvm: Seq[Def.Setting[_]] = Seq(
+  val server: Seq[Def.Setting[_]] = Seq(
     name := "server",
     resolvers ++= Seq(
       ("datomic" at "http://files.datomic.com/maven")
@@ -64,11 +53,26 @@ object Settings {
       "org.webjars.bower" % "open-iconic" % "1.1.1",
       "org.webjars" % "font-awesome" % "5.5.0",
       "org.webjars.bower" % "highlightjs" % "9.12.0",
-//      "org.specs2" %% "specs2-core" % "4.8.0" % "test",
       specs2 % Test,
       guice
-    ).map(_.exclude("org.slf4j", "slf4j-nop")) // necessary?
-//    scalacOptions in Test ++= Seq("-Yrangepos"),
-//    testFrameworks += new TestFramework("utest.runner.Framework")
+    ).map(_.exclude("org.slf4j", "slf4j-nop")),
+    PlayKeys.devSettings := Seq("play.server.http.port" -> "9001"),
+  )
+
+  val shared: Seq[Def.Setting[_]] = Seq(
+    libraryDependencies ++= Seq(
+      "com.lihaoyi" %%% "scalatags" % "0.7.0",
+      "com.lihaoyi" %%% "autowire" % "0.2.6",
+      "com.lihaoyi" %%% "utest" % "0.7.1",
+      "io.suzaku" %%% "boopickle" % "1.3.0",
+
+
+//      "org.scala-js" %%% "scalajs-dom" % "0.9.7",
+//      "com.lihaoyi" %%% "scalarx" % "0.4.0",
+//      "io.github.cquiroz" %%% "scala-java-time" % "2.0.0-RC3",
+      ("org.scalamolecule" %%% "molecule" % "0.20.1")
+        .exclude("com.datomic", "datomic-free")
+    ),
+    testFrameworks += new TestFramework("utest.runner.Framework")
   )
 }
