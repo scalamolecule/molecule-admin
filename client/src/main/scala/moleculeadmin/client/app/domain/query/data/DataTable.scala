@@ -2,7 +2,7 @@ package moleculeadmin.client.app.domain.query.data
 import autowire._
 import boopickle.Default._
 import moleculeadmin.client.app.element.query.datatable.TableElements
-import moleculeadmin.client.app.domain.QueryClient.{getCols, mkModelTree, mkTree, model2molecule}
+import moleculeadmin.client.app.domain.QueryClient.{getCols, getEidColIndexes, mkModelTree, mkTree, model2molecule}
 import moleculeadmin.client.app.domain.query.KeyEvents
 import moleculeadmin.client.app.domain.query.QueryState.{columns, offset, _}
 import moleculeadmin.client.autowire.queryWire
@@ -137,6 +137,7 @@ case class DataTable(db: String)(implicit val ctx: Ctx.Owner)
           tree() = cached.tree
           curMolecule() = cached.molecule
           columns() = cached.columns
+          eTableColIndexes = getEidColIndexes(columns.now)
           filters() = cached.filters
           offset() = 0
           rowCountAll = cached.queryResult.rowCountAll
@@ -144,7 +145,7 @@ case class DataTable(db: String)(implicit val ctx: Ctx.Owner)
           curAttrs = columns.now.map(c => s":${c.nsFull}/${c.attr}")
 
           registerKeyEvents
-          DataTableHead(db).populate(tableHead)
+          DataTableHead(db, tableBody).populate(tableHead)
           DataTableBodyFoot(db).populate(tableBody, tableFoot)
           tableContainer
 
@@ -155,12 +156,13 @@ case class DataTable(db: String)(implicit val ctx: Ctx.Owner)
           tree() = mkTree(mkModelTree(elements1))
           curMolecule() = model2molecule(elements1)
           columns() = getCols(elements)
+          eTableColIndexes = getEidColIndexes(columns.now)
           filters() = Map.empty[Int, Filter[_]]
           offset() = 0
           curAttrs = columns.now.map(c => s":${c.nsFull}/${c.attr}")
 
           registerKeyEvents
-          DataTableHead(db).populate(tableHead)
+          DataTableHead(db, tableBody).populate(tableHead)
           fetchAndPopulate(tableBody, tableFoot)
           tableContainer
       }

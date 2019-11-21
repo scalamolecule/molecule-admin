@@ -18,7 +18,8 @@ object QueryState {
   // Schema
   implicit var nsMap: Map[String, Ns] = Map.empty[String, Ns]
   var viewCellTypes = Map.empty[String, String]
-  var enumAttrs     = Seq.empty[String]
+  var enumAttrs        = Seq.empty[String]
+  var eTableColIndexes = Seq.empty[Int]
 
 
   // What is being being processed now? Concatenates part/ns/attr/pos-number as a coordinate in the tree
@@ -89,11 +90,12 @@ object QueryState {
   var curAttrs          = Seq.empty[String]
   val entityHistorySort = Var("tx")
 
-  // colIndex + 1 -> (eid -> array indexes)
+  // tableCol = colIndex + 1
+  // tableCol -> (eid -> array indexes)
   val curEntityIndexes = mutable.Map.empty[Int, mutable.LongMap[List[Int]]]
 
   // For fast render on page scrolling
-  // colIndex + 1 -> array of marker status
+  // tableCol -> array of marker status
   val curStarIndexes  = mutable.Map.empty[Int, Array[Boolean]]
   val curFlagIndexes  = mutable.Map.empty[Int, Array[Boolean]]
   val curCheckIndexes = mutable.Map.empty[Int, Array[Boolean]]

@@ -43,16 +43,21 @@ trait HeadElements extends ColOps with AppElements with RxBindings {
     save: MouseEvent => Unit,
     cancel: MouseEvent => Unit,
     retract: MouseEvent => Unit,
+    markers: Seq[MouseEvent => Unit] = Nil,
   ): TypedTag[UList] = {
     val items = if (attribute == "e") {
       Seq(
-        a(href := "#", cls := "dropdown-item", "Star"),
-        a(href := "#", cls := "dropdown-item", "Flag"),
-        a(href := "#", cls := "dropdown-item", "Check"),
+        a(href := "#", cls := "dropdown-item", "Star", onclick := markers.head),
+        a(href := "#", cls := "dropdown-item", "Flag", onclick := markers(1)),
+        a(href := "#", cls := "dropdown-item", "Check", onclick := markers(2)),
         div(cls := "dropdown-divider", margin := "3px 0"),
-        a(href := "#", cls := "dropdown-item", "Unstar"),
-        a(href := "#", cls := "dropdown-item", "Unflag"),
-        a(href := "#", cls := "dropdown-item", "Uncheck"),
+        a(href := "#", cls := "dropdown-item", "Unstar", onclick := markers(3)),
+        a(href := "#", cls := "dropdown-item", "Unflag", onclick := markers(4)),
+        a(href := "#", cls := "dropdown-item", "Uncheck", onclick := markers(5)),
+        div(cls := "dropdown-divider", margin := "3px 0"),
+        a(href := "#", cls := "dropdown-item", "Unstar all", onclick := markers(6)),
+        a(href := "#", cls := "dropdown-item", "Unflag all", onclick := markers(7)),
+        a(href := "#", cls := "dropdown-item", "Uncheck all", onclick := markers(8)),
       )
     } else if (expr == "edit") {
       Seq(
@@ -98,12 +103,13 @@ trait HeadElements extends ColOps with AppElements with RxBindings {
     expr: String,
     sortDir: String,
     sortPos: Int,
-    sortCallback: MouseEvent => Unit,
+    sort: MouseEvent => Unit,
     editable: Boolean,
     edit: MouseEvent => Unit,
     save: MouseEvent => Unit,
     cancel: MouseEvent => Unit,
     retract: MouseEvent => Unit,
+    markers: Seq[MouseEvent => Unit] = Nil,
   ): TypedTag[TableHeaderCell] = {
     val headerCell = {
       if (expr == "orig") {
@@ -122,7 +128,14 @@ trait HeadElements extends ColOps with AppElements with RxBindings {
           attribute,
           span(cls := "expr", expr),
         )
-      } else if (editable || attribute == "e") {
+      } else if (attribute == "e") {
+        td(
+          padding := 0,
+          attrMenu(attribute, card, expr, edit, save, cancel, retract
+            , markers
+          )
+        )
+      } else if (editable) {
         td(
           padding := 0,
           attrMenu(attribute, card, expr, edit, save, cancel, retract)
@@ -150,7 +163,7 @@ trait HeadElements extends ColOps with AppElements with RxBindings {
           color := "#bbbbbb"
         )
       },
-      onclick := sortCallback
+      onclick := sort
     )
     th(
       table(

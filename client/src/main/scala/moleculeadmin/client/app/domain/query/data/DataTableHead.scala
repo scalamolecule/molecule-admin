@@ -1,9 +1,9 @@
 package moleculeadmin.client.app.domain.query.data
 
-//import boopickle.Default._
 import moleculeadmin.client.app.domain.query.KeyEvents
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.domain.query.data.groupedit.{GroupEdit, GroupSave}
+import moleculeadmin.client.app.domain.query.marker.{ToggleMany, UnmarkAll}
 import moleculeadmin.client.app.element.AppElements
 import moleculeadmin.client.app.element.query.datatable.HeadElements
 import moleculeadmin.client.rxstuff.RxBindings
@@ -18,12 +18,13 @@ import scalatags.JsDom
 import scalatags.JsDom.all._
 
 
-case class DataTableHead(db: String)(implicit val ctx: Ctx.Owner)
+case class DataTableHead(
+  db: String,
+  tableBody: TableSection,
+)(implicit val ctx: Ctx.Owner)
   extends RxBindings with ColOps with ModelOps
     with HeadElements with KeyEvents with FilterFactory
     with AppElements {
-
-//  type keepBooPickleImport = PickleState
 
 
   def attrSortCell(col: Col): JsDom.TypedTag[TableHeaderCell] = {
@@ -31,7 +32,6 @@ case class DataTableHead(db: String)(implicit val ctx: Ctx.Owner)
     val Col(colIndex, _, nsAlias, nsFull, attr, _, colType, card, _, _,
     aggrType, expr, sortDir, sortPos) = col
 
-    val attrFull = s":$nsFull/$attr"
     val sortable = card == 1 || singleAggrTypes.contains(aggrType)
     val sort     = { e: MouseEvent =>
       if (cachedCols.size == 5 &&
@@ -49,11 +49,9 @@ case class DataTableHead(db: String)(implicit val ctx: Ctx.Owner)
     }
     val editable = isEditable(columns.now, colIndex, nsAlias, nsFull)
     val edit     = { _: MouseEvent =>
-      println("edit... " + attr)
       modelElements() = toggleEdit(modelElements.now, colIndex, nsFull, attr)
     }
     val save     = { _: MouseEvent =>
-      println(s"Save $attrFull changes...")
       colType match {
         case "string"     => GroupSave(db, col).string()
         case "double"     => GroupSave(db, col).double()
@@ -68,16 +66,34 @@ case class DataTableHead(db: String)(implicit val ctx: Ctx.Owner)
       //      modelElements() = toggleEdit(modelElements.now, i, nsFull, attr)
     }
     val cancel   = { _: MouseEvent =>
-      println("cancel... " + attr)
       resetEditColToOrigColCache(colIndex, colType)
-      // remove edit column from model and redraw
       modelElements() = toggleEdit(modelElements.now, colIndex, nsFull, attr)
     }
+
+    val markers: Seq[MouseEvent => Unit] = if (attr == "e") {
+      Seq(
+        { _: MouseEvent => ToggleMany(db, tableBody, colIndex, "star").set(true) },
+        { _: MouseEvent => ToggleMany(db, tableBody, colIndex, "flag").set(true) },
+        { _: MouseEvent => ToggleMany(db, tableBody, colIndex, "check").set(true) },
+        { _: MouseEvent => ToggleMany(db, tableBody, colIndex, "star").set(false) },
+        { _: MouseEvent => ToggleMany(db, tableBody, colIndex, "flag").set(false) },
+        { _: MouseEvent => ToggleMany(db, tableBody, colIndex, "check").set(false) },
+        { _: MouseEvent => UnmarkAll(db, tableBody, colIndex, "star") },
+        { _: MouseEvent => UnmarkAll(db, tableBody, colIndex, "flag") },
+        { _: MouseEvent => UnmarkAll(db, tableBody, colIndex, "check") },
+      )
+    } else Nil
+
     if (sortable) {
-      _attrHeaderSortable(attr, card, expr, sortDir, sortPos, sort,
-        editable, edit, save, cancel, retract)
+      _attrHeaderSortable(
+        attr, card, expr, sortDir, sortPos, sort, editable,
+        edit, save, cancel, retract,
+        markers
+      )
     } else {
-      _attrHeader(attr, card, expr, editable, edit, save, cancel, retract)
+      _attrHeader(
+        attr, card, expr, editable,
+        edit, save, cancel, retract)
     }
   }
 

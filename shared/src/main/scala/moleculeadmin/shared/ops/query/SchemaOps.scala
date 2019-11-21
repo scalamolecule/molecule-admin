@@ -1,6 +1,7 @@
 package moleculeadmin.shared.ops.query
 
 import moleculeadmin.shared.api.QueryApi
+import moleculeadmin.shared.ast.query.Col
 import moleculeadmin.shared.ast.schema._
 
 
@@ -48,6 +49,7 @@ trait SchemaOps extends QueryApi with Base {
     //    nsMap.map { case (ns, nsDef) => s""""$ns" -> $nsDef,""" } foreach println
     nsMap
   }
+
 
 
   def mkViewCellTypes(nsMap: Map[String, Ns]): Map[String, String] = {

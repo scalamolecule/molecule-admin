@@ -3,7 +3,7 @@ package moleculeadmin.client.app.domain.query.data
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.domain.query.data.edit.{TxLambdas, Update, UpdateCardMany, UpdateCardMap, UpdateCardOne}
 import moleculeadmin.client.app.domain.query.marker
-import moleculeadmin.client.app.domain.query.marker.Marker
+import moleculeadmin.client.app.domain.query.marker.ToggleOne
 import moleculeadmin.client.app.element.query.datatable.BodyElements
 import moleculeadmin.shared.ast.query.{QueryResult, _}
 import moleculeadmin.shared.ops.query.ColOps
@@ -127,10 +127,6 @@ abstract class Cell(
         (baseClass: String, _: Int) => baseClass
     }
 
-    lazy val eColIndexes = cols.collect {
-      case Col(colIndex, _, _, _, "e", _, _, _, _, _, _, _, _, _) => colIndex + 1
-    }
-
 
     colType match {
 
@@ -214,12 +210,10 @@ abstract class Cell(
         val getCls     = getClassLambda(origArray, valueArray)
         cellType match {
           case "eid" =>
-            val length = valueArray.length
-
-            val starIndex  = new Array[Boolean](length)
-            val flagIndex  = new Array[Boolean](length)
-            val checkIndex = new Array[Boolean](length)
-
+            val length      = valueArray.length
+            val starIndex   = new Array[Boolean](length)
+            val flagIndex   = new Array[Boolean](length)
+            val checkIndex  = new Array[Boolean](length)
             val entityIndex = mutable.LongMap.empty[List[Int]]
             var eid         = 0L
             var i           = 0
@@ -235,14 +229,15 @@ abstract class Cell(
               i += 1
             }
 
-            curEntityIndexes(colIndex + 1) = entityIndex
-            curStarIndexes(colIndex + 1) = starIndex
-            curFlagIndexes(colIndex + 1) = flagIndex
-            curCheckIndexes(colIndex + 1) = checkIndex
+            val tableCol = colIndex + 1
+            curEntityIndexes(tableCol) = entityIndex
+            curStarIndexes(tableCol) = starIndex
+            curFlagIndexes(tableCol) = flagIndex
+            curCheckIndexes(tableCol) = checkIndex
 
-            val star  = Marker(db, tableBody, eColIndexes, "star")
-            val flag  = Marker(db, tableBody, eColIndexes, "flag")
-            val check = Marker(db, tableBody, eColIndexes, "check")
+            val star  = ToggleOne(db, tableBody, "star")
+            val flag  = ToggleOne(db, tableBody, "flag")
+            val check = ToggleOne(db, tableBody, "check")
 
             (rowIndex: Int) =>
               // Set entity id for updates of subsequent attribute values
