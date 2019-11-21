@@ -124,6 +124,12 @@ trait ColOps extends HelpersAdmin {
     }
   }
 
+  def getEidColIndexes(cols: Seq[Col]): Seq[Int] = {
+    cols.collect {
+      case Col(colIndex, _, _, _, "e", _, _, _, _, _, _, _, _, _) => colIndex + 1
+    }
+  }
+
   def getCols(elements: Seq[Element])
              (implicit nsMap: Map[String, Ns]): Seq[Col] = {
     var i          = 0

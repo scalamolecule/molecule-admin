@@ -48,6 +48,20 @@ trait QueryApi extends BaseApi {
     isOn: Boolean
   ): Either[String, Long] = ???
 
+  def toggleMarkers(
+    db: String,
+    dbSettingsIdOpt: Option[Long],
+    tpe: String,
+    eids: Set[Long],
+    newState: Boolean
+  ): Either[String, Long] = ???
+
+  def unmarkAll(
+    db: String,
+    dbSettingsIdOpt: Option[Long],
+    tpe: String,
+  ): Either[String, Long] = ???
+
   def saveOpenViews(openViews: Seq[String]): Either[String, String] = ???
 
   def saveSetting(key: String, value: String): Either[String, String] = ???

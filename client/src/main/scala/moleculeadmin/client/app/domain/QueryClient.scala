@@ -39,7 +39,7 @@ object QueryClient extends RxBindings with TreeOps with SchemaOps with ColOps
       enumAttrs = mkEnumAttrs(nsMap)
 
 
-      // Set saved settings
+        // Set saved settings
       Rx {
         maxRows() = settings.getOrElse("maxRows", "-1").toInt
         limit() = settings.getOrElse("limit", "20").toInt

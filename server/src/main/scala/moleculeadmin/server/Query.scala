@@ -22,7 +22,7 @@ class Query extends QueryApi with Base {
   // Todo: this works but seems like a hack that would be nice to avoid although the impact of
   // a few input variables is negible.
   // To avoid type combination explosions from multiple inputs of various types to be transferred
-  // with autowire/boopickke, we cast all input variable values as String on the client and then
+  // with autowire/boopickle, we cast all input variable values as String on the client and then
   // cast them back to their original type here and pass them as Object's to Datomic.
   def cast(pair: (String, String)): Object = pair match {
     case ("String", v)     => v.asInstanceOf[Object]
@@ -288,7 +288,7 @@ class Query extends QueryApi with Base {
     implicit val conn = Conn(base + "/meta")
     withTransactor {
       try {
-        val dbSettingsId = dbSettingsIdOpt.getOrElse{
+        val dbSettingsId = dbSettingsIdOpt.getOrElse {
           val userId = user_User.e.username_("admin").get match {
             case List(eid) => eid
             case Nil       => user_User.username("admin").save.eid
@@ -313,6 +313,82 @@ class Query extends QueryApi with Base {
             case "flag"  => user_DbSettings(dbSettingsId).flags.assert(eid).update
             case "check" => user_DbSettings(dbSettingsId).checks.assert(eid).update
           }
+        }
+        Right(dbSettingsId)
+      } catch {
+        case t: Throwable => Left(t.getMessage)
+      }
+    }
+  }
+
+  override def toggleMarkers(
+    db: String,
+    dbSettingsIdOpt: Option[Long],
+    tpe: String,
+    eids: Set[Long],
+    newState: Boolean
+  ): Either[String, Long] = {
+    implicit val conn = Conn(base + "/meta")
+    withTransactor {
+      try {
+        val dbSettingsId = dbSettingsIdOpt.getOrElse {
+          val userId = user_User.e.username_("admin").get match {
+            case List(eid) => eid
+            case Nil       => user_User.username("admin").save.eid
+          }
+          user_User(userId).DbSettings.e.Db.name_(db).get match {
+            case List(dbSettingsId) => dbSettingsId
+            case Nil                =>
+              val dbId = meta_Db.e.name_(db).get.head
+              user_DbSettings.db(dbId).save.eid
+          }
+        }
+
+        if (newState) {
+          tpe match {
+            case "star"  => user_DbSettings(dbSettingsId).stars.assert(eids).update
+            case "flag"  => user_DbSettings(dbSettingsId).flags.assert(eids).update
+            case "check" => user_DbSettings(dbSettingsId).checks.assert(eids).update
+          }
+        } else {
+          tpe match {
+            case "star"  => user_DbSettings(dbSettingsId).stars.retract(eids).update
+            case "flag"  => user_DbSettings(dbSettingsId).flags.retract(eids).update
+            case "check" => user_DbSettings(dbSettingsId).checks.retract(eids).update
+          }
+        }
+        Right(dbSettingsId)
+      } catch {
+        case t: Throwable => Left(t.getMessage)
+      }
+    }
+  }
+
+  override def unmarkAll(
+    db: String,
+    dbSettingsIdOpt: Option[Long],
+    tpe: String,
+  ): Either[String, Long] = {
+    implicit val conn = Conn(base + "/meta")
+    withTransactor {
+      try {
+        val dbSettingsId = dbSettingsIdOpt.getOrElse {
+          val userId = user_User.e.username_("admin").get match {
+            case List(eid) => eid
+            case Nil       => user_User.username("admin").save.eid
+          }
+          user_User(userId).DbSettings.e.Db.name_(db).get match {
+            case List(dbSettingsId) => dbSettingsId
+            case Nil                =>
+              val dbId = meta_Db.e.name_(db).get.head
+              user_DbSettings.db(dbId).save.eid
+          }
+        }
+
+        tpe match {
+          case "star"  => user_DbSettings(dbSettingsId).stars().update
+          case "flag"  => user_DbSettings(dbSettingsId).flags().update
+          case "check" => user_DbSettings(dbSettingsId).checks().update
         }
         Right(dbSettingsId)
       } catch {
