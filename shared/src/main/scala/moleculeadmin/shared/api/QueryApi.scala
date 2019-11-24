@@ -48,7 +48,7 @@ trait QueryApi extends BaseApi {
     isOn: Boolean
   ): Either[String, Long] = ???
 
-  def toggleMarkers(
+  def setMarkers(
     db: String,
     dbSettingsIdOpt: Option[Long],
     tpe: String,

@@ -5,10 +5,11 @@ import moleculeadmin.shared.ops.query.data.{FilterIndex, SortIndex}
 import rx.Ctx
 
 
-case class Indexes(queryResult: QueryResult,
-                   sortCols: Seq[Col],
-                   unfiltered: Boolean
-                  )(implicit ctx: Ctx.Owner)
+case class Indexes(
+  qr: QueryResult,
+  sortCols: Seq[Col],
+  unfiltered: Boolean
+)(implicit ctx: Ctx.Owner)
   extends SortIndex with FilterIndex {
 
 
@@ -16,7 +17,7 @@ case class Indexes(queryResult: QueryResult,
     if (cachedCols != columns.now) {
       cachedCols = columns.now
       // sort
-      cachedSortIndex = getSortIndex(queryResult, sortCols, rowCount)
+      cachedSortIndex = getSortIndex(qr, sortCols, rowCount)
       //      println("## cachedSortIndex: " + cachedSortIndex.toList)
       cachedSortIndex
     } else {
@@ -28,10 +29,10 @@ case class Indexes(queryResult: QueryResult,
       cachedFilters = filters.now
       cachedFilterIndex = if (sortCols.isEmpty) {
         // filter
-        getFilterIndex(queryResult, filters.now)
+        getFilterIndex(qr, filters.now)
       } else {
         // sort + filter
-        getFilterIndex(queryResult, filters.now, getCachedSortIndex)
+        getFilterIndex(qr, filters.now, getCachedSortIndex)
       }
       //      println("CREATED: " + cachedFilterIndex.toList)
       cachedFilterIndex
@@ -67,5 +68,15 @@ case class Indexes(queryResult: QueryResult,
     //    println("filterIndex: " + filterIndex.toList)
 
     (sortIndex, filterIndex)
+  }
+
+  def getIndexBridge: Int => Int = {
+    val (sortIndex, filterIndex) = get
+    if (filterIndex.nonEmpty)
+      (i: Int) => filterIndex(i)
+    else if (sortIndex.nonEmpty)
+      (i: Int) => sortIndex(i)
+    else
+      (i: Int) => i
   }
 }

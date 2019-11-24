@@ -62,32 +62,23 @@ case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
     toColType: TransferType => ColType,
     updateCell: (Int, Option[ColType], Option[ColType]) => Unit
   ): Unit = {
-    val scalaCode                = ScalaCode(col, rhs).get
-    val scalaFiddle              = ScalaFiddle[TransferType](scalaCode)
-    val arrayIndexes             = qr.arrayIndexes
-    val origArray                = arrays(arrayIndexes(colIndex - 1))
-    val editArray                = arrays(arrayIndexes(colIndex))
-    var oldVopt                  = Option.empty[ColType]
-    var newVopt                  = Option.empty[ColType]
-    val tableRowIndexOffset      = offset.now
-    val tableRowIndexMax         = curLastRow
-    val sortCols                 = columns.now.filter(_.sortDir.nonEmpty)
-    val unfiltered               = filters.now.isEmpty
-    val (sortIndex, filterIndex) = Indexes(qr, sortCols, unfiltered).get
-    val lastRow                  = actualRowCount
-    var j                        = 0
-    var tableRowIndex            = 0
+    val scalaCode           = ScalaCode(col, rhs).get
+    val scalaFiddle         = ScalaFiddle[TransferType](scalaCode)
+    val arrayIndexes        = qr.arrayIndexes
+    val origArray           = arrays(arrayIndexes(colIndex - 1))
+    val editArray           = arrays(arrayIndexes(colIndex))
+    var oldVopt             = Option.empty[ColType]
+    var newVopt             = Option.empty[ColType]
+    val tableRowIndexOffset = offset.now
+    val tableRowIndexMax    = curLastRow
+    val sortCols            = columns.now.filter(_.sortDir.nonEmpty)
+    val unfiltered          = filters.now.isEmpty
+    val indexBridge         = Indexes(qr, sortCols, unfiltered).getIndexBridge
+    val lastRow             = actualRowCount
+    var j                   = 0
+    var tableRowIndex       = 0
 
-//    println(scalaCode)
-
-    val indexBridge: Int => Int = {
-      if (filterIndex.nonEmpty)
-        (i: Int) => filterIndex(i)
-      else if (sortIndex.nonEmpty)
-        (i: Int) => sortIndex(i)
-      else
-        (i: Int) => i
-    }
+    //    println(scalaCode)
 
     def alert(error: String): Nothing = {
       println(scalaCode)

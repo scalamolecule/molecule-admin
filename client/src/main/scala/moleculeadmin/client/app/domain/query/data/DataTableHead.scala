@@ -3,7 +3,7 @@ package moleculeadmin.client.app.domain.query.data
 import moleculeadmin.client.app.domain.query.KeyEvents
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.domain.query.data.groupedit.{GroupEdit, GroupSave}
-import moleculeadmin.client.app.domain.query.marker.{ToggleMany, UnmarkAll}
+import moleculeadmin.client.app.domain.query.marker.{SetMany, UnmarkAll}
 import moleculeadmin.client.app.element.AppElements
 import moleculeadmin.client.app.element.query.datatable.HeadElements
 import moleculeadmin.client.rxstuff.RxBindings
@@ -72,12 +72,12 @@ case class DataTableHead(
 
     val markers: Seq[MouseEvent => Unit] = if (attr == "e") {
       Seq(
-        { _: MouseEvent => ToggleMany(db, tableBody, colIndex, "star").set(true) },
-        { _: MouseEvent => ToggleMany(db, tableBody, colIndex, "flag").set(true) },
-        { _: MouseEvent => ToggleMany(db, tableBody, colIndex, "check").set(true) },
-        { _: MouseEvent => ToggleMany(db, tableBody, colIndex, "star").set(false) },
-        { _: MouseEvent => ToggleMany(db, tableBody, colIndex, "flag").set(false) },
-        { _: MouseEvent => ToggleMany(db, tableBody, colIndex, "check").set(false) },
+        { _: MouseEvent => SetMany(db, tableBody, colIndex, "star", true) },
+        { _: MouseEvent => SetMany(db, tableBody, colIndex, "flag", true) },
+        { _: MouseEvent => SetMany(db, tableBody, colIndex, "check", true) },
+        { _: MouseEvent => SetMany(db, tableBody, colIndex, "star", false) },
+        { _: MouseEvent => SetMany(db, tableBody, colIndex, "flag", false) },
+        { _: MouseEvent => SetMany(db, tableBody, colIndex, "check", false) },
         { _: MouseEvent => UnmarkAll(db, tableBody, colIndex, "star") },
         { _: MouseEvent => UnmarkAll(db, tableBody, colIndex, "flag") },
         { _: MouseEvent => UnmarkAll(db, tableBody, colIndex, "check") },

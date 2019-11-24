@@ -50,20 +50,10 @@ case class GroupSave(db: String, col: Col)(implicit val ctx: Ctx.Owner)
   var tableRowIndexOffset = offset.now
   var tableRowIndexMax    = curLastRow
 
-  val sortCols                 = columns.now.filter(_.sortDir.nonEmpty)
-  val unfiltered               = filters.now.isEmpty
-  val (sortIndex, filterIndex) = Indexes(qr, sortCols, unfiltered).get
-  val lastRow                  = actualRowCount
-
-  val indexBridge: Int => Int = {
-    if (filterIndex.nonEmpty)
-      (i: Int) => filterIndex(i)
-    else if (sortIndex.nonEmpty)
-      (i: Int) => sortIndex(i)
-    else
-      (i: Int) => i
-  }
-
+  val sortCols    = columns.now.filter(_.sortDir.nonEmpty)
+  val unfiltered  = filters.now.isEmpty
+  val indexBridge = Indexes(qr, sortCols, unfiltered).getIndexBridge
+  val lastRow     = actualRowCount
 
   case class CellUpdater[ColType](cellBaseClass: String) {
     var cells   : NodeList  = null

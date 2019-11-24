@@ -300,7 +300,6 @@ class Query extends QueryApi with Base {
               user_DbSettings.db(dbId).save.eid
           }
         }
-
         if (isOn) {
           tpe match {
             case "star"  => user_DbSettings(dbSettingsId).stars.retract(eid).update
@@ -321,7 +320,7 @@ class Query extends QueryApi with Base {
     }
   }
 
-  override def toggleMarkers(
+  override def setMarkers(
     db: String,
     dbSettingsIdOpt: Option[Long],
     tpe: String,
@@ -343,7 +342,6 @@ class Query extends QueryApi with Base {
               user_DbSettings.db(dbId).save.eid
           }
         }
-
         if (newState) {
           tpe match {
             case "star"  => user_DbSettings(dbSettingsId).stars.assert(eids).update
