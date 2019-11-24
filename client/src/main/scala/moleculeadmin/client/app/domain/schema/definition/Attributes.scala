@@ -23,7 +23,7 @@ case class Attributes(db: String,
                       attrs: Seq[Attr_])
                      (implicit val ctx: Ctx.Owner) extends Base {
 
-  type keepBooPickleImport = PickleState
+  type keepBooPickleImport_Attributes = PickleState
 
   def render = div(
     Breadcrumb(db, part, nsAlias, "").render,

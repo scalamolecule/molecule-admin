@@ -14,7 +14,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class Callbacks(db: String)(implicit ctx: Ctx.Owner) extends RxBindings {
 
-  type keepBooPickleImport = PickleState
+  type keepBooPickleImport_Callbacks = PickleState
 
   // Prevent multiple asynchronous calls to db while processing first call
   var idle = true

@@ -16,7 +16,7 @@ import scalatags.JsDom.all._
 case class ViewsRender(db: String)(implicit val ctx: Ctx.Owner)
   extends Callbacks(db)
     with ViewElements with ModelOps with ColOps with TreeOps {
-  type keepBooPickleImport2 = PickleState
+  type keepBooPickleImport_ViewsRender = PickleState
 
 
   def moleculeView: Rx.Dynamic[TypedTag[Element]] = Rx {

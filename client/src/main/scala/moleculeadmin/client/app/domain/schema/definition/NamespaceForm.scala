@@ -21,7 +21,7 @@ case class NamespaceForm(db: String,
                          nsDescr0: Option[String])
                         (implicit val ctx: Ctx.Owner) extends Base {
 
-  type keepBooPickleImport = PickleState
+  type keepBooPickleImport_NamespaceForm = PickleState
 
   def render = {
     val update = pos > 0

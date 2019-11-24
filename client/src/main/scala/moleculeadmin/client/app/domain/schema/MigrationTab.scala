@@ -12,7 +12,7 @@ import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 
 @JSExportTopLevel("MigrationTab")
 object MigrationTab extends BaseApi with RxBindings {
-  type keepBooPickleImport = PickleState
+  type keepBooPickleImport_MigrationTab = PickleState
 
   implicit val ctx: Ctx.Owner = rx.Ctx.Owner.safe()
 

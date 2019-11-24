@@ -1,21 +1,17 @@
 package moleculeadmin.client.app.domain.query.data
 
 import moleculeadmin.client.app.domain.query.QueryState._
-import moleculeadmin.client.app.domain.query.data.edit.{TxLambdas, Update, UpdateCardMany, UpdateCardMap, UpdateCardOne}
-import moleculeadmin.client.app.domain.query.marker
+import moleculeadmin.client.app.domain.query.data.edit._
 import moleculeadmin.client.app.domain.query.marker.ToggleOne
 import moleculeadmin.client.app.element.query.datatable.BodyElements
 import moleculeadmin.shared.ast.query.{QueryResult, _}
 import moleculeadmin.shared.ops.query.ColOps
-import org.scalajs.dom.html.{Element, TableCell, TableRow, TableSection}
-import org.scalajs.dom.{document, window}
+import org.scalajs.dom.document
+import org.scalajs.dom.html.{TableCell, TableRow, TableSection}
 import rx.Ctx
-import scalatags.JsDom.TypedTag
+import scalatags.JsDom
 import scalatags.JsDom.all._
-import scalatags.{JsDom, generic}
-import scala.collection.{immutable, mutable}
-import scala.collection.immutable.{HashMap, LongMap}
-import scala.scalajs.js.Date
+import scala.collection.mutable
 
 
 abstract class Cell(

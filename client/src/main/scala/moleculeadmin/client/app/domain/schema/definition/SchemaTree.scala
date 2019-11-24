@@ -8,7 +8,7 @@ import scalatags.JsDom.all._
 
 case class SchemaTree(part0: String, nss0: Seq[Ns])(implicit val ctx: Ctx.Owner) extends Base {
 
-  type keepBooPickleImport = PickleState
+  type keepBooPickleImport_SchemaTree = PickleState
 
   def treeAttr(part: String, ns: String, attr: String) = {
     val openNs = open.now.find(_._1 == part).get._2.last

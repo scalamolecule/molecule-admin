@@ -1,6 +1,6 @@
 package moleculeadmin.client.app.domain.query
 import moleculeadmin.client.app.element.AppElements
-import moleculeadmin.client.app.domain.query.QueryState.selection
+import moleculeadmin.client.app.domain.query.QueryState.builderSelection
 import moleculeadmin.client.app.domain.query.builder.{QueryBranches, SchemaDropDown}
 import moleculeadmin.client.rxstuff.RxBindings
 import moleculeadmin.shared.ast.schema.MetaSchema
@@ -11,8 +11,8 @@ import scalatags.JsDom.all.span
 case class QueryBuilder(db: String, metaSchema: MetaSchema)(implicit val ctx: Ctx.Owner)
   extends RxBindings with AppElements {
 
-  def rxElement: Node = selection.map {
-    case "q" => span()
+  def rxElement: Node = builderSelection.map {
+    case "a" => span()
     case "m" => _rowColAuto6(QueryBranches("m").dynRender)
     case key =>
       //      println("QueryBuilder...")

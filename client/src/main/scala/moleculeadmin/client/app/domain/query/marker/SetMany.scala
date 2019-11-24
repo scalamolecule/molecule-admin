@@ -13,7 +13,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 
 object SetMany extends AppElements {
-  type keepBooPickleImport = PickleState
+  type keepBooPickleImport_SetMany = PickleState
 
   var i                     = 0
   var entityRow             = 0

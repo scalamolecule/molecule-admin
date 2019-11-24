@@ -8,7 +8,7 @@ import scalatags.JsDom.all._
 case class Breadcrumb(db: String, part: String, ns: String, attr: String)
                      (implicit val ctx: Ctx.Owner) extends Base {
 
-  type keepBooPickleImport = PickleState
+  type keepBooPickleImport_Breadcrumb = PickleState
 
   def render = Rx(
     table(cls := "breadcrumb",

@@ -215,7 +215,7 @@ case class DataTableHead(
       filterCells(colIndex) = attrFilterCell(col)
       colIndex += 1
     }
-    val toggleCell = _openCloseQueryBuilder(selection() == "q", () => toggleQueryBuilder)
+    val toggleCell = _openCloseQueryBuilder(builderSelection() == "a", () => toggleQueryBuilder)
     val nsCells    = nss.map { case (ns, i) => th(colspan := i, ns) }
     tableHead.innerHTML = ""
     tableHead.appendChild(tr(toggleCell +: nsCells).render)

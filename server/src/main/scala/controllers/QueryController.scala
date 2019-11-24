@@ -14,7 +14,7 @@ import scala.concurrent.ExecutionContext
 @Singleton
 class QueryController @Inject()(api: Query)(implicit webJarsUtil: WebJarsUtil, ec: ExecutionContext) extends ByteRouter {
   val router = AutoWireByteServer.route[QueryApi](api)
-  type keepBooPickleImport = PickleState
+  type keepBooPickleImport_QueryController = PickleState
 
   // Actions
   def query(db: String) = Action(Ok(QueryPage(db)))

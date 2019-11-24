@@ -190,7 +190,6 @@ class Query extends QueryApi with Base {
 
   override def getTTxFromTxInstant(db: String, txInstantStr: String): (Long, Long) = {
     val rawConn   = Conn(base + "/" + db).datomicConn
-    //    val txInstant = str2dateLocal(txInstantStr)
     val txInstant = str2date(txInstantStr)
     val result    = datomic.Peer.q(
       """[:find ?t ?tx

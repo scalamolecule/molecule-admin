@@ -14,7 +14,7 @@ import scala.concurrent.ExecutionContext
 @Singleton
 class DbsController @Inject()(api: Dbs)(implicit webJarsUtil: WebJarsUtil, ec: ExecutionContext) extends ByteRouter {
   val router = AutoWireByteServer.route[DbsApi](api)
-  type keepBooPickleImport = PickleState
+  type keepBooPickleImport_DbsController = PickleState
 
   // Actions
 //  def index = Action(Ok(DbsPage(api.content)))

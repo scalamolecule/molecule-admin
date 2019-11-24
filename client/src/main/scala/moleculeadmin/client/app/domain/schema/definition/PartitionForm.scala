@@ -17,7 +17,7 @@ case class PartitionForm(db: String,
                          part: String,
                          partDescr0: Option[String])(implicit val ctx: Ctx.Owner) extends Base {
 
-  type keepBooPickleImport = PickleState
+  type keepBooPickleImport_PartitionForm = PickleState
 
   def render = {
     val update = pos > 0

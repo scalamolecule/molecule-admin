@@ -17,7 +17,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 case class Views()(implicit val ctx: Ctx.Owner)
   extends RxBindings with SubMenuElements {
 
-  type keepBooPickleImport = PickleState
+  type keepBooPickleImport_Views = PickleState
 
   def cb(id: Int, txt: Frag, variable: Var[Boolean]): TypedTag[Div] = Rx(
     _cb(

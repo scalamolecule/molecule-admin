@@ -22,7 +22,7 @@ case class AttributeOnlyEdit(db: String,
                              attrGroup: Option[String])
                             (implicit val ctx: Ctx.Owner) extends Base {
 
-  type keepBooPickleImport = PickleState
+  type keepBooPickleImport_AttributeOnlyEdit = PickleState
 
   def render = div(
     Breadcrumb(db, part, ns, attr).render,

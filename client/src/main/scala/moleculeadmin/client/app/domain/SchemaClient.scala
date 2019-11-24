@@ -13,7 +13,7 @@ import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 
 @JSExportTopLevel("SchemaClient")
 object SchemaClient extends RxBindings with SubMenuElements {
-  type keepBooPickleImport = PickleState
+  type keepBooPickleImport_SchemaClient = PickleState
 
   implicit val ctx = rx.Ctx.Owner.safe()
 
@@ -28,7 +28,6 @@ object SchemaClient extends RxBindings with SubMenuElements {
   @JSExport
   def load(db: String): Unit = schemaWire().getSchemas2(db).call().foreach {
     case (dbs, flatAttrs, metaSchema) =>
-
       document.body.appendChild(TopMenu(dbs, db, "schema", subMenu).render)
       document.body.appendChild(
         _containerFluid2(
@@ -42,5 +41,4 @@ object SchemaClient extends RxBindings with SubMenuElements {
         ).render
       )
   }
-
 }

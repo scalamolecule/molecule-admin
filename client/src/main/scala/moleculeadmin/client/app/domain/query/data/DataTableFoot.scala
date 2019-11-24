@@ -18,7 +18,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 case class DataTableFoot()(implicit val ctx: Ctx.Owner)
   extends RxBindings with ColOps with FootElements with KeyEvents {
 
-  type keepBooPickleImport = PickleState
+  type keepBooPickleImport_DataTableFoot = PickleState
 
   def populate(tableFoot: TableSection): Rx.Dynamic[Node] = Rx {
     //    println("---- foot ----")
@@ -32,7 +32,7 @@ case class DataTableFoot()(implicit val ctx: Ctx.Owner)
       // Asynchronously save setting
       queryWire().saveSetting("limit", limit.now.toString).call().foreach {
         case Left(err) => window.alert(err)
-        case Right(_)  => println("Saved limit setting: " + limit.now)
+        case Right(_)  => println("Saved setting for `limit`: " + limit.now)
       }
     }
     val footRow = tr(
