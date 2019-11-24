@@ -203,7 +203,41 @@ trait KeyEvents {
     var keyRepeatMs = 0L
     var avg         = 0.0
     var ratio       = 0.0
-    var throttle    = 3
+    var cycles      = 3
+
+    def throttle(
+      e: KeyboardEvent,
+      backward: () => Unit,
+      forward: () => Unit,
+    ) = {
+      // Throttle paging for smooth rendering
+      if (beginning < 10000000) {
+        beginning = new Date().getTime
+      }
+      i += 1
+      if (keyRepeatMs == 0 && i == 3) {
+        // Measure duration of 2 key repeats and apply a rough
+        // factor of 40% for processing leaving 60% time to rendering
+        keyRepeatMs = ((new Date().getTime - beginning) / 2 * 0.4).round
+        //              println("keyRepeatInterval " + keyRepeatMs)
+      }
+
+      if (i % cycles == 0) {
+        t1 = new Date().getTime
+        e.key match {
+          case "ArrowLeft"  => backward(); j += 1
+          case "ArrowRight" => forward(); j += 1
+          case _            => ()
+        }
+        t2 = new Date().getTime
+        delta = t2 - t1
+        tProcess = tProcess + delta
+        avg = (tProcess / j).round
+        ratio = avg / keyRepeatMs
+        cycles = ratio.ceil.toInt
+        // println(s"  $j  $delta    $avg    $ratio    $throttle    " + (t2 - beginning))
+      }
+    }
 
     document.onkeydown = { e: KeyboardEvent =>
       val mod = Seq("Control", "Alt", "Meta", "Shift")
@@ -298,43 +332,19 @@ trait KeyEvents {
           }
 
         } else if (e.getModifierState("Control") && e.getModifierState("Alt")) {
-          e.key match {
-            case "ArrowLeft"  => prevChunk
-            case "ArrowRight" => nextChunk
-            case _            => ()
+          if (e.repeat) {
+            throttle(e, () => prevChunk, () => nextChunk)
+          } else {
+            e.key match {
+              case "ArrowLeft"  => prevChunk
+              case "ArrowRight" => nextChunk
+              case _            => ()
+            }
           }
 
         } else if (e.getModifierState("Control")) {
           if (e.repeat) {
-            // Throttle paging for smooth rendering
-            if (beginning < 10000000) {
-              beginning = new Date().getTime
-            }
-            i += 1
-            if (keyRepeatMs == 0 && i == 3) {
-              // Measure duration of 2 key repeats and apply a rough
-              // factor of 40% for processing leaving 60% time to rendering
-              keyRepeatMs = ((new Date().getTime - beginning) / 2 * 0.4).round
-              //              println("keyRepeatInterval " + keyRepeatMs)
-            }
-
-            if (i % throttle == 0) {
-              t1 = new Date().getTime
-              e.key match {
-                case "ArrowLeft"  => prevPage
-                case "ArrowRight" =>
-                  nextPage
-                  j += 1
-                case _            => ()
-              }
-              t2 = new Date().getTime
-              delta = t2 - t1
-              tProcess = tProcess + delta
-              avg = (tProcess / j).round
-              ratio = avg / keyRepeatMs
-              throttle = ratio.ceil.toInt
-              // println(s"  $j  $delta    $avg    $ratio    $throttle    " + (t2 - beginning))
-            }
+            throttle(e, () => prevPage, () => nextPage)
           } else {
             e.key match {
               case "ArrowLeft"  => prevPage
