@@ -1,13 +1,11 @@
 package moleculeadmin.client.app.domain.query.data.edit
-import java.net.URI
-import java.util.UUID
 import autowire._
 import boopickle.Default._
 import moleculeadmin.client.app.domain.query.QueryState.{curEntity, editCellId}
 import moleculeadmin.client.autowire.queryWire
 import moleculeadmin.shared.ast.query.{Col, QueryResult}
 import org.scalajs.dom.html.{TableCell, TableRow}
-import org.scalajs.dom.{Node, NodeList, window}
+import org.scalajs.dom.window
 import rx.{Ctx, Rx}
 import scalatags.JsDom.all.{attr, _}
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -42,7 +40,7 @@ case class UpdateCardOne[T](
     nsAlias, nsFull, attrName, attrType, card, enums
   ) {
 
-  type keepBooPickleImport = PickleState
+  type keepBooPickleImport_UpdateCardOne = PickleState
 
   def update(
     cellId: String,

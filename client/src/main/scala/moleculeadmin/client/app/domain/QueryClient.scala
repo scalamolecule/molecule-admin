@@ -22,7 +22,7 @@ import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 object QueryClient extends RxBindings with TreeOps with SchemaOps with ColOps
   with Model2Molecule with AppElements with KeyEvents {
 
-  type keepBooPickleImport = PickleState
+  type keepBooPickleImport_QueryClient = PickleState
 
   implicit val ctx: Ctx.Owner = rx.Ctx.Owner.safe()
 
@@ -43,6 +43,7 @@ object QueryClient extends RxBindings with TreeOps with SchemaOps with ColOps
       Rx {
         maxRows() = settings.getOrElse("maxRows", "-1").toInt
         limit() = settings.getOrElse("limit", "20").toInt
+        builderSelection() = settings.getOrElse("builderSelection", "a")
         savedQueries() = queries
         curStars = stars
         curFlags = flags

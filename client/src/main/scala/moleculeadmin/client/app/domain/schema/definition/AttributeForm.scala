@@ -29,7 +29,7 @@ case class AttributeForm(db: String,
                          attrGroup0: Option[String])
                         (implicit val ctx: Ctx.Owner) extends Base {
 
-  type keepBooPickleImport = PickleState
+  type keepBooPickleImport_AttributeForm = PickleState
 
 
   def render = {

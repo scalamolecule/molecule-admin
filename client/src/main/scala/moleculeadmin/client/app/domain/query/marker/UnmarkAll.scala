@@ -13,7 +13,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 
 object UnmarkAll extends AppElements {
-  type keepBooPickleImport = PickleState
+  type keepBooPickleImport_UnmarkAll = PickleState
 
   var i = 0
 

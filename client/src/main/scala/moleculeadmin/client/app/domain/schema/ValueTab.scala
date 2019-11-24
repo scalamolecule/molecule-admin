@@ -17,7 +17,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 case class ValueTab(db: String, flatSchema0: FlatSchema)(implicit val ctx: Ctx.Owner)
   extends RxBindings with BaseApi with HelpersAdmin with AppElements {
 
-  type keepBooPickleImport = PickleState
+  type keepBooPickleImport_ValueTab = PickleState
 
   val metaSchemaAll = Var[FlatSchema](Nil)
   val metaSchema    = Var[FlatSchema](Nil)

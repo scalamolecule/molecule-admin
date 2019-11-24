@@ -10,7 +10,7 @@ import scalatags.JsDom.all._
 case class DefineTab(db: String, schema0: MetaSchema)
                     (implicit val ctx: Ctx.Owner) extends Base {
 
-  type keepBooPickleImport = PickleState
+  type keepBooPickleImport_DefineTab = PickleState
 
   // Init
   schema() = schema0

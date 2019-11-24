@@ -17,7 +17,7 @@ case class Namespaces(db: String,
                       partDescr: Option[String],
                       nss: Seq[Ns])(implicit val ctx: Ctx.Owner) extends Base {
 
-  type keepBooPickleImport = PickleState
+  type keepBooPickleImport_Namespaces = PickleState
 
   def render = div(
     Breadcrumb(db, part, "", "").render,

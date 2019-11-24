@@ -17,7 +17,7 @@ object QueryState {
 
   // Schema
   implicit var nsMap: Map[String, Ns] = Map.empty[String, Ns]
-  var viewCellTypes = Map.empty[String, String]
+  var viewCellTypes    = Map.empty[String, String]
   var enumAttrs        = Seq.empty[String]
   var eTableColIndexes = Seq.empty[Int]
 
@@ -33,9 +33,9 @@ object QueryState {
   val tree = Var(Tree(Nil, Nil, Nil, Nil, Nil, Nil))
 
   // Toggling
-  val selection     = Var("a")
-  var minimized     = false
-  var baseSelection = "a"
+  val builderSelection     = Var("a")
+  var builderMinimized     = false
+  var builderBaseSelection = "a"
 
 
   // Data ------------------------------------------------------

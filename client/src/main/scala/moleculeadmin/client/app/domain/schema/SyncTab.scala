@@ -15,7 +15,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 case class SyncTab(db: String)(implicit val ctx: Ctx.Owner)
   extends RxBindings with BaseApi with AppElements {
 
-  type keepBooPickleImport = PickleState
+  type keepBooPickleImport_SyncTab = PickleState
 
   val metaSchema = Var[FlatSchema](null)
   val defSchema  = Var[FlatSchema](null)

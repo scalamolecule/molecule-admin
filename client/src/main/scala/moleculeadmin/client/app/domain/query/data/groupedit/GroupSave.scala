@@ -25,7 +25,7 @@ import scalatags.JsDom.all._
 
 case class GroupSave(db: String, col: Col)(implicit val ctx: Ctx.Owner)
   extends RxBindings with ColOps with BodyElements with KeyEvents {
-  type keepBooPickleImport = PickleState
+  type keepBooPickleImport_GroupSave = PickleState
 
   val Col(colIndex, _, nsAlias, nsFull, attr, attrType, colType, _, _, enums, _, _, _, _) = col
 

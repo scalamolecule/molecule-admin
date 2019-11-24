@@ -12,7 +12,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 case class Partitions(db: String, schema1: MetaSchema)(implicit val ctx: Ctx.Owner) extends Base {
 
-  type keepBooPickleImport = PickleState
+  type keepBooPickleImport_Partitions = PickleState
 
   def render = div(
     Breadcrumb(db, "", "", "").render,

@@ -12,7 +12,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 
 case class EntityHistory(db: String)(implicit ctx: Ctx.Owner) extends Base(db) {
-  override type keepBooPickleImport2 = PickleState
+  type keepBooPickleImport_EntityHistory = PickleState
 
   def view: Rx.Dynamic[TypedTag[Element]] = Rx {
     (curEntity(), entityHistorySort()) match {

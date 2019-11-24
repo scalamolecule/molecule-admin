@@ -1,16 +1,21 @@
 package moleculeadmin.client.app.domain.query
+import autowire._
+import boopickle.Default._
 import moleculeadmin.client.app.domain.query.QueryState._
+import moleculeadmin.client.autowire.queryWire
 import moleculeadmin.shared.ast.schema.Ns
-import org.scalajs.dom.html.{TableCell, UList}
+import org.scalajs.dom.html.TableCell
 import org.scalajs.dom.raw.{HTMLInputElement, KeyboardEvent}
 import org.scalajs.dom.{Node, document, window}
 import rx.{Ctx, Rx}
 import scalatags.JsDom.all._
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js.Date
 import scala.scalajs.js.timers.setTimeout
 
 
 trait KeyEvents {
+  type keepBooPickleImport__KeyEvents = PickleState
 
   def toggle(id: String): Unit = {
     val el = document.getElementById("submenu-" + id)
@@ -40,45 +45,53 @@ trait KeyEvents {
   def toggleRecentMenu(): Unit = toggle("recentMolecules")
   def toggleShortcuts(): Unit = toggle("shortcuts")
 
-  def toggleQueryBuilder(implicit ctx: Ctx.Owner): Rx.Dynamic[Unit] = Rx(
-    if (selection.now == "q") {
-      if (minimized) {
-        selection() = "m"
+  def toggleQueryBuilder(implicit ctx: Ctx.Owner): Rx.Dynamic[Unit] = Rx {
+    if (builderSelection.now == "a") {
+      if (builderMinimized) {
+        builderSelection() = "m"
       } else {
-        baseSelection match {
-          case "a" => selection() = "a"
-          case "v" => selection() = "v"
-          case "r" => selection() = "r"
+        builderBaseSelection match {
+          case "a" => builderSelection() = "a"
+          case "v" => builderSelection() = "v"
+          case "r" => builderSelection() = "r"
         }
       }
     } else {
-      selection() = "q"
+      builderSelection() = "a"
     }
-  )
+    // Asynchronously save setting
+    queryWire().saveSetting("builderSelection", builderSelection.now)
+      .call().foreach {
+      case Left(err) => window.alert(err)
+      case Right(_)  => println(
+        "Saved setting for `builderSelection`: " + builderSelection.now
+      )
+    }
+  }
 
   def toggleMinimize(implicit ctx: Ctx.Owner): Rx.Dynamic[Unit] = Rx(
-    if (selection.now == "m") {
-      minimized = false
-      baseSelection match {
-        case "a" => selection() = "a"
-        case "v" => selection() = "v"
-        case "r" => selection() = "r"
+    if (builderSelection.now == "m") {
+      builderMinimized = false
+      builderBaseSelection match {
+        case "a" => builderSelection() = "a"
+        case "v" => builderSelection() = "v"
+        case "r" => builderSelection() = "r"
       }
     } else {
-      minimized = true
-      selection() = "m"
+      builderMinimized = true
+      builderSelection() = "m"
     }
   )
 
 
   def toggleAttrSelectionA(implicit ctx: Ctx.Owner): Rx.Dynamic[Unit] =
-    Rx {baseSelection = "a"; selection() = "a"}
+    Rx {builderBaseSelection = "a"; builderSelection() = "a"}
 
   def toggleAttrSelectionR(implicit ctx: Ctx.Owner): Rx.Dynamic[Unit] =
-    Rx {baseSelection = "r"; selection() = "r"}
+    Rx {builderBaseSelection = "r"; builderSelection() = "r"}
 
   def toggleAttrSelectionV(implicit ctx: Ctx.Owner): Rx.Dynamic[Unit] =
-    Rx {baseSelection = "v"; selection() = "v"}
+    Rx {builderBaseSelection = "v"; builderSelection() = "v"}
 
 
   def actualRowCount: Int = if (filters.now.isEmpty)
@@ -170,7 +183,11 @@ trait KeyEvents {
   }
 
 
-  def registerKeyEvents(implicit ctx: Ctx.Owner, nsMap: Map[String, Ns]) = Rx {
+  def registerKeyEvents(
+    implicit ctx: Ctx.Owner,
+    nsMap: Map[String, Ns]
+  ): Rx.Dynamic[Unit] = Rx {
+
     var firstNumber  = -1
     var secondNumber = -1
     val numberMs     = 300 // todo: setting?
@@ -189,23 +206,34 @@ trait KeyEvents {
     var throttle    = 3
 
     document.onkeydown = { e: KeyboardEvent =>
-      val mod = Seq("Control", "Alt", "Meta", "Shift").exists(m => e.getModifierState(m))
+      val mod = Seq("Control", "Alt", "Meta", "Shift")
+        .exists(m => e.getModifierState(m))
+
       if (document.activeElement == document.body) {
         if (!mod) {
           e.key match {
-            case "Escape"                          =>
+            case "Escape"                           =>
               curEntity() = 0L
               toggleOff("queries")
               toggleOff("recentMolecules")
               toggleOff("shortcuts")
-            case "q"                               => toggleOff("recentMolecules"); toggleOff("shortcuts"); toggleQueriesMenu()
-            case "r"                               => toggleOff("queries"); toggleOff("shortcuts"); toggleRecentMenu()
-            case "v"                               => toggleViews
-            case "b" if modelElements.now.nonEmpty => toggleQueryBuilder
-            case "m" if modelElements.now.nonEmpty => toggleMinimize
-            case "a" if selection.now != "a"       => baseSelection = "a"; selection() = "a"
-            //            case "v" if selection.now != "v"       => baseSelection = "v"; selection() = "v"
-            //            case "r" if selection.now != "r" => baseSelection = "r"; selection() = "r"
+            case "q"                                =>
+              toggleOff("recentMolecules")
+              toggleOff("shortcuts")
+              toggleQueriesMenu()
+            case "r"                                =>
+              toggleOff("queries")
+              toggleOff("shortcuts")
+              toggleRecentMenu()
+            case "v"                                => toggleViews
+            case "b" if modelElements.now.nonEmpty  => toggleQueryBuilder
+            case "m" if modelElements.now.nonEmpty  => toggleMinimize
+            case "a" if builderSelection.now != "a" =>
+              builderBaseSelection = "a"; builderSelection() = "a"
+            //            case "v" if builderSelection.now != "v" =>
+            //              builderBaseSelection = "v"; builderSelection() = "v"
+            //            case "r" if builderSelection.now != "r" =>
+            //              builderBaseSelection = "r"; builderSelection() = "r"
             case n if queriesOpen         => n match {
               case "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "0" =>
                 if (firstNumber == -1) {

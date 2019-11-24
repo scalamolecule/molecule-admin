@@ -19,7 +19,7 @@ import scala.{Option => sOption}
 
 @JSExportTopLevel("DbsClient")
 object DbsClient extends RxBindings with DbsElements {
-  type keepBooPickleImport = PickleState
+  type keepBooPickleImport_DbsClient = PickleState
 
   implicit val ctx = rx.Ctx.Owner.safe()
 

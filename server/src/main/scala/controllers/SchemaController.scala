@@ -14,7 +14,7 @@ import scala.concurrent.ExecutionContext
 @Singleton
 class SchemaController @Inject()(api: Schema)(implicit webJarsUtil: WebJarsUtil, ec: ExecutionContext) extends ByteRouter {
   val router = AutoWireByteServer.route[SchemaApi](api)
-  type keepBooPickleImport = PickleState
+  type keepBooPickleImport_SchemaController = PickleState
 
   // Actions
   def schema(db: String) = Action(Ok(SchemaPage(db)))

@@ -1,23 +1,23 @@
 package moleculeadmin.client.app.domain.query.data
 import autowire._
 import boopickle.Default._
-import moleculeadmin.client.app.element.query.datatable.TableElements
-import moleculeadmin.client.app.domain.QueryClient.{getCols, getEidColIndexes, mkModelTree, mkTree, model2molecule}
-import moleculeadmin.client.app.domain.query.KeyEvents
-import moleculeadmin.client.app.domain.query.QueryState.{columns, offset, _}
-import moleculeadmin.client.autowire.queryWire
-import moleculeadmin.client.rxstuff.RxBindings
-import moleculeadmin.shared.ast.query.Filter
 import molecule.ast.model.{Atom, Model}
 import molecule.ast.query.QueryExpr
 import molecule.ops.QueryOps._
-import molecule.transform.{Model2Query, Query2String}
 import molecule.ops.VerifyRawModel
+import molecule.transform.{Model2Query, Query2String}
+import moleculeadmin.client.app.domain.QueryClient.{getCols, getEidColIndexes, mkModelTree, mkTree, model2molecule}
+import moleculeadmin.client.app.domain.query.KeyEvents
+import moleculeadmin.client.app.domain.query.QueryState.{columns, offset, _}
+import moleculeadmin.client.app.element.query.datatable.TableElements
+import moleculeadmin.client.autowire.queryWire
+import moleculeadmin.client.rxstuff.RxBindings
+import moleculeadmin.shared.ast.query.Filter
 import moleculeadmin.shared.ops.query.ModelOps
 import org.scalajs.dom.document
 import org.scalajs.dom.html.TableSection
 import org.scalajs.dom.raw.HTMLElement
-import rx.{Ctx, Rx, Var}
+import rx.{Ctx, Rx}
 import scalatags.JsDom
 import scalatags.JsDom.all._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -26,7 +26,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 case class DataTable(db: String)(implicit val ctx: Ctx.Owner)
   extends RxBindings with KeyEvents with ModelOps with TableElements {
 
-  type keepBooPickleImport = PickleState
+  type keepBooPickleImport_DataTable = PickleState
 
   // Table elements
   val tableHead: TableSection = thead().render

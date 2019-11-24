@@ -42,7 +42,7 @@ case class UpdateCardMap[T](
     nsAlias, nsFull, attr, attrType, card, enums
   ) {
 
-  type keepBooPickleImport = PickleState
+  type keepBooPickleImport_UpdateCardMap = PickleState
 
   def update(
     cellId: String,

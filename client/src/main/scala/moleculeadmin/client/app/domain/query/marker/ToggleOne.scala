@@ -14,7 +14,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 case class ToggleOne(db: String, tableBody: TableSection, tpe: String)
   extends AppElements {
 
-  type keepBooPickleImport = PickleState
+  type keepBooPickleImport_ToggleOne = PickleState
 
   val (curMarkerIndexes, onCls, offCls, iconIndex) = tpe match {
     case "star"  => (curStarIndexes, mark.starOn, mark.starOff, 0)

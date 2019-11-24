@@ -17,7 +17,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 case class QuerySubMenu(db: String)(implicit val ctx: Ctx.Owner)
   extends RxBindings with SubMenuElements {
 
-  type keepBooPickleImport = PickleState
+  type keepBooPickleImport_QuerySubMenu = PickleState
 
   _maxRowsSelector.onchange = _ => {
     maxRows() = _maxRowsSelector.value.toInt
@@ -25,7 +25,7 @@ case class QuerySubMenu(db: String)(implicit val ctx: Ctx.Owner)
     // Asynchronously save setting
     queryWire().saveSetting("maxRows", maxRows.now.toString).call().foreach {
       case Left(err) => window.alert(err)
-      case Right(_)  => println("Saved max rows setting: " + maxRows.now)
+      case Right(_)  => println("Saved setting for `maxRows`: " + maxRows.now)
     }
 
     _maxRowsSelector.blur()
@@ -42,9 +42,9 @@ case class QuerySubMenu(db: String)(implicit val ctx: Ctx.Owner)
           Seq(
             RecentMolecules(db).dynRender,
             Views().dynRender,
-            ShortCuts().dynRender
           )
-        } else ()
+        } else (),
+        ShortCuts().dynRender
       )
     )
   }

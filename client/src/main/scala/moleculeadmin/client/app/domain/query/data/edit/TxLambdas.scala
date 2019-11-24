@@ -16,7 +16,7 @@ abstract class TxLambdas(db: String)
                         (implicit val ctx: Ctx.Owner)
   extends BodyElements with DateHandling {
 
-  type keepBooPickleImport = PickleState
+  type keepBooPickleImport_TxLambdas = PickleState
 
 
   def tLambda(qr: QueryResult,
