@@ -220,8 +220,8 @@ abstract class Cell(
             while (i < length) {
               eid = valueArray(i).get.toLong
               entityIndex.get(eid) match {
-                case Some(ii) => entityIndex(eid) = i :: ii
-                case None     => entityIndex(eid) = i :: Nil
+                case Some(ii) => entityIndex(eid) = ii :+ i
+                case None     => entityIndex(eid) = List(i)
               }
               starIndex(i) = curStars.contains(eid)
               flagIndex(i) = curFlags.contains(eid)

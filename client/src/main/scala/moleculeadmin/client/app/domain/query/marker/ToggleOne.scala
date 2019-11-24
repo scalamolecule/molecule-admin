@@ -2,6 +2,7 @@ package moleculeadmin.client.app.domain.query.marker
 import autowire._
 import boopickle.Default._
 import moleculeadmin.client.app.domain.query.QueryState.{dbSettingsIdOpt, _}
+import moleculeadmin.client.app.domain.query.data.Indexes
 import moleculeadmin.client.app.element.AppElements
 import moleculeadmin.client.autowire.queryWire
 import org.scalajs.dom.html.TableSection
@@ -26,50 +27,57 @@ case class ToggleOne(db: String, tableBody: TableSection, tpe: String)
   var i                     = 0
   var entityRow             = 0
 
-
   def toggle(eid: Long, isOn: Boolean): Unit = {
-    val rows = tableBody.children
+    val rows   = tableBody.children
     val eidStr = eid.toString
-    val newCls = if (isOn) {
+    val newCls = if (isOn) offCls else onCls
+
+    // And set cur marker status
+    val marked = if (isOn) {
       tpe match {
-        case "star"  => curStars -= eid
-        case "flag"  => curFlags -= eid
-        case "check" => curChecks -= eid
+        case "star"  => curStars -= eid; "unstarred"
+        case "flag"  => curFlags -= eid; "unflagged"
+        case "check" => curChecks -= eid; "unchecked"
       }
-      offCls
     } else {
       tpe match {
-        case "star"  => curStars += eid
-        case "flag"  => curFlags += eid
-        case "check" => curChecks += eid
+        case "star"  => curStars += eid; "starred"
+        case "flag"  => curFlags += eid; "flagged"
+        case "check" => curChecks += eid; "checked"
       }
-      onCls
     }
 
+    // Asynchronously save in meta db
     queryWire().toggleMarker(db, dbSettingsIdOpt, tpe, eid, isOn).call().foreach {
       case Left(err)            => window.alert(err)
       case Right(dbSettingsId1) =>
         dbSettingsIdOpt = Some(dbSettingsId1)
-        println(s"Eid $eid $tpe: " + !isOn)
+        println(s"Entity id $eid $marked")
     }
 
-
-    def setMarkerClass(tableCol: Int): Unit = {
+    def toggleIcon(tableCol: Int): Unit = {
       cell = cells(tableCol)
       if (cell.innerText == eidStr)
         cell.children(iconIndex).setAttribute("class", newCls)
     }
 
-    def updateMarkerIndex(tableCol: Int) = {
-      // Eid might not be present in other column
-      val entityIndexOpt = curEntityIndexes(tableCol).get(eid)
-      val markerIndex    = curMarkerIndexes(tableCol)
-      entityIndexOpt.foreach { entityIndex =>
-        i = 0
-        while (i < entityIndex.length) {
-          entityRow = entityIndex(i)
-          markerIndex(entityRow) = !markerIndex(entityRow)
-          i += 1
+    def updateMarkerIndex(): Unit = {
+      // Update marker in each entity column
+      eTableColIndexes.foreach { tableCol =>
+
+        // Eid might not be present in column
+        val entityIndexOpt: Option[List[Int]] = curEntityIndexes(tableCol).get(eid)
+
+        // Update other column only if it contains eid
+        entityIndexOpt.foreach { entityIndex =>
+          val markerIndex: Array[Boolean] = curMarkerIndexes(tableCol)
+
+          i = 0
+          while (i < entityIndex.length) {
+            entityRow = entityIndex(i)
+            markerIndex(entityRow) = !markerIndex(entityRow)
+            i += 1
+          }
         }
       }
     }
@@ -80,25 +88,22 @@ case class ToggleOne(db: String, tableBody: TableSection, tpe: String)
         i = 0
         while (i < rows.length) {
           cells = rows(i).children
-          setMarkerClass(c1)
+          toggleIcon(c1)
           i += 1
         }
-        updateMarkerIndex(c1)
+        updateMarkerIndex()
       }
 
       case 2 => {
         val Seq(c1, c2) = eTableColIndexes
-
-        // Update visible rows
         i = 0
         while (i < rows.length) {
           cells = rows(i).children
-          setMarkerClass(c1)
-          setMarkerClass(c2)
+          toggleIcon(c1)
+          toggleIcon(c2)
           i += 1
         }
-        updateMarkerIndex(c1)
-        updateMarkerIndex(c2)
+        updateMarkerIndex()
       }
 
       case 3 => {
@@ -106,14 +111,12 @@ case class ToggleOne(db: String, tableBody: TableSection, tpe: String)
         i = 0
         while (i < rows.length) {
           cells = rows(i).children
-          setMarkerClass(c1)
-          setMarkerClass(c2)
-          setMarkerClass(c3)
+          toggleIcon(c1)
+          toggleIcon(c2)
+          toggleIcon(c3)
           i += 1
         }
-        updateMarkerIndex(c1)
-        updateMarkerIndex(c2)
-        updateMarkerIndex(c3)
+        updateMarkerIndex()
       }
 
       case 4 => {
@@ -121,16 +124,13 @@ case class ToggleOne(db: String, tableBody: TableSection, tpe: String)
         i = 0
         while (i < rows.length) {
           cells = rows(i).children
-          setMarkerClass(c1)
-          setMarkerClass(c2)
-          setMarkerClass(c3)
-          setMarkerClass(c4)
+          toggleIcon(c1)
+          toggleIcon(c2)
+          toggleIcon(c3)
+          toggleIcon(c4)
           i += 1
         }
-        updateMarkerIndex(c1)
-        updateMarkerIndex(c2)
-        updateMarkerIndex(c3)
-        updateMarkerIndex(c4)
+        updateMarkerIndex()
       }
 
       case 5 => {
@@ -138,18 +138,14 @@ case class ToggleOne(db: String, tableBody: TableSection, tpe: String)
         i = 0
         while (i < rows.length) {
           cells = rows(i).children
-          setMarkerClass(c1)
-          setMarkerClass(c2)
-          setMarkerClass(c3)
-          setMarkerClass(c4)
-          setMarkerClass(c5)
+          toggleIcon(c1)
+          toggleIcon(c2)
+          toggleIcon(c3)
+          toggleIcon(c4)
+          toggleIcon(c5)
           i += 1
         }
-        updateMarkerIndex(c1)
-        updateMarkerIndex(c2)
-        updateMarkerIndex(c3)
-        updateMarkerIndex(c4)
-        updateMarkerIndex(c5)
+        updateMarkerIndex()
       }
 
       case 6 => {
@@ -157,20 +153,15 @@ case class ToggleOne(db: String, tableBody: TableSection, tpe: String)
         i = 0
         while (i < rows.length) {
           cells = rows(i).children
-          setMarkerClass(c1)
-          setMarkerClass(c2)
-          setMarkerClass(c3)
-          setMarkerClass(c4)
-          setMarkerClass(c5)
-          setMarkerClass(c6)
+          toggleIcon(c1)
+          toggleIcon(c2)
+          toggleIcon(c3)
+          toggleIcon(c4)
+          toggleIcon(c5)
+          toggleIcon(c6)
           i += 1
         }
-        updateMarkerIndex(c1)
-        updateMarkerIndex(c2)
-        updateMarkerIndex(c3)
-        updateMarkerIndex(c4)
-        updateMarkerIndex(c5)
-        updateMarkerIndex(c6)
+        updateMarkerIndex()
       }
 
       case 7 => {
@@ -178,22 +169,16 @@ case class ToggleOne(db: String, tableBody: TableSection, tpe: String)
         i = 0
         while (i < rows.length) {
           cells = rows(i).children
-          setMarkerClass(c1)
-          setMarkerClass(c2)
-          setMarkerClass(c3)
-          setMarkerClass(c4)
-          setMarkerClass(c5)
-          setMarkerClass(c6)
-          setMarkerClass(c7)
+          toggleIcon(c1)
+          toggleIcon(c2)
+          toggleIcon(c3)
+          toggleIcon(c4)
+          toggleIcon(c5)
+          toggleIcon(c6)
+          toggleIcon(c7)
           i += 1
         }
-        updateMarkerIndex(c1)
-        updateMarkerIndex(c2)
-        updateMarkerIndex(c3)
-        updateMarkerIndex(c4)
-        updateMarkerIndex(c5)
-        updateMarkerIndex(c6)
-        updateMarkerIndex(c7)
+        updateMarkerIndex()
       }
 
       case n =>
