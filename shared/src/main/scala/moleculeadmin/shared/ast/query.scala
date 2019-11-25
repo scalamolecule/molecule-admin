@@ -15,7 +15,7 @@ object query extends HelpersAdmin {
     listNum: List[Array[Option[List[Double]]]],
     mapStr: List[Array[Option[Map[String, String]]]],
     mapNum: List[Array[Option[Map[String, Double]]]],
-    arrayIndexes: Map[Int, Int], // colIndex -> arrayIndex
+    arrayIndexes: Map[Int, Int], // colIndex -> index of arrayIndex
     rowCountAll: Int,
     rowCount: Int,
     queryMs: Long
@@ -47,8 +47,8 @@ object query extends HelpersAdmin {
   /** Filter data
    *
    * @tparam T Double or String
-   * @param colIndex   index in table
-   * @param filterExpr filter expression including possible newlines
+   * @param colIndex   Column index
+   * @param filterExpr Filter expression including possible newlines
    * @param pred       Scala predicate to filter each value
    **/
   case class Filter[T](

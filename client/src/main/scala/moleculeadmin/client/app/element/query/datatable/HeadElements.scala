@@ -199,19 +199,19 @@ trait HeadElements extends ColOps with AppElements with RxBindings {
 
   def _attrFilterCell(
     filterId: String,
-    rawFilter: String,
-    doFilter: () => Unit
+    filterExpr: String,
+    applyFilter: () => Unit
   )(implicit ctx: Ctx.Owner): TypedTag[TableHeaderCell] = {
-    val htmlFilter: Seq[Frag] = if (rawFilter.contains("\n"))
-      rawFilter.split("\n").toSeq.flatMap(s => Seq(StringFrag(s), br)).init
+    val htmlFilter: Seq[Frag] = if (filterExpr.contains("\n"))
+      filterExpr.split("\n").toSeq.flatMap(s => Seq(StringFrag(s), br)).init
     else
-      Seq(rawFilter)
+      Seq(filterExpr)
     th(
       cls := "filter",
       id := filterId,
       contenteditable := true,
       htmlFilter,
-      oninput := doFilter
+      oninput := applyFilter
     )
   }
 

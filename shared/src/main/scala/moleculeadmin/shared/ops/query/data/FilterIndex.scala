@@ -1,20 +1,25 @@
 package moleculeadmin.shared.ops.query.data
+
 import moleculeadmin.shared.ast.query.{Filter, QueryResult}
 import moleculeadmin.shared.util.PredicateMerger._
 
 
 trait FilterIndex {
 
-  def getFilterIndex(qr: QueryResult,
-                     filters: Map[Int, Filter[_]],
-                     sortIndex: Array[Int] = Array.empty[Int]
-                    ): Array[Int] = {
+  def getFilterIndex(
+    qr: QueryResult,
+    filters: Map[Int, Filter[_]],
+    sortIndex: Array[Int] = Array.empty[Int]
+  ): Array[Int] = {
 
     // Card one lambdas
 
     // None doesn't satisfy any predicate.
     // (Use nil in query buildup to get non-values)
-    def lambdaOne[T](values: Array[Option[T]], predicate: T => Boolean): Int => Boolean = {
+    def lambdaOne[T](
+      values: Array[Option[T]],
+      predicate: T => Boolean
+    ): Int => Boolean = {
       if (sortIndex.isEmpty) {
         i: Int => values(i).fold(false)(predicate(_))
       } else {
@@ -27,7 +32,10 @@ trait FilterIndex {
     // At least one value in a Set should satisfy the predicate
     // None doesn't satisfy any predicate.
     // (Use nil in query buildup to get non-values)
-    def lambdaMany[T](values: Array[Option[List[T]]], predicate: T => Boolean): Int => Boolean = {
+    def lambdaMany[T](
+      values: Array[Option[List[T]]],
+      predicate: T => Boolean
+    ): Int => Boolean = {
       if (sortIndex.isEmpty) {
         i: Int => values(i).fold(false)(_.exists(predicate))
       } else {
@@ -35,48 +43,45 @@ trait FilterIndex {
       }
     }
 
-
     def double(f: Filter[_]): Int => Boolean = {
       val arrayIndex = qr.arrayIndexes(f.colIndex)
-        val values: Array[Option[Double]] = qr.num(arrayIndex)
-        val predicate = f.pred.asInstanceOf[Double => Boolean]
-        lambdaOne(values, predicate)
+      val values     = qr.num(arrayIndex)
+      val predicate  = f.pred.asInstanceOf[Double => Boolean]
+      lambdaOne(values, predicate)
     }
     def string(f: Filter[_]): Int => Boolean = {
       val arrayIndex = qr.arrayIndexes(f.colIndex)
-        val values: Array[Option[String]] = qr.str(arrayIndex)
-        val predicate = f.pred.asInstanceOf[String => Boolean]
-        lambdaOne(values, predicate)
+      val values     = qr.str(arrayIndex)
+      val predicate  = f.pred.asInstanceOf[String => Boolean]
+      lambdaOne(values, predicate)
     }
 
     def listDouble(f: Filter[_]): Int => Boolean = {
       val arrayIndex = qr.arrayIndexes(f.colIndex)
-        val values: Array[Option[List[Double]]] = qr.listNum(arrayIndex)
-        val predicate = f.pred.asInstanceOf[Double => Boolean]
-        lambdaMany(values, predicate)
+      val values     = qr.listNum(arrayIndex)
+      val predicate  = f.pred.asInstanceOf[Double => Boolean]
+      lambdaMany(values, predicate)
     }
     def listString(f: Filter[_]): Int => Boolean = {
       val arrayIndex = qr.arrayIndexes(f.colIndex)
-        val values: Array[Option[List[String]]] = qr.listStr(arrayIndex)
-        val predicate = f.pred.asInstanceOf[String => Boolean]
-        lambdaMany(values, predicate)
+      val values     = qr.listStr(arrayIndex)
+      val predicate  = f.pred.asInstanceOf[String => Boolean]
+      lambdaMany(values, predicate)
     }
 
-
-    def predicates: List[Int => Boolean] = filters.values.toList.map(f =>
+    var i                                = 0
+    var posIndex                         = 0
+    val lastRow                          = qr.rowCount
+    val positives                        = new Array[Int](lastRow)
+    val predicates: List[Int => Boolean] = filters.values.toList.map { f =>
       f.colType match {
-        case "double"     => double(f)
-        case "string"     => string(f)
-        case "listDouble" => listDouble(f)
-        case "listString" => listString(f)
-        case _            => _: Int => true
+        case "double"            => double(f)
+        case "string"            => string(f)
+        case "listDouble"        => listDouble(f)
+        case "listString"        => listString(f)
+        case _                   => _: Int => true
       }
-    )
-
-    var i = 0
-    var posIndex = 0
-    val lastRow = qr.rowCount
-    val positives = new Array[Int](lastRow)
+    }
 
     if (filters.size == 1) {
       val p = predicates.head
@@ -97,7 +102,8 @@ trait FilterIndex {
           i += 1
         }
     } else {
-      val pp = predicates
+      val pp  = predicates
+      // Apply filters from all columns with AND logic
       val ppp = pp.tail.foldLeft(pp.head)(_ and _)
       if (sortIndex.isEmpty)
         while (i < lastRow) {

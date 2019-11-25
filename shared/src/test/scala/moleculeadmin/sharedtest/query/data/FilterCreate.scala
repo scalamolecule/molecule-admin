@@ -1,5 +1,5 @@
-package moleculeadmin.servertest.query.data
-import moleculeadmin.servertest.query.data.FilterApply.createFilter
+package moleculeadmin.sharedtest.query.data
+
 import moleculeadmin.shared.ast.query.{Col, Filter}
 import moleculeadmin.shared.ops.query.data.FilterFactory
 import utest._

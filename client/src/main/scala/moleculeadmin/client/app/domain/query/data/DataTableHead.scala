@@ -127,7 +127,8 @@ case class DataTableHead(
 
 
   def attrFilterCell(col: Col): JsDom.TypedTag[TableHeaderCell] = {
-    val Col(colIndex, _, _, _, attr, _, colType, card, opt, _, _, attrExpr, _, _) = col
+    val Col(colIndex, _, _, _, attr, _,
+    colType, card, opt, _, _, attrExpr, _, _) = col
 
     val filterId  = "filter-" + colIndex
     val cleanAttr = clean(attr)
@@ -166,8 +167,8 @@ case class DataTableHead(
     }
 
     def filterCell(): JsDom.TypedTag[TableHeaderCell] = {
-      val rawFilter = filters.now.get(colIndex).fold("")(_.filterExpr)
-      val doFilter  = { () =>
+      val filterExpr  = filters.now.get(colIndex).fold("")(_.filterExpr)
+      val applyFilter = { () =>
         val filterExpr = document.getElementById(filterId).textContent.trim
         // Let only filters() propagate change
         offset.kill()
@@ -175,15 +176,13 @@ case class DataTableHead(
         if (filterExpr.isEmpty) {
           filters() = filters.now - colIndex
         } else {
-          createFilter(col, filterExpr) match {
-            case Some(filter) =>
-              filters() = filters.now + (colIndex -> filter)
-            case None         =>
-              filters() = filters.now - colIndex
+          createFilter(col, filterExpr, curStars, curFlags, curChecks) match {
+            case Some(filter) => filters() = filters.now + (colIndex -> filter)
+            case None         => filters() = filters.now - colIndex
           }
         }
       }
-      _attrFilterCell(filterId, rawFilter, doFilter)
+      _attrFilterCell(filterId, filterExpr, applyFilter)
     }
 
     if (attrExpr == "edit") lambdaCell() else filterCell()
@@ -207,15 +206,19 @@ case class DataTableHead(
       col = cols(colIndex)
       ns = col.nsAlias
       nss match {
-        case Nil                    => nss = Seq(ns -> 1)
-        case _ if nss.last._1 == ns => nss = nss.init :+ (nss.last._1 -> (nss.last._2 + 1))
-        case _                      => nss = nss :+ (ns -> 1)
+        case Nil                    =>
+          nss = Seq(ns -> 1)
+        case _ if nss.last._1 == ns =>
+          nss = nss.init :+ (nss.last._1 -> (nss.last._2 + 1))
+        case _                      =>
+          nss = nss :+ (ns -> 1)
       }
       sortCells(colIndex) = attrSortCell(col)
       filterCells(colIndex) = attrFilterCell(col)
       colIndex += 1
     }
-    val toggleCell = _openCloseQueryBuilder(builderSelection() == "a", () => toggleQueryBuilder)
+    val toggleCell = _openCloseQueryBuilder(
+      builderSelection() == "a", () => toggleQueryBuilder)
     val nsCells    = nss.map { case (ns, i) => th(colspan := i, ns) }
     tableHead.innerHTML = ""
     tableHead.appendChild(tr(toggleCell +: nsCells).render)
