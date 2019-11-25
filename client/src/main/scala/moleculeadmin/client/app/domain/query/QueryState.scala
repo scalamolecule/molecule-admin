@@ -22,7 +22,8 @@ object QueryState {
   var eTableColIndexes = Seq.empty[Int]
 
 
-  // What is being being processed now? Concatenates part/ns/attr/pos-number as a coordinate in the tree
+  // What is being being processed now? Concatenates part/ns/attr/pos-number
+  // as a coordinate in the tree
   val processing = Var[String]("")
 
   // Query building ---------------------------------

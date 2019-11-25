@@ -1,11 +1,12 @@
 package moleculeadmin.shared.ops.query.data
-import moleculeadmin.shared.ast.query.{Col, Filter}
-import moleculeadmin.shared.util.PredicateMerger._
 import java.util.regex.Pattern
 import molecule.util.{DateHandling, RegexMatching}
+import moleculeadmin.shared.ast.query.{Col, Filter}
+import moleculeadmin.shared.util.PredicateMerger._
 
 
 trait FilterFactory extends RegexMatching with DateHandling {
+
 
   def predNumber(token: String): Option[Double => Boolean] = token.trim match {
     case r"(-?\d+)$n"                 => Some(_ == n.toLong)
@@ -113,7 +114,6 @@ trait FilterFactory extends RegexMatching with DateHandling {
     }
   }
 
-
   def predBoolean(token: String): Option[String => Boolean] = token.trim match {
     case "1"          => Some(_ == "true")
     case "0"          => Some(_ == "false")
@@ -121,7 +121,6 @@ trait FilterFactory extends RegexMatching with DateHandling {
     case r"fa?l?s?e?" => Some(_ == "false")
     case _            => None
   }
-
 
   def predString(token: String): Option[String => Boolean] = {
     val regexNoCase    = Pattern.compile(".*", Pattern.CASE_INSENSITIVE)
@@ -133,76 +132,146 @@ trait FilterFactory extends RegexMatching with DateHandling {
       case r"!/(.*)$regex/?"  => Some(s => negRegEx.matcher(s).matches())
       case r"!i/(.*)$regex/?" => Some(s => negRegExNoCase.matcher(s).matches())
       case ""                 => None
-      case r"v *=>(.*)"       => None // todo: compile Scala filter expr
+      case r"v *=>(.*)"       => None // todo?: compile Scala filter expr
       case anyStr             => Some(s => s.contains(anyStr))
     }
+  }
+
+
+  def predEid(
+    s: Set[Long],
+    f: Set[Long],
+    c: Set[Long],
+  )(token: String): Option[Double => Boolean] = token.trim match {
+    case r"([sfcSFC]{1,3})$markers"         =>
+      // check valid combination of
+      // s - starred
+      // f - flagged
+      // c - checked
+      // S - unstarred
+      // F - unflagged
+      // C - unchecked
+      markers.length match {
+        case 1 => markers match {
+          case "s" => Some((d: Double) => s.contains(d.toLong))
+          case "f" => Some((d: Double) => f.contains(d.toLong))
+          case "c" => Some((d: Double) => c.contains(d.toLong))
+          case "S" => Some((d: Double) => !s.contains(d.toLong))
+          case "F" => Some((d: Double) => !f.contains(d.toLong))
+          case "C" => Some((d: Double) => !c.contains(d.toLong))
+        }
+        case 2 => markers.toList.sorted match {
+          case List('C', 'F') => Some((d: Double) => !c.contains(d.toLong) && !f.contains(d.toLong))
+          case List('C', 'S') => Some((d: Double) => !c.contains(d.toLong) && !s.contains(d.toLong))
+          case List('C', 'f') => Some((d: Double) => !c.contains(d.toLong) && f.contains(d.toLong))
+          case List('C', 's') => Some((d: Double) => !c.contains(d.toLong) && s.contains(d.toLong))
+          case List('F', 'S') => Some((d: Double) => !f.contains(d.toLong) && !s.contains(d.toLong))
+          case List('F', 'c') => Some((d: Double) => !f.contains(d.toLong) && c.contains(d.toLong))
+          case List('F', 's') => Some((d: Double) => !f.contains(d.toLong) && s.contains(d.toLong))
+          case List('S', 'c') => Some((d: Double) => !s.contains(d.toLong) && c.contains(d.toLong))
+          case List('S', 'f') => Some((d: Double) => !s.contains(d.toLong) && f.contains(d.toLong))
+          case List('c', 'f') => Some((d: Double) => c.contains(d.toLong) && f.contains(d.toLong))
+          case List('c', 's') => Some((d: Double) => c.contains(d.toLong) && s.contains(d.toLong))
+          case List('f', 's') => Some((d: Double) => f.contains(d.toLong) && s.contains(d.toLong))
+          case _              => println("Non-valid marker combination: " + markers); None
+        }
+        case 3 => markers.toList.sorted match {
+          case List('C', 'F', 'S') => Some((d: Double) => !c.contains(d.toLong) && !f.contains(d.toLong) && !s.contains(d.toLong))
+          case List('C', 'F', 's') => Some((d: Double) => !c.contains(d.toLong) && !f.contains(d.toLong) && s.contains(d.toLong))
+          case List('C', 'S', 'f') => Some((d: Double) => !c.contains(d.toLong) && !s.contains(d.toLong) && f.contains(d.toLong))
+          case List('C', 'f', 's') => Some((d: Double) => !c.contains(d.toLong) && f.contains(d.toLong) && s.contains(d.toLong))
+          case List('F', 'S', 'c') => Some((d: Double) => !f.contains(d.toLong) && !s.contains(d.toLong) && c.contains(d.toLong))
+          case List('F', 'c', 's') => Some((d: Double) => !f.contains(d.toLong) && c.contains(d.toLong) && s.contains(d.toLong))
+          case List('S', 'c', 'f') => Some((d: Double) => !s.contains(d.toLong) && c.contains(d.toLong) && f.contains(d.toLong))
+          case List('c', 'f', 's') => Some((d: Double) => c.contains(d.toLong) && f.contains(d.toLong) && s.contains(d.toLong))
+          case _                   => println("Non-valid marker combination: " + markers); None
+        }
+      }
+    case r"(-?\d+)$n"                 => Some(_ == n.toLong)
+    case r"< *(-?\d+)$n"              => Some(_ < n.toLong)
+    case r"> *(-?\d+)$n"              => Some(_ > n.toLong)
+    case r"<= *(-?\d+)$n"             => Some(_ <= n.toLong)
+    case r">= *(-?\d+)$n"             => Some(_ >= n.toLong)
+    case r"(-?\d+)$n1 *- *(-?\d+)$n2" => Some(d => n1.toLong <= d && d <= n2.toLong)
+    case ""                           => None
+    case other                        => println(s"Unrecognized entity id filter expr: `$other`"); None
   }
 
   def mergedPredicate[T](
     filterExpr: String,
     predicateFactory: String => Option[T => Boolean]
   ): Option[T => Boolean] = {
-    val fns: Seq[T => Boolean] = (for {
+    val predicates: Seq[T => Boolean] = (for {
       lines <- filterExpr.split('\n')
       token <- lines.split(',')
-      fn <- predicateFactory(token)
-    } yield fn).toList
+      predicate <- predicateFactory(token)
+    } yield predicate).toList
 
-    fns.length match {
+    predicates.length match {
       case 0 => None
-      case 1 => Some(fns.head)
-      // merge multiple predicates with OR logic
-      // (uses implicit in imported PredicateMerger)
-      case _ => Some(fns.tail.foldLeft(fns.head)(_ or _))
+      case 1 => Some(predicates.head)
+      case _ =>
+        // merge multiple predicates with OR logic
+        Some(predicates.tail.foldLeft(predicates.head)(_ or _))
     }
   }
 
 
-  private def filter[T](
-    colIndex: Int,
-    colType: String,
+  def createFilter(
+    col: Col,
     filterExpr: String,
-    predicateFactory: String => Option[T => Boolean]
-  ): Option[Filter[T]] = {
-    mergedPredicate(filterExpr, predicateFactory) match {
-      case None       => Option.empty[Filter[T]]
-      case Some(pred) => Some(Filter[T](colIndex, colType, filterExpr, pred))
+    curStars: Set[Long] = Set.empty[Long],
+    curFlags: Set[Long] = Set.empty[Long],
+    curChecks: Set[Long] = Set.empty[Long],
+  ): Option[Filter[_]] = {
+    val Col(colIndex, _, _, _, _, attrType,
+    colType, _, _, _, aggrType, _, _, _) = col
+
+    def filter[T](
+      predicateFactory: String => Option[T => Boolean]
+    ): Option[Filter[T]] = {
+      mergedPredicate(filterExpr, predicateFactory) match {
+        case None             => Option.empty[Filter[T]]
+        case Some(mergedPred) => Some(
+          Filter[T](colIndex, colType, filterExpr, mergedPred)
+        )
+      }
     }
-  }
 
-
-  def createFilter(col: Col, filterExpr: String): Option[Filter[_]] = {
-    val Col(colIndex, _, _, _, _, attrType, colType, _, _, _, aggrType, _, _, _) = col
     if (aggrType.isEmpty) {
       colType match {
         case "string" | "listString" => attrType match {
-          case "Date"       => filter[String](colIndex, colType, filterExpr, predDate)
-          case "Boolean"    => filter[String](colIndex, colType, filterExpr, predBoolean)
-          case "BigInt"     => filter[String](colIndex, colType, filterExpr, predBigInt)
-          case "BigDecimal" => filter[String](colIndex, colType, filterExpr, predBigDecimal)
-          case _            => filter[String](colIndex, colType, filterExpr, predString)
+          case "Date"       => filter[String](predDate)
+          case "Boolean"    => filter[String](predBoolean)
+          case "BigInt"     => filter[String](predBigInt)
+          case "BigDecimal" => filter[String](predBigDecimal)
+          case _            => filter[String](predString)
         }
         case "double" | "listDouble" => attrType match {
-          case "Int" | "Long" | "ref" | "datom" => filter[Double](colIndex, colType, filterExpr, predNumber)
-          case _                                => filter[Double](colIndex, colType, filterExpr, predDecimal)
+          case "datom"                =>
+            filter[Double](predEid(curStars, curFlags, curChecks))
+          case "Int" | "Long" | "ref" => filter[Double](predNumber)
+          case _                      => filter[Double](predDecimal)
         }
         case _                       => None
       }
     } else {
       aggrType match {
-        case "aggrInt"    => filter[Double](colIndex, colType, filterExpr, predNumber)
-        case "aggrDouble" => filter[Double](colIndex, colType, filterExpr, predDecimal)
+        case "aggrInt"    => filter[Double](predNumber)
+        case "aggrDouble" => filter[Double](predDecimal)
         case _            => colType match {
           case "string" | "listString" => attrType match {
-            case "Date"       => filter[String](colIndex, colType, filterExpr, predDate)
-            case "Boolean"    => filter[String](colIndex, colType, filterExpr, predBoolean)
-            case "BigInt"     => filter[String](colIndex, colType, filterExpr, predBigInt)
-            case "BigDecimal" => filter[String](colIndex, colType, filterExpr, predBigDecimal)
-            case _            => filter[String](colIndex, colType, filterExpr, predString)
+            case "Date"       => filter[String](predDate)
+            case "Boolean"    => filter[String](predBoolean)
+            case "BigInt"     => filter[String](predBigInt)
+            case "BigDecimal" => filter[String](predBigDecimal)
+            case _            => filter[String](predString)
           }
           case _                       => attrType match {
-            case "Int" | "Long" | "ref" | "datom" => filter[Double](colIndex, colType, filterExpr, predNumber)
-            case _                                => filter[Double](colIndex, colType, filterExpr, predDecimal)
+            case "datom"                =>
+              filter[Double](predEid(curStars, curFlags, curChecks))
+            case "Int" | "Long" | "ref" => filter[Double](predNumber)
+            case _                      => filter[Double](predDecimal)
           }
         }
       }

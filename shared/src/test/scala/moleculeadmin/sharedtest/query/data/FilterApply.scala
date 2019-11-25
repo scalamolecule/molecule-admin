@@ -1,4 +1,5 @@
-package moleculeadmin.servertest.query.data
+package moleculeadmin.sharedtest.query.data
+
 import moleculeadmin.shared.ast.query.{Col, Filter, QueryResult}
 import moleculeadmin.shared.ops.query.data.{FilterFactory, FilterIndex}
 import utest._
@@ -24,7 +25,12 @@ object FilterApply extends TestSuite with FilterFactory with FilterIndex {
         777
       )
 
-      def mkFilter(colIndex: Int, attrType: String, colType: String, filterExpr: String): Filter[_] = createFilter(
+      def mkFilter(
+        colIndex: Int,
+        attrType: String,
+        colType: String,
+        filterExpr: String
+      ): Filter[_] = createFilter(
         Col(colIndex, 0, "", "", "", attrType, colType, 1, false, Nil, "", "", "", 0), filterExpr
       ).get
 
