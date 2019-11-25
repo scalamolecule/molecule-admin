@@ -46,7 +46,7 @@ trait KeyEvents {
   def toggleShortcuts(): Unit = toggle("shortcuts")
 
   def toggleQueryBuilder(implicit ctx: Ctx.Owner): Rx.Dynamic[Unit] = Rx {
-    if (builderSelection.now == "a") {
+    if (builderSelection.now == "") {
       if (builderMinimized) {
         builderSelection() = "m"
       } else {
@@ -57,7 +57,7 @@ trait KeyEvents {
         }
       }
     } else {
-      builderSelection() = "a"
+      builderSelection() = ""
     }
     // Asynchronously save setting
     queryWire().saveSetting("builderSelection", builderSelection.now)
@@ -260,7 +260,7 @@ trait KeyEvents {
               toggleOff("shortcuts")
               toggleRecentMenu()
             case "v"                                => toggleViews
-            case "b" if modelElements.now.nonEmpty  => toggleQueryBuilder
+            case "b"                                => toggleQueryBuilder
             case "m" if modelElements.now.nonEmpty  => toggleMinimize
             case "a" if builderSelection.now != "a" =>
               builderBaseSelection = "a"; builderSelection() = "a"

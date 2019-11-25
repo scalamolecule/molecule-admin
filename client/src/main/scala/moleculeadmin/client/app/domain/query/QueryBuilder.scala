@@ -12,7 +12,7 @@ case class QueryBuilder(db: String, metaSchema: MetaSchema)(implicit val ctx: Ct
   extends RxBindings with AppElements {
 
   def rxElement: Node = builderSelection.map {
-    case "a" => span()
+    case "" => span()
     case "m" => _rowColAuto6(QueryBranches("m").dynRender)
     case key =>
       //      println("QueryBuilder...")
