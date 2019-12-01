@@ -26,29 +26,31 @@ abstract class Base(db: String)(implicit val ctx: Ctx.Owner)
     if (viewElement != null) {
       queryWire().touchEntity(db, eid).call().foreach { data =>
         viewElement.innerHTML = ""
-        data.foreach { case (attr, v) =>
-          val cellType   = viewCellTypes(attr)
-          val vElementId = parentElementId + attr + level
-          val valueCell  = getValueCell(cellType, vElementId, v, txs, level)
-          val attrCell   = getAttrCell(attr, cellType, vElementId, valueCell, txs)
-          viewElement.appendChild(
-            tr(
-              attrCell,
-              valueCell
-            ).render
-          )
+        data.foreach {
+          case (":db/ident", _) => // skip enum idents like :country/US
+          case (attr, v)        =>
+            val cellType   = viewCellTypes(attr)
+            val vElementId = parentElementId + attr + level
+            val valueCell  = getValueCell(cellType, vElementId, v, txs, level)
+            val attrCell   = getAttrCell(attr, cellType, vElementId, valueCell, txs)
+            viewElement.appendChild(
+              tr(
+                attrCell,
+                valueCell
+              ).render
+            )
         }
       }
     }
   }
 
   def getValueCell(cellType: String,
-    valueCellId: String,
-    v: String,
-    txs: Boolean,
-    level: Int,
-    asserted: Boolean = true
-  ): TypedTag[TableCell] = cellType match {
+                   valueCellId: String,
+                   v: String,
+                   txs: Boolean,
+                   level: Int,
+                   asserted: Boolean = true
+                  ): TypedTag[TableCell] = cellType match {
     case "str" => td(
       if (asserted) () else cls := "retracted",
       _str2frags(v))
@@ -180,11 +182,11 @@ abstract class Base(db: String)(implicit val ctx: Ctx.Owner)
 
 
   def getAttrCell(attr: String,
-    cellType: String,
-    valueCellId: String,
-    unexpandedValueCell: TypedTag[TableCell],
-    txs: Boolean
-  ): TypedTag[TableCell] = {
+                  cellType: String,
+                  valueCellId: String,
+                  unexpandedValueCell: TypedTag[TableCell],
+                  txs: Boolean
+                 ): TypedTag[TableCell] = {
     (if (txs) td() else th()) (
       attr,
       if (curAttrs.contains(attr)) cls := "selectedAttr" else (),

@@ -225,7 +225,7 @@ trait FilterFactory extends RegexMatching with DateHandling {
     curChecks: Set[Long] = Set.empty[Long],
   ): Option[Filter[_]] = {
     val Col(colIndex, _, _, _, _, attrType,
-    colType, _, _, _, aggrType, _, _, _) = col
+    colType, _, _, _, aggrType, _, _, _, _) = col
 
     def filter[T](
       predicateFactory: String => Option[T => Boolean]

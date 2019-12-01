@@ -4,7 +4,7 @@ import boopickle.Default._
 import moleculeadmin.client.app.domain.common.TopMenu
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.domain.query.data.DataTable
-import moleculeadmin.client.app.domain.query.{KeyEvents, QueryBuilder, QuerySubMenu, ViewsRender}
+import moleculeadmin.client.app.domain.query.{GroupedRender, KeyEvents, QueryBuilder, QuerySubMenu, ViewsRender}
 import moleculeadmin.client.app.element.AppElements
 import moleculeadmin.client.autowire.queryWire
 import moleculeadmin.client.rxstuff.RxBindings
@@ -28,7 +28,7 @@ object QueryClient extends RxBindings with TreeOps with SchemaOps with ColOps
 
   @JSExport
   def load(db: String): Unit = queryWire().loadMetaData(db).call().map {
-    case (dbs, metaSchema, (settings, views, stars, flags, checks, queries)) =>
+    case (dbs, metaSchema, (settings, curViews, stars, flags, checks, queries)) =>
 
       // Uncomment to test dynamic ScalaFiddle compilation
       //import moleculeadmin.client.app.domain.query.data.groupedit.compileTest.TestScalaFiddle
@@ -38,8 +38,7 @@ object QueryClient extends RxBindings with TreeOps with SchemaOps with ColOps
       viewCellTypes = mkViewCellTypes(nsMap)
       enumAttrs = mkEnumAttrs(nsMap)
 
-
-        // Set saved settings
+      // Set saved settings
       Rx {
         maxRows() = settings.getOrElse("maxRows", "-1").toInt
         limit() = settings.getOrElse("limit", "20").toInt
@@ -48,22 +47,22 @@ object QueryClient extends RxBindings with TreeOps with SchemaOps with ColOps
         curStars = stars
         curFlags = flags
         curChecks = checks
-        views.foreach {
-          case "showViews"           => showViews() = true
-          case "showHelp"            => showHelp() = true
-          case "showMolecule"        => showMolecule() = true
-          case "showQueries"         => showQueries() = true
-          case "showRecentMolecules" => showRecentMolecules() = true
-          case "showDatalog"         => showDatalog() = true
-          case "showTransaction"     => showTransaction() = true
-          case "showEntity"          => showEntity() = true
-          case "showEntityHistory"   => showEntityHistory() = true
-          case "showMoleculeModel"   => showMoleculeModel() = true
-          case "showMoleculeQuery"   => showMoleculeQuery() = true
-          case "showColumns"         => showColumns() = true
-          case "showTree1"           => showTree1() = true
-          case "showTree2"           => showTree2() = true
-          case "showTree3"           => showTree3() = true
+        curViews.foreach {
+          case "viewsOn"             => viewsOn() = true
+          case "viewHelp"            => viewHelp() = true
+          case "viewMolecule"        => viewMolecule() = true
+          case "viewQueries"         => viewQueries() = true
+          case "viewRecentMolecules" => viewRecentMolecules() = true
+          case "viewDatalog"         => viewDatalog() = true
+          case "viewTransaction"     => viewTransaction() = true
+          case "viewEntity"          => viewEntity() = true
+          case "viewEntityHistory"   => viewEntityHistory() = true
+          case "viewMoleculeModel"   => viewMoleculeModel() = true
+          case "viewMoleculeQuery"   => viewMoleculeQuery() = true
+          case "viewColumns"         => viewColumns() = true
+          case "viewTree1"           => viewTree1() = true
+          case "viewTree2"           => viewTree2() = true
+          case "showTree3"           => viewTree3() = true
           case _                     =>
         }
       }
@@ -79,7 +78,8 @@ object QueryClient extends RxBindings with TreeOps with SchemaOps with ColOps
           _row(
             QueryBuilder(db, metaSchema).rxElement,
             DataTable(db).rxElement,
-            ViewsRender(db).rxElement
+            ViewsRender(db).rxElement,
+            GroupedRender(db).rxElement,
           )
         ).render
       }

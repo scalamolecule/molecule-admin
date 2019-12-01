@@ -150,8 +150,14 @@ trait KeyEvents {
 
   def toggleViews(implicit ctx: Ctx.Owner): Unit = {
     document.getElementById("checkbox-view-0")
-      .asInstanceOf[HTMLInputElement].checked = !showViews.now
-    showViews() = !showViews.now
+      .asInstanceOf[HTMLInputElement].checked = !viewsOn.now
+    viewsOn() = !viewsOn.now
+  }
+
+  def toggleGrouped(implicit ctx: Ctx.Owner): Unit = {
+    document.getElementById("checkbox-grouped-0")
+      .asInstanceOf[HTMLInputElement].checked = !showGrouped.now
+    showGrouped() = !showGrouped.now
   }
 
   def useQuery(i: Int)
@@ -260,6 +266,7 @@ trait KeyEvents {
               toggleOff("shortcuts")
               toggleRecentMenu()
             case "v"                                => toggleViews
+            case "g"                                => toggleGrouped
             case "b"                                => toggleQueryBuilder
             case "m" if modelElements.now.nonEmpty  => toggleMinimize
             case "a" if builderSelection.now != "a" =>

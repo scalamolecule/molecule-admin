@@ -10,7 +10,6 @@ import moleculeadmin.shared.util.HelpersAdmin
 
 trait Base extends BaseApi with HelpersAdmin {
 
-
   override def dbNames(): Seq[String] = {
     implicit val conn = Conn(base + "/meta")
     meta_Db.name.isMolecular_(true).get.sorted
@@ -55,14 +54,20 @@ trait Base extends BaseApi with HelpersAdmin {
       checksOpt.getOrElse(Set.empty[Long]),
     )
 
+    // todo: save ns and nss of query + show dropdowns under Queries submenu
     val queries = queryIdsOpt.fold(Seq.empty[SavedQuery])(queryIds =>
-      user_Query(queryIds).molecule
-      .ColSettings.*(user_ColSetting.index.attrExpr.sortDir.sortPos)
-      .get.sortBy(_._1)
-      .map {
-        case (molecule, colSettings) =>
-          SavedQuery(molecule, colSettings.map(ColSetting.tupled(_)))
-      }
+      user_Query(queryIds).molecule.showGrouped.groupedCols$
+        .ColSettings.*(user_ColSetting.index.attrExpr.sortDir.sortPos.filterExpr)
+        .get.sortBy(_._1)
+        .map {
+          case (molecule, showGrouped, groupedCols, colSettings) =>
+            SavedQuery(
+              molecule,
+              colSettings.map(ColSetting.tupled(_)),
+              showGrouped,
+              groupedCols.fold(Seq.empty[Int])(_.toSeq)
+            )
+        }
     )
     (settings, views, stars, flags, checks, queries)
   }

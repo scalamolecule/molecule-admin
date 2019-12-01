@@ -41,26 +41,26 @@ abstract class UpdateClient[T](db: String,
     Option.empty[Array[Option[Double]]], 0,
     Option.empty[Array[Option[String]]], 0
   ) {
-    case (_, Col(colIndex1, _, `nsAlias`, `nsFull`, "e", _, _, _, _, _, _, _, _, _)) =>
+    case (_, Col(colIndex1, _, `nsAlias`, `nsFull`, "e", _, _, _, _, _, _, _, _, _, _)) =>
       (colIndex1, None, 0, None, 0, None, 0)
 
     case (
       (eColIndex, _, _, _, _, _, _),
-      Col(colIndex1, _, _, `nsFull`, `attr`, _, _, _, _, _, _, "t", _, _)
+      Col(colIndex1, _, _, `nsFull`, `attr`, _, _, _, _, _, _, "t", _, _, _)
       ) =>
       (eColIndex,
         Some(qr.num(qr.arrayIndexes(colIndex1))), colIndex1, None, 0, None, 0)
 
     case (
       (eColIndex, tArray, tIndex, _, _, _, _),
-      Col(colIndex1, _, _, `nsFull`, `attr`, _, _, _, _, _, _, "tx", _, _)
+      Col(colIndex1, _, _, `nsFull`, `attr`, _, _, _, _, _, _, "tx", _, _, _)
       ) =>
       (eColIndex, tArray, tIndex,
         Some(qr.num(qr.arrayIndexes(colIndex1))), colIndex1, None, 0)
 
     case (
       (eColIndex, tArray, tIndex, txArray, txIndex, _, _),
-      Col(colIndex1, _, _, `nsFull`, `attr`, _, _, _, _, _, _, "txInstant", _, _)
+      Col(colIndex1, _, _, `nsFull`, `attr`, _, _, _, _, _, _, "txInstant", _, _, _)
       ) =>
       (eColIndex, tArray, tIndex, txArray, txIndex,
         Some(qr.str(qr.arrayIndexes(colIndex1))), colIndex1)

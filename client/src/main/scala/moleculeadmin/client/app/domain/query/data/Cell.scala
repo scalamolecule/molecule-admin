@@ -29,7 +29,7 @@ abstract class Cell(
     val arrayIndex = qr.arrayIndexes(colIndex)
 
     val Col(_, related, nsAlias, nsFull, attr, attrType, colType,
-    card, _, enums, _, expr, _, _) = cols(colIndex)
+    card, _, enums, _, expr, _, _,_) = cols(colIndex)
 
     lazy val noCount    = expr != "count" && expr != "count-distinct"
     lazy val aggregates = Seq(

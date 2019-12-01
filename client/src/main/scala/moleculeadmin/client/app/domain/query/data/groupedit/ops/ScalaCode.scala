@@ -24,7 +24,7 @@ case class ScalaCode(col: Col, rhs0: String)
   val processParams0  = new ListBuffer[String]
 
   columns.now.collect {
-    case Col(_, _, nsAlias1, nsFull1, attr0, tpe, _, card, opt, _, _, attrExpr, _, _)
+    case Col(_, _, nsAlias1, nsFull1, attr0, tpe, _, card, opt, _, _, attrExpr, _, _, _)
       if attrExpr != "edit" =>
 
       val attr1 = if (card > 1) clean(attr0) else attr0

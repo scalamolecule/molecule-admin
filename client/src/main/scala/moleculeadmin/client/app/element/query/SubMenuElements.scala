@@ -44,7 +44,7 @@ trait SubMenuElements extends AppElements {
     retractSavedQuery: String => () => Unit
   ): TypedTag[Table] = table(cls := "tableRowLink",
     savedQueries.zipWithIndex.map {
-      case (SavedQuery(`curMolecule`, _), i) => tr(cls := "current",
+      case (SavedQuery(`curMolecule`, _, _, _), i) => tr(cls := "current",
         th(i + 1),
         td(curMolecule, paddingRight := 20),
         td(
@@ -55,7 +55,7 @@ trait SubMenuElements extends AppElements {
           )
         )
       )
-      case (query, i)                        => tr(cls := "other",
+      case (query, i)                              => tr(cls := "other",
         th(i + 1, onclick := useSavedQuery(query)),
         td(query.molecule, paddingRight := 20, onclick := useSavedQuery(query)),
         td(
@@ -141,9 +141,8 @@ trait SubMenuElements extends AppElements {
 
   // Views --------------------------------------------------------------------
 
-  def _subMenuViews(checkboxes: TypedTag[HTMLElement]*): TypedTag[LI] = li(cls := "dropdown",
-    //    a(href := "#", span("V", textDecoration.underline), "iews"),
-    a(href := "#", "Views"),
+  def _subMenu(header: String, checkboxes: Seq[TypedTag[HTMLElement]]): TypedTag[LI] = li(cls := "dropdown",
+    a(href := "#", header),
     div(
       cls := "dropdown-menu",
       width := 200,
@@ -152,20 +151,61 @@ trait SubMenuElements extends AppElements {
     )
   )
 
-  def _cb(id1: String, txt: Frag, checked1: Boolean, callback: () => Unit): TypedTag[Div] = div(
+  def _cb(id1: String, txt: Frag, checked1: Boolean, toggle: () => Unit): TypedTag[Div] = div(
     input(tpe := "checkbox",
       id := s"checkbox-$id1",
       value := id1,
       if (checked1) checked := true else (),
-      onchange := callback
+      onchange := toggle
     ),
     label(
       paddingLeft := 5,
+      marginBottom := 3,
       `for` := s"checkbox-$id1",
       txt
     )
   )
 
+
+  // Grouped --------------------------------------------------------------------
+
+  def _groupedTable[T](
+    data: Seq[(T, Int)]
+  ): TypedTag[Table] = {
+    var i = 0
+    table(
+      cls := "tableGrouped",
+      height := 500,
+      tbody(
+        display.block,
+        maxHeight := 500,
+        overflowY.scroll,
+        data.map { case (value, count) =>
+          i += 1
+          tr(
+            cls := "other",
+            th(i, color := "#888"),
+            td(
+              maxWidth := 250,
+              value.toString,
+              paddingRight := 20,
+              //            onclick := useSavedQuery(query)
+            ),
+            td(
+              textAlign.right,
+              a(cls := "discrete", href := "#",
+                span(
+                  count,
+                  paddingBottom := 6
+                ),
+                //              onclick := retractSavedQuery(query.molecule)
+              )
+            )
+          )
+        }
+      )
+    )
+  }
 
   // Shortcuts --------------------------------------------------------------------
 

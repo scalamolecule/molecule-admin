@@ -35,7 +35,7 @@ object UnmarkAll extends AppElements {
     var cells: HTMLCollection = null
     while (i < rows.length) {
       cells = rows(i).children
-      eTableColIndexes.foreach { col =>
+      eidCols.foreach { col =>
         cells(col).children(iconIndex).setAttribute("class", offCls)
       }
       i += 1
@@ -61,7 +61,7 @@ object UnmarkAll extends AppElements {
     }
 
     // Set marker to false for all entity id columns
-    eTableColIndexes.foreach { col =>
+    eidCols.foreach { col =>
       // Update cached marker index
       val curMarkerIndex = curMarkerIndexes(col)
       i = 0

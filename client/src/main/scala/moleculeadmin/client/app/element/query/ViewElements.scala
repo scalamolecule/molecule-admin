@@ -13,20 +13,22 @@ trait ViewElements extends SubMenuElements {
 
   def _moleculeView(
     rows1: Int,
-    cols1: Int,
-    moleculeStr: String,
-    addQuery: () => Unit,
+    cols1       : Int,
+    moleculeStr : String,
+    addQuery    : () => Unit,
     isSavedQuery: Boolean
   ): TypedTag[Element] = _card(
     _cardHeader(
       h5("Molecule", display.`inline-block`),
       if (isSavedQuery) {
-        span(paddingLeft := 30, float.right, "fav", color := Color.textGray,
+        span(
+          paddingLeft := 30, float.right, "fav", color := Color.textGray,
           onclick := { () =>
             window.alert(s"`$moleculeStr` is already a saved query.")
           })
       } else {
-        span(paddingLeft := 30, float.right,
+        span(
+          paddingLeft := 30, float.right,
           a(cls := "discrete", href := "#", "fav", onclick := addQuery))
       }
     ),
@@ -44,7 +46,7 @@ trait ViewElements extends SubMenuElements {
 
   def _codeView(
     header: String,
-    renderTpe: String,
+    renderTpe    : String,
     codeFragments: Frag*
   ): TypedTag[Element] = _card(
     _cardHeader(h5(header)),
@@ -59,13 +61,21 @@ trait ViewElements extends SubMenuElements {
     )
   )
 
+  def _grouped(
+    header: String,
+    frags : Frag*
+  ): TypedTag[Element] = _card(
+    _cardHeader(h5(header)),
+    _cardBody(frags)
+  )
+
   def _queriesView(
     savedQueries: Seq[SavedQuery],
-    curMolecule: String,
-    useQuery: SavedQuery => () => Unit,
+    curMolecule : String,
+    useQuery    : SavedQuery => () => Unit,
     retractQuery: String => () => Unit
   ): TypedTag[Element] = _card(
-    _cardHeader(h5("queries")),
+    _cardHeader(h5("Queries")),
     _cardBody(
       _queriesTable(savedQueries, curMolecule, useQuery, retractQuery)
     )
@@ -110,11 +120,11 @@ trait ViewElements extends SubMenuElements {
 
   def _recentMoleculesView(
     recentMolecules: Seq[String],
-    curMolecule: String,
-    savedMolecules: Seq[String],
-    resetRecentMolecules: () => Unit,
-    useRecentMolecule: String => () => Unit,
-    saveQuery: String => () => Unit,
+    curMolecule          : String,
+    savedMolecules       : Seq[String],
+    resetRecentMolecules : () => Unit,
+    useRecentMolecule    : String => () => Unit,
+    saveQuery            : String => () => Unit,
     removeRecentMolecules: String => () => Unit
   ): TypedTag[Element] = _card(
     _cardHeader(
@@ -144,10 +154,10 @@ trait ViewElements extends SubMenuElements {
       |  });
       |});""".stripMargin)
 
-  def _views(views: Frag*): TypedTag[Div] = div(
+  def _cardsContainer(cards: Frag*): TypedTag[Div] = div(
     paddingTop := 15,
     paddingLeft := 20,
-    views,
+    cards,
     hljs
   )
 }

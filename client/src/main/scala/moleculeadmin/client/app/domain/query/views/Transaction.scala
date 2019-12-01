@@ -18,7 +18,7 @@ case class Transaction(db: String)(implicit ctx: Ctx.Owner) extends Base(db) {
   def view: Rx.Dynamic[TypedTag[Element]] = Rx {
     curTx() match {
       case 0                         => // no entity id marked yet
-      case tx if showTransaction.now =>
+      case tx if viewTransaction.now =>
         val view = document.getElementById("txViewTable")
         if (view == null) {
           // Start fresh

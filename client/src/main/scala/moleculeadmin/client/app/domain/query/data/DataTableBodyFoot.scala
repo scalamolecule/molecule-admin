@@ -43,7 +43,11 @@ case class DataTableBodyFoot(db: String)(implicit val ctx: Ctx.Owner)
       columns.now,
       sortIndex,
       filters.now,
-      filterIndex
+      filterIndex,
+
+      // todo
+      false,
+      Nil
     ) +: queryCache.now.filterNot(_.modelElements == modelElements.now)
 
     // Populate table body and foot

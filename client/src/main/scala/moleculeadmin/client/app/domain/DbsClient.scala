@@ -135,7 +135,7 @@ object DbsClient extends RxBindings with DbsElements {
       thead(
         tr(
           th(),
-          th("Db1"),
+          th("Database"),
           th("Actions")
         )
       ),

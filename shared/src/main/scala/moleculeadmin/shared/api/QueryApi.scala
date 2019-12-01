@@ -33,11 +33,10 @@ trait QueryApi extends BaseApi {
     db: String,
     eid: Long,
     enumAttrs: Seq[String]
-  )
-  : List[(Long, Long, String, Boolean, String, String)] = ???
+  ): List[(Long, Long, String, Boolean, String, String)] = ???
 
   def addQuery(db: String, savedQuery: SavedQuery): Either[String, String] = ???
-
+  def updateQuery(db: String, savedQuery: SavedQuery): Either[String, String] = ???
   def retractQuery(db: String, favMolecule: String): Either[String, String] = ???
 
   def toggleMarker(

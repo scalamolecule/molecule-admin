@@ -35,7 +35,7 @@ import scala.scalajs.js.UndefOr
 case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
   extends RxBindings with ColOps with BodyElements with KeyEvents with TypeMappings {
 
-  val Col(colIndex, _, _, _, _, attrType, _, card, _, enums, _, _, _, _) = col
+  val Col(colIndex, _, _, _, _, attrType, _, card, _, enums, _, _, _, _, _) = col
 
   val colIndexes: Seq[Int] = columns.now.collect {
     case col if col.attrExpr != "edit" => col.colIndex

@@ -17,9 +17,9 @@ object QueryState {
 
   // Schema
   implicit var nsMap: Map[String, Ns] = Map.empty[String, Ns]
-  var viewCellTypes    = Map.empty[String, String]
-  var enumAttrs        = Seq.empty[String]
-  var eTableColIndexes = Seq.empty[Int]
+  var viewCellTypes = Map.empty[String, String]
+  var enumAttrs     = Seq.empty[String]
+  var eidCols       = Seq.empty[Int]
 
 
   // What is being being processed now? Concatenates part/ns/attr/pos-number
@@ -113,21 +113,26 @@ object QueryState {
   val curTxInstant = Var("")
 
   // Show view statuses
-  val showViews           = Var(false)
-  val showHelp            = Var(false)
-  val showMolecule        = Var(false)
-  val showQueries         = Var(false)
-  val showRecentMolecules = Var(false)
-  val showDatalog         = Var(false)
-  val showTransaction     = Var(false)
-  val showEntity          = Var(false)
-  val showEntityHistory   = Var(false)
+  val viewsOn             = Var(false)
+  val viewHelp            = Var(false)
+  val viewMolecule        = Var(false)
+  val viewQueries         = Var(false)
+  val viewRecentMolecules = Var(false)
+  val viewDatalog         = Var(false)
+  val viewTransaction     = Var(false)
+  val viewEntity          = Var(false)
+  val viewEntityHistory   = Var(false)
 
   // Debugging
-  val showMoleculeModel = Var(false)
-  val showMoleculeQuery = Var(false)
-  val showColumns       = Var(false)
-  val showTree1         = Var(false)
-  val showTree2         = Var(false)
-  val showTree3         = Var(false)
+  val viewMoleculeModel = Var(false)
+  val viewMoleculeQuery = Var(false)
+  val viewColumns       = Var(false)
+  val viewTree1         = Var(false)
+  val viewTree2         = Var(false)
+  val viewTree3         = Var(false)
+
+  // Col indexes for grouped attributes
+  var groupableCols = Seq.empty[Int]
+  val showGrouped   = Var(false)
+  val groupedCols   = Var(Seq.empty[Int])
 }

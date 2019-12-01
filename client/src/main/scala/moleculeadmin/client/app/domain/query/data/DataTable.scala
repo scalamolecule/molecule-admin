@@ -6,7 +6,7 @@ import molecule.ast.query.QueryExpr
 import molecule.ops.QueryOps._
 import molecule.ops.VerifyRawModel
 import molecule.transform.{Model2Query, Query2String}
-import moleculeadmin.client.app.domain.QueryClient.{getCols, getEidColIndexes, mkModelTree, mkTree, model2molecule}
+import moleculeadmin.client.app.domain.QueryClient._
 import moleculeadmin.client.app.domain.query.KeyEvents
 import moleculeadmin.client.app.domain.query.QueryState.{columns, offset, _}
 import moleculeadmin.client.app.element.query.datatable.TableElements
@@ -130,33 +130,37 @@ case class DataTable(db: String)(implicit val ctx: Ctx.Owner)
           if attr.last == '_' || attr.last == '$' =>
           _rowCol1("Please select at least one mandatory attribute")
 
-        case elements if !maxRowsChanged &&
-          queryCache.now.map(_.modelElements).contains(elements) =>
-          //          println("----------- cached ----------")
-          val cached = queryCache.now.find(_.modelElements == elements).get
-          tree() = cached.tree
-          curMolecule() = cached.molecule
-          columns() = cached.columns
-          eTableColIndexes = getEidColIndexes(columns.now)
-          filters() = cached.filters
-          offset() = 0
-          rowCountAll = cached.queryResult.rowCountAll
-          rowCount = cached.queryResult.rowCount
-          curAttrs = columns.now.map(c => s":${c.nsFull}/${c.attr}")
-
-          registerKeyEvents
-          DataTableHead(db, tableBody).populate(tableHead)
-          DataTableBodyFoot(db).populate(tableBody, tableFoot)
-          tableContainer
-
-        // New model
+//        case elements if !maxRowsChanged &&
+//          queryCache.now.map(_.modelElements).contains(elements) =>
+//          println("----------- cached ----------")
+//          val cached = queryCache.now.find(_.modelElements == elements).get
+//          tree() = cached.tree
+//          curMolecule() = cached.molecule
+//          columns() = cached.columns
+//          eidCols = getEidTableColIndexes(columns.now)
+//          groupableCols = getGroupedColIndexes(columns.now)
+////          showGrouped() = cached.showGrouped
+////          groupedCols() = cached.groupedCols
+//          filters() = cached.filters
+//          offset() = 0
+//          rowCountAll = cached.queryResult.rowCountAll
+//          rowCount = cached.queryResult.rowCount
+//          curAttrs = columns.now.map(c => s":${c.nsFull}/${c.attr}")
+//
+//          registerKeyEvents
+//          DataTableHead(db, tableBody).populate(tableHead)
+//          DataTableBodyFoot(db).populate(tableBody, tableFoot)
+//          tableContainer
+//
+//        // New model
         case elements =>
-          //          println("----------- new ----------")
+          println("----------- new ----------")
           val elements1 = VerifyRawModel(elements)
           tree() = mkTree(mkModelTree(elements1))
           curMolecule() = model2molecule(elements1)
           columns() = getCols(elements)
-          eTableColIndexes = getEidColIndexes(columns.now)
+          eidCols = getEidTableColIndexes(columns.now)
+          groupableCols = getGroupedColIndexes(columns.now)
           filters() = Map.empty[Int, Filter[_]]
           offset() = 0
           curAttrs = columns.now.map(c => s":${c.nsFull}/${c.attr}")
