@@ -63,7 +63,7 @@ case class ToggleOne(db: String, tableBody: TableSection, tpe: String)
 
     def updateMarkerIndex(): Unit = {
       // Update marker in each entity column
-      eTableColIndexes.foreach { tableCol =>
+      eidCols.foreach { tableCol =>
 
         // Eid might not be present in column
         val entityIndexOpt: Option[List[Int]] = curEntityIndexes(tableCol).get(eid)
@@ -82,9 +82,9 @@ case class ToggleOne(db: String, tableBody: TableSection, tpe: String)
       }
     }
 
-    eTableColIndexes.length match {
+    eidCols.length match {
       case 1 => {
-        val c1 = eTableColIndexes.head
+        val c1 = eidCols.head
         i = 0
         while (i < rows.length) {
           cells = rows(i).children
@@ -95,7 +95,7 @@ case class ToggleOne(db: String, tableBody: TableSection, tpe: String)
       }
 
       case 2 => {
-        val Seq(c1, c2) = eTableColIndexes
+        val Seq(c1, c2) = eidCols
         i = 0
         while (i < rows.length) {
           cells = rows(i).children
@@ -107,7 +107,7 @@ case class ToggleOne(db: String, tableBody: TableSection, tpe: String)
       }
 
       case 3 => {
-        val Seq(c1, c2, c3) = eTableColIndexes
+        val Seq(c1, c2, c3) = eidCols
         i = 0
         while (i < rows.length) {
           cells = rows(i).children
@@ -120,7 +120,7 @@ case class ToggleOne(db: String, tableBody: TableSection, tpe: String)
       }
 
       case 4 => {
-        val Seq(c1, c2, c3, c4) = eTableColIndexes
+        val Seq(c1, c2, c3, c4) = eidCols
         i = 0
         while (i < rows.length) {
           cells = rows(i).children
@@ -134,7 +134,7 @@ case class ToggleOne(db: String, tableBody: TableSection, tpe: String)
       }
 
       case 5 => {
-        val Seq(c1, c2, c3, c4, c5) = eTableColIndexes
+        val Seq(c1, c2, c3, c4, c5) = eidCols
         i = 0
         while (i < rows.length) {
           cells = rows(i).children
@@ -149,7 +149,7 @@ case class ToggleOne(db: String, tableBody: TableSection, tpe: String)
       }
 
       case 6 => {
-        val Seq(c1, c2, c3, c4, c5, c6) = eTableColIndexes
+        val Seq(c1, c2, c3, c4, c5, c6) = eidCols
         i = 0
         while (i < rows.length) {
           cells = rows(i).children
@@ -165,7 +165,7 @@ case class ToggleOne(db: String, tableBody: TableSection, tpe: String)
       }
 
       case 7 => {
-        val Seq(c1, c2, c3, c4, c5, c6, c7) = eTableColIndexes
+        val Seq(c1, c2, c3, c4, c5, c6, c7) = eidCols
         i = 0
         while (i < rows.length) {
           cells = rows(i).children

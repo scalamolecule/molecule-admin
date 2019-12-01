@@ -83,23 +83,23 @@ trait ColOps extends HelpersAdmin {
       (0, false)) if col.colIndex > i => (0, false)
 
       // Not editable if aggr or tx
-      case (Col(`i`, _, _, _, _, _, _, _, _, _, _, attrExpr, _, _),
+      case (Col(`i`, _, _, _, _, _, _, _, _, _, _, attrExpr, _, _, _),
       (0, false)) if nonMenuExprs.contains(attrExpr) => (0, false)
 
       // Start checking
-      case (Col(`i`, _, _, _, _, _, _, _, _, _, _, _, _, _),
+      case (Col(`i`, _, _, _, _, _, _, _, _, _, _, _, _, _, _),
       (0, false)) => (1, false)
 
       // We have en entity id in namespace
-      case (Col(_, _, `nsAlias`, `nsFull`, "e", _, _, _, _, _, _, _, _, _),
+      case (Col(_, _, `nsAlias`, `nsFull`, "e", _, _, _, _, _, _, _, _, _, _),
       (1, false)) => (1, true)
 
       // Other cols before asking col - still no entity id - continue checking
-      case (Col(_, _, `nsAlias`, `nsFull`, _, _, _, _, _, _, _, _, _, _),
+      case (Col(_, _, `nsAlias`, `nsFull`, _, _, _, _, _, _, _, _, _, _, _),
       (1, false)) => (1, false)
 
       // Attributes before `e` in this namespace disqualifies editing
-      case (Col(_, _, `nsAlias`, `nsFull`, _, _, _, _, _, _, _, _, _, _),
+      case (Col(_, _, `nsAlias`, `nsFull`, _, _, _, _, _, _, _, _, _, _, _),
       (1, true)) => (0, false)
 
       // Previous namespaces
@@ -117,16 +117,22 @@ trait ColOps extends HelpersAdmin {
 
       // Entity id col
       case (Col(colIndex, _, `nsAlias`, `nsFull`, "e",
-      _, _, _, _, _, _, _, _, _), -1) => colIndex
+      _, _, _, _, _, _, _, _, _, _), -1) => colIndex
 
       // Previous cols
       case (_, colIndex) => colIndex
     }
   }
 
-  def getEidColIndexes(cols: Seq[Col]): Seq[Int] = {
+  def getEidTableColIndexes(cols: Seq[Col]): Seq[Int] = {
     cols.collect {
-      case Col(colIndex, _, _, _, "e", _, _, _, _, _, _, _, _, _) => colIndex + 1
+      case Col(colIndex, _, _, _, "e", _, _, _, _, _, _, _, _, _, _) => colIndex + 1
+    }
+  }
+
+  def getGroupedColIndexes(cols: Seq[Col]): Seq[Int] = {
+    cols.collect {
+      case col if col.attr != "e" => col.colIndex
     }
   }
 
@@ -218,9 +224,9 @@ trait ColOps extends HelpersAdmin {
   def getSortedColumns(cols: Seq[Col], colIndex: Int, additive: Boolean): Seq[Col] = {
 
     def singleToggle(): Seq[Col] = cols.map {
-      case col@Col(`colIndex`, _, _, _, _, _, _, _, _, _, _, _, "", _)     => col.copy(sortDir = "asc", sortPos = 0)
-      case col@Col(`colIndex`, _, _, _, _, _, _, _, _, _, _, _, "asc", _)  => col.copy(sortDir = "desc", sortPos = 0)
-      case col@Col(`colIndex`, _, _, _, _, _, _, _, _, _, _, _, "desc", _) => col.copy(sortDir = "", sortPos = 0)
+      case col@Col(`colIndex`, _, _, _, _, _, _, _, _, _, _, _, "", _, _)     => col.copy(sortDir = "asc", sortPos = 0)
+      case col@Col(`colIndex`, _, _, _, _, _, _, _, _, _, _, _, "asc", _, _)  => col.copy(sortDir = "desc", sortPos = 0)
+      case col@Col(`colIndex`, _, _, _, _, _, _, _, _, _, _, _, "desc", _, _) => col.copy(sortDir = "", sortPos = 0)
       case col                                                             => col.copy(sortDir = "", sortPos = 0)
     }
 
@@ -237,8 +243,8 @@ trait ColOps extends HelpersAdmin {
           } else {
             // Add new asc and position both
             cols.map {
-              case col@Col(`colIndex`, _, _, _, _, _, _, _, _, _, _, _, _, _) => col.copy(sortDir = "asc", sortPos = 2)
-              case col@Col(`i`, _, _, _, _, _, _, _, _, _, _, _, _, _)        => col.copy(sortPos = 1)
+              case col@Col(`colIndex`, _, _, _, _, _, _, _, _, _, _, _, _, _, _) => col.copy(sortDir = "asc", sortPos = 2)
+              case col@Col(`i`, _, _, _, _, _, _, _, _, _, _, _, _, _, _)        => col.copy(sortPos = 1)
               case col                                                        => col
             }
           }
@@ -248,15 +254,15 @@ trait ColOps extends HelpersAdmin {
           if (curSortCols.exists(c => c.colIndex == colIndex && c.sortDir == "desc")) {
             // Turning off cur col sorting - one sort left (no position)
             cols.map {
-              case col@Col(`colIndex`, _, _, _, _, _, _, _, _, _, _, _, "desc", _)             => col.copy(sortDir = "", sortPos = 0)
-              case col@Col(i, _, _, _, _, _, _, _, _, _, _, _, sort, sortPos) if sort.nonEmpty => col.copy(sortPos = 0)
+              case col@Col(`colIndex`, _, _, _, _, _, _, _, _, _, _, _, "desc", _, _)             => col.copy(sortDir = "", sortPos = 0)
+              case col@Col(i, _, _, _, _, _, _, _, _, _, _, _, sort, _, _) if sort.nonEmpty => col.copy(sortPos = 0)
               case col                                                                         => col
             }
           } else {
             val newLastSortPos = curSortCols.map(_.sortPos).max + 1
             cols.map {
-              case col@Col(`colIndex`, _, _, _, _, _, _, _, _, _, _, _, "", _)    => col.copy(sortDir = "asc", sortPos = newLastSortPos)
-              case col@Col(`colIndex`, _, _, _, _, _, _, _, _, _, _, _, "asc", _) => col.copy(sortDir = "desc")
+              case col@Col(`colIndex`, _, _, _, _, _, _, _, _, _, _, _, "", _, _)    => col.copy(sortDir = "asc", sortPos = newLastSortPos)
+              case col@Col(`colIndex`, _, _, _, _, _, _, _, _, _, _, _, "asc", _, _) => col.copy(sortDir = "desc")
               case col                                                            => col
             }
           }
@@ -267,15 +273,15 @@ trait ColOps extends HelpersAdmin {
             // Turning off cur col sorting - shift all higher positions down
             val outgoingPos = curSortCols.find(_.colIndex == colIndex).get.sortPos
             cols.map {
-              case col@Col(`colIndex`, _, _, _, _, _, _, _, _, _, _, _, "desc", _)                                      => col.copy(sortDir = "", sortPos = 0)
-              case col@Col(_, _, _, _, _, _, _, _, _, _, _, _, sort, sortPos) if sort.nonEmpty && sortPos > outgoingPos => col.copy(sortPos = sortPos - 1)
+              case col@Col(`colIndex`, _, _, _, _, _, _, _, _, _, _, _, "desc", _, _)                                      => col.copy(sortDir = "", sortPos = 0)
+              case col@Col(_, _, _, _, _, _, _, _, _, _, _, _, sort, sortPos, _) if sort.nonEmpty && sortPos > outgoingPos => col.copy(sortPos = sortPos - 1)
               case col                                                                                                  => col
             }
           } else {
             val newLastSortPos = curSortCols.map(_.sortPos).max + 1
             cols.map {
-              case col@Col(`colIndex`, _, _, _, _, _, _, _, _, _, _, _, "", _)    => col.copy(sortDir = "asc", sortPos = newLastSortPos)
-              case col@Col(`colIndex`, _, _, _, _, _, _, _, _, _, _, _, "asc", _) => col.copy(sortDir = "desc")
+              case col@Col(`colIndex`, _, _, _, _, _, _, _, _, _, _, _, "", _, _)    => col.copy(sortDir = "asc", sortPos = newLastSortPos)
+              case col@Col(`colIndex`, _, _, _, _, _, _, _, _, _, _, _, "asc", _, _) => col.copy(sortDir = "desc")
               case col                                                            => col
             }
           }

@@ -239,15 +239,85 @@ class Query extends QueryApi with Base {
             dbSettingsId1
         }
 
-        val SavedQuery(molecule1, colSettings) = savedQuery
+        val SavedQuery(molecule1, colSettings, showGrouped, groupedCols) = savedQuery
 
         if (user_DbSettings(dbSettingsId).Queries.molecule.get.contains(molecule1)) {
           Left(s"`$molecule1` is already saved.")
         } else {
-          val colSettings1  = colSettings.map(cs => (cs.index, cs.attrExpr, cs.sortDir, cs.sortPos))
-          val colSettingIds = user_ColSetting.index.attrExpr.sortDir.sortPos.insert(colSettings1).eidSet
-          val newQueryId    = user_Query.molecule(molecule1).colSettings(colSettingIds).save.eid
+          val colSettingIds = user_ColSetting
+            .index.attrExpr.sortDir.sortPos.filterExpr
+            .insert(
+              colSettings.map(cs =>
+                (cs.colIndex, cs.attrExpr, cs.sortDir, cs.sortPos, cs.filterExpr)
+              )
+            ).eidSet
+
+          val newQueryId = user_Query
+            .molecule(molecule1)
+            .colSettings(colSettingIds)
+            .showGrouped(showGrouped)
+            .groupedCols(groupedCols)
+            .save.eid
+
           user_DbSettings(dbSettingsId).queries.assert(newQueryId).update
+          Right("ok")
+        }
+      } catch {
+        case t: Throwable => Left(t.getMessage)
+      }
+    }
+  }
+
+  override def updateQuery(db: String, savedQuery: SavedQuery): Either[String, String] = {
+    implicit val conn = Conn(base + "/meta")
+    withTransactor {
+      try {
+        // Use admin for now
+        val userId = user_User.e.username_("admin").get match {
+          case List(eid) => eid
+          case Nil       => user_User.username("admin").save.eid
+        }
+        val dbId   = meta_Db.e.name_(db).get.headOption match {
+          case Some(eid) => eid
+          case None      =>
+            throw new RuntimeException(s"Unexpectedly couldn't find database name `$db` in meta database.")
+        }
+
+        // One DbSettings per db for now
+        val dbSettingsId = user_User(userId).DbSettings.e.db_(dbId).get match {
+          case List(eid) => eid
+          case Nil       =>
+            val dbSettingsId1 = user_DbSettings.db(dbId).save.eid
+            user_User(userId).dbSettings.assert(dbSettingsId1).update
+            dbSettingsId1
+        }
+
+        val SavedQuery(molecule1, colSettings, showGrouped, groupedCols) = savedQuery
+
+        val queryIds = user_DbSettings(dbSettingsId).Queries.e.molecule_(molecule1).get
+
+        if (queryIds.isEmpty) {
+          Left(s"`$molecule1` unexpectedly not found.")
+        } else if (queryIds.length > 1) {
+          Left(s"`$molecule1` unexpectedly found ${queryIds.length} times.")
+        } else {
+          val queryId = queryIds.head
+          // Re-insert col settings
+          user_Query(queryId).colSettings().update
+          val colSettingIds = user_ColSetting
+            .index.attrExpr.sortDir.sortPos
+            .insert(
+              colSettings.map(cs =>
+                (cs.colIndex, cs.attrExpr, cs.sortDir, cs.sortPos)
+              )
+            ).eidSet
+
+          user_Query(queryId)
+            .colSettings(colSettingIds)
+            .showGrouped(showGrouped)
+            .groupedCols(groupedCols)
+            .update
+
           Right("ok")
         }
       } catch {

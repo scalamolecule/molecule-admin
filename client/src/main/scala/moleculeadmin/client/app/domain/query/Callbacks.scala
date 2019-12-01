@@ -30,7 +30,8 @@ class Callbacks(db: String)(implicit ctx: Ctx.Owner) extends RxBindings {
 
   protected val useRecentMoleculeCallback: String => () => Unit =
     (molecule1: String) => () => Rx {
-      modelElements() = queryCache.now.find(_.molecule == molecule1).get.modelElements
+      modelElements() = queryCache.now
+        .find(_.molecule == molecule1).get.modelElements
     }
 
   protected val removeRecentMoleculeCallback: String => () => Unit =
@@ -39,16 +40,21 @@ class Callbacks(db: String)(implicit ctx: Ctx.Owner) extends RxBindings {
     }
 
 
-  // Queries ----------------------------------------------------------
+  // Saved Queries ----------------------------------------------------------
 
-  def colSettings(columns: Seq[Col]): Seq[ColSetting] =
-    columns.map(c => ColSetting(c.colIndex, c.attrExpr, c.sortDir, c.sortPos))
+  def colSettings(cols: Seq[Col]): Seq[ColSetting] =
+    cols.map(c => ColSetting(
+      c.colIndex, c.attrExpr, c.sortDir, c.sortPos, c.filterExpr
+    ))
 
   def getQuery(molecule: String): SavedQuery =
     queryCache.now.find(_.molecule == molecule) match {
-      case Some(QueryCache(_, _, _, _, cols, _, _, _)) => SavedQuery(molecule, colSettings(cols))
-      case None                                  =>
-        throw new RuntimeException(s"Unexpectedly didn't find query `$molecule` in cache")
+      case Some(QueryCache(_, _, _, _, cols, _, _, _, showGrouped, groupedCols)) =>
+        SavedQuery(molecule, colSettings(cols), showGrouped, groupedCols)
+      case None                                                                  =>
+        throw new RuntimeException(
+          s"Unexpectedly didn't find query `$molecule` in cache"
+        )
     }
 
   protected val saveQueryCallback   : String => () => Unit =
@@ -56,7 +62,8 @@ class Callbacks(db: String)(implicit ctx: Ctx.Owner) extends RxBindings {
       if (idle) {
         idle = false
         val query = getQuery(molecule1)
-        queryWire().addQuery(db, query).call().foreach {
+        queryWire().addQuery(db, query)
+          .call().foreach {
           case Left(error) =>
             window.alert(s"Error adding query: $error")
             idle = true
@@ -89,11 +96,19 @@ class Callbacks(db: String)(implicit ctx: Ctx.Owner) extends RxBindings {
           window.alert(s"Error using query: $err")
           idle = true
         case Right(elements) =>
+//          showGrouped() = query.showGrouped
+//          groupedCols() = query.groupedCols
           modelElements() = elements
-          val colSettings = query.colSettings.map(cs => cs.index -> cs).toMap
+          val colSettings = query.colSettings.map(cs => cs.colIndex -> cs).toMap
           columns() = columns.now.map { column =>
-            val ColSetting(index, expr, sort, sortPos) = colSettings(column.colIndex)
-            column.copy(colIndex = index, attrExpr = expr, sortDir = sort, sortPos = sortPos)
+            val ColSetting(colIndex, expr, sort, sortPos, _) =
+              colSettings(column.colIndex)
+            column.copy(
+              colIndex = colIndex,
+              attrExpr = expr,
+              sortDir = sort,
+              sortPos = sortPos
+            )
           }
           idle = true
       }

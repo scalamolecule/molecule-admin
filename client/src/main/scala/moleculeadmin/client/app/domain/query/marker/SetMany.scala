@@ -99,7 +99,7 @@ object SetMany extends AppElements {
         }
 
       // Update markers for each entity id column
-      eTableColIndexes.foreach { col =>
+      eidCols.foreach { col =>
 
         // Loop affected entity ids
         eids.foreach { eid =>
@@ -124,7 +124,7 @@ object SetMany extends AppElements {
 
     val rows = tableBody.children
 
-    eTableColIndexes.length match {
+    eidCols.length match {
       case 1 => {
         // With only 1 eid column we can toggle table rows first
         i = 0
@@ -138,7 +138,7 @@ object SetMany extends AppElements {
 
       case 2 => {
         // Other entity id columns
-        val c2 = eTableColIndexes.filterNot(_ == tableCol).head
+        val c2 = eidCols.filterNot(_ == tableCol).head
 
         // Update table rows
         i = 0
@@ -152,7 +152,7 @@ object SetMany extends AppElements {
       }
 
       case 3 => {
-        val Seq(c2, c3) = eTableColIndexes.filterNot(_ == tableCol)
+        val Seq(c2, c3) = eidCols.filterNot(_ == tableCol)
         i = 0
         while (i < rows.length) {
           cells = rows(i).children
@@ -165,7 +165,7 @@ object SetMany extends AppElements {
       }
 
       case 4 => {
-        val Seq(c2, c3, c4) = eTableColIndexes.filterNot(_ == tableCol)
+        val Seq(c2, c3, c4) = eidCols.filterNot(_ == tableCol)
         i = 0
         while (i < rows.length) {
           cells = rows(i).children
@@ -179,7 +179,7 @@ object SetMany extends AppElements {
       }
 
       case 5 => {
-        val Seq(c2, c3, c4, c5) = eTableColIndexes.filterNot(_ == tableCol)
+        val Seq(c2, c3, c4, c5) = eidCols.filterNot(_ == tableCol)
         i = 0
         while (i < rows.length) {
           cells = rows(i).children
@@ -194,7 +194,7 @@ object SetMany extends AppElements {
       }
 
       case 6 => {
-        val Seq(c2, c3, c4, c5, c6) = eTableColIndexes.filterNot(_ == tableCol)
+        val Seq(c2, c3, c4, c5, c6) = eidCols.filterNot(_ == tableCol)
         i = 0
         while (i < rows.length) {
           cells = rows(i).children
@@ -210,7 +210,7 @@ object SetMany extends AppElements {
       }
 
       case 7 => {
-        val Seq(c2, c3, c4, c5, c6, c7) = eTableColIndexes.filterNot(_ == tableCol)
+        val Seq(c2, c3, c4, c5, c6, c7) = eidCols.filterNot(_ == tableCol)
         i = 0
         while (i < rows.length) {
           cells = rows(i).children

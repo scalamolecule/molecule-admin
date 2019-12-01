@@ -94,11 +94,9 @@ object MetaDefinition {
       val uuid       = oneUUID
       val username   = oneString
       val password   = oneString
-      // Global settings for user
       val views      = manyString.noHistory.doc("Open views")
       val settings   = mapString.noHistory.doc("Key/setting pairs")
-      // Db specific settings
-      val dbSettings = many[DbSettings].noHistory.isComponent.doc("Multiple settings for multiple databases")
+      val dbSettings = many[DbSettings].noHistory.isComponent.doc("Db specific settings")
     }
     trait DbSettings {
       val db      = one[meta.Db].noHistory.doc("Database")
@@ -114,17 +112,14 @@ object MetaDefinition {
       val nss         = oneString.noHistory.doc("All namespaces in query")
       val molecule    = oneString.noHistory.doc("Molecule as text string. Model, cache etc will be derived from this.")
       val colSettings = many[ColSetting].noHistory.isComponent.doc("Column settings for query result")
+      val showGrouped = oneBoolean.noHistory.doc("Show grouped attribute boxes")
+      val groupedCols = manyInt.noHistory.doc("Col indexes of grouped attributes shown")
     }
     trait ColSetting {
-      val index    = oneInt.noHistory.doc("Column index")
-      val attrExpr = oneString.noHistory.doc("Attribute expression to be rendered in column header")
-      val sortDir  = oneString.noHistory.doc("asc/desc or empty string if not sorted")
-      val sortPos  = oneInt.noHistory.doc("If multiple sort columns, an index from 1 to max 5")
-      val filters  = many[Filter].noHistory.doc("Multiple filters to this query")
-    }
-    trait Filter {
-      val pos        = oneInt.noHistory.doc("Ordering position - starts at 1")
-      val name       = oneString.noHistory.doc("Optional filter name")
+      val index      = oneInt.noHistory.doc("Column index")
+      val attrExpr   = oneString.noHistory.doc("Attribute expression to be rendered in column header")
+      val sortDir    = oneString.noHistory.doc("asc/desc or empty string if not sorted")
+      val sortPos    = oneInt.noHistory.doc("If multiple sort columns, an index from 1 to max 5")
       val filterExpr = oneString.noHistory.doc("Filter expression. Can be multi-line.")
     }
   }

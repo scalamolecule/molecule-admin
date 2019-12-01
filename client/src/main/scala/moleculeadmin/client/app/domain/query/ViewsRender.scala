@@ -81,22 +81,22 @@ case class ViewsRender(db: String)(implicit val ctx: Ctx.Owner)
     //    println("ViewsRender...")
     // Triggering by columns() ensures that both model and
     // columns have been calculated (in DataTable)
-    if (columns().nonEmpty && showViews()) {
-      _views(
-        if (showMolecule()) moleculeView else (),
-        if (showQueries()) queriesView else (),
-        if (showRecentMolecules()) recentMoleculesView else (),
-        if (showDatalog()) Datalog() else (),
-        if (showTransaction()) Transaction(db).view else (),
-        if (showEntity()) Entity(db).view else (),
-        if (showEntityHistory()) EntityHistory(db).view else (),
+    if (columns().nonEmpty && viewsOn()) {
+      _cardsContainer(
+        if (viewMolecule()) moleculeView else (),
+        if (viewQueries()) queriesView else (),
+        if (viewRecentMolecules()) recentMoleculesView else (),
+        if (viewDatalog()) Datalog() else (),
+        if (viewTransaction()) Transaction(db).view else (),
+        if (viewEntity()) Entity(db).view else (),
+        if (viewEntityHistory()) EntityHistory(db).view else (),
 
-        if (showMoleculeModel()) moleculeModelView else (),
-        if (showMoleculeQuery()) moleculeQueryView else (),
-        if (showColumns()) columnsView else (),
-        if (showTree1()) tree1View else (),
-        if (showTree2()) tree2View else (),
-        if (showTree3()) tree3View else ()
+        if (viewMoleculeModel()) moleculeModelView else (),
+        if (viewMoleculeQuery()) moleculeQueryView else (),
+        if (viewColumns()) columnsView else (),
+        if (viewTree1()) tree1View else (),
+        if (viewTree2()) tree2View else (),
+        if (viewTree3()) tree3View else ()
       )
     } else span()
   }

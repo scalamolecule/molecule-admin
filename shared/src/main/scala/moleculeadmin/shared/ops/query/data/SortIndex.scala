@@ -5,7 +5,13 @@ import moleculeadmin.shared.ast.query.{Col, QueryResult}
 
 trait SortIndex {
 
-  def getSortIndex(qr: QueryResult, sortCols: Seq[Col], rowCount: Int): Array[Int] = {
+  var i = 0
+
+  def getSortIndex(
+    qr: QueryResult,
+    sortCols: Seq[Col],
+    rowCount: Int
+  ): Array[Int] = {
     // println("SORTING...")
     sortCols.size match {
       case 1 => sortArray1(qr, sortCols)
@@ -18,20 +24,28 @@ trait SortIndex {
   }
 
 
-  private def ord[T](ordering: Ordering[T], sort: String): Ordering[T] = if (sort == "asc") ordering else ordering.reverse
+  private def ord[T](ordering: Ordering[T], sort: String): Ordering[T] =
+    if (sort == "asc") ordering else ordering.reverse
 
 
-  private def indexArray1[T](array1: Array[T], sort1: String)(implicit ord1: Ordering[T]): Array[Int] =
+  private def indexArray1[T](
+    array1: Array[T],
+    sort1: String
+  )(implicit ord1: Ordering[T]): Array[Int] =
     array1.zipWithIndex.sortBy { case (v, i) => v }(ord(ord1, sort1)).map(_._2)
 
 
-  private def indexArray2[T1, T2](rowCount: Int,
-                                  array1: Array[T1], array2: Array[T2],
-                                  sort1: String, sort2: String
-                                 )(implicit ord1: Ordering[T1], ord2: Ordering[T2]): Array[Int] = {
+  private def indexArray2[T1, T2](
+    rowCount: Int,
+    array1: Array[T1],
+    array2: Array[T2],
+    sort1: String,
+    sort2: String
+  )(implicit
+    ord1: Ordering[T1],
+    ord2: Ordering[T2]): Array[Int] = {
     val indexArray = new Array[(Int, T1, T2)](rowCount)
-    var i          = 0
-    // println("sort numRows: " + rowCount)
+    i = 0
     while (i < rowCount) {
       indexArray(i) = (i, array1(i), array2(i))
       i += 1
@@ -40,46 +54,97 @@ trait SortIndex {
     indexArray.sortBy { case (_, v1, v2) => (v1, v2) }(ordering).map(_._1)
   }
 
-  private def indexArray3[T1, T2, T3](rowCount: Int,
-                                      array1: Array[T1], array2: Array[T2], array3: Array[T3],
-                                      sort1: String, sort2: String, sort3: String
-                                     )(implicit ord1: Ordering[T1], ord2: Ordering[T2], ord3: Ordering[T3]): Array[Int] = {
+  private def indexArray3[T1, T2, T3](
+    rowCount: Int,
+    array1: Array[T1],
+    array2: Array[T2],
+    array3: Array[T3],
+    sort1: String,
+    sort2: String,
+    sort3: String
+  )(implicit
+    ord1: Ordering[T1],
+    ord2: Ordering[T2],
+    ord3: Ordering[T3]): Array[Int] = {
     val indexArray = new Array[(Int, T1, T2, T3)](rowCount)
-    var i          = 0
+    i = 0
     while (i < rowCount) {
       indexArray(i) = (i, array1(i), array2(i), array3(i))
       i += 1
     }
-    val ordering = Ordering.Tuple3(ord(ord1, sort1), ord(ord2, sort2), ord(ord3, sort3))
-    indexArray.sortBy { case (_, v1, v2, v3) => (v1, v2, v3) }(ordering).map(_._1)
+    val ordering = Ordering.Tuple3(
+      ord(ord1, sort1),
+      ord(ord2, sort2),
+      ord(ord3, sort3))
+    indexArray.sortBy {
+      case (_, v1, v2, v3) => (v1, v2, v3)
+    }(ordering).map(_._1)
   }
 
-  private def indexArray4[T1, T2, T3, T4](rowCount: Int,
-                                          array1: Array[T1], array2: Array[T2], array3: Array[T3], array4: Array[T4],
-                                          sort1: String, sort2: String, sort3: String, sort4: String
-                                         )(implicit ord1: Ordering[T1], ord2: Ordering[T2], ord3: Ordering[T3], ord4: Ordering[T4]): Array[Int] = {
+  private def indexArray4[T1, T2, T3, T4](
+    rowCount: Int,
+    array1: Array[T1],
+    array2: Array[T2],
+    array3: Array[T3],
+    array4: Array[T4],
+    sort1: String,
+    sort2: String,
+    sort3: String,
+    sort4: String
+  )(implicit
+    ord1: Ordering[T1],
+    ord2: Ordering[T2],
+    ord3: Ordering[T3],
+    ord4: Ordering[T4]): Array[Int] = {
     val indexArray = new Array[(Int, T1, T2, T3, T4)](rowCount)
-    var i          = 0
+    i = 0
     while (i < rowCount) {
       indexArray(i) = (i, array1(i), array2(i), array3(i), array4(i))
       i += 1
     }
-    val ordering = Ordering.Tuple4(ord(ord1, sort1), ord(ord2, sort2), ord(ord3, sort3), ord(ord4, sort4))
-    indexArray.sortBy { case (_, v1, v2, v3, v4) => (v1, v2, v3, v4) }(ordering).map(_._1)
+    val ordering = Ordering.Tuple4(
+      ord(ord1, sort1),
+      ord(ord2, sort2),
+      ord(ord3, sort3),
+      ord(ord4, sort4))
+    indexArray.sortBy {
+      case (_, v1, v2, v3, v4) => (v1, v2, v3, v4)
+    }(ordering).map(_._1)
   }
 
-  private def indexArray5[T1, T2, T3, T4, T5](rowCount: Int,
-                                              array1: Array[T1], array2: Array[T2], array3: Array[T3], array4: Array[T4], array5: Array[T5],
-                                              sort1: String, sort2: String, sort3: String, sort4: String, sort5: String
-                                             )(implicit ord1: Ordering[T1], ord2: Ordering[T2], ord3: Ordering[T3], ord4: Ordering[T4], ord5: Ordering[T5]): Array[Int] = {
+  private def indexArray5[T1, T2, T3, T4, T5](
+    rowCount: Int,
+    array1: Array[T1],
+    array2: Array[T2],
+    array3: Array[T3],
+    array4: Array[T4],
+    array5: Array[T5],
+    sort1: String,
+    sort2: String,
+    sort3: String,
+    sort4: String,
+    sort5: String
+  )(implicit
+    ord1: Ordering[T1],
+    ord2: Ordering[T2],
+    ord3: Ordering[T3],
+    ord4: Ordering[T4],
+    ord5: Ordering[T5]): Array[Int] = {
     val indexArray = new Array[(Int, T1, T2, T3, T4, T5)](rowCount)
-    var i          = 0
+    i = 0
     while (i < rowCount) {
       indexArray(i) = (i, array1(i), array2(i), array3(i), array4(i), array5(i))
       i += 1
     }
-    val ordering = Ordering.Tuple5(ord(ord1, sort1), ord(ord2, sort2), ord(ord3, sort3), ord(ord4, sort4), ord(ord5, sort5))
-    indexArray.sortBy { case (_, v1, v2, v3, v4, v5) => (v1, v2, v3, v4, v5) }(ordering).map(_._1)
+    val ordering = Ordering.Tuple5(
+      ord(ord1, sort1),
+      ord(ord2, sort2),
+      ord(ord3, sort3),
+      ord(ord4, sort4),
+      ord(ord5, sort5))
+    indexArray.sortBy {
+      case (_, v1, v2, v3, v4, v5) => (v1, v2, v3, v4, v5)
+    }(ordering).map(_._1)
   }
 
 
@@ -104,7 +169,7 @@ trait SortIndex {
   }
 
   private def sortArray1(qr: QueryResult, sortCols: Seq[Col]): Array[Int] = {
-    val Col(colIndex1, _, _, _, _, t1, dt1, _, _, _, at1, _, s1, _) = sortCols.head
+    val Col(colIndex1, _, _, _, _, t1, dt1, _, _, _, at1, _, s1, _, _) = sortCols.head
 
     val i1 = qr.arrayIndexes(colIndex1)
     tpe(t1, dt1, at1) match {
@@ -114,13 +179,14 @@ trait SortIndex {
     }
   }
 
-  private def sort2(qr: QueryResult, sortCols: Seq[Col], numRows: Int,
-                    t1: String, t2: String,
-                    dt1: String, dt2: String,
-                    at1: String, at2: String,
-                    i1: Int, i2: Int,
-                    s1: String, s2: String
-                   ): Array[Int] = {
+  private def sort2(
+    qr: QueryResult, sortCols: Seq[Col], numRows: Int,
+    t1: String, t2: String,
+    dt1: String, dt2: String,
+    at1: String, at2: String,
+    i1: Int, i2: Int,
+    s1: String, s2: String
+  ): Array[Int] = {
     (tpe(t1, dt1, at1), tpe(t2, dt2, at2)) match {
       case ("string", "string") => indexArray2[String, String](numRows, str(qr, i1), str(qr, i2), s1, s2)
       case ("string", "double") => indexArray2[String, Double](numRows, str(qr, i1), dou(qr, i2), s1, s2)
@@ -130,8 +196,8 @@ trait SortIndex {
     }
   }
   private def sortArray2(qr: QueryResult, sortCols: Seq[Col], numRows: Int): Array[Int] = {
-    val Col(colIndex1, _, _, _, _, t1, dt1, _, _, _, at1, _, s1, p1) = sortCols.head
-    val Col(colIndex2, _, _, _, _, t2, dt2, _, _, _, at2, _, s2, p2) = sortCols(1)
+    val Col(colIndex1, _, _, _, _, t1, dt1, _, _, _, at1, _, s1, p1, _) = sortCols.head
+    val Col(colIndex2, _, _, _, _, t2, dt2, _, _, _, at2, _, s2, p2, _) = sortCols(1)
 
     val i1 = qr.arrayIndexes(colIndex1)
     val i2 = qr.arrayIndexes(colIndex2)
@@ -145,13 +211,14 @@ trait SortIndex {
   }
 
 
-  private def sort3(qr: QueryResult, sortCols: Seq[Col], numRows: Int,
-                    t1: String, t2: String, t3: String,
-                    dt1: String, dt2: String, dt3: String,
-                    at1: String, at2: String, at3: String,
-                    i1: Int, i2: Int, i3: Int,
-                    s1: String, s2: String, s3: String,
-                   ): Array[Int] = {
+  private def sort3(
+    qr: QueryResult, sortCols: Seq[Col], numRows: Int,
+    t1: String, t2: String, t3: String,
+    dt1: String, dt2: String, dt3: String,
+    at1: String, at2: String, at3: String,
+    i1: Int, i2: Int, i3: Int,
+    s1: String, s2: String, s3: String,
+  ): Array[Int] = {
     (tpe(t1, dt1, at1), tpe(t2, dt2, at2), tpe(t3, dt3, at3)) match {
       case ("string", "string", "string") => indexArray3[String, String, String](numRows, str(qr, i1), str(qr, i2), str(qr, i3), s1, s2, s3)
       case ("string", "string", "double") => indexArray3[String, String, Double](numRows, str(qr, i1), str(qr, i2), dou(qr, i3), s1, s2, s3)
@@ -165,9 +232,9 @@ trait SortIndex {
     }
   }
   private def sortArray3(qr: QueryResult, sortCols: Seq[Col], numRows: Int): Array[Int] = {
-    val Col(colIndex1, _, _, _, _, t1, dt1, _, _, _, at1, _, s1, p1) = sortCols.head
-    val Col(colIndex2, _, _, _, _, t2, dt2, _, _, _, at2, _, s2, p2) = sortCols(1)
-    val Col(colIndex3, _, _, _, _, t3, dt3, _, _, _, at3, _, s3, p3) = sortCols(2)
+    val Col(colIndex1, _, _, _, _, t1, dt1, _, _, _, at1, _, s1, p1, _) = sortCols.head
+    val Col(colIndex2, _, _, _, _, t2, dt2, _, _, _, at2, _, s2, p2, _) = sortCols(1)
+    val Col(colIndex3, _, _, _, _, t3, dt3, _, _, _, at3, _, s3, p3, _) = sortCols(2)
 
     val i1 = qr.arrayIndexes(colIndex1)
     val i2 = qr.arrayIndexes(colIndex2)
@@ -185,13 +252,14 @@ trait SortIndex {
   }
 
 
-  private def sort4(qr: QueryResult, sortCols: Seq[Col], numRows: Int,
-                    t1: String, t2: String, t3: String, t4: String,
-                    dt1: String, dt2: String, dt3: String, dt4: String,
-                    at1: String, at2: String, at3: String, at4: String,
-                    i1: Int, i2: Int, i3: Int, i4: Int,
-                    s1: String, s2: String, s3: String, s4: String,
-                   ): Array[Int] = {
+  private def sort4(
+    qr: QueryResult, sortCols: Seq[Col], numRows: Int,
+    t1: String, t2: String, t3: String, t4: String,
+    dt1: String, dt2: String, dt3: String, dt4: String,
+    at1: String, at2: String, at3: String, at4: String,
+    i1: Int, i2: Int, i3: Int, i4: Int,
+    s1: String, s2: String, s3: String, s4: String,
+  ): Array[Int] = {
     (tpe(t1, dt1, at1), tpe(t2, dt2, at2), tpe(t3, dt3, at3), tpe(t4, dt4, at4)) match {
       case ("string", "string", "string", "string") => indexArray4[String, String, String, String](numRows, str(qr, i1), str(qr, i2), str(qr, i3), str(qr, i4), s1, s2, s3, s4)
       case ("string", "string", "string", "double") => indexArray4[String, String, String, Double](numRows, str(qr, i1), str(qr, i2), str(qr, i3), dou(qr, i4), s1, s2, s3, s4)
@@ -213,10 +281,10 @@ trait SortIndex {
     }
   }
   private def sortArray4(qr: QueryResult, sortCols: Seq[Col], numRows: Int): Array[Int] = {
-    val Col(colIndex1, _, _, _, _, t1, dt1, _, _, _, at1, _, s1, p1) = sortCols.head
-    val Col(colIndex2, _, _, _, _, t2, dt2, _, _, _, at2, _, s2, p2) = sortCols(1)
-    val Col(colIndex3, _, _, _, _, t3, dt3, _, _, _, at3, _, s3, p3) = sortCols(2)
-    val Col(colIndex4, _, _, _, _, t4, dt4, _, _, _, at4, _, s4, p4) = sortCols(3)
+    val Col(colIndex1, _, _, _, _, t1, dt1, _, _, _, at1, _, s1, p1, _) = sortCols.head
+    val Col(colIndex2, _, _, _, _, t2, dt2, _, _, _, at2, _, s2, p2, _) = sortCols(1)
+    val Col(colIndex3, _, _, _, _, t3, dt3, _, _, _, at3, _, s3, p3, _) = sortCols(2)
+    val Col(colIndex4, _, _, _, _, t4, dt4, _, _, _, at4, _, s4, p4, _) = sortCols(3)
 
     val i1 = qr.arrayIndexes(colIndex1)
     val i2 = qr.arrayIndexes(colIndex2)
@@ -253,13 +321,14 @@ trait SortIndex {
   }
 
 
-  private def sort5(qr: QueryResult, sortCols: Seq[Col], numRows: Int,
-                    t1: String, t2: String, t3: String, t4: String, t5: String,
-                    dt1: String, dt2: String, dt3: String, dt4: String, dt5: String,
-                    at1: String, at2: String, at3: String, at4: String, at5: String,
-                    i1: Int, i2: Int, i3: Int, i4: Int, i5: Int,
-                    s1: String, s2: String, s3: String, s4: String, s5: String
-                   ): Array[Int] = {
+  private def sort5(
+    qr: QueryResult, sortCols: Seq[Col], numRows: Int,
+    t1: String, t2: String, t3: String, t4: String, t5: String,
+    dt1: String, dt2: String, dt3: String, dt4: String, dt5: String,
+    at1: String, at2: String, at3: String, at4: String, at5: String,
+    i1: Int, i2: Int, i3: Int, i4: Int, i5: Int,
+    s1: String, s2: String, s3: String, s4: String, s5: String
+  ): Array[Int] = {
     (tpe(t1, dt1, at1), tpe(t2, dt2, at2), tpe(t3, dt3, at3), tpe(t4, dt4, at4), tpe(t5, dt5, at5)) match {
       case ("string", "string", "string", "string", "string") => indexArray5[String, String, String, String, String](numRows, str(qr, i1), str(qr, i2), str(qr, i3), str(qr, i4), str(qr, i5), s1, s2, s3, s4, s5)
       case ("string", "string", "string", "string", "double") => indexArray5[String, String, String, String, Double](numRows, str(qr, i1), str(qr, i2), str(qr, i3), str(qr, i4), dou(qr, i5), s1, s2, s3, s4, s5)
@@ -296,12 +365,12 @@ trait SortIndex {
       case (a, b, c, d, e)                                    => println(s"ILLEGAL column types: ($a, $b, $c, $d, $e)"); null
     }
   }
-  private def sortArray5(qr: QueryResult, sortCols: Seq[Col], numRows: Int) = {
-    val Col(colIndex1, _, _, _, _, t1, dt1, _, _, _, at1, _, s1, p1) = sortCols.head
-    val Col(colIndex2, _, _, _, _, t2, dt2, _, _, _, at2, _, s2, p2) = sortCols(1)
-    val Col(colIndex3, _, _, _, _, t3, dt3, _, _, _, at3, _, s3, p3) = sortCols(2)
-    val Col(colIndex4, _, _, _, _, t4, dt4, _, _, _, at4, _, s4, p4) = sortCols(3)
-    val Col(colIndex5, _, _, _, _, t5, dt5, _, _, _, at5, _, s5, p5) = sortCols(4)
+  private def sortArray5(qr: QueryResult, sortCols: Seq[Col], numRows: Int): Array[Int] = {
+    val Col(colIndex1, _, _, _, _, t1, dt1, _, _, _, at1, _, s1, p1, _) = sortCols.head
+    val Col(colIndex2, _, _, _, _, t2, dt2, _, _, _, at2, _, s2, p2, _) = sortCols(1)
+    val Col(colIndex3, _, _, _, _, t3, dt3, _, _, _, at3, _, s3, p3, _) = sortCols(2)
+    val Col(colIndex4, _, _, _, _, t4, dt4, _, _, _, at4, _, s4, p4, _) = sortCols(3)
+    val Col(colIndex5, _, _, _, _, t5, dt5, _, _, _, at5, _, s5, p5, _) = sortCols(4)
 
     val i1 = qr.arrayIndexes(colIndex1)
     val i2 = qr.arrayIndexes(colIndex2)

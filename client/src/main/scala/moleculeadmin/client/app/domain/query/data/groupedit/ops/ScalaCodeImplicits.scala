@@ -6,7 +6,7 @@ import scala.collection.mutable.ListBuffer
 
 
 abstract class ScalaCodeImplicits(col: Col, rhs0: String) extends TypeMappings {
-  val Col(_, _, nsAlias, nsFull, attr, attrType, _, card, _, _, _, _, _, _) = col
+  val Col(_, _, nsAlias, nsFull, attr, attrType, _, card, _, _, _, _, _, _, _) = col
 
   val q = "\"\"\""
 

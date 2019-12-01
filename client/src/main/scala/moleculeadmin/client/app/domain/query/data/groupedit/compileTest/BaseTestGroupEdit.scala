@@ -5,7 +5,7 @@ import moleculeadmin.shared.ast.query.Col
 
 class BaseTestGroupEdit(col: Col) extends TestScalaFiddle {
 
-  val Col(_, _, _, _, attr, attrType, _, _, _, _, _, _, _, _) = col
+  val Col(_, _, _, _, attr, attrType, _, _, _, _, _, _, _, _, _) = col
 
   val optional = attr.last == '$'
 

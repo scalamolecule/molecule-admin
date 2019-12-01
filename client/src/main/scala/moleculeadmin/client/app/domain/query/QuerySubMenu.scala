@@ -42,6 +42,7 @@ case class QuerySubMenu(db: String)(implicit val ctx: Ctx.Owner)
           Seq(
             RecentMolecules(db).dynRender,
             Views().dynRender,
+            Grouped().dynRender,
           )
         } else (),
         ShortCuts().dynRender

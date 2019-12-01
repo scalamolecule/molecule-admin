@@ -16,6 +16,7 @@ trait HeadElements extends ColOps with AppElements with RxBindings {
   def _openCloseQueryBuilder(closed: Boolean, onclck: () => Unit): TypedTag[Element] = th(
     cls := "hover",
     i(cls := "fas fa-angle-double-" + (if (closed) "right" else "left")),
+    textAlign.center,
     onclick := onclck
   )
 

@@ -17,7 +17,7 @@ case class EntityHistory(db: String)(implicit ctx: Ctx.Owner) extends Base(db) {
   def view: Rx.Dynamic[TypedTag[Element]] = Rx {
     (curEntity(), entityHistorySort()) match {
       case (0, _)                               => // no entity id marked yet
-      case (eid, sort) if showEntityHistory.now =>
+      case (eid, sort) if viewEntityHistory.now =>
         val view = document.getElementById("entityHistoryEid")
         if (view == null) {
           // Start fresh

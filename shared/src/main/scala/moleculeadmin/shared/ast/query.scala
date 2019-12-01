@@ -36,7 +36,8 @@ object query extends HelpersAdmin {
     aggrType: String = "",
     attrExpr: String = "",
     sortDir: String = "",
-    sortPos: Int = 0
+    sortPos: Int = 0,
+    filterExpr: String = ""
   ) {
     override def toString = {
       s"""Col($colIndex, $related, "$nsAlias", "$nsFull", "$attr", "$attrType", "$colType", $card, $opt, ${seq(enums)}, "$aggrType", "$attrExpr", "$sortDir", $sortPos)"""
@@ -67,18 +68,23 @@ object query extends HelpersAdmin {
     columns: Seq[Col],
     sortIndex: Array[Int],
     filters: Map[Int, Filter[_]] = Map.empty[Int, Filter[_]],
-    filterIndex: Array[Int]
+    filterIndex: Array[Int],
+    showGrouped: Boolean,
+    groupedCols: Seq[Int]
   )
 
   case class SavedQuery(
     molecule: String,
-    colSettings: Seq[ColSetting]
+    colSettings: Seq[ColSetting],
+    showGrouped: Boolean,
+    groupedCols: Seq[Int]
   )
 
   case class ColSetting(
-    index: Int,
+    colIndex: Int,
     attrExpr: String,
     sortDir: String,
-    sortPos: Int
+    sortPos: Int,
+    filterExpr: String
   )
 }

@@ -204,6 +204,37 @@ table.tableRowLink td {
 
 
 
+table.tableGrouped {
+    width: 100%;
+    font-size: 11px;
+}
+table.tableGrouped tr.current {
+    color: #ababab;
+}
+table.tableGrouped tr.current:hover {
+    color: #ababab;
+    cursor: default;
+    background-color: default;
+}
+/*table.tableGrouped tr.other:hover {
+    color: #00a4db;
+    cursor: pointer;
+    background-color: #eee;
+}*/
+table.tableGrouped th {
+    text-align: right;
+    vertical-align: top;
+    padding-left: 5px;
+    padding-right: 9px;
+    width: 5%;
+    font-weight: normal;
+}
+table.tableGrouped td {
+    padding: 0px 5px 0px 5px;
+}
+
+
+
 table.tableEntity th {
     font-weight: normal;
     color: #8e8e8e;

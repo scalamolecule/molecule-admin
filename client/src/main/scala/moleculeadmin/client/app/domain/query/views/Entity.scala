@@ -11,7 +11,7 @@ case class Entity(db: String)(implicit ctx: Ctx.Owner) extends Base(db) {
   def view: Rx.Dynamic[TypedTag[Element]] = Rx {
     curEntity() match {
       case 0                     => // no entity id marked yet
-      case eid if showEntity.now =>
+      case eid if viewEntity.now =>
         val view = document.getElementById("entityViewTable")
         if (view == null) {
           // Start fresh

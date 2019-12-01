@@ -30,7 +30,7 @@ case class DataTableHead(
   def attrSortCell(col: Col): JsDom.TypedTag[TableHeaderCell] = {
     //      println("attrSortCell...")
     val Col(colIndex, _, nsAlias, nsFull, attr, _, colType, card, _, _,
-    aggrType, expr, sortDir, sortPos) = col
+    aggrType, expr, sortDir, sortPos, _) = col
 
     val sortable = card == 1 || singleAggrTypes.contains(aggrType)
     val sort     = { e: MouseEvent =>
@@ -128,7 +128,7 @@ case class DataTableHead(
 
   def attrFilterCell(col: Col): JsDom.TypedTag[TableHeaderCell] = {
     val Col(colIndex, _, _, _, attr, _,
-    colType, card, opt, _, _, attrExpr, _, _) = col
+    colType, card, opt, _, _, attrExpr, _, _, _) = col
 
     val filterId  = "filter-" + colIndex
     val cleanAttr = clean(attr)
@@ -150,7 +150,7 @@ case class DataTableHead(
       }
 
       val applyLambda = { () =>
-        // Only update after pressing Enter (so that paging doesn't initiates)
+        // Only update after pressing Enter (so that paging is not activated)
         if (editCellId.nonEmpty) {
           colType match {
             case "string"     => GroupEdit(col, filterId).string()

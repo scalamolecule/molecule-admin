@@ -55,7 +55,6 @@ class Dbs extends DbsApi {
   }
 
   def dbs_()(implicit conn: Conn): Dbs = {
-    //    implicit val conn = metaConn
     meta_Db.name.isMolecular$.defFilePath$.get.sortBy(_._1)
   }
 
@@ -64,7 +63,7 @@ class Dbs extends DbsApi {
 
   def dbList(): Either[List[String], List[(String, Option[Boolean], Option[String])]] = try {
 
-//     recreateDbFrom(MetaSchema, "localhost:4334/meta", "free")
+//    recreateDbFrom(MetaSchema, "localhost:4334/meta", "free")
 
 
     // 2. Prepare sync - get connection

@@ -18,11 +18,11 @@ import utest._
 
 /*
   /Users/mg/clazzig/clazzig/clazzig/server/app/db/schema/ClazzigDefinition.scala
-  /Users/mg/molecule/molecule-admin/molecule-admin/jvm/src/main/scala/db/core/schema/CoreTestDefinition.scala
-  /Users/mg/molecule/molecule-admin/molecule-admin/jvm/src/main/scala/db/migration/schema/PartitionDefinition.scala
-  /Users/mg/molecule/molecule-admin/molecule-admin/jvm/src/main/scala/db/migration/schema/Partition1Definition.scala
-  /Users/mg/molecule/molecule-admin/molecule-admin/jvm/src/main/scala/db/core/schema/TreeDefinition.scala
-  /Users/mg/molecule/molecule-admin/molecule-admin/jvm/src/main/scala/db/integration/schema/MBrainzDefinition.scala
+  /Users/mg/molecule/molecule-admin/molecule-admin/server/src/main/scala/db/core/schema/CoreTestDefinition.scala
+  /Users/mg/molecule/molecule-admin/molecule-admin/server/src/main/scala/db/migration/schema/PartitionDefinition.scala
+  /Users/mg/molecule/molecule-admin/molecule-admin/server/src/main/scala/db/migration/schema/Partition1Definition.scala
+  /Users/mg/molecule/molecule-admin/molecule-admin/server/src/main/scala/db/core/schema/TreeDefinition.scala
+  /Users/mg/molecule/molecule-admin/molecule-admin/server/src/main/scala/db/integration/schema/MBrainzDefinition.scala
 */
 
 object ResetDbs extends TestSuite with ExampleData with Settings {
@@ -86,13 +86,13 @@ object ResetDbs extends TestSuite with ExampleData with Settings {
 
       case "Tree" =>
         if (debug) println("- Tree")
-        val defFilePath = pwd / 'jvm / 'src / 'main / 'scala / 'db / 'core / 'schema / "TreeDefinition.scala"
+        val defFilePath = pwd / 'server / 'src / 'main / 'scala / 'db / 'core / 'schema / "TreeDefinition.scala"
         DefFile("Tree", Some(defFilePath.toString)).saveToMetaDb
         recreateDbFrom(TreeSchema, "localhost:4334/Tree", protocol)
 
       case "mbrainz-1968-1973" =>
         if (debug) println("- mbrainz-1968-1973")
-        val defFilePath = pwd / 'jvm / 'src / 'main / 'scala / 'db / 'integration / 'schema / "MBrainzDefinition.scala"
+        val defFilePath = pwd / 'server / 'src / 'main / 'scala / 'db / 'integration / 'schema / "MBrainzDefinition.scala"
         DefFile("mbrainz-1968-1973", Some(defFilePath.toString)).saveToMetaDb
         implicit val mbrainzConn = Conn("datomic:free://localhost:4334/mbrainz-1968-1973")
         if (Schema.a(":Artist/name").get.isEmpty) {

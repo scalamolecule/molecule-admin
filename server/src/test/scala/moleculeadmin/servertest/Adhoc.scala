@@ -21,35 +21,23 @@ object Adhoc extends Specification
 
   "Adhoc" >> {
 
-//    //      implicit val conn = Conn(base + "/CoreTest")
-//    implicit val conn = Conn(base + "/mbrainz-1968-1973")
-//
-//    //      val eid = 716881581322888L
-//    val eid = 17592186072911L
-//
-//    Schema.a.get.sorted foreach println
-//
-//    println(Schema.a(":Release/country").get)
-//    println(Schema.a(":country/US").get)
-//
-//
-//    println(eid.touchQuoted)
+    //      implicit val conn = Conn(base + "/CoreTest")
+    implicit val conn = Conn(base + "/mbrainz-1968-1973")
+
+    //      val eid = 716881581322888L
+    val eid = 17592186072911L
+
+    Schema.a.get.sorted foreach println
+
+    println(Schema.a(":Release/country").get)
+    println(Schema.a(":country/US").get)
+    println(Schema.a(":Country/US").get)
 
 
-    Molecule2Model(
-      "Release.name.Country.e.name._Release.Labels.name.Country.e.name"
-    ) === Right(List(
-      Atom("Release", "name", "String", 1, VarValue, None, Seq(), Seq()),
-      Bond("Release", "country", "Country", 1, Seq()),
-      Generic("Country", "e", "datom", EntValue),
-      Atom("Country", "name", "String", 1, VarValue, None, Seq(), Seq()),
-      ReBond("Release"),
-      Bond("Release", "labels", "Label", 2, Seq()),
-      Atom("Label", "name", "String", 1, VarValue, None, Seq(), Seq()),
-      Bond("Label", "country", "Country", 1, Seq()),
-      Generic("Country", "e", "datom", EntValue),
-      Atom("Country", "name", "String", 1, VarValue, None, Seq(), Seq())
-    ))
+    println(eid.touchQuoted)
+
+
+
 
     ok
   }
