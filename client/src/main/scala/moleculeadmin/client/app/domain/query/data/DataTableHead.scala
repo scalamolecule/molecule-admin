@@ -98,8 +98,9 @@ case class DataTableHead(
   }
 
   def resetEditColToOrigColCache(colIndex: Int, colType: String) = {
-    val curQueryCache =
-      queryCache.now.find(_.modelElements == modelElements.now).get
+    val curQueryCache = queryCache2
+//    val curQueryCache =
+//      queryCache.now.find(_.modelElements == modelElements.now).get
 
     val qr: QueryResult = curQueryCache.queryResult
     val arrayIndexes    = qr.arrayIndexes
@@ -121,8 +122,10 @@ case class DataTableHead(
       case "mapString"  => qr.copy(mapStr = revert(qr.mapStr))
       case "mapDouble"  => qr.copy(mapNum = revert(qr.mapNum))
     }
-    queryCache() = curQueryCache.copy(queryResult = origQueryResult) +:
-      queryCache.now.filterNot(_.modelElements == modelElements.now)
+    queryCache2 = curQueryCache.copy(queryResult = origQueryResult)
+
+//    queryCache() = curQueryCache.copy(queryResult = origQueryResult) +:
+//      queryCache.now.filterNot(_.modelElements == modelElements.now)
   }
 
 

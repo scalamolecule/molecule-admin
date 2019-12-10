@@ -1,14 +1,15 @@
 package moleculeadmin.client.app.element.query
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.element.AppElements
-import moleculeadmin.shared.ast.query.SavedQuery
+import moleculeadmin.client.jsdom.DropdownMenu
+import moleculeadmin.shared.ast.query.QueryData
 import org.scalajs.dom.html._
 import org.scalajs.dom.raw.HTMLElement
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
 
 
-trait SubMenuElements extends AppElements {
+trait SubMenuElements extends AppElements with DropdownMenu {
 
 
   val _maxRowsSelector = select(
@@ -37,106 +38,282 @@ trait SubMenuElements extends AppElements {
 
   // Queries --------------------------------------------------------------------
 
-  def _queriesTable(
-    savedQueries: Seq[SavedQuery],
+
+  def _subMenuQueryList(
     curMolecule: String,
-    useSavedQuery: SavedQuery => () => Unit,
-    retractSavedQuery: String => () => Unit
-  ): TypedTag[Table] = table(cls := "tableRowLink",
-    savedQueries.zipWithIndex.map {
-      case (SavedQuery(`curMolecule`, _, _, _), i) => tr(cls := "current",
-        th(i + 1),
-        td(curMolecule, paddingRight := 20),
-        td(
-          textAlign.right,
-          a(cls := "discrete", href := "#",
-            span(cls := "oi oi-x", fontSize := 9.px, color := "#888", paddingBottom := 6),
-            onclick := retractSavedQuery(curMolecule)
-          )
-        )
+    newFav: Seq[QueryData],
+    queriesByPartNs: Seq[(String, Seq[(String, Seq[(String, QueryData)])])],
+    recentQueries: Seq[QueryData],
+    savedQueries: Seq[QueryData],
+    favoriteQueries: Seq[QueryData],
+    savedMolecules: Seq[String],
+    favoriteMolecules: Seq[String],
+    use: QueryData => () => Unit,
+    save: QueryData => () => Unit,
+    favorite: QueryData => () => Unit,
+    unfavorite: QueryData => () => Unit,
+    retract: QueryData => () => Unit,
+  ): TypedTag[LI] = {
+    li(
+      cls := "dropdown",
+      a(href := "#", span("L", textDecoration.underline), "ist"),
+      div(
+        cls := "dropdown-menu",
+        id := "submenu-query-list",
+        minWidth := 180,
+        paddingTop := 8,
+        paddingBottom := 5,
+
+        if (recentQueries.nonEmpty)
+          li(cls := "dropdown-submenu",
+            "Recent queries",
+            ul(
+              cls := "dropdown-menu",
+              li(
+                _recentQueries(
+                  curMolecule,
+                  recentQueries,
+                  savedQueries,
+                  favoriteQueries,
+                  savedMolecules,
+                  favoriteMolecules,
+                  use,
+                  save,
+                  favorite
+                )
+              ),
+            )
+          ) else (),
+
+        if (savedQueries.nonEmpty)
+          li(cls := "dropdown-submenu",
+            "Saved queries",
+            _savedQueries(
+              curMolecule,
+              queriesByPartNs,
+              favoriteQueries,
+              favoriteMolecules,
+              use,
+              favorite,
+              unfavorite,
+              retract
+            )
+          ) else (),
+
+        if (favoriteQueries.nonEmpty || newFav.nonEmpty)
+          li(
+            paddingTop := 5,
+            _favoriteQueries(
+              curMolecule,
+              newFav,
+              favoriteQueries,
+              use,
+              save,
+              unfavorite
+            ),
+          ) else ()
       )
-      case (query, i)                              => tr(cls := "other",
-        th(i + 1, onclick := useSavedQuery(query)),
-        td(query.molecule, paddingRight := 20, onclick := useSavedQuery(query)),
-        td(
-          textAlign.right,
-          a(cls := "discrete", href := "#",
-            span(cls := "oi oi-x", fontSize := 9.px, color := "#888", paddingBottom := 6),
-            onclick := retractSavedQuery(query.molecule)
+    )
+  }
+
+
+  def _recentQueries(
+    curMolecule: String,
+    recentQueries: Seq[QueryData],
+    savedQueries: Seq[QueryData],
+    favoriteQueries: Seq[QueryData],
+    savedMolecules: Seq[String],
+    favoriteMolecules: Seq[String],
+    use: QueryData => () => Unit,
+    save: QueryData => () => Unit,
+    favorite: QueryData => () => Unit
+  ): TypedTag[Table] = {
+    table(
+      cls := "tableRowLink",
+      recentQueries.map { q =>
+        val cur = q.molecule == curMolecule
+        tr(
+          cls := (if (cur) "current" else "other"),
+
+          td(
+            q.molecule,
+            paddingRight := 20,
+            if (cur) () else onclick := use(q)
+          ),
+
+          if (savedMolecules.contains(q.molecule))
+            td("")
+          else
+            td(
+              textAlign.right,
+              a(cls := "discrete", href := "#", "save", onclick := save(q))
+            ),
+
+          if (favoriteMolecules.contains(q.molecule))
+            td("")
+          else
+            td(
+              textAlign.right,
+              a(cls := "discrete", href := "#", "fav", onclick := favorite(q))
+            ),
+        )
+      }
+    )
+  }
+
+  def _savedQueriesNs(
+    curMolecule: String,
+    queriesByNs: Seq[(String, Seq[(String, QueryData)])],
+    favoriteQueries: Seq[QueryData],
+    favoriteMolecules: Seq[String],
+    use: QueryData => () => Unit,
+    favorite: QueryData => () => Unit,
+    unfavorite: QueryData => () => Unit,
+    retract: QueryData => () => Unit,
+  ): Seq[TypedTag[LI]] = {
+    queriesByNs.map { case (ns, mm) =>
+      li(cls := "dropdown-submenu",
+        ns,
+        ul(
+          cls := "dropdown-menu",
+          li(
+            table(cls := "tableRowLink",
+              mm.map { case (m, q) =>
+                val cur = m == curMolecule
+                tr(
+                  cls := (if (cur) "current" else "other"),
+
+                  td(
+                    m,
+                    paddingRight := 20,
+                    if (cur) () else onclick := use(q)
+                  ),
+
+                  td(
+                    textAlign.right,
+                    if (favoriteMolecules.contains(m))
+                      a(cls := "discrete", href := "#",
+                        "unfav", onclick := unfavorite(q))
+                    else
+                      a(cls := "discrete", href := "#",
+                        "fav", onclick := favorite(q))
+                  ),
+
+                  td(
+                    textAlign.right,
+                    span(
+                      cls := "discrete",
+                      span(cls := "oi oi-x", fontSize := 9.px,
+                        color := "#888", paddingBottom := 6),
+                      onclick := retract(q)
+                      //                      onclick := { () =>
+                      //                        println("hej")
+                      //                      }
+                    )
+                  )
+                )
+              }
+            )
           )
         )
       )
     }
-  )
+  }
 
-  def _subMenuQueries(
-    savedQueries: Seq[SavedQuery],
+  def _savedQueries(
     curMolecule: String,
-    useSavedQuery: SavedQuery => () => Unit,
-    retractSavedQuery: String => () => Unit
-  ): TypedTag[LI] = li(
-    cls := "dropdown",
-    a(href := "#", span("Q", textDecoration.underline), "ueries"),
-    div(
+    queriesByPartNs: Seq[(String, Seq[(String, Seq[(String, QueryData)])])],
+    favoriteQueries: Seq[QueryData],
+    favoriteMolecules: Seq[String],
+    use: QueryData => () => Unit,
+    favorite: QueryData => () => Unit,
+    unfavorite: QueryData => () => Unit,
+    retract: QueryData => () => Unit,
+  ): TypedTag[UList] = {
+    ul(
       cls := "dropdown-menu",
-      id := "submenu-queries",
-      paddingBottom := 5,
-      _queriesTable(savedQueries, curMolecule, useSavedQuery, retractSavedQuery)
+      if (queriesByPartNs.head._1 == "db.part/user") {
+        // No custom partitions - show nss directly
+        _savedQueriesNs(
+          curMolecule,
+          queriesByPartNs.head._2,
+          favoriteQueries,
+          favoriteMolecules,
+          use,
+          favorite,
+          unfavorite,
+          retract,
+        )
+      } else {
+        queriesByPartNs.map { case (part, queriesByNs) =>
+          li(cls := "dropdown-submenu",
+            part,
+            ul(
+              cls := "dropdown-menu",
+              _savedQueriesNs(
+                curMolecule,
+                queriesByNs,
+                favoriteQueries,
+                favoriteMolecules,
+                use,
+                favorite,
+                unfavorite,
+                retract,
+              )
+            )
+          )
+        }
+      }
     )
-  )
+  }
 
-
-  // Recent molecules --------------------------------------------------------------------
-
-  def _recentMoleculesList(
-    recentMolecules: Seq[String],
+  def _favoriteQueries(
     curMolecule: String,
-    useRecentMolecule: String => () => Unit,
-    savedMolecules: Seq[String],
-    saveQuery: String => () => Unit,
-    removeRecentMolecules: String => () => Unit
-  ): TypedTag[Table] = table(cls := "tableRowLink",
-    recentMolecules.zipWithIndex.map {
-      case (m@`curMolecule`, i) => tr(cls := "current",
-        th(i + 1),
-        td(m, paddingRight := 20),
-        if (savedMolecules.contains(m)) td("") else
-          td(textAlign.right, a(cls := "discrete", href := "#", "fav", onclick := saveQuery(m))),
-        td("")
-      )
-      case (m, i)               => tr(cls := "other",
-        th(i + 1, onclick := useRecentMolecule(m)),
-        td(m, paddingRight := 20, onclick := useRecentMolecule(m)),
-        if (savedMolecules.contains(m)) td("") else
-          td(textAlign.right, a(cls := "discrete", href := "#", "fav", onclick := saveQuery(m))),
-        td(
-          textAlign.right,
-          a(cls := "discrete", href := "#",
-            span(cls := "oi oi-x", fontSize := 9.px, color := "#888", paddingBottom := 6),
-            onclick := removeRecentMolecules(m)
+    newFav: Seq[QueryData],
+    favoriteQueries: Seq[QueryData],
+    use: QueryData => () => Unit,
+    save: QueryData => () => Unit,
+    unfavorite: QueryData => () => Unit
+  ): TypedTag[Table] = {
+    table(
+      cls := "tableRowLink",
+      newFav.map(query =>
+        tr(cls := "current",
+          th(0),
+          td(curMolecule, paddingRight := 20),
+          td(
+            textAlign.right,
+            a(cls := "discrete", href := "#", "save", onclick := save(query))
           )
         )
-      )
-    }
-  )
-
-  def _subMenuRecent(
-    recentMolecules: Seq[String],
-    curMolecule: String,
-    useRecentMolecule: String => () => Unit,
-    savedMolecules: Seq[String],
-    saveQuery: String => () => Unit,
-    removeRecentMolecules: String => () => Unit
-  ): TypedTag[LI] = li(
-    cls := "dropdown",
-    a(href := "#", span("R", textDecoration.underline), "ecent"),
-    div(
-      cls := "dropdown-menu",
-      id := "submenu-recentMolecules",
-      paddingBottom := 5,
-      _recentMoleculesList(recentMolecules, curMolecule, useRecentMolecule, savedMolecules, saveQuery, removeRecentMolecules)
+      ) ++ favoriteQueries.zipWithIndex.map {
+        case (query@QueryData(`curMolecule`, _, _, _, _, _, _), i) =>
+          tr(cls := "current",
+            th(i + 1),
+            td(curMolecule, paddingRight := 20),
+            td(
+              textAlign.right,
+              a(cls := "discrete", href := "#",
+                span(cls := "oi oi-x", fontSize := 9.px, color := "#888", paddingBottom := 6),
+                onclick := unfavorite(query)
+              )
+            )
+          )
+        case (query, i)                                            =>
+          tr(cls := "other",
+            th(i + 1, onclick := use(query)),
+            td(query.molecule, paddingRight := 20, onclick := use(query)),
+            td(
+              textAlign.right,
+              a(cls := "discrete", href := "#",
+                span(cls := "oi oi-x", fontSize := 9.px, color := "#888", paddingBottom := 6),
+                onclick := unfavorite(query)
+              )
+            )
+          )
+      }
     )
-  )
+  }
 
 
   // Views --------------------------------------------------------------------

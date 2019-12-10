@@ -58,6 +58,12 @@ case class DataTable(db: String)(implicit val ctx: Ctx.Owner)
     queryWire()
       .query(db, datalogQuery, rules, l, ll, lll, maxRows.now, columns.now)
       .call().foreach {
+      case Right(queryResult) =>
+        //        println("QUERY")
+        rowCountAll = queryResult.rowCountAll
+        rowCount = queryResult.rowCount
+        DataTableBodyFoot(db).populate(tableBody, tableFoot, queryResult)
+
       case Left(Nil) =>
         tableBody.innerHTML = ""
         tableBody.appendChild(
@@ -77,12 +83,6 @@ case class DataTable(db: String)(implicit val ctx: Ctx.Owner)
             p(), p(b("Stacktrace")), ul(for (l <- msgs.tail) yield li(l))
           ).render
         )
-
-      case Right(queryResult) =>
-        //        println("QUERY")
-        rowCountAll = queryResult.rowCountAll
-        rowCount = queryResult.rowCount
-        DataTableBodyFoot(db).populate(tableBody, tableFoot, Some(queryResult))
     }
   }
 
@@ -90,7 +90,8 @@ case class DataTable(db: String)(implicit val ctx: Ctx.Owner)
     //    println("---- table")
 
     // Var's not to trigger this Rx
-    // (`modelElements` is the main trigger)
+    // (`modelElements` and `maxRows` are the main triggers)
+    columns.kill()
     filters.kill()
     offset.kill()
     limit.kill()
@@ -101,9 +102,8 @@ case class DataTable(db: String)(implicit val ctx: Ctx.Owner)
     curTx() = 0L
     curTxInstant() = ""
 
+    // Re-calculate when max rows changes
     maxRows()
-    val maxRowsChanged = savedMaxRows != maxRows.now
-    savedMaxRows = maxRows.now
 
     try {
       modelElements() match {
@@ -130,31 +130,8 @@ case class DataTable(db: String)(implicit val ctx: Ctx.Owner)
           if attr.last == '_' || attr.last == '$' =>
           _rowCol1("Please select at least one mandatory attribute")
 
-//        case elements if !maxRowsChanged &&
-//          queryCache.now.map(_.modelElements).contains(elements) =>
-//          println("----------- cached ----------")
-//          val cached = queryCache.now.find(_.modelElements == elements).get
-//          tree() = cached.tree
-//          curMolecule() = cached.molecule
-//          columns() = cached.columns
-//          eidCols = getEidTableColIndexes(columns.now)
-//          groupableCols = getGroupedColIndexes(columns.now)
-////          showGrouped() = cached.showGrouped
-////          groupedCols() = cached.groupedCols
-//          filters() = cached.filters
-//          offset() = 0
-//          rowCountAll = cached.queryResult.rowCountAll
-//          rowCount = cached.queryResult.rowCount
-//          curAttrs = columns.now.map(c => s":${c.nsFull}/${c.attr}")
-//
-//          registerKeyEvents
-//          DataTableHead(db, tableBody).populate(tableHead)
-//          DataTableBodyFoot(db).populate(tableBody, tableFoot)
-//          tableContainer
-//
-//        // New model
         case elements =>
-          println("----------- new ----------")
+                    println("----------- new model ----------")
           val elements1 = VerifyRawModel(elements)
           tree() = mkTree(mkModelTree(elements1))
           curMolecule() = model2molecule(elements1)

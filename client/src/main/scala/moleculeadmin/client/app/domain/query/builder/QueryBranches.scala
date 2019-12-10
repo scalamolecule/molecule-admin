@@ -18,13 +18,13 @@ case class QueryBranches(selection: String)(implicit val ctx: Ctx.Owner)
   extends RxBindings with TreeOps with DropdownMenu with AppElements {
 
   // Unique index across recursive branches
-  var index = 0
+  var index = 1
 
   def renderBranches(trees: Seq[Tree]): JsDom.TypedTag[Div] = {
     _rowColAuto(
       Rx(
         trees.zipWithIndex.map { case (Tree(path, attrs0, selAttrs, refs0, selRefs, branches), j) =>
-          index = index + j + 1
+          index = index + j
           val (refAttr, nsFull) = path.last
           val (attrs, refs)     = attrSelection(attrs0, selAttrs, refs0, selection)
           val additivesMap      = getAdditives(selAttrs)

@@ -10,7 +10,7 @@ import moleculeadmin.client.app.domain.query.data.Indexes
 import moleculeadmin.client.app.element.query.datatable.BodyElements
 import moleculeadmin.client.autowire.queryWire
 import moleculeadmin.client.rxstuff.RxBindings
-import moleculeadmin.shared.ast.query.Col
+import moleculeadmin.shared.ast.query.{Col, QueryResult}
 import moleculeadmin.shared.ops.query.ColOps
 import org.scalajs.dom.html.{LI, TableCell, TableRow}
 import org.scalajs.dom.{Node, NodeList, document, window}
@@ -37,7 +37,8 @@ case class GroupSave(db: String, col: Col)(implicit val ctx: Ctx.Owner)
   // Start spinner since saving to db can take time
   processing() = filterId
 
-  val cache = queryCache.now.find(_.modelElements == modelElements.now).get
+  val cache = queryCache2
+//  val cache = queryCache.now.find(_.modelElements == modelElements.now).get
   val qr    = cache.queryResult
 
   val eidIndex = getEidColIndex(columns.now, colIndex, nsAlias, nsFull)
@@ -156,7 +157,8 @@ case class GroupSave(db: String, col: Col)(implicit val ctx: Ctx.Owner)
           }
 
           // Invalidate previous caches to avoid old attr data to hang over
-          queryCache() = Seq(cache)
+//          queryCache() = Seq(cache)
+          queryCache2 = cache
 
           // Turn spinner off
           processing() = ""

@@ -29,6 +29,23 @@
 }
 
 
+.nav li.dropdown-submenu {
+    padding: 2px 0px 2px 0px;
+}
+.nav li.dropdown-submenu:hover {
+    background-color: #eee;
+}
+.nav li.dropdown-submenu > ul {
+    min-width: 60px;
+    padding: 4px 4px;
+}
+.nav li.dropdown-submenu > li:hover {
+    background-color: #eee;
+}
+.nav li.dropdown-submenu  a {
+    padding: 0px 2px 0px 2px;
+}
+
 
 .nav-pills {
   padding-right: 10px;

@@ -47,8 +47,9 @@ case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
   // Start spinner since compilation can take some seconds
   processing() = filterId
 
-  val qr: QueryResult =
-    queryCache.now.find(_.modelElements == modelElements.now).get.queryResult
+  val qr: QueryResult = queryCache2.queryResult
+  //  val qr: QueryResult =
+  //    queryCache.now.find(_.modelElements == modelElements.now).get.queryResult
 
   val tableRows: NodeList = document.getElementById("tableBody").childNodes
 

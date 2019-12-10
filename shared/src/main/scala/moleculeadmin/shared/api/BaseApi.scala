@@ -1,6 +1,6 @@
 package moleculeadmin.shared.api
 
-import moleculeadmin.shared.ast.query.SavedQuery
+import moleculeadmin.shared.ast.query.QueryData
 import moleculeadmin.shared.ast.schema.{MetaSchema, _}
 
 trait BaseApi {
@@ -17,7 +17,7 @@ trait BaseApi {
         Set[Long],
         Set[Long],
         Set[Long],
-        Seq[SavedQuery]
+        Seq[QueryData]
         )) = ???
 
   def getMetaSchema(db: String): MetaSchema = ???

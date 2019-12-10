@@ -5,7 +5,7 @@ import org.scalajs.dom.html.{Div, Element, LI, Span, TableRow}
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all.{h5, _}
 import org.scalajs.dom.window
-import moleculeadmin.shared.ast.query.SavedQuery
+import moleculeadmin.shared.ast.query.QueryData
 
 trait ViewElements extends SubMenuElements {
 
@@ -69,17 +69,17 @@ trait ViewElements extends SubMenuElements {
     _cardBody(frags)
   )
 
-  def _queriesView(
-    savedQueries: Seq[SavedQuery],
-    curMolecule : String,
-    useQuery    : SavedQuery => () => Unit,
-    retractQuery: String => () => Unit
-  ): TypedTag[Element] = _card(
-    _cardHeader(h5("Queries")),
-    _cardBody(
-      _queriesTable(savedQueries, curMolecule, useQuery, retractQuery)
-    )
-  )
+//  def _queriesView(
+//    savedQueries: Seq[SavedQuery],
+//    curMolecule : String,
+//    useQuery    : SavedQuery => () => Unit,
+//    retractQuery: String => () => Unit
+//  ): TypedTag[Element] = _card(
+//    _cardHeader(h5("Queries")),
+//    _cardBody(
+//      _savedQueriesTable(savedQueries, curMolecule, useQuery, retractQuery)
+//    )
+//  )
 
 
   def _txView(msg: String): TypedTag[Element] = _card(
@@ -118,33 +118,33 @@ trait ViewElements extends SubMenuElements {
     )
   )
 
-  def _recentMoleculesView(
-    recentMolecules: Seq[String],
-    curMolecule          : String,
-    savedMolecules       : Seq[String],
-    resetRecentMolecules : () => Unit,
-    useRecentMolecule    : String => () => Unit,
-    saveQuery            : String => () => Unit,
-    removeRecentMolecules: String => () => Unit
-  ): TypedTag[Element] = _card(
-    _cardHeader(
-      h5("Cache", display.`inline-block`),
-      span(
-        paddingLeft := 30,
-        float.right,
-        a(cls := "discrete", href := "#", "reset", onclick := resetRecentMolecules))
-    ),
-    _cardBody(
-      _recentMoleculesList(
-        recentMolecules,
-        curMolecule,
-        useRecentMolecule,
-        savedMolecules,
-        saveQuery,
-        removeRecentMolecules,
-      )
-    )
-  )
+//  def _recentMoleculesView(
+//    recentMolecules: Seq[String],
+//    curMolecule          : String,
+//    savedMolecules       : Seq[String],
+//    resetRecentMolecules : () => Unit,
+//    useRecentMolecule    : String => () => Unit,
+//    saveQuery            : String => () => Unit,
+//    removeRecentMolecules: String => () => Unit
+//  ): TypedTag[Element] = _card(
+//    _cardHeader(
+//      h5("Cache", display.`inline-block`),
+//      span(
+//        paddingLeft := 30,
+//        float.right,
+//        a(cls := "discrete", href := "#", "reset", onclick := resetRecentMolecules))
+//    ),
+//    _cardBody(
+//      _recentQueriesList(
+//        recentMolecules,
+//        curMolecule,
+//        useRecentMolecule,
+//        savedMolecules,
+//        saveQuery,
+//        removeRecentMolecules,
+//      )
+//    )
+//  )
 
 
   val hljs = script(
