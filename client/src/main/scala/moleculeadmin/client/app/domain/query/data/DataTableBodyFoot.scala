@@ -2,14 +2,14 @@ package moleculeadmin.client.app.domain.query.data
 import moleculeadmin.client.app.domain.query.KeyEvents
 import moleculeadmin.client.app.domain.query.QueryState.{columns, _}
 import moleculeadmin.client.rxstuff.RxBindings
-import moleculeadmin.shared.ast.query.{QueryCache, QueryResult}
+import moleculeadmin.shared.ast.query.{QueryCache, QueryData, QueryResult}
+import moleculeadmin.shared.ops.query.{ColOps, MoleculeOps}
 import org.scalajs.dom.html.TableSection
 import rx.{Ctx, Rx}
-import scala.scalajs.js.Date
 
 
 case class DataTableBodyFoot(db: String)(implicit val ctx: Ctx.Owner)
-  extends RxBindings with KeyEvents {
+  extends RxBindings with KeyEvents with ColOps with MoleculeOps {
 
   cachedRowBuilder = None
   //  println("---- DataTableBodyFoot ----")
@@ -17,7 +17,7 @@ case class DataTableBodyFoot(db: String)(implicit val ctx: Ctx.Owner)
   def populate(
     tableBody: TableSection,
     tableFoot: TableSection,
-    optQueryResult: Option[QueryResult] = None
+    queryResult: QueryResult
   ): Unit = Rx {
     //    println("---- body ----")
 
@@ -27,15 +27,13 @@ case class DataTableBodyFoot(db: String)(implicit val ctx: Ctx.Owner)
     offset()
     limit()
 
-    val queryResult              = optQueryResult.getOrElse {
-      queryCache.now.find(_.modelElements == modelElements.now).get.queryResult
-    }
     val sortCols                 = columns.now.filter(_.sortDir.nonEmpty)
     val unfiltered               = filters.now.isEmpty
     val (sortIndex, filterIndex) = Indexes(queryResult, sortCols, unfiltered).get
 
     // Cache current query result and rendering data
-    queryCache() = QueryCache(
+
+    val c = QueryCache(
       modelElements.now,
       tree.now,
       curMolecule.now,
@@ -44,11 +42,23 @@ case class DataTableBodyFoot(db: String)(implicit val ctx: Ctx.Owner)
       sortIndex,
       filters.now,
       filterIndex,
+      showGrouped.now,
+      groupedCols.now
+    )
 
-      // todo
+    queryCache2 = c
+
+    val (part, ns) = getPartNs(curMolecule.now)
+
+    recentQueries() = QueryData(
+      curMolecule.now,
+      part, ns,
       false,
-      Nil
-    ) +: queryCache.now.filterNot(_.modelElements == modelElements.now)
+      showGrouped.now,
+      groupedCols.now,
+      colSettings(columns.now)
+    ) +: recentQueries.now.filterNot(_.molecule == curMolecule.now)
+
 
     // Populate table body and foot
     tableBody.innerHTML = ""
@@ -57,6 +67,9 @@ case class DataTableBodyFoot(db: String)(implicit val ctx: Ctx.Owner)
       cachedRowBuilder = Some(rb)
       rb
     }
+
+    //    println("append...")
+
     rowBuilder.append(sortIndex, filterIndex)
     DataTableFoot().populate(tableFoot)
   }

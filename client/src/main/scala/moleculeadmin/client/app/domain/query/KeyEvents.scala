@@ -3,7 +3,9 @@ import autowire._
 import boopickle.Default._
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.autowire.queryWire
+import moleculeadmin.shared.ast.query.QueryData
 import moleculeadmin.shared.ast.schema.Ns
+import moleculeadmin.shared.ops.query.{ColOps, MoleculeOps}
 import org.scalajs.dom.html.TableCell
 import org.scalajs.dom.raw.{HTMLInputElement, KeyboardEvent}
 import org.scalajs.dom.{Node, document, window}
@@ -14,7 +16,7 @@ import scala.scalajs.js.Date
 import scala.scalajs.js.timers.setTimeout
 
 
-trait KeyEvents {
+trait KeyEvents extends ColOps with MoleculeOps {
   type keepBooPickleImport__KeyEvents = PickleState
 
   def toggle(id: String): Unit = {
@@ -41,7 +43,7 @@ trait KeyEvents {
     }
   }
 
-  def toggleQueriesMenu(): Unit = toggle("queries")
+  def toggleQueryList(): Unit = toggle("query-list")
   def toggleRecentMenu(): Unit = toggle("recentMolecules")
   def toggleShortcuts(): Unit = toggle("shortcuts")
 
@@ -160,33 +162,44 @@ trait KeyEvents {
     showGrouped() = !showGrouped.now
   }
 
-  def useQuery(i: Int)
-    (implicit ctx: Ctx.Owner, nsMap: Map[String, Ns]) =
+  def saveCurrentQuery(implicit ctx: Ctx.Owner) = {
+    val (part, ns) = getPartNs(curMolecule.now)
+    val query      = QueryData(
+      curMolecule.now,
+      part, ns, true,
+      showGrouped.now,
+      groupedCols.now,
+      colSettings(columns.now)
+    )
+    (new Callbacks).saveQuery(query)
+  }
+
+  def useQuery(i: Int)(implicit ctx: Ctx.Owner) =
     if (i < savedQueries.now.size) {
-      new Callbacks("").useQuery(savedQueries.now.sortBy(_.molecule).apply(i))
+      (new Callbacks).useQuery(savedQueries.now.sortBy(_.molecule).apply(i))
     } else {
       // Print soft error message to browser console
       window.alert(s"Only ${savedQueries.now.size} queries saved.")
     }
 
-  def useRecentMolecule(i: Int)(implicit ctx: Ctx.Owner): Unit =
-    if (i < queryCache.now.size) {
-      modelElements() = queryCache.now.sortBy(_.molecule).apply(i).modelElements
-    } else {
-      window.alert(s"Only ${queryCache.now.size} previous queries.")
-    }
+  //  def useRecentMolecule(i: Int)(implicit ctx: Ctx.Owner): Unit =
+  //    if (i < queryCache.now.size) {
+  //      modelElements() = queryCache.now.sortBy(_.molecule).apply(i).modelElements
+  //    } else {
+  //      window.alert(s"Only ${queryCache.now.size} previous queries.")
+  //    }
 
 
   def queriesOpen: Boolean = {
-    val queriesElement = document.getElementById("submenu-queries")
+    val queriesElement = document.getElementById("submenu-query-list")
     queriesElement != null &&
       queriesElement.getAttribute("style").endsWith("display:block;")
   }
-  def recentMoleculesOpen: Boolean = {
-    val recentElement = document.getElementById("submenu-recentMolecules")
-    recentElement != null &&
-      recentElement.getAttribute("style").endsWith("display:block;")
-  }
+  //  def recentMoleculesOpen: Boolean = {
+  //    val recentElement = document.getElementById("submenu-recentMolecules")
+  //    recentElement != null &&
+  //      recentElement.getAttribute("style").endsWith("display:block;")
+  //  }
 
 
   def registerKeyEvents(
@@ -252,19 +265,17 @@ trait KeyEvents {
       if (document.activeElement == document.body) {
         if (!mod) {
           e.key match {
-            case "Escape"                           =>
+            case "Escape" =>
               curEntity() = 0L
-              toggleOff("queries")
-              toggleOff("recentMolecules")
+              toggleOff("query-list")
               toggleOff("shortcuts")
-            case "q"                                =>
-              toggleOff("recentMolecules")
+            case "l"      =>
               toggleOff("shortcuts")
-              toggleQueriesMenu()
-            case "r"                                =>
-              toggleOff("queries")
-              toggleOff("shortcuts")
-              toggleRecentMenu()
+              toggleQueryList()
+            //            case "r"                                =>
+            //              toggleOff("queries")
+            //              toggleOff("shortcuts")
+            //              toggleRecentMenu()
             case "v"                                => toggleViews
             case "g"                                => toggleGrouped
             case "b"                                => toggleQueryBuilder
@@ -275,7 +286,12 @@ trait KeyEvents {
             //              builderBaseSelection = "v"; builderSelection() = "v"
             //            case "r" if builderSelection.now != "r" =>
             //              builderBaseSelection = "r"; builderSelection() = "r"
-            case n if queriesOpen         => n match {
+            case n if queriesOpen => n match {
+              case "0" if !savedQueries.now.exists(_.molecule == curMolecule.now) =>
+                println("save query.. " + curMolecule.now)
+                savedQueries.now foreach println
+                saveCurrentQuery
+
               case "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "0" =>
                 if (firstNumber == -1) {
                   firstNumber = n.toInt
@@ -294,27 +310,27 @@ trait KeyEvents {
                 }
               case _                                                         => ()
             }
-            case n if recentMoleculesOpen => n match {
-              case "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "0" =>
-                // todo: refactor out redundant functionality for queries/recent
-                if (firstNumber == -1) {
-                  firstNumber = n.toInt
-                  setTimeout(numberMs) {
-                    val index = if (secondNumber == -1)
-                      firstNumber - 1
-                    else
-                      firstNumber * 10 + secondNumber - 1
-                    if (index > 0)
-                      useRecentMolecule(index)
-                    firstNumber = -1
-                    secondNumber = -1
-                  }
-                } else if (secondNumber == -1) {
-                  secondNumber = n.toInt
-                }
-              case _                                                         => ()
-            }
-            case _                        => ()
+            //            case n if recentMoleculesOpen => n match {
+            //              case "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "0" =>
+            //                // todo: refactor out redundant functionality for queries/recent
+            //                if (firstNumber == -1) {
+            //                  firstNumber = n.toInt
+            //                  setTimeout(numberMs) {
+            //                    val index = if (secondNumber == -1)
+            //                      firstNumber - 1
+            //                    else
+            //                      firstNumber * 10 + secondNumber - 1
+            //                    if (index > 0)
+            //                      useRecentMolecule(index)
+            //                    firstNumber = -1
+            //                    secondNumber = -1
+            //                  }
+            //                } else if (secondNumber == -1) {
+            //                  secondNumber = n.toInt
+            //                }
+            //              case _                                                         => ()
+            //            }
+            case _ => ()
             //            case other => println(other)
           }
 

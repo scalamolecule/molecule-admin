@@ -103,24 +103,21 @@ object MetaDefinition {
       val stars   = manyLong.noHistory.doc("Starred entity ids for this db")
       val flags   = manyLong.noHistory.doc("Flagged entity ids for this db")
       val checks  = manyLong.noHistory.doc("Checked entity ids for this db")
-      val queries = many[Query].noHistory.isComponent.doc("Saved queries (molecules) for this db")
+      val queries = many[Query].noHistory.isComponent.doc("Recent/saved/favorite queries for this db")
     }
     trait Query {
-      val pos         = oneInt.noHistory.doc("Ordering position among queries for primary namespace - starts at 1")
-      val name        = oneString.noHistory.doc("Optional user-friendly name of query")
-      val ns          = oneString.noHistory.doc("First/primary namespace in query")
-      val nss         = oneString.noHistory.doc("All namespaces in query")
-      val molecule    = oneString.noHistory.doc("Molecule as text string. Model, cache etc will be derived from this.")
-      val colSettings = many[ColSetting].noHistory.isComponent.doc("Column settings for query result")
+      val molecule    = oneString.noHistory.doc("Molecule of query to build model/view")
+      val part        = oneString.noHistory.doc("Initial partition of molecule")
+      val ns          = oneString.noHistory.doc("Initial namespace of molecule")
+      val isFavorite  = oneBoolean.noHistory.doc("Is a favorite query to appear in alphabetic shortcut list")
       val showGrouped = oneBoolean.noHistory.doc("Show grouped attribute boxes")
       val groupedCols = manyInt.noHistory.doc("Col indexes of grouped attributes shown")
+      val colSettings = many[ColSetting].noHistory.isComponent.doc("Column settings for query result")
     }
     trait ColSetting {
-      val index      = oneInt.noHistory.doc("Column index")
-      val attrExpr   = oneString.noHistory.doc("Attribute expression to be rendered in column header")
-      val sortDir    = oneString.noHistory.doc("asc/desc or empty string if not sorted")
-      val sortPos    = oneInt.noHistory.doc("If multiple sort columns, an index from 1 to max 5")
-      val filterExpr = oneString.noHistory.doc("Filter expression. Can be multi-line.")
+      val colIndex = oneInt.noHistory.doc("Column index")
+      val sortDir  = oneString.noHistory.doc("asc/desc or empty string if not sorted")
+      val sortPos  = oneInt.noHistory.doc("If multiple sort columns, an index from 1 to max 5")
     }
   }
 }

@@ -1,5 +1,5 @@
 package moleculeadmin.client.app.domain.query
-import moleculeadmin.shared.ast.query.{Col, SavedQuery, Filter, QueryCache}
+import moleculeadmin.shared.ast.query.{Col, QueryData, Filter, QueryCache}
 import moleculeadmin.shared.ast.schema.Ns
 import moleculeadmin.shared.ast.tree.Tree
 import molecule.ast.model.Element
@@ -12,6 +12,8 @@ import scala.collection.mutable.ListBuffer
 
 object QueryState {
 
+  var db = ""
+
   // Db settings id so that we can avoid looking it up on each marker toggle
   var dbSettingsIdOpt = Option.empty[Long]
 
@@ -22,8 +24,7 @@ object QueryState {
   var eidCols       = Seq.empty[Int]
 
 
-  // What is being being processed now? Concatenates part/ns/attr/pos-number
-  // as a coordinate in the tree
+  // Current processing coordinate in tree (part/ns/attr/pos-number)
   val processing = Var[String]("")
 
   // Query building ---------------------------------
@@ -63,7 +64,8 @@ object QueryState {
   // Caching -----------------------------------
 
   // Re-use recent query results
-  var queryCache = Var(Seq.empty[QueryCache])
+//  val queryCache = Var(Seq.empty[QueryCache])
+  var queryCache2: QueryCache = null
 
   // Avoiding re-creating sort index array during paging
   var cachedCols       = Seq.empty[Col]
@@ -75,16 +77,17 @@ object QueryState {
   var cachedFilterIndex = Array.empty[Int]
 
   // Track maxRows change
-  var savedMaxRows = -1
+//  var savedMaxRows = -1
 
   var changeArrays = Map.empty[Int, Array[Int]]
+
+  val savedQueries = Var(Seq.empty[QueryData])
+  val recentQueries = Var(Seq.empty[QueryData])
 
 
   // Views --------------------------------
 
   val curMolecule = Var("")
-
-  val savedQueries = Var(Seq.empty[SavedQuery])
 
   // Entities
   val curEntity         = Var(0L)
@@ -116,8 +119,6 @@ object QueryState {
   val viewsOn             = Var(false)
   val viewHelp            = Var(false)
   val viewMolecule        = Var(false)
-  val viewQueries         = Var(false)
-  val viewRecentMolecules = Var(false)
   val viewDatalog         = Var(false)
   val viewTransaction     = Var(false)
   val viewEntity          = Var(false)

@@ -17,7 +17,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 
 abstract class Base(db: String)(implicit val ctx: Ctx.Owner)
-  extends Callbacks(db) with ViewElements with ModelOps with TreeOps {
+  extends Callbacks with ViewElements with ModelOps with TreeOps {
   type keepBooPickleImport_Base = PickleState
 
   // Recursively add entity row to view

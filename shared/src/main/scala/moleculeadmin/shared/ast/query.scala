@@ -73,18 +73,19 @@ object query extends HelpersAdmin {
     groupedCols: Seq[Int]
   )
 
-  case class SavedQuery(
+  case class QueryData(
     molecule: String,
-    colSettings: Seq[ColSetting],
+    part: String,
+    ns: String,
+    isFavorite: Boolean,
     showGrouped: Boolean,
-    groupedCols: Seq[Int]
+    groupedCols: Seq[Int],
+    colSettings: Seq[ColSetting]
   )
 
   case class ColSetting(
     colIndex: Int,
-    attrExpr: String,
     sortDir: String,
-    sortPos: Int,
-    filterExpr: String
+    sortPos: Int
   )
 }

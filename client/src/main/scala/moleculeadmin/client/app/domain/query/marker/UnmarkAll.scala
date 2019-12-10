@@ -41,8 +41,9 @@ object UnmarkAll extends AppElements {
       i += 1
     }
 
-    val rowCount = queryCache.now
-      .find(_.modelElements == modelElements.now).get.queryResult.rowCount
+    val rowCount = queryCache2.queryResult.rowCount
+//    val rowCount = queryCache.now
+//      .find(_.modelElements == modelElements.now).get.queryResult.rowCount
 
     // Save asynchronously in meta db
     queryWire().unmarkAll(db, dbSettingsIdOpt, tpe).call()

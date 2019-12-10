@@ -13,11 +13,11 @@ import molecule.ast.transactionModel.{Add, Retract}
 import molecule.facade.{Conn, TxReport}
 import moleculeadmin.server.query.Rows2QueryResult
 import moleculeadmin.shared.api.QueryApi
-import moleculeadmin.shared.ast.query.{Col, SavedQuery, QueryResult}
+import moleculeadmin.shared.ast.query.{Col, QueryData, QueryResult}
 import scala.collection.JavaConverters._
 
 
-class Query extends QueryApi with Base {
+class QueryBackend extends QueryApi with Base {
 
   // Todo: this works but seems like a hack that would be nice to avoid although the impact of
   // a few input variables is negible.
@@ -215,7 +215,7 @@ class Query extends QueryApi with Base {
   }
 
 
-  override def addQuery(db: String, savedQuery: SavedQuery): Either[String, String] = {
+  override def addQuery(db: String, query: QueryData): Either[String, String] = {
     implicit val conn = Conn(base + "/meta")
     withTransactor {
       try {
@@ -239,27 +239,35 @@ class Query extends QueryApi with Base {
             dbSettingsId1
         }
 
-        val SavedQuery(molecule1, colSettings, showGrouped, groupedCols) = savedQuery
+        println("dbSettingsId 2: " + dbSettingsId)
+
+
+        val QueryData(molecule1, part, ns,
+        isFavorite, showGrouped, groupedCols, colSettings) = query
 
         if (user_DbSettings(dbSettingsId).Queries.molecule.get.contains(molecule1)) {
           Left(s"`$molecule1` is already saved.")
         } else {
           val colSettingIds = user_ColSetting
-            .index.attrExpr.sortDir.sortPos.filterExpr
+            .colIndex.sortDir.sortPos
             .insert(
               colSettings.map(cs =>
-                (cs.colIndex, cs.attrExpr, cs.sortDir, cs.sortPos, cs.filterExpr)
+                (cs.colIndex, cs.sortDir, cs.sortPos)
               )
             ).eidSet
 
           val newQueryId = user_Query
             .molecule(molecule1)
-            .colSettings(colSettingIds)
+            .part(part)
+            .ns(ns)
+            .isFavorite(isFavorite)
             .showGrouped(showGrouped)
             .groupedCols(groupedCols)
+            .colSettings(colSettingIds)
             .save.eid
 
           user_DbSettings(dbSettingsId).queries.assert(newQueryId).update
+
           Right("ok")
         }
       } catch {
@@ -268,7 +276,7 @@ class Query extends QueryApi with Base {
     }
   }
 
-  override def updateQuery(db: String, savedQuery: SavedQuery): Either[String, String] = {
+  override def updateQuery(db: String, query: QueryData): Either[String, String] = {
     implicit val conn = Conn(base + "/meta")
     withTransactor {
       try {
@@ -292,7 +300,8 @@ class Query extends QueryApi with Base {
             dbSettingsId1
         }
 
-        val SavedQuery(molecule1, colSettings, showGrouped, groupedCols) = savedQuery
+        val QueryData(molecule1, _, _,
+        isFavorite, showGrouped, groupedCols, colSettings) = query
 
         val queryIds = user_DbSettings(dbSettingsId).Queries.e.molecule_(molecule1).get
 
@@ -305,17 +314,18 @@ class Query extends QueryApi with Base {
           // Re-insert col settings
           user_Query(queryId).colSettings().update
           val colSettingIds = user_ColSetting
-            .index.attrExpr.sortDir.sortPos
+            .colIndex.sortDir.sortPos
             .insert(
               colSettings.map(cs =>
-                (cs.colIndex, cs.attrExpr, cs.sortDir, cs.sortPos)
+                (cs.colIndex, cs.sortDir, cs.sortPos)
               )
             ).eidSet
 
           user_Query(queryId)
-            .colSettings(colSettingIds)
+            .isFavorite(isFavorite)
             .showGrouped(showGrouped)
             .groupedCols(groupedCols)
+            .colSettings(colSettingIds)
             .update
 
           Right("ok")
@@ -326,20 +336,21 @@ class Query extends QueryApi with Base {
     }
   }
 
-  override def retractQuery(db: String, queryMolecule: String): Either[String, String] = {
+  override def retractQuery(db: String, query: QueryData): Either[String, String] = {
     implicit val conn = Conn(base + "/meta")
+    val molecule1 = query.molecule
     withTransactor {
       try {
         user_User.username_("admin")
           .DbSettings.Db.name_(db)
-          ._DbSettings.Queries.e.molecule_(queryMolecule)
+          ._DbSettings.Queries.e.molecule_(molecule1)
           .get match {
-          case Nil           => Left(s"Unexpectedly couldn't find saved molecule `$queryMolecule` in meta database.")
+          case Nil           => Left(s"Unexpectedly couldn't find saved molecule `$molecule1` in meta database.")
           case List(queryId) =>
             queryId.retract
             Right("ok")
           case favIds        =>
-            Left(s"Unexpectedly found ${favIds.size} instances of saved molecule `$queryMolecule` in meta database.")
+            Left(s"Unexpectedly found ${favIds.size} instances of saved molecule `$molecule1` in meta database.")
         }
       } catch {
         case t: Throwable => Left(t.getMessage)

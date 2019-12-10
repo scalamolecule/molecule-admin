@@ -1,6 +1,6 @@
 package moleculeadmin.shared.api
 
-import moleculeadmin.shared.ast.query.{Col, SavedQuery, QueryResult}
+import moleculeadmin.shared.ast.query.{Col, QueryData, QueryResult}
 import scala.collection.mutable.ListBuffer
 
 trait QueryApi extends BaseApi {
@@ -35,9 +35,9 @@ trait QueryApi extends BaseApi {
     enumAttrs: Seq[String]
   ): List[(Long, Long, String, Boolean, String, String)] = ???
 
-  def addQuery(db: String, savedQuery: SavedQuery): Either[String, String] = ???
-  def updateQuery(db: String, savedQuery: SavedQuery): Either[String, String] = ???
-  def retractQuery(db: String, favMolecule: String): Either[String, String] = ???
+  def addQuery(db: String, query: QueryData): Either[String, String] = ???
+  def updateQuery(db: String, query: QueryData): Either[String, String] = ???
+  def retractQuery(db: String, query: QueryData): Either[String, String] = ???
 
   def toggleMarker(
     db: String,

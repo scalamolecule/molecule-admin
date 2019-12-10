@@ -31,7 +31,7 @@ case class ShortCuts()(implicit val ctx: Ctx.Owner)
     _subMenuShortcuts(
       _shortCutsTable("Keyboard shortcuts", 14,
         _square("?", "Toggle this shortcuts info", { () => hideShortcuts }),
-        _square("q", "Toggle Queries menu", { () => toggleQueriesMenu }),
+        _square("q", "Toggle Queries menu", { () => toggleQueryList }),
         _square("r", "Toggle Recent queries menu", { () => toggleRecentMenu }),
         _square("v", "Toggle Views", { () => toggleViews }),
         _square("b", "Toggle Query Builder", { () => toggleQueryBuilder }),

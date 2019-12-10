@@ -4,7 +4,7 @@ import molecule.api.Entity
 import molecule.api.out20._
 import molecule.facade.Conn
 import moleculeadmin.shared.api.BaseApi
-import moleculeadmin.shared.ast.query.{ColSetting, SavedQuery}
+import moleculeadmin.shared.ast.query.{ColSetting, QueryData}
 import moleculeadmin.shared.ast.schema._
 import moleculeadmin.shared.util.HelpersAdmin
 
@@ -21,9 +21,11 @@ trait Base extends BaseApi with HelpersAdmin {
       Set[Long],
       Set[Long],
       Set[Long],
-      Seq[SavedQuery]
+      Seq[QueryData]
     ) = {
     implicit val conn = Conn(base + "/meta")
+
+
     // Use "admin" for now. Todo: users
     val userId                     = user_User.e.username_("admin").get match {
       case List(eid) => eid
@@ -45,27 +47,39 @@ trait Base extends BaseApi with HelpersAdmin {
         dbSettingsId1
     }
 
-    val (_, starsOpt, flagsOpt, checksOpt, queryIdsOpt) =
+    println("dbSettingsId 1: " + dbSettingsId)
+    user_DbSettings(dbSettingsId).Queries.molecule.colSettings$.get foreach println
+
+    user_ColSetting.e.colIndex.sortDir.sortPos.get foreach println
+
+    val (_, stars$, flags$, checks$, queryIds$) =
       user_DbSettings(dbSettingsId).db.stars$.flags$.checks$.queries$.get.head
 
     val (stars, flags, checks) = (
-      starsOpt.getOrElse(Set.empty[Long]),
-      flagsOpt.getOrElse(Set.empty[Long]),
-      checksOpt.getOrElse(Set.empty[Long]),
+      stars$.getOrElse(Set.empty[Long]),
+      flags$.getOrElse(Set.empty[Long]),
+      checks$.getOrElse(Set.empty[Long])
     )
 
-    // todo: save ns and nss of query + show dropdowns under Queries submenu
-    val queries = queryIdsOpt.fold(Seq.empty[SavedQuery])(queryIds =>
-      user_Query(queryIds).molecule.showGrouped.groupedCols$
-        .ColSettings.*(user_ColSetting.index.attrExpr.sortDir.sortPos.filterExpr)
+    val queries = queryIds$.fold(Seq.empty[QueryData])(queryIds =>
+      user_Query(queryIds)
+        .molecule.part.ns.isFavorite.showGrouped.groupedCols$.colSettings$
         .get.sortBy(_._1)
         .map {
-          case (molecule, showGrouped, groupedCols, colSettings) =>
-            SavedQuery(
-              molecule,
-              colSettings.map(ColSetting.tupled(_)),
+          case (molecule1, part, ns, isFavorite, showGrouped, groupedCols$, colSettings$) =>
+            val colSettings = colSettings$.fold(Seq.empty[ColSetting])(
+              colSettingIds =>
+                user_ColSetting(colSettingIds).colIndex.sortDir.sortPos.get
+                  .map(ColSetting.tupled(_))
+            )
+            QueryData(
+              molecule1,
+              part,
+              ns,
+              isFavorite,
               showGrouped,
-              groupedCols.fold(Seq.empty[Int])(_.toSeq)
+              groupedCols$.fold(Seq.empty[Int])(_.toSeq),
+              colSettings
             )
         }
     )
@@ -81,7 +95,7 @@ trait Base extends BaseApi with HelpersAdmin {
           Set[Long],
           Set[Long],
           Set[Long],
-          Seq[SavedQuery]
+          Seq[QueryData]
         )
     ) =
     (dbNames(), getMetaSchema(db), settings(db))
