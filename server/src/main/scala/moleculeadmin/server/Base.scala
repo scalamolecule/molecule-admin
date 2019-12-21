@@ -4,7 +4,8 @@ import molecule.api.Entity
 import molecule.api.out20._
 import molecule.facade.Conn
 import moleculeadmin.shared.api.BaseApi
-import moleculeadmin.shared.ast.query.{ColSetting, QueryData}
+//import moleculeadmin.shared.ast.query.{ColSetting, QueryData}
+import moleculeadmin.shared.ast.query.QueryData
 import moleculeadmin.shared.ast.schema._
 import moleculeadmin.shared.util.HelpersAdmin
 
@@ -24,7 +25,6 @@ trait Base extends BaseApi with HelpersAdmin {
       Seq[QueryData]
     ) = {
     implicit val conn = Conn(base + "/meta")
-
 
     // Use "admin" for now. Todo: users
     val userId                     = user_User.e.username_("admin").get match {
@@ -47,43 +47,33 @@ trait Base extends BaseApi with HelpersAdmin {
         dbSettingsId1
     }
 
-    println("dbSettingsId 1: " + dbSettingsId)
-    user_DbSettings(dbSettingsId).Queries.molecule.colSettings$.get foreach println
-
-    user_ColSetting.e.colIndex.sortDir.sortPos.get foreach println
-
-    val (_, stars$, flags$, checks$, queryIds$) =
-      user_DbSettings(dbSettingsId).db.stars$.flags$.checks$.queries$.get.head
-
-    val (stars, flags, checks) = (
-      stars$.getOrElse(Set.empty[Long]),
-      flags$.getOrElse(Set.empty[Long]),
-      checks$.getOrElse(Set.empty[Long])
-    )
-
-    val queries = queryIds$.fold(Seq.empty[QueryData])(queryIds =>
-      user_Query(queryIds)
-        .molecule.part.ns.isFavorite.showGrouped.groupedCols$.colSettings$
-        .get.sortBy(_._1)
-        .map {
-          case (molecule1, part, ns, isFavorite, showGrouped, groupedCols$, colSettings$) =>
-            val colSettings = colSettings$.fold(Seq.empty[ColSetting])(
-              colSettingIds =>
-                user_ColSetting(colSettingIds).colIndex.sortDir.sortPos.get
-                  .map(ColSetting.tupled(_))
-            )
-            QueryData(
-              molecule1,
-              part,
-              ns,
-              isFavorite,
-              showGrouped,
-              groupedCols$.fold(Seq.empty[Int])(_.toSeq),
-              colSettings
-            )
-        }
-    )
-    (settings, views, stars, flags, checks, queries)
+    user_DbSettings(dbSettingsId).db.stars$.flags$.checks$.Queries.*?(
+      user_Query.molecule.part.ns.isFavorite.showGrouped.groupedCols$.ColSettings.*?(
+        user_ColSetting.colIndex.sortDir.sortPos
+      )
+    ).get.head match {
+      case (_, stars$, flags$, checks$, queryList) =>
+        (
+          settings,
+          views,
+          stars$.getOrElse(Set.empty[Long]),
+          flags$.getOrElse(Set.empty[Long]),
+          checks$.getOrElse(Set.empty[Long]),
+          queryList.sortBy(_._1).map {
+            case (molecule1, part, ns, isFavorite, showGrouped, groupedCols$, colSettings) =>
+              QueryData(
+                molecule1,
+                part,
+                ns,
+                isFavorite,
+                showGrouped,
+                groupedCols$.getOrElse(Set.empty[Int]),
+//                groupedCols$.fold(Seq.empty[Int])(_.toSeq),
+                colSettings //.map(ColSetting tupled)
+              )
+          }
+        )
+    }
   }
 
   override def loadMetaData(db: String): (
@@ -199,28 +189,34 @@ trait Base extends BaseApi with HelpersAdmin {
     MetaSchema(parts.sortBy(_.pos))
   }
 
+
   override def getFlatMetaSchema(db: String): FlatSchema = {
     implicit val conn = Conn(base + "/meta")
     meta_Db.name_(db)
       .Partitions.pos.name.descr$
       .Namespaces.pos.name.nameFull.descr$
-      .Attrs.pos.name.card.tpe.enums$.refNs$.options$.doc$.attrGroup$.entityCount$.distinctValueCount$.descrAttr$.topValues$
-      .get.sortBy(t => (t._1, t._4, t._8)).zipWithIndex.map {
-      case ((_, part, partDescr, _, ns, nsFull, nsDescr, _, attr, card, tpe, enums0, ref, options0, doc, attrGroup, count, distinctCount, descrAttr, topValues0), i) => {
-        val enums                     = enums0.getOrElse(Nil).toSeq.sorted
-        val options                   = options0.getOrElse(Nil).toSeq.filterNot(_ == "indexed").sorted
-        val topValues1: Seq[TopValue] = if (topValues0.isEmpty) Nil else {
-          val topValueIds = topValues0.getOrElse(Nil)
-          stats_TopValue(topValueIds).entityCount.value.label$.get.map(TopValue tupled)
-        }
-        val topValues2                = if (topValues1.isEmpty)
+      .Attrs.pos.name.card.tpe.enums$.refNs$.options$.doc$
+      .attrGroup$.entityCount$.distinctValueCount$.descrAttr$.TopValues.*?(
+      stats_TopValue.entityCount.value.label$
+    ).get.sortBy(t => (t._1, t._4, t._8)).zipWithIndex.map {
+      case ((_, part, partDescr, _, ns, nsFull, nsDescr, _, attr, card, tpe,
+      enums0, ref, options0, doc,
+      attrGroup, count, distinctCount, descrAttr, topValuesList), i) => {
+        val topValues1: Seq[TopValue] = topValuesList.map(TopValue tupled)
+        val topValues2: Seq[TopValue] = if (topValues1.isEmpty)
           Nil
         else if (topValues1.head.label$.isDefined)
           topValues1.sortBy(r => (r.entityCount, r.label$.getOrElse("")))
         else
           topValues1.sortBy(r => (r.entityCount, r.value))
 
-        FlatAttr(i + 1, part, partDescr, ns, nsFull, nsDescr, attr, card, tpe, enums, ref, options, doc, attrGroup, count, distinctCount, descrAttr, topValues2)
+        FlatAttr(
+          i + 1, part, partDescr, ns, nsFull, nsDescr, attr, card, tpe,
+          enums0.getOrElse(Nil).toSeq.sorted,
+          ref,
+          options0.getOrElse(Nil).toSeq.filterNot(_ == "indexed").sorted,
+          doc, attrGroup, count, distinctCount, descrAttr, topValues2
+        )
       }
     }
   }

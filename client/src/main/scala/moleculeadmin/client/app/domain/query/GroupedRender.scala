@@ -21,7 +21,7 @@ case class GroupedRender(db: String)(implicit val ctx: Ctx.Owner)
   def groupData(
     qr: QueryResult,
     colIndex: Int,
-    colType                 : String
+    colType: String
   ): Seq[(String, Int)] = {
     colType match {
       case "string" =>
@@ -42,12 +42,10 @@ case class GroupedRender(db: String)(implicit val ctx: Ctx.Owner)
 
   def rxElement: Rx.Dynamic[TypedTag[Element]] = Rx {
     if (groupedCols().nonEmpty && showGrouped()) {
-      val qr: QueryResult = queryCache2.queryResult
-//      val qr: QueryResult = queryCache.now
-//        .find(_.modelElements == modelElements.now).get.queryResult
+      val qr: QueryResult = queryCache.queryResult
 
       _cardsContainer(
-        groupedCols.now.map { colIndex =>
+        groupedCols.now.toSeq.sorted.map { colIndex =>
           val Col(_, _, nsAlias, _, attr, _, colType, _, _, _, _, _, _, _, _) =
             columns.now.find(_.colIndex == colIndex).get
           _grouped(

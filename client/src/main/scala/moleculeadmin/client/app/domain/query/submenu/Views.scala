@@ -29,8 +29,6 @@ case class Views()(implicit val ctx: Ctx.Owner)
         val openViews = Seq(
           if (viewsOn.now) Some("viewsOn") else None,
           if (viewMolecule.now) Some("viewMolecule") else None,
-//          if (viewQueries.now) Some("viewQueries") else None,
-//          if (viewRecentMolecules.now) Some("viewRecentMolecules") else None,
           if (viewDatalog.now) Some("viewDatalog") else None,
           if (viewTransaction.now) Some("viewTransaction") else None,
           if (viewEntity.now) Some("viewEntity") else None,
@@ -76,19 +74,17 @@ case class Views()(implicit val ctx: Ctx.Owner)
         cb(0, span("Show ", span("V", textDecoration.underline), "iews"), viewsOn),
         hr,
         cb(1, "Molecule", viewMolecule),
-//        cb(2, "Queries", viewQueries),
-//        cb(3, "Recent", viewRecentMolecules),
-        cb(4, "Datalog", viewDatalog),
-        cb(5, "Transaction", viewTransaction),
-        cb(6, "Entity", viewEntity),
-        cb(7, "Entity History", viewEntityHistory),
+        cb(2, "Datalog", viewDatalog),
+        cb(3, "Transaction", viewTransaction),
+        cb(4, "Entity", viewEntity),
+        cb(5, "Entity History", viewEntityHistory),
         h5("Debugging", paddingTop := 10, paddingBottom := 10),
-        cb(8, "Molecule Model", viewMoleculeModel),
-        cb(9, "Molecule Query", viewMoleculeQuery),
-        cb(10, "Columns", viewColumns),
-        cb(11, "Tree with attr names only", viewTree1),
-        cb(12, "Tree with attr definitions", viewTree2),
-        cb(13, "Full Tree", viewTree3)
+        cb(6, "Molecule Model", viewMoleculeModel),
+        cb(7, "Molecule Query", viewMoleculeQuery),
+        cb(8, "Columns", viewColumns),
+        cb(9, "Tree with attr names only", viewTree1),
+        cb(10, "Tree with attr definitions", viewTree2),
+        cb(11, "Full Tree", viewTree3)
       )
     )
   }

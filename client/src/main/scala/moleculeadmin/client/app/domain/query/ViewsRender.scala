@@ -24,39 +24,16 @@ case class ViewsRender(db: String)(implicit val ctx: Ctx.Owner)
     val lines      = curMolecule.now.split("\n")
     val rows       = lines.length + 2
     val cols       = lines.map(_.length).max + 25
-//    val alreadyFav = savedQueries().exists(_.molecule == curMolecule.now)
     val alreadyFav = savedQueries.now.exists(_.molecule == curMolecule.now)
     _moleculeView(
       rows,
       cols,
       curMolecule.now,
-      saveQueryCallback(QueryData(curMolecule.now, "x", "x", false, false, Nil, Nil)),
+      upsertQueryCallback(QueryData(curMolecule.now, "x", "x", false, false, Set.empty[Int], Nil)),
       alreadyFav
     )
   }
 
-  //  def queriesView: Rx.Dynamic[TypedTag[Element]] = Rx {
-  //    _queriesView(
-  //      savedQueries().sortBy(_.molecule),
-  //      curMolecule.now,
-  //      useQueryCallback,
-  //      retractQueryCallback
-  //    )
-  //  }
-  //
-  //  def recentMoleculesView: Rx.Dynamic[TypedTag[Element]] = Rx {
-  //    // Clear recent molecules when max rows is changed
-  //    maxRows()
-  //    _recentMoleculesView(
-  //      queryCache().map(_.molecule).sorted,
-  //      curMolecule.now,
-  //      savedQueries().map(_.molecule),
-  //      resetRecentMoleculesCallback,
-  //      useRecentMoleculeCallback,
-  //      saveQueryCallback,
-  //      removeRecentMoleculeCallback
-  //    )
-  //  }
 
   def moleculeModelView: TypedTag[Element] =
     _codeView("Molecule Model", "scala", Model(modelElements.now).toString())
@@ -85,14 +62,13 @@ case class ViewsRender(db: String)(implicit val ctx: Ctx.Owner)
 
 
   def rxElement: Rx.Dynamic[TypedTag[Element]] = Rx {
-    //    println("ViewsRender...")
-    // Triggering by columns() ensures that both model and
-    // columns have been calculated (in DataTable)
-    if (columns().nonEmpty && viewsOn()) {
+    // triggers
+    viewsOn()
+    columns()
+    if (columns.now.nonEmpty && viewsOn.now) {
+      // Render views
       _cardsContainer(
         if (viewMolecule()) moleculeView else (),
-        //        if (viewQueries()) queriesView else (),
-        //        if (viewRecentMolecules()) recentMoleculesView else (),
         if (viewDatalog()) Datalog() else (),
         if (viewTransaction()) Transaction(db).view else (),
         if (viewEntity()) Entity(db).view else (),

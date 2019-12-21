@@ -1,6 +1,7 @@
 package moleculeadmin.shared.ops.query
 
-import moleculeadmin.shared.ast.query.{Col, ColSetting}
+//import moleculeadmin.shared.ast.query.{Col, ColSetting}
+import moleculeadmin.shared.ast.query.Col
 import moleculeadmin.shared.ast.schema.{Attr, Ns}
 import molecule.ast.model._
 import molecule.transform.Model2Query.coalesce
@@ -220,8 +221,8 @@ trait ColOps extends HelpersAdmin {
     cols
   }
 
-  def colSettings(cols: Seq[Col]): Seq[ColSetting] =
-    cols.map(c => ColSetting(c.colIndex, c.sortDir, c.sortPos))
+  def colSettings(cols: Seq[Col]): Seq[(Int, String, Int)] =
+    cols.map(c => (c.colIndex, c.sortDir, c.sortPos))
 
   def getSortedColumns(cols: Seq[Col], colIndex: Int, additive: Boolean): Seq[Col] = {
 

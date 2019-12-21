@@ -37,8 +37,7 @@ case class GroupSave(db: String, col: Col)(implicit val ctx: Ctx.Owner)
   // Start spinner since saving to db can take time
   processing() = filterId
 
-  val cache = queryCache2
-//  val cache = queryCache.now.find(_.modelElements == modelElements.now).get
+  val cache = queryCache
   val qr    = cache.queryResult
 
   val eidIndex = getEidColIndex(columns.now, colIndex, nsAlias, nsFull)
@@ -157,8 +156,7 @@ case class GroupSave(db: String, col: Col)(implicit val ctx: Ctx.Owner)
           }
 
           // Invalidate previous caches to avoid old attr data to hang over
-//          queryCache() = Seq(cache)
-          queryCache2 = cache
+          queryCache = cache
 
           // Turn spinner off
           processing() = ""

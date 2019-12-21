@@ -49,7 +49,7 @@ trait SubMenuElements extends AppElements with DropdownMenu {
     savedMolecules: Seq[String],
     favoriteMolecules: Seq[String],
     use: QueryData => () => Unit,
-    save: QueryData => () => Unit,
+    upsert: QueryData => () => Unit,
     favorite: QueryData => () => Unit,
     unfavorite: QueryData => () => Unit,
     retract: QueryData => () => Unit,
@@ -78,7 +78,7 @@ trait SubMenuElements extends AppElements with DropdownMenu {
                   savedMolecules,
                   favoriteMolecules,
                   use,
-                  save,
+                  upsert,
                   favorite
                 )
               ),
@@ -108,7 +108,7 @@ trait SubMenuElements extends AppElements with DropdownMenu {
               newFav,
               favoriteQueries,
               use,
-              save,
+              upsert,
               unfavorite
             ),
           ) else ()
@@ -272,18 +272,18 @@ trait SubMenuElements extends AppElements with DropdownMenu {
     newFav: Seq[QueryData],
     favoriteQueries: Seq[QueryData],
     use: QueryData => () => Unit,
-    save: QueryData => () => Unit,
+    upsert: QueryData => () => Unit,
     unfavorite: QueryData => () => Unit
   ): TypedTag[Table] = {
     table(
       cls := "tableRowLink",
       newFav.map(query =>
-        tr(cls := "current",
+        tr(cls := "other", onclick := upsert(query),
           th(0),
-          td(curMolecule, paddingRight := 20),
-          td(
-            textAlign.right,
-            a(cls := "discrete", href := "#", "save", onclick := save(query))
+          td("save current query...",
+            whiteSpace.nowrap,
+            paddingRight := 20,
+            colspan := 2
           )
         )
       ) ++ favoriteQueries.zipWithIndex.map {
@@ -406,14 +406,14 @@ trait SubMenuElements extends AppElements with DropdownMenu {
       shortcuts)
   )
 
-  def _square(key: String, label: String, onclck: () => Unit): TypedTag[TableRow] = tr(
+  def _square(key: String, label: Frag, onclck: () => Unit): TypedTag[TableRow] = tr(
     cls := "other",
     th(span(key, cls := "box")),
     td(label),
     onclick := onclck
   )
 
-  def _circle(key: String, label: String, onclck: () => Unit): TypedTag[TableRow] = tr(
+  def _circle(key: String, label: Frag, onclck: () => Unit): TypedTag[TableRow] = tr(
     cls := "other",
     th(span(cls := "circle", key)),
     td(label),

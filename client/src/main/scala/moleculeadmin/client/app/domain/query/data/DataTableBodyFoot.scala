@@ -32,8 +32,7 @@ case class DataTableBodyFoot(db: String)(implicit val ctx: Ctx.Owner)
     val (sortIndex, filterIndex) = Indexes(queryResult, sortCols, unfiltered).get
 
     // Cache current query result and rendering data
-
-    val c = QueryCache(
+    queryCache = QueryCache(
       modelElements.now,
       tree.now,
       curMolecule.now,
@@ -45,8 +44,6 @@ case class DataTableBodyFoot(db: String)(implicit val ctx: Ctx.Owner)
       showGrouped.now,
       groupedCols.now
     )
-
-    queryCache2 = c
 
     val (part, ns) = getPartNs(curMolecule.now)
 
@@ -69,7 +66,6 @@ case class DataTableBodyFoot(db: String)(implicit val ctx: Ctx.Owner)
     }
 
     //    println("append...")
-
     rowBuilder.append(sortIndex, filterIndex)
     DataTableFoot().populate(tableFoot)
   }

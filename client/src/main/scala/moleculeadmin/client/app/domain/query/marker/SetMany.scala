@@ -35,9 +35,7 @@ object SetMany extends AppElements {
     }
 
     val eids: Set[Long] = {
-      val qr = queryCache2.queryResult
-//      val qr = queryCache.now
-//        .find(_.modelElements == modelElements.now).get.queryResult
+      val qr = queryCache.queryResult
 
       val eidArray: Array[Option[Double]] = qr.num(qr.arrayIndexes(colIndex))
 

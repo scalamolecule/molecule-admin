@@ -4,14 +4,17 @@ import moleculeadmin.client.app.domain.query.KeyEvents
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.rxstuff.RxBindings
 import org.scalajs.dom.document
+import org.scalajs.dom.html.LI
 import rx.{Ctx, Rx}
+import scalatags.JsDom
+import scalatags.JsDom.all._
 import scala.scalajs.js.timers._
 
 
 case class ShortCuts()(implicit val ctx: Ctx.Owner)
   extends RxBindings with SubMenuElements with KeyEvents {
 
-  def hideShortcuts = {
+  def hideShortcuts: SetTimeoutHandle = {
     val el = document.getElementById("submenu-shortcuts")
     val style = el.getAttribute("style")
     if (style.endsWith("display:block;")) {
@@ -27,19 +30,19 @@ case class ShortCuts()(implicit val ctx: Ctx.Owner)
   }
 
 
-  def dynRender = Rx {
+  def dynRender: Rx.Dynamic[JsDom.TypedTag[LI]] = Rx {
     _subMenuShortcuts(
       _shortCutsTable("Keyboard shortcuts", 14,
         _square("?", "Toggle this shortcuts info", { () => hideShortcuts }),
-        _square("q", "Toggle Queries menu", { () => toggleQueryList }),
-        _square("r", "Toggle Recent queries menu", { () => toggleRecentMenu }),
-        _square("v", "Toggle Views", { () => toggleViews }),
-        _square("b", "Toggle Query Builder", { () => toggleQueryBuilder }),
-        _square("m", "Minimize query to selected attributes", { () => toggleMinimize })
+        _square("q", span("Toggle ", span("Q", textDecoration.underline), "ueries Builder"), { () => toggleQueryBuilder }),
+        _square("l", span(span("L", textDecoration.underline), "ist favorite queries"), { () => toggleQueryList }),
+//        _square("r", "Toggle Recent queries menu", { () => toggleRecentMenu }),
+        _square("v", span("Toggle ", span("V", textDecoration.underline), "iews"), { () => toggleViews }),
       ),
 
-      _shortCutsTable("Attribute selections", 14,
-        _circle("a", "Show all attributes", { () => toggleAttrSelectionA }),
+      _shortCutsTable("Query attribute selections", 14,
+        _circle("m", span(span("M", textDecoration.underline), "inimize query to selected attributes"), { () => toggleMinimize }),
+        _circle("a", span("Show ", span("A", textDecoration.underline), "ll attributes"), { () => toggleAttrSelectionA }),
 //        _circle("r", "Show attributes without ref attributes", { () => toggleAttrSelectionR }),
 //        _circle("v", "Show only attributes with values", { () => toggleAttrSelectionV })
       ),

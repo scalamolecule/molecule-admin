@@ -39,8 +39,8 @@ object QueryClient extends RxBindings with TreeOps with SchemaOps with ColOps
       viewCellTypes = mkViewCellTypes(nsMap)
       enumAttrs = mkEnumAttrs(nsMap)
 
-      println("queries:")
-      queries foreach println
+//      println("queries:")
+//      queries foreach println
 
       // Apply saved settings
       Rx {
@@ -71,10 +71,8 @@ object QueryClient extends RxBindings with TreeOps with SchemaOps with ColOps
       }
 
       // Render page
-
-      //      val subMenu = QuerySubMenu(db)
       document.body.appendChild(
-        TopMenu(dbs, db, "query", QuerySubMenu(db).dynRender2).render
+        TopMenu(dbs, db, "query", QuerySubMenu(db).dynRender).render
       )
       // make saved queries available via key command
       registerKeyEvents

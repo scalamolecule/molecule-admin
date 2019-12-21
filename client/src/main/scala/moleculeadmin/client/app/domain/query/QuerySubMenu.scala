@@ -31,58 +31,16 @@ case class QuerySubMenu(db: String)(implicit val ctx: Ctx.Owner)
     _maxRowsSelector.blur()
   }
 
-//  //  val maxRowsSelector = _maxRowsSelector
-//
-//  val queryList = QueryList(db)
-//
-//  //  println("QuerySubMenu")
-//
-//  lazy val list: Rx.Dynamic[Rx.Dynamic[JsDom.TypedTag[LI]]] = Rx {
-//    //    queryCache()
-//    savedQueries()
-//    recentQueries()
-//
-//    if (savedQueries.now.nonEmpty || recentQueries.now.nonEmpty) {
-//      //    if (savedQueries().nonEmpty || recentQueries().nonEmpty) {
-//      //    if (recentQueries().nonEmpty) {
-//      println("saved/recent triggered...")
-//      queryList.dynRender
-//    } else Rx(li())
-//    //    } else Rx(li("list..."))
-//  }
-//
-//  lazy val views: Rx.Dynamic[Rx.Dynamic[JsDom.TypedTag[LI]]] = Rx {
-//
-//    println("views...")
-//    modelElements()
-//    columns()
-//
-//    if (modelElements().nonEmpty) {
-//      println("views 2...")
-//      Views().dynRender
-//    } else Rx(li())
-//    //    } else Rx(li("views.."))
-//  }
-//
-//  def dynRender: JsDom.TypedTag[Span] = {
-//    span(
-//      _maxRowsSelector,
-//      ul(
-//        cls := "nav nav-pills",
-//        list,
-//        views,
-//        ShortCuts().dynRender
-//      )
-//    )
-//  }
 
-
-  def dynRender2: Rx.Dynamic[JsDom.TypedTag[Span]] = Rx {
+  def dynRender: Rx.Dynamic[JsDom.TypedTag[Span]] = Rx {
     span(
       _maxRowsSelector,
       ul(cls := "nav nav-pills",
-        if (savedQueries().nonEmpty || recentQueries().nonEmpty) {
-          println("savedQueries/recentQueries")
+        if (
+          savedQueries().nonEmpty || recentQueries().nonEmpty
+
+        ) {
+//          println("savedQueries/recentQueries")
           // Re-calc query list when molecule changes
           curMolecule()
           QueryList(db).dynRender
