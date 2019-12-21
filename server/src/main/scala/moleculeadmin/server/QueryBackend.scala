@@ -67,8 +67,6 @@ class QueryBackend extends QueryApi with Base {
     else
       conn.db +: rules.get +: inputs(l ++ ll ++ lll)
 
-    val t = new Timer
-
     val t0        = System.currentTimeMillis
     val allRows   = Peer.q(datalogQuery, allInputs: _*)
     val queryTime = System.currentTimeMillis - t0
@@ -205,17 +203,20 @@ class QueryBackend extends QueryApi with Base {
     (row.get(0).asInstanceOf[Long], row.get(1).asInstanceOf[Long])
   }
 
-  def withTransactor[T](body: => Either[String, T])(implicit conn: Conn): Either[String, T] = try {
+  def withTransactor[T](
+    body: => Either[String, T]
+  )(implicit conn: Conn): Either[String, T] = try {
     // Check if transactor responds by sending a Future back
     conn.datomicConn.sync()
     // Execute body of work
     body
   } catch {
-    case _: Throwable => Left("Datomic Transactor unavailable. Please restart it and try the operation again.")
+    case _: Throwable => Left(
+      "Datomic Transactor unavailable. Please restart it and try the operation again.")
   }
 
 
-  override def addQuery(db: String, query: QueryData): Either[String, String] = {
+  override def upsertQuery(db: String, query: QueryData): Either[String, String] = {
     implicit val conn = Conn(base + "/meta")
     withTransactor {
       try {
@@ -227,7 +228,8 @@ class QueryBackend extends QueryApi with Base {
         val dbId   = meta_Db.e.name_(db).get.headOption match {
           case Some(eid) => eid
           case None      =>
-            throw new RuntimeException(s"Unexpectedly couldn't find database name `$db` in meta database.")
+            throw new RuntimeException(
+              s"Unexpectedly couldn't find database name `$db` in meta database.")
         }
 
         // One DbSettings per db for now
@@ -239,36 +241,33 @@ class QueryBackend extends QueryApi with Base {
             dbSettingsId1
         }
 
-        println("dbSettingsId 2: " + dbSettingsId)
-
-
-        val QueryData(molecule1, part, ns,
+        val QueryData(molecule1, _, _,
         isFavorite, showGrouped, groupedCols, colSettings) = query
 
-        if (user_DbSettings(dbSettingsId).Queries.molecule.get.contains(molecule1)) {
-          Left(s"`$molecule1` is already saved.")
-        } else {
-          val colSettingIds = user_ColSetting
-            .colIndex.sortDir.sortPos
-            .insert(
-              colSettings.map(cs =>
-                (cs.colIndex, cs.sortDir, cs.sortPos)
-              )
-            ).eidSet
+        user_DbSettings(dbSettingsId).Queries.e.molecule_(molecule1).get match {
+          case Nil =>
+            val newQueryId =
+              user_Query.molecule.part.ns.isFavorite.showGrouped.groupedCols.ColSettings.*(
+                user_ColSetting.colIndex.sortDir.sortPos
+              ).insert(List(QueryData.unapply(query).get)).eid
+            user_DbSettings(dbSettingsId).queries.assert(newQueryId).update
+            Right("Successfully inserted query")
 
-          val newQueryId = user_Query
-            .molecule(molecule1)
-            .part(part)
-            .ns(ns)
-            .isFavorite(isFavorite)
-            .showGrouped(showGrouped)
-            .groupedCols(groupedCols)
-            .colSettings(colSettingIds)
-            .save.eid
+          case Seq(queryId) =>
+            // Re-insert col settings
+            user_Query(queryId).colSettings().update
+            val colSettingIds =
+              user_ColSetting.colIndex.sortDir.sortPos.insert(colSettings).eidSet
+            user_Query(queryId)
+              .isFavorite(isFavorite)
+              .showGrouped(showGrouped)
+              .groupedCols(groupedCols)
+              .colSettings(colSettingIds)
+              .update
+            Right("Successfully updated query")
 
-          user_DbSettings(dbSettingsId).queries.assert(newQueryId).update
-
-          Right("ok")
+          case queryIds =>
+            Left(s"`$molecule1` unexpectedly found ${queryIds.length} times.")
         }
       } catch {
         case t: Throwable => Left(t.getMessage)
@@ -288,7 +287,8 @@ class QueryBackend extends QueryApi with Base {
         val dbId   = meta_Db.e.name_(db).get.headOption match {
           case Some(eid) => eid
           case None      =>
-            throw new RuntimeException(s"Unexpectedly couldn't find database name `$db` in meta database.")
+            throw new RuntimeException(
+              s"Unexpectedly couldn't find database name `$db` in meta database.")
         }
 
         // One DbSettings per db for now
@@ -313,14 +313,8 @@ class QueryBackend extends QueryApi with Base {
           val queryId = queryIds.head
           // Re-insert col settings
           user_Query(queryId).colSettings().update
-          val colSettingIds = user_ColSetting
-            .colIndex.sortDir.sortPos
-            .insert(
-              colSettings.map(cs =>
-                (cs.colIndex, cs.sortDir, cs.sortPos)
-              )
-            ).eidSet
-
+          val colSettingIds =
+            user_ColSetting.colIndex.sortDir.sortPos.insert(colSettings).eidSet
           user_Query(queryId)
             .isFavorite(isFavorite)
             .showGrouped(showGrouped)

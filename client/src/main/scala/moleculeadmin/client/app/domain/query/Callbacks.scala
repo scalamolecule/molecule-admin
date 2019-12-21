@@ -4,7 +4,7 @@ import boopickle.Default._
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.autowire.queryWire
 import moleculeadmin.client.rxstuff.RxBindings
-import moleculeadmin.shared.ast.query.{ColSetting, QueryData}
+import moleculeadmin.shared.ast.query.QueryData
 import moleculeadmin.shared.ops.query.ColOps
 import moleculeadmin.shared.ops.transform.Molecule2Model
 import org.scalajs.dom.window
@@ -20,22 +20,54 @@ class Callbacks(implicit ctx: Ctx.Owner)
   // Prevent multiple asynchronous calls to db while processing first call
   var idle = true
 
-  def saveQuery(query: QueryData): Unit = Rx {
+  private def sorted(query: QueryData): QueryData = query.copy(
+    colSettings = columns.now.map(c => (c.colIndex, c.sortDir, c.sortPos)))
+
+  private def setColumns(query: QueryData): Unit = {
+    val colSettings = query.colSettings.map(cs => cs._1 -> cs).toMap
+    columns() = columns.now.map { column =>
+      val (_, sort, sortPos) = colSettings(column.colIndex)
+      column.copy(sortDir = sort, sortPos = sortPos)
+    }
+  }
+
+  def upsertQuery(query: QueryData): Unit = Rx {
     if (idle) {
       idle = false
-      queryWire().addQuery(db, query).call().foreach {
-        case Right(_)    =>
+      queryWire().upsertQuery(db, query).call().foreach {
+        case Right("Successfully inserted query") =>
           savedQueries() = savedQueries.now :+ query
+          setColumns(query)
           idle = true
+
+        case Right("Successfully updated query") =>
+          // Keep saved and recent queries in sync
+          val m = query.molecule
+          savedQueries() = savedQueries.now.map {
+            case QueryData(`m`, _, _, _, _, _, _) => query
+            case q                                => q
+          }
+          recentQueries() = recentQueries.now.map {
+            case QueryData(`m`, _, _, _, _, _, _) => query
+            case q                                => q
+          }
+          setColumns(query)
+          idle = true
+
+        case Right(msg) =>
+          window.alert(s"Unexpected successful query upsertion: $msg")
+          idle = true
+
         case Left(error) =>
-          window.alert(s"Error adding query: $error")
+          window.alert(s"Error upserting query: $error")
           idle = true
       }
     }
   }
 
-  protected val saveQueryCallback: QueryData => () => Unit =
-    (query: QueryData) => () => saveQuery(query)
+  protected val upsertQueryCallback: QueryData => () => Unit =
+    (query: QueryData) => () => upsertQuery(sorted(query))
+
 
   protected val retractQueryCallback: QueryData => () => Unit =
     (query: QueryData) => () => Rx {
@@ -57,7 +89,7 @@ class Callbacks(implicit ctx: Ctx.Owner)
     if (idle) {
       idle = false
       queryWire().updateQuery(db, updatedQuery).call().foreach {
-        case Right(_)    =>
+        case Right(_) =>
           val m = updatedQuery.molecule
 
           // Keep saved and recent queries in sync
@@ -94,19 +126,7 @@ class Callbacks(implicit ctx: Ctx.Owner)
           showGrouped() = query.showGrouped
           groupedCols() = query.groupedCols
           modelElements() = elements
-          val colSettings = query.colSettings.map(cs => cs.colIndex -> cs).toMap
-
-          // Columns have been calculated when model updated
-          // Now add sorting settings
-          columns() = columns.now.map { column =>
-            val ColSetting(colIndex, sort, sortPos) =
-              colSettings(column.colIndex)
-            column.copy(
-              colIndex = colIndex,
-              sortDir = sort,
-              sortPos = sortPos
-            )
-          }
+          setColumns(query)
           idle = true
         case Left(err)       =>
           window.alert(s"Error using query: $err")

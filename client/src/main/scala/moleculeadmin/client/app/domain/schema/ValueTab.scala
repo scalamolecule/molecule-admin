@@ -9,7 +9,9 @@ import moleculeadmin.shared.ast.schema._
 import moleculeadmin.shared.util.HelpersAdmin
 import org.scalajs.dom
 import org.scalajs.dom.Event
+import org.scalajs.dom.html.Div
 import rx.{Ctx, Rx, Var}
+import scalatags.JsDom
 import scalatags.JsDom.all.{textAlign, _}
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -28,7 +30,7 @@ case class ValueTab(db: String, flatSchema0: FlatSchema)(implicit val ctx: Ctx.O
 
   init(flatSchema0)
 
-  def init(flatSchema1: FlatSchema) = {
+  def init(flatSchema1: FlatSchema): Rx.Dynamic[Unit] = {
     Rx {
       metaSchemaAll() = flatSchema1
       metaSchema() = if (showAll()) flatSchema1 else {
@@ -42,7 +44,7 @@ case class ValueTab(db: String, flatSchema0: FlatSchema)(implicit val ctx: Ctx.O
   }
 
 
-  def render2 = Rx {
+  def render2: Rx.Dynamic[JsDom.TypedTag[Div]] = Rx {
     div(
       marginTop := 20,
       marginLeft := 40,
@@ -211,7 +213,6 @@ case class ValueTab(db: String, flatSchema0: FlatSchema)(implicit val ctx: Ctx.O
             )
           )
         )
-        //        }
       }
     )
   }

@@ -39,8 +39,9 @@ case class QueryList(db: String)(implicit val ctx: Ctx.Owner)
     val favoriteQueries = savedQueries.now.filter(_.isFavorite).sortBy(_.molecule)
 
     val newFav: Seq[QueryData] =
-      if (curMolecule.now.isEmpty ||
-        savedQueries.now.exists(_.molecule == curMolecule.now)) {
+      if (curMolecule.now.isEmpty
+//        || savedQueries.now.exists(_.molecule == curMolecule.now)
+      ) {
         Nil
       } else {
         val (part, ns) = getPartNs(curMolecule.now)
@@ -55,8 +56,8 @@ case class QueryList(db: String)(implicit val ctx: Ctx.Owner)
         )
       }
 
-    println("QueryList " + curMolecule.now)
-    println("newFav " + newFav)
+    //    println("QueryList " + curMolecule.now)
+    //    println("newFav " + newFav)
 
     _subMenuQueryList(
       curMolecule.now,
@@ -71,7 +72,7 @@ case class QueryList(db: String)(implicit val ctx: Ctx.Owner)
       favoriteQueries.map(_.molecule),
 
       useQueryCallback,
-      saveQueryCallback,
+      upsertQueryCallback,
       favoriteQueryCallback,
       unfavoriteQueryCallback,
       retractQueryCallback,

@@ -63,25 +63,17 @@ object QueryState {
 
   // Caching -----------------------------------
 
-  // Re-use recent query results
-//  val queryCache = Var(Seq.empty[QueryCache])
-  var queryCache2: QueryCache = null
-
   // Avoiding re-creating sort index array during paging
-  var cachedCols       = Seq.empty[Col]
-  var cachedSortIndex  = Array.empty[Int]
-  var cachedRowBuilder = Option.empty[RowBuilder]
-
-  // Avoiding re-creating index array during paging
-  var cachedFilters     = Map.empty[Int, Filter[_]]
-  var cachedFilterIndex = Array.empty[Int]
-
-  // Track maxRows change
-//  var savedMaxRows = -1
+  var queryCache: QueryCache = null
+  var cachedCols             = Seq.empty[Col]
+  var cachedSortIndex        = Array.empty[Int]
+  var cachedRowBuilder       = Option.empty[RowBuilder]
+  var cachedFilters          = Map.empty[Int, Filter[_]]
+  var cachedFilterIndex      = Array.empty[Int]
 
   var changeArrays = Map.empty[Int, Array[Int]]
 
-  val savedQueries = Var(Seq.empty[QueryData])
+  val savedQueries  = Var(Seq.empty[QueryData])
   val recentQueries = Var(Seq.empty[QueryData])
 
 
@@ -116,13 +108,13 @@ object QueryState {
   val curTxInstant = Var("")
 
   // Show view statuses
-  val viewsOn             = Var(false)
-  val viewHelp            = Var(false)
-  val viewMolecule        = Var(false)
-  val viewDatalog         = Var(false)
-  val viewTransaction     = Var(false)
-  val viewEntity          = Var(false)
-  val viewEntityHistory   = Var(false)
+  val viewsOn           = Var(false)
+  val viewHelp          = Var(false)
+  val viewMolecule      = Var(false)
+  val viewDatalog       = Var(false)
+  val viewTransaction   = Var(false)
+  val viewEntity        = Var(false)
+  val viewEntityHistory = Var(false)
 
   // Debugging
   val viewMoleculeModel = Var(false)
@@ -135,5 +127,5 @@ object QueryState {
   // Col indexes for grouped attributes
   var groupableCols = Seq.empty[Int]
   val showGrouped   = Var(false)
-  val groupedCols   = Var(Seq.empty[Int])
+  val groupedCols   = Var(Set.empty[Int])
 }

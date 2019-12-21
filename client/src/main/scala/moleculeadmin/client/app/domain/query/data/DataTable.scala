@@ -77,7 +77,7 @@ case class DataTable(db: String)(implicit val ctx: Ctx.Owner)
           div(
             p(), p(b("An error occurred when querying")), pre(msgs.head),
             p(), p(b("Model")), pre(modelElements.now.mkString("\n")),
-            p(), p(b("Query")), pre(query.toString),
+            p(), p(b("Query")), pre(query.toString()),
             p(), p(b("Datalog")), pre(datalogQuery),
             p(), p(b("Cols")), pre(columns.now.mkString("\n")),
             p(), p(b("Stacktrace")), ul(for (l <- msgs.tail) yield li(l))
@@ -131,7 +131,7 @@ case class DataTable(db: String)(implicit val ctx: Ctx.Owner)
           _rowCol1("Please select at least one mandatory attribute")
 
         case elements =>
-                    println("----------- new model ----------")
+          //          println("----------- new model ----------")
           val elements1 = VerifyRawModel(elements)
           tree() = mkTree(mkModelTree(elements1))
           curMolecule() = model2molecule(elements1)
@@ -141,6 +141,9 @@ case class DataTable(db: String)(implicit val ctx: Ctx.Owner)
           filters() = Map.empty[Int, Filter[_]]
           offset() = 0
           curAttrs = columns.now.map(c => s":${c.nsFull}/${c.attr}")
+
+          // trigger views (columns trigger killed, so that is dormant here)
+          viewsOn.recalc()
 
           registerKeyEvents
           DataTableHead(db, tableBody).populate(tableHead)

@@ -162,7 +162,7 @@ trait KeyEvents extends ColOps with MoleculeOps {
     showGrouped() = !showGrouped.now
   }
 
-  def saveCurrentQuery(implicit ctx: Ctx.Owner) = {
+  def upsertCurrentQuery(implicit ctx: Ctx.Owner) = {
     val (part, ns) = getPartNs(curMolecule.now)
     val query      = QueryData(
       curMolecule.now,
@@ -171,10 +171,10 @@ trait KeyEvents extends ColOps with MoleculeOps {
       groupedCols.now,
       colSettings(columns.now)
     )
-    (new Callbacks).saveQuery(query)
+    (new Callbacks).upsertQuery(query)
   }
 
-  def useQuery(i: Int)(implicit ctx: Ctx.Owner) =
+  def useQuery(i: Int)(implicit ctx: Ctx.Owner): Unit =
     if (i < savedQueries.now.size) {
       (new Callbacks).useQuery(savedQueries.now.sortBy(_.molecule).apply(i))
     } else {
@@ -182,24 +182,11 @@ trait KeyEvents extends ColOps with MoleculeOps {
       window.alert(s"Only ${savedQueries.now.size} queries saved.")
     }
 
-  //  def useRecentMolecule(i: Int)(implicit ctx: Ctx.Owner): Unit =
-  //    if (i < queryCache.now.size) {
-  //      modelElements() = queryCache.now.sortBy(_.molecule).apply(i).modelElements
-  //    } else {
-  //      window.alert(s"Only ${queryCache.now.size} previous queries.")
-  //    }
-
-
   def queriesOpen: Boolean = {
     val queriesElement = document.getElementById("submenu-query-list")
     queriesElement != null &&
       queriesElement.getAttribute("style").endsWith("display:block;")
   }
-  //  def recentMoleculesOpen: Boolean = {
-  //    val recentElement = document.getElementById("submenu-recentMolecules")
-  //    recentElement != null &&
-  //      recentElement.getAttribute("style").endsWith("display:block;")
-  //  }
 
 
   def registerKeyEvents(
@@ -278,7 +265,7 @@ trait KeyEvents extends ColOps with MoleculeOps {
             //              toggleRecentMenu()
             case "v"                                => toggleViews
             case "g"                                => toggleGrouped
-            case "b"                                => toggleQueryBuilder
+            case "q"                                => toggleQueryBuilder
             case "m" if modelElements.now.nonEmpty  => toggleMinimize
             case "a" if builderSelection.now != "a" =>
               builderBaseSelection = "a"; builderSelection() = "a"
@@ -287,10 +274,7 @@ trait KeyEvents extends ColOps with MoleculeOps {
             //            case "r" if builderSelection.now != "r" =>
             //              builderBaseSelection = "r"; builderSelection() = "r"
             case n if queriesOpen => n match {
-              case "0" if !savedQueries.now.exists(_.molecule == curMolecule.now) =>
-                println("save query.. " + curMolecule.now)
-                savedQueries.now foreach println
-                saveCurrentQuery
+              case "0" if curMolecule.now.nonEmpty => upsertCurrentQuery
 
               case "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "0" =>
                 if (firstNumber == -1) {
@@ -308,30 +292,11 @@ trait KeyEvents extends ColOps with MoleculeOps {
                 } else if (secondNumber == -1) {
                   secondNumber = n.toInt
                 }
-              case _                                                         => ()
+
+              case _ => ()
             }
-            //            case n if recentMoleculesOpen => n match {
-            //              case "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "0" =>
-            //                // todo: refactor out redundant functionality for queries/recent
-            //                if (firstNumber == -1) {
-            //                  firstNumber = n.toInt
-            //                  setTimeout(numberMs) {
-            //                    val index = if (secondNumber == -1)
-            //                      firstNumber - 1
-            //                    else
-            //                      firstNumber * 10 + secondNumber - 1
-            //                    if (index > 0)
-            //                      useRecentMolecule(index)
-            //                    firstNumber = -1
-            //                    secondNumber = -1
-            //                  }
-            //                } else if (secondNumber == -1) {
-            //                  secondNumber = n.toInt
-            //                }
-            //              case _                                                         => ()
-            //            }
+
             case _ => ()
-            //            case other => println(other)
           }
 
         } else if (e.getModifierState("Shift")) {

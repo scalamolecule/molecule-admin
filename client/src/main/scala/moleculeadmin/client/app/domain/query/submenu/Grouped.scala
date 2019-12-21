@@ -45,7 +45,7 @@ case class Grouped()(implicit val ctx: Ctx.Owner)
                 .asInstanceOf[HTMLInputElement].checked = true
               showGrouped() = true
             }
-            groupedCols() = groupedCols.now :+ colIndex
+            groupedCols() = groupedCols.now + colIndex
           }
         }
         //        if (groupedOn.now != groupedOnBefore) {

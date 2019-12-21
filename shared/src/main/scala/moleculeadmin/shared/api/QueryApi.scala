@@ -35,7 +35,7 @@ trait QueryApi extends BaseApi {
     enumAttrs: Seq[String]
   ): List[(Long, Long, String, Boolean, String, String)] = ???
 
-  def addQuery(db: String, query: QueryData): Either[String, String] = ???
+  def upsertQuery(db: String, query: QueryData): Either[String, String] = ???
   def updateQuery(db: String, query: QueryData): Either[String, String] = ???
   def retractQuery(db: String, query: QueryData): Either[String, String] = ???
 

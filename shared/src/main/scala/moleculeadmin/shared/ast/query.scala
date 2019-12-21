@@ -70,7 +70,7 @@ object query extends HelpersAdmin {
     filters: Map[Int, Filter[_]] = Map.empty[Int, Filter[_]],
     filterIndex: Array[Int],
     showGrouped: Boolean,
-    groupedCols: Seq[Int]
+    groupedCols: Set[Int]
   )
 
   case class QueryData(
@@ -79,13 +79,7 @@ object query extends HelpersAdmin {
     ns: String,
     isFavorite: Boolean,
     showGrouped: Boolean,
-    groupedCols: Seq[Int],
-    colSettings: Seq[ColSetting]
-  )
-
-  case class ColSetting(
-    colIndex: Int,
-    sortDir: String,
-    sortPos: Int
+    groupedCols: Set[Int],
+    colSettings: Seq[(Int, String, Int)]
   )
 }
