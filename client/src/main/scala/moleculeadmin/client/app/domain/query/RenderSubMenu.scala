@@ -3,7 +3,7 @@ import autowire._
 import boopickle.Default._
 import moleculeadmin.client.app.element.query.SubMenuElements
 import moleculeadmin.client.app.domain.query.QueryState._
-import moleculeadmin.client.app.domain.query.submenu._
+import moleculeadmin.client.app.domain.query.submenu.{SubMenuQueryList, _}
 import moleculeadmin.client.autowire.queryWire
 import moleculeadmin.client.rxstuff.RxBindings
 import org.scalajs.dom.html.{LI, Span}
@@ -14,7 +14,7 @@ import scalatags.JsDom.all._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 
-case class QuerySubMenu(db: String)(implicit val ctx: Ctx.Owner)
+case class RenderSubMenu(db: String)(implicit val ctx: Ctx.Owner)
   extends RxBindings with SubMenuElements {
 
   type keepBooPickleImport_QuerySubMenu = PickleState
@@ -33,29 +33,27 @@ case class QuerySubMenu(db: String)(implicit val ctx: Ctx.Owner)
 
 
   def dynRender: Rx.Dynamic[JsDom.TypedTag[Span]] = Rx {
+//    println("---- submenu")
+    // Re-calc sub menu when query changes
+    curMolecule()
+
     span(
       _maxRowsSelector,
       ul(cls := "nav nav-pills",
         if (
-          savedQueries().nonEmpty || recentQueries().nonEmpty
+          savedQueries.nonEmpty
+            || recentQueries.nonEmpty
+            || modelElements.now.nonEmpty
+        ) SubMenuQueryList(db).dynRender else (),
 
-        ) {
-//          println("savedQueries/recentQueries")
-          // Re-calc query list when molecule changes
-          curMolecule()
-          QueryList(db).dynRender
-        } else {
-          ()
-        },
-
-        if (modelElements().nonEmpty) {
+        if (modelElements.now.nonEmpty) {
           Seq(
-            Views().dynRender,
-            Grouped().dynRender,
+            SubMenuGrouped().dynRender,
+            SubMenuViews().dynRender,
           )
         } else (),
 
-        ShortCuts().dynRender
+        SubMenuShortCuts().dynRender
       )
     )
   }

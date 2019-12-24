@@ -2,32 +2,32 @@ package moleculeadmin.client.app.domain.query.submenu
 import moleculeadmin.client.app.domain.query.Callbacks
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.element.query.SubMenuElements
-import moleculeadmin.shared.ast.query.QueryData
+import moleculeadmin.shared.ast.query.QueryDTO
 import moleculeadmin.shared.ops.query.MoleculeOps
 import org.scalajs.dom.html.LI
 import rx.{Ctx, Rx}
 import scalatags.JsDom
 
 
-case class QueryList(db: String)(implicit val ctx: Ctx.Owner)
+case class SubMenuQueryList(db: String)(implicit val ctx: Ctx.Owner)
   extends Callbacks with SubMenuElements with MoleculeOps {
 
   def dynRender: Rx.Dynamic[JsDom.TypedTag[LI]] = Rx {
 
     // Organize saved molecules by part/ns/molecule hierarchy
-    val queriesByPartNs = savedQueries.now.sortBy(_.molecule).foldLeft(
+    val queriesByPartNs = savedQueries.sortBy(_.molecule).foldLeft(
       "", "",
-      Seq.empty[(String, Seq[(String, Seq[(String, QueryData)])])]
+      Seq.empty[(String, Seq[(String, Seq[(String, QueryDTO)])])]
     ) {
-      case ((p0, _, pp), q@QueryData(m, p, ns, _, _, _, _)) if p0 != p =>
+      case ((p0, _, pp), q@QueryDTO(m, p, ns, _, _, _, _)) if p0 != p =>
         (p, ns, pp :+ p -> Seq(ns -> Seq(m -> q)))
 
-      case ((_, ns0, pp), q@QueryData(m, p, ns, _, _, _, _)) if ns0 != ns =>
+      case ((_, ns0, pp), q@QueryDTO(m, p, ns, _, _, _, _)) if ns0 != ns =>
         val (curPart, curNss) = pp.last
         val newNs             = ns -> Seq(m -> q)
         (p, ns, pp.init :+ (curPart -> (curNss :+ newNs)))
 
-      case ((_, _, pp), q@QueryData(m, p, ns, _, _, _, _)) =>
+      case ((_, _, pp), q@QueryDTO(m, p, ns, _, _, _, _)) =>
         val (curPart, curNss) = pp.last
         val (curNs, curMols)  = curNss.last
         val updatedNs         = curNs -> (curMols :+ (m -> q))
@@ -35,40 +35,34 @@ case class QueryList(db: String)(implicit val ctx: Ctx.Owner)
         (p, ns, pp.init :+ updatedPart)
     }._3
 
+    val favoriteQueries = savedQueries.filter(_.isFavorite).sortBy(_.molecule)
 
-    val favoriteQueries = savedQueries.now.filter(_.isFavorite).sortBy(_.molecule)
-
-    val newFav: Seq[QueryData] =
-      if (curMolecule.now.isEmpty
-//        || savedQueries.now.exists(_.molecule == curMolecule.now)
-      ) {
+    val newFav: Seq[QueryDTO] =
+      if (curMolecule.now.isEmpty) {
         Nil
       } else {
         val (part, ns) = getPartNs(curMolecule.now)
         Seq(
-          QueryData(
+          QueryDTO(
             curMolecule.now,
             part, ns, true,
-            showGrouped.now,
+            showGrouped,
             groupedCols.now,
             colSettings(columns.now)
           )
         )
       }
 
-    //    println("QueryList " + curMolecule.now)
-    //    println("newFav " + newFav)
-
     _subMenuQueryList(
       curMolecule.now,
       newFav,
       queriesByPartNs,
 
-      recentQueries.now.sortBy(_.molecule),
-      savedQueries.now,
+      recentQueries.sortBy(_.molecule),
+      savedQueries,
       favoriteQueries,
 
-      savedQueries.now.map(_.molecule),
+      savedQueries.map(_.molecule),
       favoriteQueries.map(_.molecule),
 
       useQueryCallback,

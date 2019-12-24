@@ -34,8 +34,10 @@ case class DataTableHead(
 
     val sortable = card == 1 || singleAggrTypes.contains(aggrType)
     val sort     = { e: MouseEvent =>
-      if (cachedCols.size == 5 &&
-        !cachedCols.exists(_.colIndex == colIndex)) {
+//      if (cachedCols.size == 5 &&
+//        !cachedCols.exists(_.colIndex == colIndex)) {
+      if (columns.now.size == 5 &&
+        !columns.now.exists(_.colIndex == colIndex)) {
         window.alert("Can sort maximum 5 columns.")
       } else {
         //            println("------------ sort ------------")
@@ -215,7 +217,7 @@ case class DataTableHead(
       colIndex += 1
     }
     val toggleCell = _openCloseQueryBuilder(
-      builderSelection() == "", () => toggleQueryBuilder)
+      querySelection() == "", () => toggleQueryBuilder)
     val nsCells    = nss.map { case (ns, i) => th(colspan := i, ns) }
     tableHead.innerHTML = ""
     tableHead.appendChild(tr(toggleCell +: nsCells).render)

@@ -13,7 +13,7 @@ import molecule.ast.transactionModel.{Add, Retract}
 import molecule.facade.{Conn, TxReport}
 import moleculeadmin.server.query.Rows2QueryResult
 import moleculeadmin.shared.api.QueryApi
-import moleculeadmin.shared.ast.query.{Col, QueryData, QueryResult}
+import moleculeadmin.shared.ast.query.{Col, QueryDTO, QueryResult}
 import scala.collection.JavaConverters._
 
 
@@ -216,7 +216,7 @@ class QueryBackend extends QueryApi with Base {
   }
 
 
-  override def upsertQuery(db: String, query: QueryData): Either[String, String] = {
+  override def upsertQuery(db: String, query: QueryDTO): Either[String, String] = {
     implicit val conn = Conn(base + "/meta")
     withTransactor {
       try {
@@ -241,7 +241,7 @@ class QueryBackend extends QueryApi with Base {
             dbSettingsId1
         }
 
-        val QueryData(molecule1, _, _,
+        val QueryDTO(molecule1, _, _,
         isFavorite, showGrouped, groupedCols, colSettings) = query
 
         user_DbSettings(dbSettingsId).Queries.e.molecule_(molecule1).get match {
@@ -249,7 +249,7 @@ class QueryBackend extends QueryApi with Base {
             val newQueryId =
               user_Query.molecule.part.ns.isFavorite.showGrouped.groupedCols.ColSettings.*(
                 user_ColSetting.colIndex.sortDir.sortPos
-              ).insert(List(QueryData.unapply(query).get)).eid
+              ).insert(List(QueryDTO.unapply(query).get)).eid
             user_DbSettings(dbSettingsId).queries.assert(newQueryId).update
             Right("Successfully inserted query")
 
@@ -275,7 +275,7 @@ class QueryBackend extends QueryApi with Base {
     }
   }
 
-  override def updateQuery(db: String, query: QueryData): Either[String, String] = {
+  override def updateQuery(db: String, query: QueryDTO): Either[String, String] = {
     implicit val conn = Conn(base + "/meta")
     withTransactor {
       try {
@@ -300,7 +300,7 @@ class QueryBackend extends QueryApi with Base {
             dbSettingsId1
         }
 
-        val QueryData(molecule1, _, _,
+        val QueryDTO(molecule1, _, _,
         isFavorite, showGrouped, groupedCols, colSettings) = query
 
         val queryIds = user_DbSettings(dbSettingsId).Queries.e.molecule_(molecule1).get
@@ -330,7 +330,7 @@ class QueryBackend extends QueryApi with Base {
     }
   }
 
-  override def retractQuery(db: String, query: QueryData): Either[String, String] = {
+  override def retractQuery(db: String, query: QueryDTO): Either[String, String] = {
     implicit val conn = Conn(base + "/meta")
     val molecule1 = query.molecule
     withTransactor {

@@ -3,7 +3,7 @@ import autowire._
 import boopickle.Default._
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.autowire.queryWire
-import moleculeadmin.shared.ast.query.QueryData
+import moleculeadmin.shared.ast.query.QueryDTO
 import moleculeadmin.shared.ast.schema.Ns
 import moleculeadmin.shared.ops.query.{ColOps, MoleculeOps}
 import org.scalajs.dom.html.TableCell
@@ -43,57 +43,85 @@ trait KeyEvents extends ColOps with MoleculeOps {
     }
   }
 
-  def toggleQueryList(): Unit = toggle("query-list")
-  def toggleRecentMenu(): Unit = toggle("recentMolecules")
-  def toggleShortcuts(): Unit = toggle("shortcuts")
+  def toggleOffAll(): Unit = {
+    curEntity() = 0L
+    toggleOff("query-list")
+    toggleOff("views")
+    toggleOff("grouped")
+    toggleOff("shortcuts")
+  }
+  def toggleQueryListMenu(): Unit = {
+    toggle("query-list")
+    toggleOff("views")
+    toggleOff("grouped")
+    toggleOff("shortcuts")
+  }
+  def toggleViewsMenu(): Unit = {
+    toggleOff("query-list")
+    toggle("views")
+    toggleOff("grouped")
+    toggleOff("shortcuts")
+  }
+  def toggleGroupedMenu(): Unit = {
+    toggleOff("query-list")
+    toggleOff("views")
+    toggle("grouped")
+    toggleOff("shortcuts")
+  }
+  def toggleShortcutsMenu(): Unit = {
+    toggleOff("query-list")
+    toggleOff("views")
+    toggleOff("grouped")
+    toggle("shortcuts")
+  }
 
   def toggleQueryBuilder(implicit ctx: Ctx.Owner): Rx.Dynamic[Unit] = Rx {
-    if (builderSelection.now == "") {
-      if (builderMinimized) {
-        builderSelection() = "m"
+    if (querySelection.now == "") {
+      if (queryMinimized) {
+        querySelection() = "m"
       } else {
-        builderBaseSelection match {
-          case "a" => builderSelection() = "a"
-          case "v" => builderSelection() = "v"
-          case "r" => builderSelection() = "r"
+        queryBaseSelection match {
+          case "a" => querySelection() = "a"
+          case "v" => querySelection() = "v"
+          case "r" => querySelection() = "r"
         }
       }
     } else {
-      builderSelection() = ""
+      querySelection() = ""
     }
     // Asynchronously save setting
-    queryWire().saveSetting("builderSelection", builderSelection.now)
+    queryWire().saveSetting("querySelection", querySelection.now)
       .call().foreach {
       case Left(err) => window.alert(err)
       case Right(_)  => println(
-        "Saved setting for `builderSelection`: " + builderSelection.now
+        "Saved setting for `builderSelection`: " + querySelection.now
       )
     }
   }
 
   def toggleMinimize(implicit ctx: Ctx.Owner): Rx.Dynamic[Unit] = Rx(
-    if (builderSelection.now == "m") {
-      builderMinimized = false
-      builderBaseSelection match {
-        case "a" => builderSelection() = "a"
-        case "v" => builderSelection() = "v"
-        case "r" => builderSelection() = "r"
+    if (querySelection.now == "m") {
+      queryMinimized = false
+      queryBaseSelection match {
+        case "a" => querySelection() = "a"
+        case "v" => querySelection() = "v"
+        case "r" => querySelection() = "r"
       }
     } else {
-      builderMinimized = true
-      builderSelection() = "m"
+      queryMinimized = true
+      querySelection() = "m"
     }
   )
 
 
   def toggleAttrSelectionA(implicit ctx: Ctx.Owner): Rx.Dynamic[Unit] =
-    Rx {builderBaseSelection = "a"; builderSelection() = "a"}
+    Rx {queryBaseSelection = "a"; querySelection() = "a"}
 
   def toggleAttrSelectionR(implicit ctx: Ctx.Owner): Rx.Dynamic[Unit] =
-    Rx {builderBaseSelection = "r"; builderSelection() = "r"}
+    Rx {queryBaseSelection = "r"; querySelection() = "r"}
 
   def toggleAttrSelectionV(implicit ctx: Ctx.Owner): Rx.Dynamic[Unit] =
-    Rx {builderBaseSelection = "v"; builderSelection() = "v"}
+    Rx {queryBaseSelection = "v"; querySelection() = "v"}
 
 
   def actualRowCount: Int = if (filters.now.isEmpty)
@@ -150,44 +178,69 @@ trait KeyEvents extends ColOps with MoleculeOps {
       }
     }
 
-  def toggleViews(implicit ctx: Ctx.Owner): Unit = {
-    document.getElementById("checkbox-view-0")
-      .asInstanceOf[HTMLInputElement].checked = !viewsOn.now
-    viewsOn() = !viewsOn.now
+
+  // Queries ------------------------------
+
+  def queryListOpen: Boolean = {
+    val element = document.getElementById("submenu-query-list")
+    element != null && element.getAttribute("style").endsWith("display:block;")
   }
 
-  def toggleGrouped(implicit ctx: Ctx.Owner): Unit = {
-    document.getElementById("checkbox-grouped-0")
-      .asInstanceOf[HTMLInputElement].checked = !showGrouped.now
-    showGrouped() = !showGrouped.now
-  }
+  def useQuery(i: Int)(implicit ctx: Ctx.Owner): Unit =
+    if (i < savedQueries.size) {
+      (new Callbacks).useQuery(savedQueries.sortBy(_.molecule).apply(i))
+    } else {
+      window.alert(s"Only ${savedQueries.size} queries saved.")
+    }
 
   def upsertCurrentQuery(implicit ctx: Ctx.Owner) = {
     val (part, ns) = getPartNs(curMolecule.now)
-    val query      = QueryData(
+    val query      = QueryDTO(
       curMolecule.now,
       part, ns, true,
-      showGrouped.now,
+      showGrouped,
       groupedCols.now,
       colSettings(columns.now)
     )
     (new Callbacks).upsertQuery(query)
   }
 
-  def useQuery(i: Int)(implicit ctx: Ctx.Owner): Unit =
-    if (i < savedQueries.now.size) {
-      (new Callbacks).useQuery(savedQueries.now.sortBy(_.molecule).apply(i))
-    } else {
-      // Print soft error message to browser console
-      window.alert(s"Only ${savedQueries.now.size} queries saved.")
-    }
 
-  def queriesOpen: Boolean = {
-    val queriesElement = document.getElementById("submenu-query-list")
-    queriesElement != null &&
-      queriesElement.getAttribute("style").endsWith("display:block;")
+  // Views ------------------------------
+
+  def viewsOpen: Boolean = {
+    val element = document.getElementById("submenu-views")
+    element != null && element.getAttribute("style").endsWith("display:block;")
+  }
+  //  def toggleShowViews(implicit ctx: Ctx.Owner): Unit =
+  //    (new Callbacks).toggleShowGrouped()
+
+  def toggleViews(implicit ctx: Ctx.Owner): Unit = {
+    document.getElementById("checkbox-view-0")
+      .asInstanceOf[HTMLInputElement].checked = !showViews.now
+    showViews() = !showViews.now
   }
 
+
+  // Grouped ------------------------------
+
+  def groupedOpen: Boolean = {
+    val element = document.getElementById("submenu-grouped")
+    element != null && element.getAttribute("style").endsWith("display:block;")
+  }
+
+  def toggleShowGrouped(implicit ctx: Ctx.Owner): Unit = {
+    document.getElementById("checkbox-grouped--1")
+      .asInstanceOf[HTMLInputElement].checked = !showGrouped
+    (new Callbacks).toggleShowGrouped()
+  }
+
+  def toggleGrouped(i: Int)(implicit ctx: Ctx.Owner): Unit = {
+    if (i == -1 || i >= groupCols.now.size)
+      window.alert(s"Unrecognized shortcut")
+    else
+      (new Callbacks).toggleGrouped(groupCols.now(i))
+  }
 
   def registerKeyEvents(
     implicit ctx: Ctx.Owner,
@@ -245,6 +298,25 @@ trait KeyEvents extends ColOps with MoleculeOps {
       }
     }
 
+    def numberInputs(n0: String, action: Int => Unit) = {
+      val n = n0.toInt
+      if (firstNumber == -1) {
+        firstNumber = n
+        setTimeout(numberMs) {
+          val index = if (secondNumber == -1)
+            firstNumber - 1
+          else
+            firstNumber * 10 + secondNumber - 1
+          if (index >= 0)
+            action(index)
+          firstNumber = -1
+          secondNumber = -1
+        }
+      } else if (secondNumber == -1) {
+        secondNumber = n
+      }
+    }
+
     document.onkeydown = { e: KeyboardEvent =>
       val mod = Seq("Control", "Alt", "Meta", "Shift")
         .exists(m => e.getModifierState(m))
@@ -252,59 +324,50 @@ trait KeyEvents extends ColOps with MoleculeOps {
       if (document.activeElement == document.body) {
         if (!mod) {
           e.key match {
-            case "Escape" =>
-              curEntity() = 0L
-              toggleOff("query-list")
-              toggleOff("shortcuts")
-            case "l"      =>
-              toggleOff("shortcuts")
-              toggleQueryList()
-            //            case "r"                                =>
-            //              toggleOff("queries")
-            //              toggleOff("shortcuts")
-            //              toggleRecentMenu()
-            case "v"                                => toggleViews
-            case "g"                                => toggleGrouped
-            case "q"                                => toggleQueryBuilder
-            case "m" if modelElements.now.nonEmpty  => toggleMinimize
-            case "a" if builderSelection.now != "a" =>
-              builderBaseSelection = "a"; builderSelection() = "a"
+            case "Escape"                          => toggleOffAll()
+            case "l"                               => toggleQueryListMenu()
+            case "v"                               => toggleViewsMenu()
+            case "g"                               => toggleGroupedMenu()
+            case "q"                               => toggleQueryBuilder
+            case "m" if modelElements.now.nonEmpty => toggleMinimize
+            case "a" if querySelection.now != "a"  =>
+              queryBaseSelection = "a"; querySelection() = "a"
             //            case "v" if builderSelection.now != "v" =>
             //              builderBaseSelection = "v"; builderSelection() = "v"
             //            case "r" if builderSelection.now != "r" =>
             //              builderBaseSelection = "r"; builderSelection() = "r"
-            case n if queriesOpen => n match {
-              case "0" if curMolecule.now.nonEmpty => upsertCurrentQuery
 
-              case "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "0" =>
-                if (firstNumber == -1) {
-                  firstNumber = n.toInt
-                  setTimeout(numberMs) {
-                    val index = if (secondNumber == -1)
-                      firstNumber - 1
-                    else
-                      firstNumber * 10 + secondNumber - 1
-                    if (index >= 0)
-                      useQuery(index)
-                    firstNumber = -1
-                    secondNumber = -1
-                  }
-                } else if (secondNumber == -1) {
-                  secondNumber = n.toInt
-                }
-
-              case _ => ()
+            case n if queryListOpen => n match {
+              case " " if curMolecule.now.nonEmpty => upsertCurrentQuery
+              case r"\d"                           =>
+                if (savedQueries.count(_.isFavorite) < 10)
+                  useQuery(n.toInt - 1)
+                else
+                  numberInputs(n, useQuery)
+              case _                               => ()
             }
 
-            case _ => ()
+            case n if groupedOpen => n match {
+              case " "   => toggleShowGrouped
+              case r"\d" =>
+                if (groupCols.now.size < 10)
+                  toggleGrouped(n.toInt - 1)
+                else
+                  numberInputs(n, toggleGrouped)
+              case _     => ()
+            }
+
+            case n if viewsOpen => n match {
+              case " "   => toggleViews
+              case r"\d" => numberInputs(n, useQuery)
+              case _     => ()
+            }
+            case _              => ()
           }
 
         } else if (e.getModifierState("Shift")) {
           e.key match {
-            case "?" =>
-              toggleOff("queries")
-              toggleOff("recentMolecules");
-              toggleShortcuts
+            case "?" => toggleShortcutsMenu()
             case _   => ()
           }
 

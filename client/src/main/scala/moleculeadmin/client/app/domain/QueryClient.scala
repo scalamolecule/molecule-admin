@@ -39,21 +39,21 @@ object QueryClient extends RxBindings with TreeOps with SchemaOps with ColOps
       viewCellTypes = mkViewCellTypes(nsMap)
       enumAttrs = mkEnumAttrs(nsMap)
 
-//      println("queries:")
-//      queries foreach println
+      //      println("queries:")
+      //      queries foreach println
 
-      // Apply saved settings
+      // Apply saved general settings
       Rx {
         //        println("QueryClient...")
         maxRows() = settings.getOrElse("maxRows", "-1").toInt
         limit() = settings.getOrElse("limit", "20").toInt
-        builderSelection() = settings.getOrElse("builderSelection", "a")
-        savedQueries() = queries
+        querySelection() = settings.getOrElse("querySelection", "a")
+        savedQueries = queries
         curStars = stars
         curFlags = flags
         curChecks = checks
         curViews.foreach {
-          case "viewsOn"           => viewsOn() = true
+          case "viewsOn"           => showViews() = true
           case "viewHelp"          => viewHelp() = true
           case "viewMolecule"      => viewMolecule() = true
           case "viewDatalog"       => viewDatalog() = true
@@ -72,17 +72,17 @@ object QueryClient extends RxBindings with TreeOps with SchemaOps with ColOps
 
       // Render page
       document.body.appendChild(
-        TopMenu(dbs, db, "query", QuerySubMenu(db).dynRender).render
+        TopMenu(dbs, db, "query", RenderSubMenu(db).dynRender).render
       )
       // make saved queries available via key command
       registerKeyEvents
       document.body.appendChild {
         _containerFluid2(
           _row(
-            QueryBuilder(db, metaSchema).rxElement,
+            RenderQueryBuilder(db, metaSchema).rxElement,
             DataTable(db).rxElement,
-            ViewsRender(db).rxElement,
-            GroupedRender(db).rxElement,
+            RenderGroups(db).rxElement,
+            RenderViews(db).rxElement,
           )
         ).render
       }

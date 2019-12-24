@@ -5,7 +5,7 @@ import molecule.transform.Model2Query
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.domain.query.views.{Datalog, Entity, EntityHistory, Transaction}
 import moleculeadmin.client.app.element.query.ViewElements
-import moleculeadmin.shared.ast.query.QueryData
+import moleculeadmin.shared.ast.query.QueryDTO
 import moleculeadmin.shared.ops.query.builder.TreeOps
 import moleculeadmin.shared.ops.query.{ColOps, ModelOps}
 import org.scalajs.dom.html.Element
@@ -14,9 +14,8 @@ import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
 
 
-case class ViewsRender(db: String)(implicit val ctx: Ctx.Owner)
-  extends Callbacks
-    with ViewElements with ModelOps with ColOps with TreeOps {
+case class RenderViews(db: String)(implicit val ctx: Ctx.Owner)
+  extends Callbacks with ViewElements with ModelOps with ColOps with TreeOps {
   type keepBooPickleImport_ViewsRender = PickleState
 
 
@@ -24,16 +23,15 @@ case class ViewsRender(db: String)(implicit val ctx: Ctx.Owner)
     val lines      = curMolecule.now.split("\n")
     val rows       = lines.length + 2
     val cols       = lines.map(_.length).max + 25
-    val alreadyFav = savedQueries.now.exists(_.molecule == curMolecule.now)
+    val alreadyFav = savedQueries.exists(_.molecule == curMolecule.now)
     _moleculeView(
       rows,
       cols,
       curMolecule.now,
-      upsertQueryCallback(QueryData(curMolecule.now, "x", "x", false, false, Set.empty[Int], Nil)),
+      upsertQueryCallback(QueryDTO(curMolecule.now, "x", "x", false, false, Set.empty[Int], Nil)),
       alreadyFav
     )
   }
-
 
   def moleculeModelView: TypedTag[Element] =
     _codeView("Molecule Model", "scala", Model(modelElements.now).toString())
@@ -63,9 +61,9 @@ case class ViewsRender(db: String)(implicit val ctx: Ctx.Owner)
 
   def rxElement: Rx.Dynamic[TypedTag[Element]] = Rx {
     // triggers
-    viewsOn()
+    showViews()
     columns()
-    if (columns.now.nonEmpty && viewsOn.now) {
+    if (columns.now.nonEmpty && showViews.now) {
       // Render views
       _cardsContainer(
         if (viewMolecule()) moleculeView else (),

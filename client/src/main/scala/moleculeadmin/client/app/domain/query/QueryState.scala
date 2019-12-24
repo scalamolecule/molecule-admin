@@ -1,5 +1,5 @@
 package moleculeadmin.client.app.domain.query
-import moleculeadmin.shared.ast.query.{Col, QueryData, Filter, QueryCache}
+import moleculeadmin.shared.ast.query.{Col, QueryDTO, Filter, QueryCache}
 import moleculeadmin.shared.ast.schema.Ns
 import moleculeadmin.shared.ast.tree.Tree
 import molecule.ast.model.Element
@@ -17,31 +17,27 @@ object QueryState {
   // Db settings id so that we can avoid looking it up on each marker toggle
   var dbSettingsIdOpt = Option.empty[Long]
 
-  // Schema
+  // Schema ----------------------------------------
   implicit var nsMap: Map[String, Ns] = Map.empty[String, Ns]
   var viewCellTypes = Map.empty[String, String]
   var enumAttrs     = Seq.empty[String]
   var eidCols       = Seq.empty[Int]
 
+  // Tree branches ---------------------------------
+  val tree = Var(Tree(Nil, Nil, Nil, Nil, Nil, Nil))
 
   // Current processing coordinate in tree (part/ns/attr/pos-number)
   val processing = Var[String]("")
 
   // Query building ---------------------------------
-
   var newQueryBuildup = true
 
-  // Tree branches
-  val tree = Var(Tree(Nil, Nil, Nil, Nil, Nil, Nil))
-
   // Toggling
-  val builderSelection     = Var("a")
-  var builderMinimized     = false
-  var builderBaseSelection = "a"
-
+  val querySelection     = Var("a")
+  var queryMinimized     = false
+  var queryBaseSelection = "a"
 
   // Data ------------------------------------------------------
-
   // Model
   val modelElements = Var(Seq.empty[Element])
 
@@ -60,25 +56,23 @@ object QueryState {
 
   var editCellId = ""
 
-
-  // Caching -----------------------------------
-
-  // Avoiding re-creating sort index array during paging
+  // Caching (for paging) -----------------------------------
   var queryCache: QueryCache = null
+  var savedQueries           = Seq.empty[QueryDTO]
+  var recentQueries          = Seq.empty[QueryDTO]
   var cachedCols             = Seq.empty[Col]
   var cachedSortIndex        = Array.empty[Int]
-  var cachedRowBuilder       = Option.empty[RowBuilder]
   var cachedFilters          = Map.empty[Int, Filter[_]]
   var cachedFilterIndex      = Array.empty[Int]
 
-  var changeArrays = Map.empty[Int, Array[Int]]
+  //  var cachedRowBuilder  = Option.empty[RowBuilder]
 
-  val savedQueries  = Var(Seq.empty[QueryData])
-  val recentQueries = Var(Seq.empty[QueryData])
-
+  // Grouped --------------------------------
+  var showGrouped = false
+  val groupCols   = Var(Seq.empty[Int])
+  val groupedCols = Var(Set.empty[Int])
 
   // Views --------------------------------
-
   val curMolecule = Var("")
 
   // Entities
@@ -108,7 +102,7 @@ object QueryState {
   val curTxInstant = Var("")
 
   // Show view statuses
-  val viewsOn           = Var(false)
+  val showViews         = Var(false)
   val viewHelp          = Var(false)
   val viewMolecule      = Var(false)
   val viewDatalog       = Var(false)
@@ -123,9 +117,4 @@ object QueryState {
   val viewTree1         = Var(false)
   val viewTree2         = Var(false)
   val viewTree3         = Var(false)
-
-  // Col indexes for grouped attributes
-  var groupableCols = Seq.empty[Int]
-  val showGrouped   = Var(false)
-  val groupedCols   = Var(Set.empty[Int])
 }

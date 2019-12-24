@@ -5,7 +5,7 @@ import molecule.api.out20._
 import molecule.facade.Conn
 import moleculeadmin.shared.api.BaseApi
 //import moleculeadmin.shared.ast.query.{ColSetting, QueryData}
-import moleculeadmin.shared.ast.query.QueryData
+import moleculeadmin.shared.ast.query.QueryDTO
 import moleculeadmin.shared.ast.schema._
 import moleculeadmin.shared.util.HelpersAdmin
 
@@ -22,7 +22,7 @@ trait Base extends BaseApi with HelpersAdmin {
       Set[Long],
       Set[Long],
       Set[Long],
-      Seq[QueryData]
+      Seq[QueryDTO]
     ) = {
     implicit val conn = Conn(base + "/meta")
 
@@ -61,15 +61,14 @@ trait Base extends BaseApi with HelpersAdmin {
           checks$.getOrElse(Set.empty[Long]),
           queryList.sortBy(_._1).map {
             case (molecule1, part, ns, isFavorite, showGrouped, groupedCols$, colSettings) =>
-              QueryData(
+              QueryDTO(
                 molecule1,
                 part,
                 ns,
                 isFavorite,
                 showGrouped,
                 groupedCols$.getOrElse(Set.empty[Int]),
-//                groupedCols$.fold(Seq.empty[Int])(_.toSeq),
-                colSettings //.map(ColSetting tupled)
+                colSettings
               )
           }
         )
@@ -85,7 +84,7 @@ trait Base extends BaseApi with HelpersAdmin {
           Set[Long],
           Set[Long],
           Set[Long],
-          Seq[QueryData]
+          Seq[QueryDTO]
         )
     ) =
     (dbNames(), getMetaSchema(db), settings(db))

@@ -11,7 +11,7 @@ import scalatags.JsDom.all._
 import scala.scalajs.js.timers._
 
 
-case class ShortCuts()(implicit val ctx: Ctx.Owner)
+case class SubMenuShortCuts()(implicit val ctx: Ctx.Owner)
   extends RxBindings with SubMenuElements with KeyEvents {
 
   def hideShortcuts: SetTimeoutHandle = {
@@ -35,9 +35,9 @@ case class ShortCuts()(implicit val ctx: Ctx.Owner)
       _shortCutsTable("Keyboard shortcuts", 14,
         _square("?", "Toggle this shortcuts info", { () => hideShortcuts }),
         _square("q", span("Toggle ", span("Q", textDecoration.underline), "ueries Builder"), { () => toggleQueryBuilder }),
-        _square("l", span(span("L", textDecoration.underline), "ist favorite queries"), { () => toggleQueryList }),
+        _square("l", span(span("L", textDecoration.underline), "ist favorite queries"), { () => toggleQueryListMenu }),
 //        _square("r", "Toggle Recent queries menu", { () => toggleRecentMenu }),
-        _square("v", span("Toggle ", span("V", textDecoration.underline), "iews"), { () => toggleViews }),
+        _square("v", span("Toggle ", span("V", textDecoration.underline), "iews"), { () => toggleViewsMenu }),
       ),
 
       _shortCutsTable("Query attribute selections", 14,
