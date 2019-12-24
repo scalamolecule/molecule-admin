@@ -87,7 +87,7 @@ case class DataTable(db: String)(implicit val ctx: Ctx.Owner)
   }
 
   def rxElement: Rx.Dynamic[JsDom.TypedTag[HTMLElement]] = Rx {
-    //    println("---- table")
+//    println("---- table")
 
     // Var's not to trigger this Rx
     // (`modelElements` and `maxRows` are the main triggers)
@@ -131,19 +131,18 @@ case class DataTable(db: String)(implicit val ctx: Ctx.Owner)
           _rowCol1("Please select at least one mandatory attribute")
 
         case elements =>
-          //          println("----------- new model ----------")
+//          println("----------- new model ----------")
           val elements1 = VerifyRawModel(elements)
           tree() = mkTree(mkModelTree(elements1))
           curMolecule() = model2molecule(elements1)
           columns() = getCols(elements)
           eidCols = getEidTableColIndexes(columns.now)
-          groupableCols = getGroupedColIndexes(columns.now)
           filters() = Map.empty[Int, Filter[_]]
           offset() = 0
           curAttrs = columns.now.map(c => s":${c.nsFull}/${c.attr}")
 
           // trigger views (columns trigger killed, so that is dormant here)
-          viewsOn.recalc()
+          showViews.recalc()
 
           registerKeyEvents
           DataTableHead(db, tableBody).populate(tableHead)

@@ -69,11 +69,9 @@ object query extends HelpersAdmin {
     sortIndex: Array[Int],
     filters: Map[Int, Filter[_]] = Map.empty[Int, Filter[_]],
     filterIndex: Array[Int],
-    showGrouped: Boolean,
-    groupedCols: Set[Int]
   )
 
-  case class QueryData(
+  case class QueryDTO(
     molecule: String,
     part: String,
     ns: String,

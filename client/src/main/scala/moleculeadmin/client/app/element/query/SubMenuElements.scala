@@ -2,11 +2,14 @@ package moleculeadmin.client.app.element.query
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.element.AppElements
 import moleculeadmin.client.jsdom.DropdownMenu
-import moleculeadmin.shared.ast.query.QueryData
+import moleculeadmin.shared.ast.query.QueryDTO
+import org.scalajs.dom
+import org.scalajs.dom.document
 import org.scalajs.dom.html._
 import org.scalajs.dom.raw.HTMLElement
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
+import scalatags.generic
 
 
 trait SubMenuElements extends AppElements with DropdownMenu {
@@ -41,22 +44,22 @@ trait SubMenuElements extends AppElements with DropdownMenu {
 
   def _subMenuQueryList(
     curMolecule: String,
-    newFav: Seq[QueryData],
-    queriesByPartNs: Seq[(String, Seq[(String, Seq[(String, QueryData)])])],
-    recentQueries: Seq[QueryData],
-    savedQueries: Seq[QueryData],
-    favoriteQueries: Seq[QueryData],
+    newFav: Seq[QueryDTO],
+    queriesByPartNs: Seq[(String, Seq[(String, Seq[(String, QueryDTO)])])],
+    recentQueries: Seq[QueryDTO],
+    savedQueries: Seq[QueryDTO],
+    favoriteQueries: Seq[QueryDTO],
     savedMolecules: Seq[String],
     favoriteMolecules: Seq[String],
-    use: QueryData => () => Unit,
-    upsert: QueryData => () => Unit,
-    favorite: QueryData => () => Unit,
-    unfavorite: QueryData => () => Unit,
-    retract: QueryData => () => Unit,
+    use: QueryDTO => () => Unit,
+    upsert: QueryDTO => () => Unit,
+    favorite: QueryDTO => () => Unit,
+    unfavorite: QueryDTO => () => Unit,
+    retract: QueryDTO => () => Unit,
   ): TypedTag[LI] = {
     li(
       cls := "dropdown",
-      a(href := "#", span("L", textDecoration.underline), "ist"),
+      a(href := "#", _shortcut("L", "ist")),
       div(
         cls := "dropdown-menu",
         id := "submenu-query-list",
@@ -119,14 +122,14 @@ trait SubMenuElements extends AppElements with DropdownMenu {
 
   def _recentQueries(
     curMolecule: String,
-    recentQueries: Seq[QueryData],
-    savedQueries: Seq[QueryData],
-    favoriteQueries: Seq[QueryData],
+    recentQueries: Seq[QueryDTO],
+    savedQueries: Seq[QueryDTO],
+    favoriteQueries: Seq[QueryDTO],
     savedMolecules: Seq[String],
     favoriteMolecules: Seq[String],
-    use: QueryData => () => Unit,
-    save: QueryData => () => Unit,
-    favorite: QueryData => () => Unit
+    use: QueryDTO => () => Unit,
+    save: QueryDTO => () => Unit,
+    favorite: QueryDTO => () => Unit
   ): TypedTag[Table] = {
     table(
       cls := "tableRowLink",
@@ -163,13 +166,13 @@ trait SubMenuElements extends AppElements with DropdownMenu {
 
   def _savedQueriesNs(
     curMolecule: String,
-    queriesByNs: Seq[(String, Seq[(String, QueryData)])],
-    favoriteQueries: Seq[QueryData],
+    queriesByNs: Seq[(String, Seq[(String, QueryDTO)])],
+    favoriteQueries: Seq[QueryDTO],
     favoriteMolecules: Seq[String],
-    use: QueryData => () => Unit,
-    favorite: QueryData => () => Unit,
-    unfavorite: QueryData => () => Unit,
-    retract: QueryData => () => Unit,
+    use: QueryDTO => () => Unit,
+    favorite: QueryDTO => () => Unit,
+    unfavorite: QueryDTO => () => Unit,
+    retract: QueryDTO => () => Unit,
   ): Seq[TypedTag[LI]] = {
     queriesByNs.map { case (ns, mm) =>
       li(cls := "dropdown-submenu",
@@ -178,37 +181,43 @@ trait SubMenuElements extends AppElements with DropdownMenu {
           cls := "dropdown-menu",
           li(
             table(cls := "tableRowLink",
-              mm.map { case (m, q) =>
-                val cur = m == curMolecule
+              mm.zipWithIndex.map { case ((m, q), i) =>
+                val cur   = m == curMolecule
+                // Toggle favorite status
+                var isFav = favoriteMolecules.contains(m)
+                def action: Unit = {
+                  val elem = document.getElementById("savedFav" + i)
+                  elem.innerText = ""
+                  elem.appendChild(if (isFav) "fav".render else "unfav".render)
+                  if (isFav) unfavorite(q)() else favorite(q)()
+                  isFav = !isFav
+                }
+
                 tr(
+                  id := "saved" + i,
                   cls := (if (cur) "current" else "other"),
-
-                  td(
-                    m,
-                    paddingRight := 20,
-                    if (cur) () else onclick := use(q)
-                  ),
-
+                  td(m, paddingRight := 20, if (cur) () else onclick := use(q)),
                   td(
                     textAlign.right,
-                    if (favoriteMolecules.contains(m))
-                      a(cls := "discrete", href := "#",
-                        "unfav", onclick := unfavorite(q))
-                    else
-                      a(cls := "discrete", href := "#",
-                        "fav", onclick := favorite(q))
+                    a(
+                      cls := "discrete", href := "#",
+                      span(
+                        id := "savedFav" + i,
+                        if (isFav) "unfav" else "fav",
+                      ),
+                      onclick := { () => action }
+                    )
                   ),
-
                   td(
                     textAlign.right,
                     span(
                       cls := "discrete",
                       span(cls := "oi oi-x", fontSize := 9.px,
                         color := "#888", paddingBottom := 6),
-                      onclick := retract(q)
-                      //                      onclick := { () =>
-                      //                        println("hej")
-                      //                      }
+                      onclick := { () =>
+                        document.getElementById("saved" + i).innerText = ""
+                        retract(q)()
+                      }
                     )
                   )
                 )
@@ -222,13 +231,13 @@ trait SubMenuElements extends AppElements with DropdownMenu {
 
   def _savedQueries(
     curMolecule: String,
-    queriesByPartNs: Seq[(String, Seq[(String, Seq[(String, QueryData)])])],
-    favoriteQueries: Seq[QueryData],
+    queriesByPartNs: Seq[(String, Seq[(String, Seq[(String, QueryDTO)])])],
+    favoriteQueries: Seq[QueryDTO],
     favoriteMolecules: Seq[String],
-    use: QueryData => () => Unit,
-    favorite: QueryData => () => Unit,
-    unfavorite: QueryData => () => Unit,
-    retract: QueryData => () => Unit,
+    use: QueryDTO => () => Unit,
+    favorite: QueryDTO => () => Unit,
+    unfavorite: QueryDTO => () => Unit,
+    retract: QueryDTO => () => Unit,
   ): TypedTag[UList] = {
     ul(
       cls := "dropdown-menu",
@@ -269,48 +278,47 @@ trait SubMenuElements extends AppElements with DropdownMenu {
 
   def _favoriteQueries(
     curMolecule: String,
-    newFav: Seq[QueryData],
-    favoriteQueries: Seq[QueryData],
-    use: QueryData => () => Unit,
-    upsert: QueryData => () => Unit,
-    unfavorite: QueryData => () => Unit
+    newFav: Seq[QueryDTO],
+    favoriteQueries: Seq[QueryDTO],
+    use: QueryDTO => () => Unit,
+    upsert: QueryDTO => () => Unit,
+    unfavorite: QueryDTO => () => Unit
   ): TypedTag[Table] = {
     table(
       cls := "tableRowLink",
       newFav.map(query =>
-        tr(cls := "other", onclick := upsert(query),
-          th(0),
+        tr(
+          cls := "other",
+          onclick := upsert(query),
+          th("␣", whiteSpace.nowrap),
           td("save current query...",
             whiteSpace.nowrap,
             paddingRight := 20,
             colspan := 2
           )
         )
-      ) ++ favoriteQueries.zipWithIndex.map {
-        case (query@QueryData(`curMolecule`, _, _, _, _, _, _), i) =>
-          tr(cls := "current",
-            th(i + 1),
-            td(curMolecule, paddingRight := 20),
-            td(
-              textAlign.right,
-              a(cls := "discrete", href := "#",
-                span(cls := "oi oi-x", fontSize := 9.px, color := "#888", paddingBottom := 6),
-                onclick := unfavorite(query)
-              )
+      ) ++ favoriteQueries.zipWithIndex.map { case (q, i) =>
+        val cur = q.molecule == curMolecule
+
+        val action: generic.AttrPair[dom.Element, () => Unit] =
+          onclick := (if (cur) () => () else use(q))
+
+        tr(
+          id := "favorite" + i,
+          cls := (if (cur) "current" else "other"),
+          th(i + 1, action),
+          td(q.molecule, paddingRight := 20, action),
+          td(
+            textAlign.right,
+            a(cls := "discrete", href := "#",
+              "unfav",
+              onclick := { () =>
+                document.getElementById("favorite" + i).innerText = ""
+                unfavorite(q)()
+              }
             )
           )
-        case (query, i)                                            =>
-          tr(cls := "other",
-            th(i + 1, onclick := use(query)),
-            td(query.molecule, paddingRight := 20, onclick := use(query)),
-            td(
-              textAlign.right,
-              a(cls := "discrete", href := "#",
-                span(cls := "oi oi-x", fontSize := 9.px, color := "#888", paddingBottom := 6),
-                onclick := unfavorite(query)
-              )
-            )
-          )
+        )
       }
     )
   }
@@ -318,52 +326,77 @@ trait SubMenuElements extends AppElements with DropdownMenu {
 
   // Views --------------------------------------------------------------------
 
-  def _subMenu(header: String, checkboxes: Seq[TypedTag[HTMLElement]]): TypedTag[LI] = li(cls := "dropdown",
-    a(href := "#", header),
-    div(
-      cls := "dropdown-menu",
-      width := 200,
-      paddingBottom := 3,
-      checkboxes
+  def _subMenu(
+    idStr: String,
+    header: Frag,
+    checkboxes: Seq[TypedTag[HTMLElement]],
+  ): TypedTag[LI] =
+    li(cls := "dropdown",
+      a(href := "#", header),
+      div(
+        id := idStr,
+        cls := "dropdown-menu",
+        minWidth := 200,
+        paddingBottom := 3,
+        checkboxes
+      )
     )
-  )
 
-  def _cb(id1: String, txt: Frag, checked1: Boolean, toggle: () => Unit): TypedTag[Div] = div(
-    input(tpe := "checkbox",
-      id := s"checkbox-$id1",
-      value := id1,
-      if (checked1) checked := true else (),
-      onchange := toggle
-    ),
-    label(
-      paddingLeft := 5,
-      marginBottom := 3,
-      `for` := s"checkbox-$id1",
+  def _cbLabel(key: String, txt: String): TypedTag[Span] =
+    span(
+      span(key, marginLeft := 5, marginRight := 10),
       txt
     )
-  )
+
+  def _cb(id1: String, txt: Frag, checked1: Boolean, toggle: () => Unit): TypedTag[Div] =
+    div(
+      input(tpe := "checkbox",
+        id := s"checkbox-$id1",
+        value := id1,
+        if (checked1) checked := true else (),
+        onchange := toggle
+      ),
+      label(
+        paddingLeft := 5,
+        marginBottom := 3,
+        `for` := s"checkbox-$id1",
+        txt
+      ),
+      whiteSpace.nowrap
+    )
 
 
   // Grouped --------------------------------------------------------------------
 
   def _groupedTable[T](
+    colType: String,
+    mandatory: Boolean,
     data: Seq[(T, Int)]
   ): TypedTag[Table] = {
-    var i = 0
+    var i = if (mandatory) 0 else -1
     table(
       cls := "tableGrouped",
-      height := 500,
+//      maxHeight := 150,
+//      height := 150,
       tbody(
         display.block,
-        maxHeight := 500,
+        maxHeight := 150,
         overflowY.scroll,
         data.map { case (value, count) =>
           i += 1
           tr(
             cls := "other",
-            th(i, color := "#888"),
+            if (i > 0) {
+              th(i, color := "#888")
+            } else {
+              th()
+            },
             td(
               maxWidth := 250,
+              colType match {
+                case "double" => textAlign.right
+                case _        => ()
+              },
               value.toString,
               paddingRight := 20,
               //            onclick := useSavedQuery(query)

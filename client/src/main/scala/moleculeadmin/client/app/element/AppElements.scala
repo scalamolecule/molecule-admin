@@ -67,6 +67,13 @@ trait AppElements extends Bootstrap {
       str
   }
 
+  def _shortcut(underlined: String, tail: String, prefix: String = ""): TypedTag[Span] =
+    span(
+      prefix,
+      span(underlined, textDecoration.underline),
+      tail
+    )
+
 
   val defaultSize = 3
 

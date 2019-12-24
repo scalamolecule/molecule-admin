@@ -14,20 +14,20 @@ import scalatags.JsDom.all._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 
-case class Views()(implicit val ctx: Ctx.Owner)
+case class SubMenuViews()(implicit val ctx: Ctx.Owner)
   extends RxBindings with SubMenuElements {
 
   type keepBooPickleImport_Views = PickleState
 
-  def cb(id: Int, txt: Frag, variable: Var[Boolean]): TypedTag[Div] = Rx(
+  def cb(key: Int, txt: String, variable: Var[Boolean]): TypedTag[Div] = Rx(
     _cb(
-      "view-" + id,
-      txt,
+      "view-" + key,
+      _cbLabel(if(key == 0) "␣" else s"$key", txt),
       variable.now,
       { () =>
         variable() = !variable.now
         val openViews = Seq(
-          if (viewsOn.now) Some("viewsOn") else None,
+          if (showViews.now) Some("viewsOn") else None,
           if (viewMolecule.now) Some("viewMolecule") else None,
           if (viewDatalog.now) Some("viewDatalog") else None,
           if (viewTransaction.now) Some("viewTransaction") else None,
@@ -46,7 +46,7 @@ case class Views()(implicit val ctx: Ctx.Owner)
           // manually check 'showViews' checkbox on/off
           document.getElementById("checkbox-view-0")
             .asInstanceOf[HTMLInputElement].checked = show
-          viewsOn() = show
+          showViews() = show
           if (show)
             "viewsOn" +: openViews
           else
@@ -57,10 +57,9 @@ case class Views()(implicit val ctx: Ctx.Owner)
 
         // Asynchronously save setting
         queryWire().saveOpenViews(viewsSettings).call().foreach {
-          case Left(err) => window.alert(err)
-          case Right(_)  =>
-            println("Saved open views settings: " +
+          case Right(_)  => println("Saved open views settings: " +
               viewsSettings.mkString(", "))
+          case Left(err) => window.alert(err)
         }
       }
     )
@@ -69,9 +68,10 @@ case class Views()(implicit val ctx: Ctx.Owner)
 
   def dynRender: Rx.Dynamic[TypedTag[LI]] = Rx {
     _subMenu(
-      "Views",
+      "submenu-views",
+      _shortcut("V", "iews"),
       Seq(
-        cb(0, span("Show ", span("V", textDecoration.underline), "iews"), viewsOn),
+        cb(0, "Show Views", showViews),
         hr,
         cb(1, "Molecule", viewMolecule),
         cb(2, "Datalog", viewDatalog),

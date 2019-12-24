@@ -2,7 +2,7 @@ package moleculeadmin.client.app.domain.query.data
 import moleculeadmin.client.app.domain.query.KeyEvents
 import moleculeadmin.client.app.domain.query.QueryState.{columns, _}
 import moleculeadmin.client.rxstuff.RxBindings
-import moleculeadmin.shared.ast.query.{QueryCache, QueryData, QueryResult}
+import moleculeadmin.shared.ast.query.{QueryCache, QueryDTO, QueryResult}
 import moleculeadmin.shared.ops.query.{ColOps, MoleculeOps}
 import org.scalajs.dom.html.TableSection
 import rx.{Ctx, Rx}
@@ -11,8 +11,11 @@ import rx.{Ctx, Rx}
 case class DataTableBodyFoot(db: String)(implicit val ctx: Ctx.Owner)
   extends RxBindings with KeyEvents with ColOps with MoleculeOps {
 
-  cachedRowBuilder = None
   //  println("---- DataTableBodyFoot ----")
+
+  // Locally cached RowBuilder to avoid re-creation on paging
+  var cachedRowBuilder = Option.empty[RowBuilder]
+  //  cachedRowBuilder = None
 
   def populate(
     tableBody: TableSection,
@@ -40,21 +43,35 @@ case class DataTableBodyFoot(db: String)(implicit val ctx: Ctx.Owner)
       columns.now,
       sortIndex,
       filters.now,
-      filterIndex,
-      showGrouped.now,
-      groupedCols.now
+      filterIndex
     )
+
+    // Grouped
+    savedQueries.find(_.molecule == curMolecule.now).fold {
+      //      println("grouped default")
+      // All grouped as default (?)
+      showGrouped = false
+      groupedCols() = groupCols.now.toSet
+    } { query =>
+//      println("grouped match    : " + showGrouped + " - " + query.showGrouped + " - " + groupCols + " - " + query.groupedCols)
+      showGrouped = query.showGrouped
+      if (groupedCols.now == query.groupedCols)
+        groupedCols.recalc()
+      else
+        groupedCols() = query.groupedCols
+    }
+    groupCols() = getGroupedColIndexes(columns.now)
 
     val (part, ns) = getPartNs(curMolecule.now)
 
-    recentQueries() = QueryData(
+    recentQueries = QueryDTO(
       curMolecule.now,
       part, ns,
       false,
-      showGrouped.now,
+      showGrouped,
       groupedCols.now,
       colSettings(columns.now)
-    ) +: recentQueries.now.filterNot(_.molecule == curMolecule.now)
+    ) +: recentQueries.filterNot(_.molecule == curMolecule.now)
 
 
     // Populate table body and foot

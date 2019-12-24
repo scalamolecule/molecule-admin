@@ -1,6 +1,6 @@
 package moleculeadmin.client.app.domain.query.data
 import moleculeadmin.client.app.domain.query.QueryState._
-import moleculeadmin.shared.ast.query.{Col, QueryResult}
+import moleculeadmin.shared.ast.query.{Col, Filter, QueryResult}
 import moleculeadmin.shared.ops.query.data.{FilterIndex, SortIndex}
 import rx.Ctx
 
