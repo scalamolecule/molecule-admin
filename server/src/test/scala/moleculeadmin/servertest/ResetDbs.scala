@@ -30,15 +30,17 @@ object ResetDbs extends TestSuite with ExampleData with Settings {
   val base     = "datomic:free://localhost:4334"
 
   val tests = Tests {
-    //    test("Reset all") {
-    //      resetDbs()
-    //    }
+    //        test("Reset all") {
+    //          resetDbs()
+    //        }
+
     //    test("Reset all and poplulate") {
     //      resetDbs()
     //      populateCoreTest(Conn("datomic:free://localhost:4334/CoreTest"))
-    //      populatePartition(Conn("datomic:free://localhost:4334/Partition"))
-    //      populateTree(Conn("datomic:free://localhost:4334/Tree"))
+    ////      populatePartition(Conn("datomic:free://localhost:4334/Partition"))
+    ////      populateTree(Conn("datomic:free://localhost:4334/Tree"))
     //    }
+
     test("Reset CoreTest") {
       resetDbs(Seq("CoreTest"))
       populateCoreTest(Conn("datomic:free://localhost:4334/CoreTest"))

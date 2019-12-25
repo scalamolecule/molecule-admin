@@ -250,6 +250,7 @@ class QueryBackend extends QueryApi with Base {
               user_Query.molecule.part.ns.isFavorite.showGrouped.groupedCols.ColSettings.*(
                 user_ColSetting.colIndex.sortDir.sortPos
               ).insert(List(QueryDTO.unapply(query).get)).eid
+
             user_DbSettings(dbSettingsId).queries.assert(newQueryId).update
             Right("Successfully inserted query")
 
@@ -258,12 +259,14 @@ class QueryBackend extends QueryApi with Base {
             user_Query(queryId).colSettings().update
             val colSettingIds =
               user_ColSetting.colIndex.sortDir.sortPos.insert(colSettings).eidSet
+
             user_Query(queryId)
               .isFavorite(isFavorite)
               .showGrouped(showGrouped)
               .groupedCols(groupedCols)
               .colSettings(colSettingIds)
               .update
+
             Right("Successfully updated query")
 
           case queryIds =>
@@ -469,7 +472,7 @@ class QueryBackend extends QueryApi with Base {
     }
   }
 
-  override def saveOpenViews(openViews: Seq[String]): Either[String, String] = {
+  override def saveSettings(pairs: Seq[(String, String)]): Either[String, String] = {
     implicit val conn = Conn(base + "/meta")
     withTransactor {
       try {
@@ -478,26 +481,8 @@ class QueryBackend extends QueryApi with Base {
           case List(eid) => eid
           case Nil       => user_User.username("admin").save.eid
         }
-        // Replace open views setting
-        user_User(userId).views(openViews).update
-        Right("ok")
-      } catch {
-        case t: Throwable => Left(t.getMessage)
-      }
-    }
-  }
-
-  override def saveSetting(key: String, value: String): Either[String, String] = {
-    implicit val conn = Conn(base + "/meta")
-    withTransactor {
-      try {
-        // Use admin for now
-        val userId = user_User.e.username_("admin").get match {
-          case List(eid) => eid
-          case Nil       => user_User.username("admin").save.eid
-        }
-        // Save key/value setting
-        user_User(userId).settings.assert(key -> value).update
+        // Save key/value settings
+        user_User(userId).settings.assert(pairs).update
         Right("ok")
       } catch {
         case t: Throwable => Left(t.getMessage)
@@ -523,7 +508,6 @@ class QueryBackend extends QueryApi with Base {
       case "Float" | "Double"     => (v: Double) => v
     }
   }
-
 
   def update[T](
     db: String,

@@ -16,8 +16,9 @@ case class EntityHistory(db: String)(implicit ctx: Ctx.Owner) extends Base(db) {
 
   def view: Rx.Dynamic[TypedTag[Element]] = Rx {
     (curEntity(), entityHistorySort()) match {
-      case (0, _)                               => // no entity id marked yet
-      case (eid, sort) if viewEntityHistory.now =>
+      case (0, _) => // no entity id marked yet
+
+      case (eid, sort) if curViews.now.contains("viewEntityHistory") =>
         val view = document.getElementById("entityHistoryEid")
         if (view == null) {
           // Start fresh
@@ -44,7 +45,8 @@ case class EntityHistory(db: String)(implicit ctx: Ctx.Owner) extends Base(db) {
           )
           addEntityHistoryRows("entityHistoryViewTable", eid, sort)
         }
-      case _                                    => // don't update non-present entityView
+
+      case _ => // don't update non-present entityView
     }
     _entityHistoryView("Point on entity id...")
   }

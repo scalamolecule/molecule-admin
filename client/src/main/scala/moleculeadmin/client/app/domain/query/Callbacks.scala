@@ -5,7 +5,7 @@ import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.autowire.queryWire
 import moleculeadmin.client.rxstuff.RxBindings
 import moleculeadmin.shared.ast.query.QueryDTO
-import moleculeadmin.shared.ops.query.ColOps
+import moleculeadmin.shared.ops.query.{ColOps, MoleculeOps}
 import moleculeadmin.shared.ops.transform.Molecule2Model
 import org.scalajs.dom.raw.HTMLInputElement
 import org.scalajs.dom.{document, window}
@@ -14,12 +14,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 
 class Callbacks(implicit ctx: Ctx.Owner)
-  extends RxBindings with ColOps {
+  extends RxBindings with MoleculeOps with ColOps {
 
   type keepBooPickleImport_Callbacks = PickleState
-
-  // Prevent multiple asynchronous calls to db while processing first call
-  var idle = true
 
   private def sorted(query: QueryDTO): QueryDTO = query.copy(
     colSettings = columns.now.map(c => (c.colIndex, c.sortDir, c.sortPos)))
@@ -32,84 +29,78 @@ class Callbacks(implicit ctx: Ctx.Owner)
     }
   }
 
+  def saveSettings2(pairs: Seq[(String, String)]): Unit =
+    queryWire().saveSettings(pairs).call().foreach {
+      case Right(_)  => println(s"Saved settings: " + pairs.mkString(", "))
+      case Left(err) => window.alert(err)
+    }
+
+  def saveSetting(pair: (String, String)): Unit = saveSettings2(Seq(pair))
+
+  private def updateQueryCaches(query: QueryDTO) = {
+    val m = query.molecule
+    savedQueries = savedQueries.map {
+      case QueryDTO(`m`, _, _, _, _, _, _) => query
+      case q                               => q
+    }
+    recentQueries = recentQueries.map {
+      case QueryDTO(`m`, _, _, _, _, _, _) => query
+      case q                               => q
+    }
+  }
+
   def upsertQuery(query: QueryDTO): Unit = Rx {
-    if (idle) {
-      idle = false
-      // Re-draw query list
-      curMolecule.recalc()
-      queryWire().upsertQuery(db, query).call().foreach {
-        case Right("Successfully inserted query") =>
-          savedQueries = savedQueries :+ query
-          setColumns(query)
-          idle = true
+    queryWire().upsertQuery(db, query).call().foreach {
+      case Right("Successfully inserted query") =>
+        println("Inserted query: " + query)
+        savedQueries = savedQueries :+ query
+        setColumns(query)
 
-        case Right("Successfully updated query") =>
-          // Keep saved and recent queries in sync
-          val m = query.molecule
-          savedQueries = savedQueries.map {
-            case QueryDTO(`m`, _, _, _, _, _, _) => query
-            case q                               => q
-          }
-          recentQueries = recentQueries.map {
-            case QueryDTO(`m`, _, _, _, _, _, _) => query
-            case q                               => q
-          }
-          setColumns(query)
-          idle = true
+      case Right("Successfully updated query") =>
+        println("Updated query: " + query)
+        updateQueryCaches(query)
+        setColumns(query)
 
-        case Right(msg) =>
-          window.alert(s"Unexpected successful query upsertion: $msg")
-          idle = true
+      case Right(msg) =>
+        window.alert(s"Unexpected successful query upsertion: $msg")
 
-        case Left(error) =>
-          window.alert(s"Error upserting query: $error")
-          idle = true
-      }
+      case Left(error) =>
+        window.alert(s"Error upserting query: $error")
+    }
+  }
+
+  private def updateQuery(query: QueryDTO): Rx.Dynamic[Unit] = Rx {
+    queryWire().updateQuery(db, query).call().foreach {
+      case Right(_) =>
+        println("Updated query: " + query)
+        updateQueryCaches(query)
+
+      case Left(error) =>
+        window.alert(s"Error updating query: $error")
     }
   }
 
   protected val upsertQueryCallback: QueryDTO => () => Unit =
-    (query: QueryDTO) => () => upsertQuery(sorted(query))
+    (query: QueryDTO) => () => {
+      upsertQuery(sorted(query))
+      // Re-draw whole submenu
+      curMolecule.recalc()
+    }
 
 
   protected val retractQueryCallback: QueryDTO => () => Unit =
     (query: QueryDTO) => () => Rx {
-      if (idle) {
-        idle = false
-        queryWire().retractQuery(db, query).call().foreach {
-          case Right(_)    =>
-            savedQueries = savedQueries.filterNot(_.molecule == query.molecule)
-            idle = true
-          case Left(error) =>
-            window.alert(s"Error retracting query: $error")
-            idle = true
-        }
-      }
-    }
-
-  def updateQuery(updatedQuery: QueryDTO): Rx.Dynamic[Unit] = Rx {
-    if (idle) {
-      idle = false
-      queryWire().updateQuery(db, updatedQuery).call().foreach {
+      queryWire().retractQuery(db, query).call().foreach {
         case Right(_) =>
-          // Keep saved and recent queries in sync
-          val m = updatedQuery.molecule
-          savedQueries = savedQueries.map {
-            case QueryDTO(`m`, _, _, _, _, _, _) => updatedQuery
-            case q                               => q
-          }
-          recentQueries = recentQueries.map {
-            case QueryDTO(`m`, _, _, _, _, _, _) => updatedQuery
-            case q                               => q
-          }
-          idle = true
+          println("Removed query: " + query)
+          savedQueries = savedQueries.filterNot(_.molecule == query.molecule)
+          // Re-draw whole submenu
+          curMolecule.recalc()
 
         case Left(error) =>
-          window.alert(s"Error updating query: $error")
-          idle = true
+          window.alert(s"Error retracting query: $error")
       }
     }
-  }
 
   protected val favoriteQueryCallback: QueryDTO => () => Unit =
     (query: QueryDTO) => () => updateQuery(query.copy(isFavorite = true))
@@ -120,119 +111,107 @@ class Callbacks(implicit ctx: Ctx.Owner)
 
 
   def useQuery(query: QueryDTO): Rx.Dynamic[Unit] = Rx {
-    if (idle) {
-      idle = false
-      Molecule2Model(query.molecule) match {
-        case Right(elements) =>
-          //          println("---- use query")
-          modelElements() = elements
-          setColumns(query)
-          idle = true
-        case Left(err)       =>
-          window.alert(s"Error using query: $err")
-          idle = true
-      }
+    Molecule2Model(query.molecule) match {
+      case Right(elements) =>
+        modelElements() = elements
+        setColumns(query)
+
+      case Left(err) =>
+        window.alert(s"Error using query: $err")
     }
   }
 
   protected val useQueryCallback: QueryDTO => () => Unit =
     (query: QueryDTO) => () => useQuery(query)
 
-  //  def toggleViews(): Rx.Dynamic[Unit] = Rx {
-  //    if (idle) {
-  //      idle = false
-  //      showGrouped() = !showGrouped.now
-  //      groupedCols.recalc()
-  //    }
-  //  }
 
-  def toggleShowGrouped(): Rx.Dynamic[Unit] = Rx {
-    if (idle) {
-      idle = false
-//      println("toggleShowGrouped")
-      showGrouped = !showGrouped
-      groupedCols.recalc()
-      //      val updatedQuery = queryCache.
-      //      queryWire().updateQuery(db, updatedQuery).call().foreach {
-      //        case Right(_) =>
-      ////          // Keep saved and recent queries in sync
-      ////          val m = updatedQuery.molecule
-      ////          savedQueries() = savedQueries.now.map {
-      ////            case QueryData(`m`, _, _, _, _, _, _) => updatedQuery
-      ////            case q                                => q
-      ////          }
-      ////          recentQueries() = recentQueries.now.map {
-      ////            case QueryData(`m`, _, _, _, _, _, _) => updatedQuery
-      ////            case q                                => q
-      ////          }
-      //          idle = true
-      //
-      //        case Left(error) =>
-      //          window.alert(s"Error toggling showGrouped status: $error")
-      //          idle = true
-      //      }
-    }
+  // Grouped ------------------------------
+
+  private def getCb(id: String): HTMLInputElement =
+    document.getElementById("checkbox-" + id).asInstanceOf[HTMLInputElement]
+
+  def getCurQueryDTO: QueryDTO = {
+    val (part, ns) = getPartNs(curMolecule.now)
+    QueryDTO(
+      curMolecule.now,
+      part, ns, true,
+      showGrouped,
+      groupedCols.now,
+      colSettings(columns.now)
+    )
   }
 
-  def getCb(id: String): HTMLInputElement =
-    document.getElementById(id).asInstanceOf[HTMLInputElement]
+  def toggleShowGrouped(): Rx.Dynamic[Unit] = Rx {
+    showGrouped = !showGrouped
+    groupedCols.recalc()
+    upsertQuery(getCurQueryDTO.copy(showGrouped = showGrouped))
+  }
 
   def toggleGrouped(colIndex: Int): Rx.Dynamic[Unit] = Rx {
-    if (idle) {
-      idle = false
-      val cbAll = getCb("checkbox-grouped--1")
-      val cb    = getCb("checkbox-grouped-" + colIndex)
+    val cbAll = getCb("grouped-showGrouped")
+    val cb    = getCb("grouped-" + colIndex)
 
-      if (groupedCols.now.contains(colIndex)) {
-        // on -> off
-        if (groupedCols.now.size == 1) {
-          cbAll.checked = false
-          showGrouped = false
-        }
-        if (cb.checked) cb.checked = false
-        groupedCols() = groupedCols.now.filterNot(_ == colIndex)
-
-      } else {
-        // off -> on
-        if (groupedCols.now.isEmpty) {
-          cbAll.checked = true
-          showGrouped = true
-        }
-        if (!cb.checked) cb.checked = true
-        groupedCols() = groupedCols.now + colIndex
+    if (groupedCols.now.contains(colIndex)) {
+      // on -> off
+      if (groupedCols.now.size == 1) {
+        cbAll.checked = false
+        showGrouped = false
       }
+      if (cb.checked) cb.checked = false
+      groupedCols() = groupedCols.now.filterNot(_ == colIndex)
 
-
-      //      queryWire().updateQuery(db, updatedQuery).call().foreach {
-      //        case Right(_) =>
-      //          // Keep saved and recent queries in sync
-      //          val m = updatedQuery.molecule
-      //          savedQueries() = savedQueries.now.map {
-      //            case QueryData(`m`, _, _, _, _, _, _) => updatedQuery
-      //            case q                                => q
-      //          }
-      //          recentQueries() = recentQueries.now.map {
-      //            case QueryData(`m`, _, _, _, _, _, _) => updatedQuery
-      //            case q                                => q
-      //          }
-      //          idle = true
-      //
-      //        case Left(error) =>
-      //          window.alert(s"Error updating query: $error")
-      //          idle = true
-      //      }
-
-      //      Molecule2Model(query.molecule) match {
-      //        case Right(elements) =>
-      //          //          showGrouped() = query.showGrouped
-      //          //          groupedCols() = query.groupedCols
-      //          modelElements() = elements
-      //          setColumns(query)
-      //          idle = true
-      //        case Left(err)       =>
-      //          window.alert(s"Error using query: $err")
-      //          idle = true
-      //      }
+    } else {
+      // off -> on
+      if (groupedCols.now.isEmpty) {
+        cbAll.checked = true
+        showGrouped = true
+      }
+      if (!cb.checked) cb.checked = true
+      groupedCols() = groupedCols.now + colIndex
     }
+
+    upsertQuery(getCurQueryDTO.copy(
+      showGrouped = showGrouped,
+      groupedCols = groupedCols.now
+    ))
+  }
+
+
+  // Views ------------------------------
+
+
+  def toggleShowViews(): Rx.Dynamic[Unit] = Rx {
+    showViews = !showViews
+    curViews.recalc()
+    saveSetting("showViews" -> showViews.toString)
+  }
+
+  def toggleView(view: String): Rx.Dynamic[Unit] = Rx {
+    val cbAll = getCb("view-showViews")
+    val cb    = getCb("view-" + view)
+
+    if (curViews.now.contains(view)) {
+      // on -> off
+      if (curViews.now.size == 1) {
+        cbAll.checked = false
+        showViews = false
+      }
+      if (cb.checked) cb.checked = false
+      curViews() = curViews.now.filterNot(_ == view)
+
+    } else {
+      // off -> on
+      if (curViews.now.isEmpty) {
+        cbAll.checked = true
+        showViews = true
+      }
+      if (!cb.checked) cb.checked = true
+      curViews() = curViews.now :+ view
+    }
+
+    saveSettings2(Seq(
+      "showViews" -> showViews.toString,
+      view -> cb.checked.toString
+    ))
   }
 }

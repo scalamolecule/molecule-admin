@@ -51,16 +51,16 @@ case class DataTableBodyFoot(db: String)(implicit val ctx: Ctx.Owner)
       //      println("grouped default")
       // All grouped as default (?)
       showGrouped = false
-      groupedCols() = groupCols.now.toSet
+      groupedCols() = groupableCols.now.toSet
     } { query =>
-//      println("grouped match    : " + showGrouped + " - " + query.showGrouped + " - " + groupCols + " - " + query.groupedCols)
+//      println("grouped match    : " + showGrouped + " - " + query.showGrouped + " - " + groupableCols.now + " - " + query.groupedCols)
       showGrouped = query.showGrouped
       if (groupedCols.now == query.groupedCols)
         groupedCols.recalc()
       else
         groupedCols() = query.groupedCols
     }
-    groupCols() = getGroupedColIndexes(columns.now)
+    groupableCols() = getGroupedColIndexes(columns.now)
 
     val (part, ns) = getPartNs(curMolecule.now)
 

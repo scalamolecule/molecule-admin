@@ -13,7 +13,6 @@ trait BaseApi {
     Seq[String],
       MetaSchema,
       (Map[String, String],
-        Set[String],
         Set[Long],
         Set[Long],
         Set[Long],

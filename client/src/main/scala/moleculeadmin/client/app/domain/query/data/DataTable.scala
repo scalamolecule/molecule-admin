@@ -142,7 +142,7 @@ case class DataTable(db: String)(implicit val ctx: Ctx.Owner)
           curAttrs = columns.now.map(c => s":${c.nsFull}/${c.attr}")
 
           // trigger views (columns trigger killed, so that is dormant here)
-          showViews.recalc()
+          curViews.recalc()
 
           registerKeyEvents
           DataTableHead(db, tableBody).populate(tableHead)
