@@ -1,15 +1,11 @@
 package moleculeadmin.client.app.element.query
-import moleculeadmin.client.app.element.AppElements
 import moleculeadmin.shared.styles.Color
-import org.scalajs.dom.html.{Div, Element, LI, Span, TableRow}
+import org.scalajs.dom.html.{Div, Element}
+import org.scalajs.dom.window
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all.{h5, _}
-import org.scalajs.dom.window
-import moleculeadmin.shared.ast.query.QueryDTO
 
 trait ViewElements extends SubMenuElements {
-
-  val _avoidAutofocus = input(tpe := "hidden", autofocus := true)
 
   def _moleculeView(
     rows1: Int,
@@ -64,15 +60,6 @@ trait ViewElements extends SubMenuElements {
       )
     )
 
-  def _grouped(
-    header: String,
-    frags: Frag*
-  ): TypedTag[Element] =
-    _card(
-      _cardHeader(h5(header)),
-      _cardBody(frags)
-    )
-
   def _txView(msg: String): TypedTag[Element] =
     _card(
       _cardHeader(h5("Transaction")),
@@ -113,20 +100,4 @@ trait ViewElements extends SubMenuElements {
       )
     )
 
-
-  val hljs =
-    script(
-      """$(document).ready(function() {
-        |  $('pre code').each(function(i, block) {
-        |    hljs.highlightBlock(block);
-        |  });
-        |});""".stripMargin)
-
-  def _cardsContainer(cards: Frag*): TypedTag[Div] =
-    div(
-      paddingTop := 15,
-      paddingLeft := 20,
-      cards,
-      hljs
-    )
 }

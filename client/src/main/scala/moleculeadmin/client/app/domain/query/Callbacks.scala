@@ -2,6 +2,8 @@ package moleculeadmin.client.app.domain.query
 import autowire._
 import boopickle.Default._
 import moleculeadmin.client.app.domain.query.QueryState._
+import moleculeadmin.client.app.domain.query.submenu.SubMenuQueryList
+import moleculeadmin.client.app.element.query.SubMenuElements
 import moleculeadmin.client.autowire.queryWire
 import moleculeadmin.client.rxstuff.RxBindings
 import moleculeadmin.shared.ast.query.QueryDTO
@@ -14,7 +16,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 
 class Callbacks(implicit ctx: Ctx.Owner)
-  extends RxBindings with MoleculeOps with ColOps {
+  extends RxBindings with MoleculeOps with ColOps with SubMenuElements {
 
   type keepBooPickleImport_Callbacks = PickleState
 
@@ -49,17 +51,19 @@ class Callbacks(implicit ctx: Ctx.Owner)
     }
   }
 
-  def upsertQuery(query: QueryDTO): Unit = Rx {
+  def upsertQuery(query: QueryDTO, refreshSubmenu: Boolean = false): Unit = Rx {
     queryWire().upsertQuery(db, query).call().foreach {
       case Right("Successfully inserted query") =>
         println("Inserted query: " + query)
         savedQueries = savedQueries :+ query
         setColumns(query)
+        if (refreshSubmenu) curMolecule.recalc()
 
       case Right("Successfully updated query") =>
         println("Updated query: " + query)
         updateQueryCaches(query)
         setColumns(query)
+        if (refreshSubmenu) curMolecule.recalc()
 
       case Right(msg) =>
         window.alert(s"Unexpected successful query upsertion: $msg")
@@ -70,44 +74,58 @@ class Callbacks(implicit ctx: Ctx.Owner)
   }
 
   private def updateQuery(query: QueryDTO): Rx.Dynamic[Unit] = Rx {
+    updateQueryCaches(query)
     queryWire().updateQuery(db, query).call().foreach {
-      case Right(_) =>
-        println("Updated query: " + query)
-        updateQueryCaches(query)
-
-      case Left(error) =>
-        window.alert(s"Error updating query: $error")
+      case Right(_)    => println("Updated query: " + query)
+      case Left(error) => window.alert(s"Error updating query: $error")
     }
   }
 
   protected val upsertQueryCallback: QueryDTO => () => Unit =
-    (query: QueryDTO) => () => {
-      upsertQuery(sorted(query))
-      // Re-draw whole submenu
-      curMolecule.recalc()
-    }
-
+    (query: QueryDTO) => () => upsertQuery(sorted(query), true)
 
   protected val retractQueryCallback: QueryDTO => () => Unit =
     (query: QueryDTO) => () => Rx {
       queryWire().retractQuery(db, query).call().foreach {
-        case Right(_) =>
-          println("Removed query: " + query)
-          savedQueries = savedQueries.filterNot(_.molecule == query.molecule)
-          // Re-draw whole submenu
-          curMolecule.recalc()
-
-        case Left(error) =>
-          window.alert(s"Error retracting query: $error")
+        case Right(_)    => println("Removed query: " + query)
+        case Left(error) => window.alert(s"Error retracting query: $error")
       }
+      savedQueries = savedQueries.filterNot(_.molecule == query.molecule)
+      updateFavoritesList()
     }
 
   protected val favoriteQueryCallback: QueryDTO => () => Unit =
-    (query: QueryDTO) => () => updateQuery(query.copy(isFavorite = true))
+    (query: QueryDTO) => () => {
+      updateQuery(query.copy(isFavorite = true))
+      updateFavoritesList()
+    }
 
 
   protected val unfavoriteQueryCallback: QueryDTO => () => Unit =
-    (query: QueryDTO) => () => updateQuery(query.copy(isFavorite = false))
+    (query: QueryDTO) => () => {
+      updateQuery(query.copy(isFavorite = false))
+      updateFavoritesList()
+    }
+
+
+  def getFavoriteQueries: Seq[QueryDTO] =
+    savedQueries.filter(_.isFavorite).sortBy(_.molecule)
+
+  def newFav: Seq[QueryDTO] =
+    if (curMolecule.now.isEmpty) Nil else Seq(curQuery)
+
+  def updateFavoritesList(): Unit = {
+    val list = document.getElementById("querylist-favorites")
+    list.innerHTML = ""
+    _favoriteQueryRows(
+      curMolecule.now,
+      newFav,
+      getFavoriteQueries,
+      useQueryCallback,
+      upsertQueryCallback,
+      unfavoriteQueryCallback
+    ).foreach(row => list.appendChild(row.render))
+  }
 
 
   def useQuery(query: QueryDTO): Rx.Dynamic[Unit] = Rx {
@@ -130,7 +148,7 @@ class Callbacks(implicit ctx: Ctx.Owner)
   private def getCb(id: String): HTMLInputElement =
     document.getElementById("checkbox-" + id).asInstanceOf[HTMLInputElement]
 
-  def getCurQueryDTO: QueryDTO = {
+  def curQuery: QueryDTO = {
     val (part, ns) = getPartNs(curMolecule.now)
     QueryDTO(
       curMolecule.now,
@@ -144,7 +162,7 @@ class Callbacks(implicit ctx: Ctx.Owner)
   def toggleShowGrouped(): Rx.Dynamic[Unit] = Rx {
     showGrouped = !showGrouped
     groupedCols.recalc()
-    upsertQuery(getCurQueryDTO.copy(showGrouped = showGrouped))
+    upsertQuery(curQuery.copy(showGrouped = showGrouped))
   }
 
   def toggleGrouped(colIndex: Int): Rx.Dynamic[Unit] = Rx {
@@ -170,7 +188,7 @@ class Callbacks(implicit ctx: Ctx.Owner)
       groupedCols() = groupedCols.now + colIndex
     }
 
-    upsertQuery(getCurQueryDTO.copy(
+    upsertQuery(curQuery.copy(
       showGrouped = showGrouped,
       groupedCols = groupedCols.now
     ))

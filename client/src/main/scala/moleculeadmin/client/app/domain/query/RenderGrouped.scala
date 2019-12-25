@@ -1,7 +1,7 @@
 package moleculeadmin.client.app.domain.query
 
 import moleculeadmin.client.app.domain.query.QueryState._
-import moleculeadmin.client.app.element.query.ViewElements
+import moleculeadmin.client.app.element.query.{GroupedAttrElements, ViewElements}
 import moleculeadmin.shared.ast.query.{Col, QueryResult}
 import org.scalajs.dom.html.Element
 import rx.{Ctx, Rx}
@@ -9,8 +9,8 @@ import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
 
 
-case class RenderGroups(db: String)(implicit val ctx: Ctx.Owner)
-  extends ViewElements {
+case class RenderGrouped(db: String)(implicit val ctx: Ctx.Owner)
+  extends GroupedAttrElements {
 
   def groupData(
     qr: QueryResult,
@@ -60,27 +60,30 @@ case class RenderGroups(db: String)(implicit val ctx: Ctx.Owner)
     }
   }
 
+  def groupedTable(
+    colIndex: Int,
+//    ns: String,
+    attr: String,
+    colType: String,
+  ): TypedTag[Element] = {
+    val mandatory = !attr.endsWith("$")
+
+    _groupedTable(
+      colType,
+      mandatory,
+      groupData(queryCache.queryResult, colIndex, colType, mandatory)
+    )
+  }
 
   def rxElement: Rx.Dynamic[TypedTag[Element]] = Rx {
     groupedCols()
     if (showGrouped && groupedCols.now.nonEmpty) {
       _cardsContainer(
         columns.now.collect {
-          case Col(colIndex, _, nsAlias, _, attr, _, colType, _, _, _, _, _, _, _, _)
-            if groupedCols.now.contains(colIndex) =>
-            val mandatory = !attr.endsWith("$")
+          case c if groupedCols.now.contains(c.colIndex) =>
             _grouped(
-              s"$nsAlias/$attr",
-              _groupedTable(
-                colType,
-                mandatory,
-                groupData(
-                  queryCache.queryResult,
-                  colIndex,
-                  colType,
-                  mandatory
-                )
-              )
+              s"${c.nsFull}/${c.attr}",
+              groupedTable(c.colIndex, c.attr, c.colType)
             )
         }
       )
