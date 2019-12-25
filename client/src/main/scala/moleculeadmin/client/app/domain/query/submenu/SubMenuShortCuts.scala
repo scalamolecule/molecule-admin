@@ -1,7 +1,6 @@
 package moleculeadmin.client.app.domain.query.submenu
-import moleculeadmin.client.app.element.query.SubMenuElements
 import moleculeadmin.client.app.domain.query.KeyEvents
-import moleculeadmin.client.app.domain.query.QueryState._
+import moleculeadmin.client.app.element.query.SubMenuElements
 import moleculeadmin.client.rxstuff.RxBindings
 import org.scalajs.dom.document
 import org.scalajs.dom.html.LI
@@ -36,7 +35,6 @@ case class SubMenuShortCuts()(implicit val ctx: Ctx.Owner)
         _square("?", "Toggle this shortcuts info", { () => hideShortcuts }),
         _square("q", span("Toggle ", span("Q", textDecoration.underline), "ueries Builder"), { () => toggleQueryBuilder }),
         _square("l", span(span("L", textDecoration.underline), "ist favorite queries"), { () => toggleQueryListMenu }),
-//        _square("r", "Toggle Recent queries menu", { () => toggleRecentMenu }),
         _square("v", span("Toggle ", span("V", textDecoration.underline), "iews"), { () => toggleViewsMenu }),
       ),
 

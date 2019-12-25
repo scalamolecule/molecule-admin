@@ -14,6 +14,7 @@ import moleculeadmin.shared.ops.transform.Model2Molecule
 import org.scalajs.dom.document
 import rx.{Ctx, Rx}
 import scalatags.JsDom.all._
+import scala.collection.immutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 
@@ -28,46 +29,36 @@ object QueryClient extends RxBindings with TreeOps with SchemaOps with ColOps
 
   @JSExport
   def load(db0: String): Unit = queryWire().loadMetaData(db0).call().map {
-    case (dbs, metaSchema, (settings, curViews, stars, flags, checks, queries)) =>
+    case (dbs, metaSchema, (settings, stars, flags, checks, queries)) =>
 
       // Uncomment to test dynamic ScalaFiddle compilation
-      //import moleculeadmin.client.app.domain.query.data.groupedit.compileTest.TestScalaFiddle
-      //       TestScalaFiddle
+      // import moleculeadmin.client.app.domain.query.data.groupedit.compileTest.TestScalaFiddle
+      // TestScalaFiddle
 
+      // Base settings
       db = db0
       nsMap = mkNsMap(metaSchema)
       viewCellTypes = mkViewCellTypes(nsMap)
       enumAttrs = mkEnumAttrs(nsMap)
 
-      //      println("queries:")
+      //      settings.toList.sortBy(_._1) foreach println
+      //      println("---------")
       //      queries foreach println
+      //      println("---------")
 
-      // Apply saved general settings
+      // Saved custom settings
       Rx {
-        //        println("QueryClient...")
         maxRows() = settings.getOrElse("maxRows", "-1").toInt
         limit() = settings.getOrElse("limit", "20").toInt
         querySelection() = settings.getOrElse("querySelection", "a")
+        showViews = settings.getOrElse("showViews", "false").toBoolean
+        curViews() = settings.collect {
+          case (k, "true") if k.startsWith("view") => k
+        }.toSeq
         savedQueries = queries
         curStars = stars
         curFlags = flags
         curChecks = checks
-        curViews.foreach {
-          case "viewsOn"           => showViews() = true
-          case "viewHelp"          => viewHelp() = true
-          case "viewMolecule"      => viewMolecule() = true
-          case "viewDatalog"       => viewDatalog() = true
-          case "viewTransaction"   => viewTransaction() = true
-          case "viewEntity"        => viewEntity() = true
-          case "viewEntityHistory" => viewEntityHistory() = true
-          case "viewMoleculeModel" => viewMoleculeModel() = true
-          case "viewMoleculeQuery" => viewMoleculeQuery() = true
-          case "viewColumns"       => viewColumns() = true
-          case "viewTree1"         => viewTree1() = true
-          case "viewTree2"         => viewTree2() = true
-          case "showTree3"         => viewTree3() = true
-          case _                   =>
-        }
       }
 
       // Render page

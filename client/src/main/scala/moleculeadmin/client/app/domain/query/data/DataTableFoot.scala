@@ -1,7 +1,7 @@
 package moleculeadmin.client.app.domain.query.data
 import autowire._
 import boopickle.Default._
-import moleculeadmin.client.app.domain.query.KeyEvents
+import moleculeadmin.client.app.domain.query.{Callbacks, KeyEvents}
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.element.query.datatable.FootElements
 import moleculeadmin.client.autowire.queryWire
@@ -28,12 +28,7 @@ case class DataTableFoot()(implicit val ctx: Ctx.Owner)
       offset.kill()
       offset() = 0
       limit() = limitSelector.value.toInt
-
-      // Asynchronously save setting
-      queryWire().saveSetting("limit", limit.now.toString).call().foreach {
-        case Left(err) => window.alert(err)
-        case Right(_)  => println("Saved setting for `limit`: " + limit.now)
-      }
+      (new Callbacks).saveSetting("limit" -> limit.now.toString)
     }
     val footRow = tr(
       td(

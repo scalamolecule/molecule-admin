@@ -61,10 +61,7 @@ trait QueryApi extends BaseApi {
     tpe: String,
   ): Either[String, Long] = ???
 
-  def saveOpenViews(openViews: Seq[String]): Either[String, String] = ???
-
-  def saveSetting(key: String, value: String): Either[String, String] = ???
-
+  def saveSettings(pairs: Seq[(String, String)]): Either[String, String] = ???
 
   def updateStr(
     db: String,

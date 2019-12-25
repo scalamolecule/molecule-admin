@@ -18,7 +18,6 @@ trait Base extends BaseApi with HelpersAdmin {
 
   def settings(db: String): (
     Map[String, String],
-      Set[String],
       Set[Long],
       Set[Long],
       Set[Long],
@@ -27,15 +26,10 @@ trait Base extends BaseApi with HelpersAdmin {
     implicit val conn = Conn(base + "/meta")
 
     // Use "admin" for now. Todo: users
-    val userId                     = user_User.e.username_("admin").get match {
-      case List(eid) => eid
-      case Nil       => user_User.username("admin").save.eid
+    val (userId, settingsOpt) = user_User.e.username_("admin").settings$.get match {
+      case List((eid, settingsOpt)) => (eid, settingsOpt)
+      case Nil                      => (user_User.username("admin").save.eid, None)
     }
-    val (_, settingsOpt, viewsOpt) = user_User(userId).username.settings$.views$.get.head
-    val (settings, views)          = (
-      settingsOpt.getOrElse(Map.empty[String, String]),
-      viewsOpt.getOrElse(Set.empty[String])
-    )
 
     val dbId = meta_Db.e.name_(db).get.head
 
@@ -54,8 +48,7 @@ trait Base extends BaseApi with HelpersAdmin {
     ).get.head match {
       case (_, stars$, flags$, checks$, queryList) =>
         (
-          settings,
-          views,
+          settingsOpt.getOrElse(Map.empty[String, String]),
           stars$.getOrElse(Set.empty[Long]),
           flags$.getOrElse(Set.empty[Long]),
           checks$.getOrElse(Set.empty[Long]),
@@ -80,7 +73,6 @@ trait Base extends BaseApi with HelpersAdmin {
       MetaSchema,
       (
         Map[String, String],
-          Set[String],
           Set[Long],
           Set[Long],
           Set[Long],

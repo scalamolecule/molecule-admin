@@ -38,11 +38,10 @@ object QueryState {
   var queryBaseSelection = "a"
 
   // Data ------------------------------------------------------
-  // Model
-  val modelElements = Var(Seq.empty[Element])
 
-  // Column headers
-  val columns = Var(Seq.empty[Col])
+  val modelElements = Var(Seq.empty[Element])
+  val curMolecule   = Var("")
+  val columns       = Var(Seq.empty[Col])
 
   // Filters indexed by colIndex
   val filters = Var(Map.empty[Int, Filter[_]])
@@ -65,15 +64,28 @@ object QueryState {
   var cachedFilters          = Map.empty[Int, Filter[_]]
   var cachedFilterIndex      = Array.empty[Int]
 
-  //  var cachedRowBuilder  = Option.empty[RowBuilder]
-
   // Grouped --------------------------------
-  var showGrouped = false
-  val groupCols   = Var(Seq.empty[Int])
-  val groupedCols = Var(Set.empty[Int])
+  var showGrouped   = false
+  val groupableCols = Var(Seq.empty[Int])
+  val groupedCols   = Var(Set.empty[Int])
 
   // Views --------------------------------
-  val curMolecule = Var("")
+  var showViews = false
+  val allViews  = Seq(
+    ("view01_Molecule", "Molecule"),
+    ("view02_Datalog", "Datalog"),
+    ("view03_Transaction", "Transaction"),
+    ("view04_Entity", "Entity"),
+    ("view05_EntityHistory", "Entity History"),
+    ("view06_MoleculeModel", "Molecule Model"),
+    ("view07_MoleculeQuery", "Molecule Query"),
+    ("view08_Columns", "Columns"),
+    ("view09_Tree1", "Tree with attr names only"),
+    ("view10_Tree2", "Tree with attr definitions"),
+    ("view11_Tree3", "Full Tree")
+  )
+  val curViews  = Var(Seq.empty[String])
+
 
   // Entities
   val curEntity         = Var(0L)
@@ -100,21 +112,4 @@ object QueryState {
   val curT         = Var(0L)
   val curTx        = Var(0L)
   val curTxInstant = Var("")
-
-  // Show view statuses
-  val showViews         = Var(false)
-  val viewHelp          = Var(false)
-  val viewMolecule      = Var(false)
-  val viewDatalog       = Var(false)
-  val viewTransaction   = Var(false)
-  val viewEntity        = Var(false)
-  val viewEntityHistory = Var(false)
-
-  // Debugging
-  val viewMoleculeModel = Var(false)
-  val viewMoleculeQuery = Var(false)
-  val viewColumns       = Var(false)
-  val viewTree1         = Var(false)
-  val viewTree2         = Var(false)
-  val viewTree3         = Var(false)
 }

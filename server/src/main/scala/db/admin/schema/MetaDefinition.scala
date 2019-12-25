@@ -94,7 +94,6 @@ object MetaDefinition {
       val uuid       = oneUUID
       val username   = oneString
       val password   = oneString
-      val views      = manyString.noHistory.doc("Open views")
       val settings   = mapString.noHistory.doc("Key/setting pairs")
       val dbSettings = many[DbSettings].noHistory.isComponent.doc("Db specific settings")
     }
@@ -110,8 +109,8 @@ object MetaDefinition {
       val part        = oneString.noHistory.doc("Initial partition of molecule")
       val ns          = oneString.noHistory.doc("Initial namespace of molecule")
       val isFavorite  = oneBoolean.noHistory.doc("Is a favorite query to appear in alphabetic shortcut list")
-      val showGrouped = oneBoolean.noHistory.doc("Show grouped attribute boxes")
-      val groupedCols = manyInt.noHistory.doc("Col indexes of grouped attributes shown")
+      val showGrouped = oneBoolean.noHistory.doc("Show grouped attribute")
+      val groupedCols = manyInt.noHistory.doc("Col indexes of open grouped attributes")
       val colSettings = many[ColSetting].noHistory.isComponent.doc("Column settings for query result")
     }
     trait ColSetting {

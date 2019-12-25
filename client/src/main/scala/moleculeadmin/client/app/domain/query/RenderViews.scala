@@ -1,13 +1,11 @@
 package moleculeadmin.client.app.domain.query
-import boopickle.Default._
 import molecule.ast.model.Model
 import molecule.transform.Model2Query
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.domain.query.views.{Datalog, Entity, EntityHistory, Transaction}
 import moleculeadmin.client.app.element.query.ViewElements
 import moleculeadmin.shared.ast.query.QueryDTO
-import moleculeadmin.shared.ops.query.builder.TreeOps
-import moleculeadmin.shared.ops.query.{ColOps, ModelOps}
+import moleculeadmin.shared.ops.query.ModelOps
 import org.scalajs.dom.html.Element
 import rx.{Ctx, Rx}
 import scalatags.JsDom.TypedTag
@@ -15,9 +13,7 @@ import scalatags.JsDom.all._
 
 
 case class RenderViews(db: String)(implicit val ctx: Ctx.Owner)
-  extends Callbacks with ViewElements with ModelOps with ColOps with TreeOps {
-  type keepBooPickleImport_ViewsRender = PickleState
-
+  extends Callbacks with ViewElements with ModelOps {
 
   def moleculeView: Rx.Dynamic[TypedTag[Element]] = Rx {
     val lines      = curMolecule.now.split("\n")
@@ -60,24 +56,23 @@ case class RenderViews(db: String)(implicit val ctx: Ctx.Owner)
 
 
   def rxElement: Rx.Dynamic[TypedTag[Element]] = Rx {
-    // triggers
-    showViews()
+    curViews()
     columns()
-    if (columns.now.nonEmpty && showViews.now) {
-      // Render views
+    if (showViews && curViews.now.nonEmpty && columns.now.nonEmpty) {
       _cardsContainer(
-        if (viewMolecule()) moleculeView else (),
-        if (viewDatalog()) Datalog() else (),
-        if (viewTransaction()) Transaction(db).view else (),
-        if (viewEntity()) Entity(db).view else (),
-        if (viewEntityHistory()) EntityHistory(db).view else (),
-
-        if (viewMoleculeModel()) moleculeModelView else (),
-        if (viewMoleculeQuery()) moleculeQueryView else (),
-        if (viewColumns()) columnsView else (),
-        if (viewTree1()) tree1View else (),
-        if (viewTree2()) tree2View else (),
-        if (viewTree3()) tree3View else ()
+        curViews.now.sorted.collect {
+          case "view01_Molecule"      => moleculeView: Frag
+          case "view02_Datalog"       => Datalog(): Frag
+          case "view03_Transaction"   => Transaction(db).view: Frag
+          case "view04_Entity"        => Entity(db).view: Frag
+          case "view05_EntityHistory" => EntityHistory(db).view: Frag
+          case "view06_MoleculeModel" => moleculeModelView: Frag
+          case "view07_MoleculeQuery" => moleculeQueryView: Frag
+          case "view08_Columns"       => columnsView: Frag
+          case "view09_Tree1"         => tree1View: Frag
+          case "view10_Tree2"         => tree2View: Frag
+          case "view11_Tree3"         => tree3View: Frag
+        }
       )
     } else span()
   }

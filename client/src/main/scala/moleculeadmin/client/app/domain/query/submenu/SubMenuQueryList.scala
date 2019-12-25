@@ -13,6 +13,7 @@ case class SubMenuQueryList(db: String)(implicit val ctx: Ctx.Owner)
   extends Callbacks with SubMenuElements with MoleculeOps {
 
   def dynRender: Rx.Dynamic[JsDom.TypedTag[LI]] = Rx {
+//    curMolecule()
 
     // Organize saved molecules by part/ns/molecule hierarchy
     val queriesByPartNs = savedQueries.sortBy(_.molecule).foldLeft(
@@ -38,20 +39,7 @@ case class SubMenuQueryList(db: String)(implicit val ctx: Ctx.Owner)
     val favoriteQueries = savedQueries.filter(_.isFavorite).sortBy(_.molecule)
 
     val newFav: Seq[QueryDTO] =
-      if (curMolecule.now.isEmpty) {
-        Nil
-      } else {
-        val (part, ns) = getPartNs(curMolecule.now)
-        Seq(
-          QueryDTO(
-            curMolecule.now,
-            part, ns, true,
-            showGrouped,
-            groupedCols.now,
-            colSettings(columns.now)
-          )
-        )
-      }
+      if (curMolecule.now.isEmpty) Nil else Seq(getCurQueryDTO)
 
     _subMenuQueryList(
       curMolecule.now,

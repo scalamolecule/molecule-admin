@@ -51,6 +51,7 @@ trait KeyEvents extends ColOps with MoleculeOps {
     toggleOff("shortcuts")
   }
   def toggleQueryListMenu(): Unit = {
+//    groupableCols.recalc()
     toggle("query-list")
     toggleOff("views")
     toggleOff("grouped")
@@ -89,14 +90,8 @@ trait KeyEvents extends ColOps with MoleculeOps {
     } else {
       querySelection() = ""
     }
-    // Asynchronously save setting
-    queryWire().saveSetting("querySelection", querySelection.now)
-      .call().foreach {
-      case Left(err) => window.alert(err)
-      case Right(_)  => println(
-        "Saved setting for `builderSelection`: " + querySelection.now
-      )
-    }
+
+    (new Callbacks).saveSetting("querySelection" -> querySelection.now)
   }
 
   def toggleMinimize(implicit ctx: Ctx.Owner): Rx.Dynamic[Unit] = Rx(
@@ -193,32 +188,9 @@ trait KeyEvents extends ColOps with MoleculeOps {
       window.alert(s"Only ${savedQueries.size} queries saved.")
     }
 
-  def upsertCurrentQuery(implicit ctx: Ctx.Owner) = {
-    val (part, ns) = getPartNs(curMolecule.now)
-    val query      = QueryDTO(
-      curMolecule.now,
-      part, ns, true,
-      showGrouped,
-      groupedCols.now,
-      colSettings(columns.now)
-    )
-    (new Callbacks).upsertQuery(query)
-  }
-
-
-  // Views ------------------------------
-
-  def viewsOpen: Boolean = {
-    val element = document.getElementById("submenu-views")
-    element != null && element.getAttribute("style").endsWith("display:block;")
-  }
-  //  def toggleShowViews(implicit ctx: Ctx.Owner): Unit =
-  //    (new Callbacks).toggleShowGrouped()
-
-  def toggleViews(implicit ctx: Ctx.Owner): Unit = {
-    document.getElementById("checkbox-view-0")
-      .asInstanceOf[HTMLInputElement].checked = !showViews.now
-    showViews() = !showViews.now
+  def upsertCurrentQuery(implicit ctx: Ctx.Owner): Unit = {
+    val callback = new Callbacks
+    callback.upsertQuery(callback.getCurQueryDTO)
   }
 
 
@@ -230,17 +202,39 @@ trait KeyEvents extends ColOps with MoleculeOps {
   }
 
   def toggleShowGrouped(implicit ctx: Ctx.Owner): Unit = {
-    document.getElementById("checkbox-grouped--1")
+    document.getElementById("checkbox-grouped-showGrouped")
       .asInstanceOf[HTMLInputElement].checked = !showGrouped
     (new Callbacks).toggleShowGrouped()
   }
 
   def toggleGrouped(i: Int)(implicit ctx: Ctx.Owner): Unit = {
-    if (i == -1 || i >= groupCols.now.size)
-      window.alert(s"Unrecognized shortcut")
+    if (i == -1 || i >= groupableCols.now.size)
+      window.alert(s"Unrecognized shortcut for grouped attribute: $i")
     else
-      (new Callbacks).toggleGrouped(groupCols.now(i))
+      (new Callbacks).toggleGrouped(groupableCols.now(i))
   }
+
+
+  // Views ------------------------------
+
+  def viewsOpen: Boolean = {
+    val element = document.getElementById("submenu-views")
+    element != null && element.getAttribute("style").endsWith("display:block;")
+  }
+
+  def toggleShowViews(implicit ctx: Ctx.Owner): Unit = {
+    document.getElementById("checkbox-view-showViews")
+      .asInstanceOf[HTMLInputElement].checked = !showViews
+    (new Callbacks).toggleShowViews()
+  }
+
+  def toggleView(i: Int)(implicit ctx: Ctx.Owner): Unit = {
+    if (i == -1 || i >= allViews.size)
+      window.alert(s"Unrecognized shortcut for view: $i")
+    else
+      (new Callbacks).toggleView(allViews(i)._1)
+  }
+
 
   def registerKeyEvents(
     implicit ctx: Ctx.Owner,
@@ -350,7 +344,7 @@ trait KeyEvents extends ColOps with MoleculeOps {
             case n if groupedOpen => n match {
               case " "   => toggleShowGrouped
               case r"\d" =>
-                if (groupCols.now.size < 10)
+                if (groupableCols.now.size < 10)
                   toggleGrouped(n.toInt - 1)
                 else
                   numberInputs(n, toggleGrouped)
@@ -358,8 +352,8 @@ trait KeyEvents extends ColOps with MoleculeOps {
             }
 
             case n if viewsOpen => n match {
-              case " "   => toggleViews
-              case r"\d" => numberInputs(n, useQuery)
+              case " "   => toggleShowViews
+              case r"\d" => numberInputs(n, toggleView)
               case _     => ()
             }
             case _              => ()

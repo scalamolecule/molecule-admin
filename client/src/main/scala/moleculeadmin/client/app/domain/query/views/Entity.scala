@@ -10,8 +10,9 @@ case class Entity(db: String)(implicit ctx: Ctx.Owner) extends Base(db) {
 
   def view: Rx.Dynamic[TypedTag[Element]] = Rx {
     curEntity() match {
-      case 0                     => // no entity id marked yet
-      case eid if viewEntity.now =>
+      case 0 => // no entity id marked yet
+
+      case eid if curViews.now.contains("viewEntity") =>
         val view = document.getElementById("entityViewTable")
         if (view == null) {
           // Start fresh
@@ -19,7 +20,8 @@ case class Entity(db: String)(implicit ctx: Ctx.Owner) extends Base(db) {
         } else {
           addEntityRows("entityViewTable", eid, false, 0)
         }
-      case _                     => // don't update non-present entityView
+
+      case _ => // don't update non-present entityView
     }
     _entityView("Point on entity id...")
   }

@@ -1,22 +1,16 @@
 package moleculeadmin.client.app.domain.query
 
-import boopickle.Default._
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.element.query.ViewElements
 import moleculeadmin.shared.ast.query.{Col, QueryResult}
-import moleculeadmin.shared.ops.query.builder.TreeOps
-import moleculeadmin.shared.ops.query.{ColOps, ModelOps}
 import org.scalajs.dom.html.Element
 import rx.{Ctx, Rx}
 import scalatags.JsDom.TypedTag
-import scalatags.JsDom.all.{s, _}
+import scalatags.JsDom.all._
 
 
 case class RenderGroups(db: String)(implicit val ctx: Ctx.Owner)
-  extends Callbacks
-    with ViewElements with ModelOps with ColOps with TreeOps {
-  type keepBooPickleImport_ViewsRender = PickleState
-
+  extends ViewElements {
 
   def groupData(
     qr: QueryResult,
@@ -69,7 +63,6 @@ case class RenderGroups(db: String)(implicit val ctx: Ctx.Owner)
 
   def rxElement: Rx.Dynamic[TypedTag[Element]] = Rx {
     groupedCols()
-    //    println("GroupedRender : " + showGrouped + " - " + groupCols.now + " - " + groupedCols.now)
     if (showGrouped && groupedCols.now.nonEmpty) {
       _cardsContainer(
         columns.now.collect {
