@@ -34,8 +34,6 @@ case class DataTableHead(
 
     val sortable = card == 1 || singleAggrTypes.contains(aggrType)
     val sort     = { e: MouseEvent =>
-//      if (cachedCols.size == 5 &&
-//        !cachedCols.exists(_.colIndex == colIndex)) {
       if (columns.now.size == 5 &&
         !columns.now.exists(_.colIndex == colIndex)) {
         window.alert("Can sort maximum 5 columns.")
@@ -46,7 +44,8 @@ case class DataTableHead(
         // Show first page with each new sort
         offset() = 0
         columns() = getSortedColumns(
-          columns.now, colIndex, e.getModifierState("Shift"))
+          columns.now, colIndex, e.getModifierState("Shift")
+        )
       }
     }
     val editable = isEditable(columns.now, colIndex, nsAlias, nsFull)

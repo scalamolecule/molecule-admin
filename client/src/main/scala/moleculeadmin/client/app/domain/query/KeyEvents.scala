@@ -190,7 +190,7 @@ trait KeyEvents extends ColOps with MoleculeOps {
 
   def upsertCurrentQuery(implicit ctx: Ctx.Owner): Unit = {
     val callback = new Callbacks
-    callback.upsertQuery(callback.getCurQueryDTO)
+    callback.upsertQuery(callback.curQuery, true)
   }
 
 

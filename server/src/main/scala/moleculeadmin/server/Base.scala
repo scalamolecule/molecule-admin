@@ -4,10 +4,10 @@ import molecule.api.Entity
 import molecule.api.out20._
 import molecule.facade.Conn
 import moleculeadmin.shared.api.BaseApi
-//import moleculeadmin.shared.ast.query.{ColSetting, QueryData}
 import moleculeadmin.shared.ast.query.QueryDTO
 import moleculeadmin.shared.ast.schema._
 import moleculeadmin.shared.util.HelpersAdmin
+
 
 trait Base extends BaseApi with HelpersAdmin {
 

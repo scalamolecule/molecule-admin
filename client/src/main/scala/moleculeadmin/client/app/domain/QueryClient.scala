@@ -72,7 +72,7 @@ object QueryClient extends RxBindings with TreeOps with SchemaOps with ColOps
           _row(
             RenderQueryBuilder(db, metaSchema).rxElement,
             DataTable(db).rxElement,
-            RenderGroups(db).rxElement,
+            RenderGrouped(db).rxElement,
             RenderViews(db).rxElement,
           )
         ).render

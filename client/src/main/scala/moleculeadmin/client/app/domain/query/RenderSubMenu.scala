@@ -20,7 +20,7 @@ case class RenderSubMenu(db: String)(implicit val ctx: Ctx.Owner)
 
 
   def dynRender: Rx.Dynamic[JsDom.TypedTag[Span]] = Rx {
-//    println("---- submenu")
+    println("---- submenu")
     // Re-calc sub menu when query changes
     curMolecule()
 

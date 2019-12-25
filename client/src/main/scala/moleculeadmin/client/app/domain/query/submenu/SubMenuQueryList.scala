@@ -4,7 +4,9 @@ import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.element.query.SubMenuElements
 import moleculeadmin.shared.ast.query.QueryDTO
 import moleculeadmin.shared.ops.query.MoleculeOps
-import org.scalajs.dom.html.LI
+import org.scalajs.dom.document
+import org.scalajs.dom.html.{LI, TableRow}
+import org.scalajs.dom.raw.Node
 import rx.{Ctx, Rx}
 import scalatags.JsDom
 
@@ -13,7 +15,7 @@ case class SubMenuQueryList(db: String)(implicit val ctx: Ctx.Owner)
   extends Callbacks with SubMenuElements with MoleculeOps {
 
   def dynRender: Rx.Dynamic[JsDom.TypedTag[LI]] = Rx {
-//    curMolecule()
+    //    curMolecule()
 
     // Organize saved molecules by part/ns/molecule hierarchy
     val queriesByPartNs = savedQueries.sortBy(_.molecule).foldLeft(
@@ -36,10 +38,7 @@ case class SubMenuQueryList(db: String)(implicit val ctx: Ctx.Owner)
         (p, ns, pp.init :+ updatedPart)
     }._3
 
-    val favoriteQueries = savedQueries.filter(_.isFavorite).sortBy(_.molecule)
-
-    val newFav: Seq[QueryDTO] =
-      if (curMolecule.now.isEmpty) Nil else Seq(getCurQueryDTO)
+    val favoriteQueries = getFavoriteQueries
 
     _subMenuQueryList(
       curMolecule.now,
@@ -57,7 +56,7 @@ case class SubMenuQueryList(db: String)(implicit val ctx: Ctx.Owner)
       upsertQueryCallback,
       favoriteQueryCallback,
       unfavoriteQueryCallback,
-      retractQueryCallback,
+      retractQueryCallback
     )
   }
 }

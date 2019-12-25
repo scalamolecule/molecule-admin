@@ -74,6 +74,44 @@ trait AppElements extends Bootstrap {
       tail
     )
 
+  def _cbLabel(key: String, txt: String): TypedTag[Span] =
+    span(
+      span(key, marginLeft := 5, marginRight := 10),
+      txt
+    )
+
+  def _cb(id1: String, txt: Frag, checked1: Boolean, toggle: () => Unit): TypedTag[Div] =
+    div(
+      input(tpe := "checkbox",
+        id := s"checkbox-$id1",
+        value := id1,
+        if (checked1) checked := true else (),
+        onchange := toggle
+      ),
+      label(
+        paddingLeft := 5,
+        marginBottom := 3,
+        `for` := s"checkbox-$id1",
+        txt
+      ),
+      whiteSpace.nowrap
+    )
+
+  val hljs =
+    script(
+      """$(document).ready(function() {
+        |  $('pre code').each(function(i, block) {
+        |    hljs.highlightBlock(block);
+        |  });
+        |});""".stripMargin)
+
+  def _cardsContainer(cards: Frag*): TypedTag[Div] =
+    div(
+      paddingTop := 15,
+      paddingLeft := 20,
+      cards,
+      hljs
+    )
 
   val defaultSize = 3
 
