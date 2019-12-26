@@ -9,21 +9,18 @@ import scalatags.JsDom
 import scalatags.JsDom.all._
 
 
-case class RenderSubMenu(db: String)(implicit val ctx: Ctx.Owner)
-  extends RxBindings with SubMenuElements {
+case class RenderSubMenu()(implicit val ctx: Ctx.Owner)
+  extends SubMenuElements {
 
+  // Initialize max row onchange callback
   _maxRowsSelector.onchange = _ => {
     maxRows() = _maxRowsSelector.value.toInt
     (new Callbacks).saveSetting("maxRows" -> maxRows.now.toString)
     _maxRowsSelector.blur()
   }
 
-
   def dynRender: Rx.Dynamic[JsDom.TypedTag[Span]] = Rx {
-    println("---- submenu")
-    // Re-calc sub menu when query changes
-    curMolecule()
-
+    renderSubMenu()
     span(
       _maxRowsSelector,
       ul(cls := "nav nav-pills",
@@ -31,16 +28,16 @@ case class RenderSubMenu(db: String)(implicit val ctx: Ctx.Owner)
           savedQueries.nonEmpty
             || recentQueries.nonEmpty
             || modelElements.now.nonEmpty
-        ) SubMenuQueryList(db).dynRender else (),
+        ) SubMenuQueryList().render else (),
 
-        if (modelElements.now.nonEmpty) {
+        if (modelElements.now.nonEmpty && rowCountAll > 0) {
           Seq(
-            SubMenuGrouped().dynRender,
-            SubMenuViews().dynRender,
+            SubMenuGrouped().render,
+            SubMenuViews().render,
           )
         } else (),
 
-        SubMenuShortCuts().dynRender
+        SubMenuShortCuts().render
       )
     )
   }

@@ -2,11 +2,10 @@ package moleculeadmin.client.app.domain.query
 import autowire._
 import boopickle.Default._
 import moleculeadmin.client.app.domain.query.QueryState._
-import moleculeadmin.client.app.domain.query.submenu.SubMenuQueryList
 import moleculeadmin.client.app.element.query.SubMenuElements
 import moleculeadmin.client.autowire.queryWire
 import moleculeadmin.client.rxstuff.RxBindings
-import moleculeadmin.shared.ast.query.QueryDTO
+import moleculeadmin.shared.ast.query.{Col, QueryDTO}
 import moleculeadmin.shared.ops.query.{ColOps, MoleculeOps}
 import moleculeadmin.shared.ops.transform.Molecule2Model
 import org.scalajs.dom.raw.HTMLInputElement
@@ -33,7 +32,8 @@ class Callbacks(implicit ctx: Ctx.Owner)
 
   def saveSettings2(pairs: Seq[(String, String)]): Unit =
     queryWire().saveSettings(pairs).call().foreach {
-      case Right(_)  => println(s"Saved settings: " + pairs.mkString(", "))
+      case Right(_) =>
+      //        println(s"Saved settings: " + pairs.mkString(", "))
       case Left(err) => window.alert(err)
     }
 
@@ -54,13 +54,13 @@ class Callbacks(implicit ctx: Ctx.Owner)
   def upsertQuery(query: QueryDTO, refreshSubmenu: Boolean = false): Unit = Rx {
     queryWire().upsertQuery(db, query).call().foreach {
       case Right("Successfully inserted query") =>
-        println("Inserted query: " + query)
+        //        println("Inserted query: " + query)
         savedQueries = savedQueries :+ query
         setColumns(query)
         if (refreshSubmenu) curMolecule.recalc()
 
       case Right("Successfully updated query") =>
-        println("Updated query: " + query)
+        //        println("Updated query: " + query)
         updateQueryCaches(query)
         setColumns(query)
         if (refreshSubmenu) curMolecule.recalc()
@@ -76,7 +76,8 @@ class Callbacks(implicit ctx: Ctx.Owner)
   private def updateQuery(query: QueryDTO): Rx.Dynamic[Unit] = Rx {
     updateQueryCaches(query)
     queryWire().updateQuery(db, query).call().foreach {
-      case Right(_)    => println("Updated query: " + query)
+      case Right(_) =>
+      //        println("Updated query: " + query)
       case Left(error) => window.alert(s"Error updating query: $error")
     }
   }
@@ -87,7 +88,8 @@ class Callbacks(implicit ctx: Ctx.Owner)
   protected val retractQueryCallback: QueryDTO => () => Unit =
     (query: QueryDTO) => () => Rx {
       queryWire().retractQuery(db, query).call().foreach {
-        case Right(_)    => println("Removed query: " + query)
+        case Right(_) =>
+        //          println("Removed query: " + query)
         case Left(error) => window.alert(s"Error retracting query: $error")
       }
       savedQueries = savedQueries.filterNot(_.molecule == query.molecule)
@@ -154,49 +156,49 @@ class Callbacks(implicit ctx: Ctx.Owner)
       curMolecule.now,
       part, ns, true,
       showGrouped,
-      groupedCols.now,
+      groupedColIndexes.now,
       colSettings(columns.now)
     )
   }
 
   def toggleShowGrouped(): Rx.Dynamic[Unit] = Rx {
     showGrouped = !showGrouped
-    groupedCols.recalc()
+    groupedColIndexes.recalc()
     upsertQuery(curQuery.copy(showGrouped = showGrouped))
   }
 
-  def toggleGrouped(colIndex: Int): Rx.Dynamic[Unit] = Rx {
-    val cbAll = getCb("grouped-showGrouped")
-    val cb    = getCb("grouped-" + colIndex)
+  def toggleGrouped(col: Col): Rx.Dynamic[Unit] = Rx {
+    val colIndex = col.colIndex
+    val cbAll    = getCb("grouped-showGrouped")
+    val cb       = getCb("grouped-" + colIndex)
 
-    if (groupedCols.now.contains(colIndex)) {
+    if (groupedColIndexes.now.contains(colIndex)) {
       // on -> off
-      if (groupedCols.now.size == 1) {
+      if (groupedColIndexes.now.size == 1) {
         cbAll.checked = false
         showGrouped = false
       }
       if (cb.checked) cb.checked = false
-      groupedCols() = groupedCols.now.filterNot(_ == colIndex)
+      groupedColIndexes() = groupedColIndexes.now.filterNot(_ == colIndex)
 
     } else {
       // off -> on
-      if (groupedCols.now.isEmpty) {
+      if (groupedColIndexes.now.isEmpty) {
         cbAll.checked = true
         showGrouped = true
       }
       if (!cb.checked) cb.checked = true
-      groupedCols() = groupedCols.now + colIndex
+      groupedColIndexes() = groupedColIndexes.now + colIndex
     }
 
     upsertQuery(curQuery.copy(
       showGrouped = showGrouped,
-      groupedCols = groupedCols.now
+      groupedColIndexes = groupedColIndexes.now
     ))
   }
 
 
   // Views ------------------------------
-
 
   def toggleShowViews(): Rx.Dynamic[Unit] = Rx {
     showViews = !showViews

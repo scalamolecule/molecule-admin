@@ -1,7 +1,5 @@
 package moleculeadmin.client.app.domain.query.data.groupedit
 
-import java.net.URI
-import java.util.{Date, UUID}
 import autowire._
 import boopickle.Default._
 import moleculeadmin.client.app.domain.query.KeyEvents
@@ -10,7 +8,7 @@ import moleculeadmin.client.app.domain.query.data.Indexes
 import moleculeadmin.client.app.element.query.datatable.BodyElements
 import moleculeadmin.client.autowire.queryWire
 import moleculeadmin.client.rxstuff.RxBindings
-import moleculeadmin.shared.ast.query.{Col, QueryResult}
+import moleculeadmin.shared.ast.query.Col
 import moleculeadmin.shared.ops.query.ColOps
 import org.scalajs.dom.html.{LI, TableCell, TableRow}
 import org.scalajs.dom.{Node, NodeList, document, window}
@@ -19,11 +17,9 @@ import scalatags.JsDom.TypedTag
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.scalajs.js
-//import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
 
-case class GroupSave(db: String, col: Col)(implicit val ctx: Ctx.Owner)
+case class GroupSave(col: Col)(implicit val ctx: Ctx.Owner)
   extends RxBindings with ColOps with BodyElements with KeyEvents {
   type keepBooPickleImport_GroupSave = PickleState
 

@@ -77,7 +77,7 @@ object query extends HelpersAdmin {
     ns: String,
     isFavorite: Boolean,
     showGrouped: Boolean,
-    groupedCols: Set[Int],
+    groupedColIndexes: Set[Int],
     colSettings: Seq[(Int, String, Int)]
   )
 }

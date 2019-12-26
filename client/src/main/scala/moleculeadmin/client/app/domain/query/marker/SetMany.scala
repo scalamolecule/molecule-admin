@@ -21,7 +21,6 @@ object SetMany extends AppElements {
   var cell : Element        = null
 
   def apply(
-    db: String,
     tableBody: TableSection,
     colIndex: Int,
     tpe: String,

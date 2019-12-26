@@ -15,12 +15,11 @@ import scala.collection.mutable
 
 
 abstract class Cell(
-  db: String,
   tableBody: TableSection,
   cols: Seq[Col],
   qr: QueryResult
 )(implicit ctx: Ctx.Owner)
-  extends TxLambdas(db) with Update with BodyElements with ColOps {
+  extends TxLambdas with Update with BodyElements with ColOps {
 
   // current entity id for updates of subsequent attributes on each row
   var e = 0L
@@ -76,17 +75,17 @@ abstract class Cell(
         val eid    : Long      = cell.getAttribute("eid").toLong
         val updater            = card match {
           case 1 => UpdateCardOne(
-            db, cols, qr, origArray, valueArray, baseClass,
+            cols, qr, origArray, valueArray, baseClass,
             colType, rowIndex, colIndex, related,
             nsAlias, nsFull, attr, attrType, card, enums, expr
           )
           case 2 => UpdateCardMany(
-            db, cols, qr, origArray, valueArray, baseClass,
+            cols, qr, origArray, valueArray, baseClass,
             colType, rowIndex, colIndex, related,
             nsAlias, nsFull, attr, attrType, card, enums, cellType, expr
           )
           case 3 => UpdateCardMap(
-            db, cols, qr, origArray, valueArray, baseClass,
+            cols, qr, origArray, valueArray, baseClass,
             colType, rowIndex, colIndex, related,
             nsAlias, nsFull, attr, attrType, card, enums, expr
           )
@@ -231,9 +230,9 @@ abstract class Cell(
             curFlagIndexes(tableCol) = flagIndex
             curCheckIndexes(tableCol) = checkIndex
 
-            val star  = ToggleOne(db, tableBody, "star")
-            val flag  = ToggleOne(db, tableBody, "flag")
-            val check = ToggleOne(db, tableBody, "check")
+            val star  = ToggleOne(tableBody, "star")
+            val flag  = ToggleOne(tableBody, "flag")
+            val check = ToggleOne(tableBody, "check")
 
             (rowIndex: Int) =>
               // Set entity id for updates of subsequent attribute values

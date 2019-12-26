@@ -1,16 +1,52 @@
 package moleculeadmin.client.app.domain.query
 
 import moleculeadmin.client.app.domain.query.QueryState._
-import moleculeadmin.client.app.element.query.{GroupedAttrElements, ViewElements}
-import moleculeadmin.shared.ast.query.{Col, QueryResult}
+import moleculeadmin.client.app.element.query.GroupedAttrElements
+import moleculeadmin.shared.ast.query.QueryResult
 import org.scalajs.dom.html.Element
 import rx.{Ctx, Rx}
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
 
 
-case class RenderGrouped(db: String)(implicit val ctx: Ctx.Owner)
+case class RenderGrouped()(implicit val ctx: Ctx.Owner)
   extends GroupedAttrElements {
+
+
+  def dynRender: Rx.Dynamic[TypedTag[Element]] = Rx {
+    groupedColIndexes()
+    if (showGrouped && groupedColIndexes.now.nonEmpty) {
+      _cardsContainer(
+        columns.now.collect {
+          case c
+            if groupedColIndexes.now.contains(c.colIndex)
+              && groupableCols.map(_.colIndex).contains(c.colIndex)
+          =>
+            _grouped(
+              s"${c.nsFull}/${c.attr}",
+              groupedTable(c.colIndex, c.attr, c.colType)
+            )
+        }
+      )
+    } else {
+      span()
+    }
+  }
+
+  def groupedTable(
+    colIndex: Int,
+    attr: String,
+    colType: String,
+  ): TypedTag[Element] = {
+    val mandatory = !attr.endsWith("$")
+    _groupedTable(
+      colType,
+      mandatory,
+      groupData(queryCache.queryResult, colIndex, colType, mandatory)
+    )
+  }
+
+  def cacheGrouped() = {}
 
   def groupData(
     qr: QueryResult,
@@ -57,36 +93,8 @@ case class RenderGrouped(db: String)(implicit val ctx: Ctx.Owner)
           .mapValues(_.length).toSeq
           .sortBy { case (v, c) => (-c, v) }
           .map { case (v, c) => (v.toString, c) }
+
+      case _ => Nil
     }
-  }
-
-  def groupedTable(
-    colIndex: Int,
-//    ns: String,
-    attr: String,
-    colType: String,
-  ): TypedTag[Element] = {
-    val mandatory = !attr.endsWith("$")
-
-    _groupedTable(
-      colType,
-      mandatory,
-      groupData(queryCache.queryResult, colIndex, colType, mandatory)
-    )
-  }
-
-  def rxElement: Rx.Dynamic[TypedTag[Element]] = Rx {
-    groupedCols()
-    if (showGrouped && groupedCols.now.nonEmpty) {
-      _cardsContainer(
-        columns.now.collect {
-          case c if groupedCols.now.contains(c.colIndex) =>
-            _grouped(
-              s"${c.nsFull}/${c.attr}",
-              groupedTable(c.colIndex, c.attr, c.colType)
-            )
-        }
-      )
-    } else span()
   }
 }

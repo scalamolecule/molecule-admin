@@ -6,7 +6,7 @@ import rx.{Ctx, Rx}
 import scalatags.JsDom.TypedTag
 
 
-case class Entity(db: String)(implicit ctx: Ctx.Owner) extends Base(db) {
+case class Entity()(implicit ctx: Ctx.Owner) extends Base() {
 
   def view: Rx.Dynamic[TypedTag[Element]] = Rx {
     curEntity() match {

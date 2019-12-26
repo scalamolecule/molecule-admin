@@ -4,18 +4,15 @@ import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.element.query.SubMenuElements
 import moleculeadmin.shared.ast.query.QueryDTO
 import moleculeadmin.shared.ops.query.MoleculeOps
-import org.scalajs.dom.document
-import org.scalajs.dom.html.{LI, TableRow}
-import org.scalajs.dom.raw.Node
-import rx.{Ctx, Rx}
-import scalatags.JsDom
+import org.scalajs.dom.html.LI
+import rx.Ctx
 
 
-case class SubMenuQueryList(db: String)(implicit val ctx: Ctx.Owner)
+case class SubMenuQueryList()(implicit val ctx: Ctx.Owner)
   extends Callbacks with SubMenuElements with MoleculeOps {
 
-  def dynRender: Rx.Dynamic[JsDom.TypedTag[LI]] = Rx {
-    //    curMolecule()
+
+  def render: LI = {
 
     // Organize saved molecules by part/ns/molecule hierarchy
     val queriesByPartNs = savedQueries.sortBy(_.molecule).foldLeft(
@@ -57,6 +54,6 @@ case class SubMenuQueryList(db: String)(implicit val ctx: Ctx.Owner)
       favoriteQueryCallback,
       unfavoriteQueryCallback,
       retractQueryCallback
-    )
+    ).render
   }
 }

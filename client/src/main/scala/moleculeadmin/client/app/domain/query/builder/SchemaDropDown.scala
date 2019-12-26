@@ -1,6 +1,6 @@
 package moleculeadmin.client.app.domain.query.builder
 import moleculeadmin.client.app.element.query.SchemaDropdownElements
-import moleculeadmin.client.app.domain.query.QueryState.{modelElements, newQueryBuildup}
+import moleculeadmin.client.app.domain.query.QueryState.{db, modelElements, newQueryBuildup}
 import moleculeadmin.client.rxstuff.RxBindings
 import moleculeadmin.shared.ast.schema._
 import molecule.ast.model._
@@ -11,7 +11,7 @@ import scalatags.JsDom
 import scalatags.JsDom.all._
 
 
-case class SchemaDropDown(db: String, schema: MetaSchema, selection: String)
+case class SchemaDropDown(schema: MetaSchema, selection: String)
                          (implicit val ctx: Ctx.Owner)
   extends RxBindings with SchemaOps with SchemaDropdownElements {
 

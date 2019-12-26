@@ -11,7 +11,7 @@ import scalatags.JsDom.all._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 
-case class EntityHistory(db: String)(implicit ctx: Ctx.Owner) extends Base(db) {
+case class EntityHistory()(implicit ctx: Ctx.Owner) extends Base() {
   type keepBooPickleImport_EntityHistory = PickleState
 
   def view: Rx.Dynamic[TypedTag[Element]] = Rx {

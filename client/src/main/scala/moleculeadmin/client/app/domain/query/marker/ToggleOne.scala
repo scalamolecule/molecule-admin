@@ -11,8 +11,7 @@ import org.scalajs.dom.window
 import scala.concurrent.ExecutionContext.Implicits.global
 
 
-case class ToggleOne(db: String, tableBody: TableSection, tpe: String)
-  extends AppElements {
+case class ToggleOne(tableBody: TableSection, tpe: String) extends AppElements {
 
   type keepBooPickleImport_ToggleOne = PickleState
 
