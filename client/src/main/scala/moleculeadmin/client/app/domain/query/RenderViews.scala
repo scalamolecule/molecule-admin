@@ -12,8 +12,31 @@ import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
 
 
-case class RenderViews(db: String)(implicit val ctx: Ctx.Owner)
+case class RenderViews()(implicit val ctx: Ctx.Owner)
   extends Callbacks with ViewElements with ModelOps {
+
+
+  def dynRender: Rx.Dynamic[TypedTag[Element]] = Rx {
+    curViews()
+    columns()
+    if (showViews && curViews.now.nonEmpty && columns.now.nonEmpty) {
+      _cardsContainer(
+        curViews.now.sorted.collect {
+          case "view01_Molecule"      => moleculeView: Frag
+          case "view02_Datalog"       => Datalog(): Frag
+          case "view03_Transaction"   => Transaction().view: Frag
+          case "view04_Entity"        => Entity().view: Frag
+          case "view05_EntityHistory" => EntityHistory().view: Frag
+          case "view06_MoleculeModel" => moleculeModelView: Frag
+          case "view07_MoleculeQuery" => moleculeQueryView: Frag
+          case "view08_Columns"       => columnsView: Frag
+          case "view09_Tree1"         => tree1View: Frag
+          case "view10_Tree2"         => tree2View: Frag
+          case "view11_Tree3"         => tree3View: Frag
+        }
+      )
+    } else span()
+  }
 
   def moleculeView: Rx.Dynamic[TypedTag[Element]] = Rx {
     val lines      = curMolecule.now.split("\n")
@@ -53,27 +76,4 @@ case class RenderViews(db: String)(implicit val ctx: Ctx.Owner)
     _codeView("Tree with attr definitions", "scala", tree.now.code)
   def tree3View: TypedTag[Element] =
     _codeView("Full Tree", "scala", tree.now.code2)
-
-
-  def rxElement: Rx.Dynamic[TypedTag[Element]] = Rx {
-    curViews()
-    columns()
-    if (showViews && curViews.now.nonEmpty && columns.now.nonEmpty) {
-      _cardsContainer(
-        curViews.now.sorted.collect {
-          case "view01_Molecule"      => moleculeView: Frag
-          case "view02_Datalog"       => Datalog(): Frag
-          case "view03_Transaction"   => Transaction(db).view: Frag
-          case "view04_Entity"        => Entity(db).view: Frag
-          case "view05_EntityHistory" => EntityHistory(db).view: Frag
-          case "view06_MoleculeModel" => moleculeModelView: Frag
-          case "view07_MoleculeQuery" => moleculeQueryView: Frag
-          case "view08_Columns"       => columnsView: Frag
-          case "view09_Tree1"         => tree1View: Frag
-          case "view10_Tree2"         => tree2View: Frag
-          case "view11_Tree3"         => tree3View: Frag
-        }
-      )
-    } else span()
-  }
 }

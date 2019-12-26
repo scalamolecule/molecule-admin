@@ -1,4 +1,5 @@
 package moleculeadmin.client.app.domain.query.data
+
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.domain.query.{Callbacks, KeyEvents}
 import moleculeadmin.client.rxstuff.RxBindings
@@ -8,14 +9,11 @@ import org.scalajs.dom.html.TableSection
 import rx.{Ctx, Rx}
 
 
-case class DataTableBodyFoot(db: String)(implicit val ctx: Ctx.Owner)
+case class DataTableBodyFoot()(implicit val ctx: Ctx.Owner)
   extends Callbacks with RxBindings with KeyEvents with ColOps with MoleculeOps {
-
-  //  println("---- DataTableBodyFoot ----")
 
   // Locally cached RowBuilder to avoid re-creation on paging
   var cachedRowBuilder = Option.empty[RowBuilder]
-  //  cachedRowBuilder = None
 
   def populate(
     tableBody: TableSection,
@@ -48,17 +46,16 @@ case class DataTableBodyFoot(db: String)(implicit val ctx: Ctx.Owner)
 
     // Grouped
     savedQueries.find(_.molecule == curMolecule.now).fold {
-      // default
       showGrouped = false
-      groupedCols() = groupableCols.now.toSet
+      groupedColIndexes() = Set.empty[Int]
     } { query =>
       showGrouped = query.showGrouped
-      if (groupedCols.now == query.groupedCols)
-        groupedCols.recalc()
+      if (groupedColIndexes.now == query.groupedColIndexes)
+        groupedColIndexes.recalc()
       else
-        groupedCols() = query.groupedCols
+        groupedColIndexes() = query.groupedColIndexes
     }
-    groupableCols() = getGroupedColIndexes(columns.now)
+    renderSubMenu.recalc()
 
     recentQueries =
       curQuery +: recentQueries.filterNot(_.molecule == curMolecule.now)
@@ -66,12 +63,11 @@ case class DataTableBodyFoot(db: String)(implicit val ctx: Ctx.Owner)
     // Populate table body and foot
     tableBody.innerHTML = ""
     val rowBuilder = cachedRowBuilder.getOrElse {
-      val rb = RowBuilder(db, tableBody, columns.now, queryResult)
+      val rb = RowBuilder(tableBody, columns.now, queryResult)
       cachedRowBuilder = Some(rb)
       rb
     }
 
-    //    println("append...")
     rowBuilder.append(sortIndex, filterIndex)
     DataTableFoot().populate(tableFoot)
   }

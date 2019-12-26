@@ -3,46 +3,51 @@ package moleculeadmin.client.app.domain.query.submenu
 import moleculeadmin.client.app.domain.query.Callbacks
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.element.query.SubMenuElements
-import moleculeadmin.client.rxstuff.RxBindings
-import org.scalajs.dom.html.{Div, LI}
-import rx.{Ctx, Rx}
-import scalatags.JsDom.TypedTag
+import org.scalajs.dom.html.LI
+import rx.Ctx
 import scalatags.JsDom.all._
 
 
 case class SubMenuGrouped()(implicit val ctx: Ctx.Owner)
-  extends Callbacks with RxBindings with SubMenuElements {
+  extends Callbacks with SubMenuElements {
 
-  def cb(n: Int, colIndex: Int, attr: String): TypedTag[Div] = Rx {
-    if(n == 0)
-      _cb(
-        "grouped-showGrouped",
-        _cbLabel("␣", attr),
-        showGrouped,
-        () => toggleShowGrouped()
+
+  def render: LI = {
+    if (queryCache != null && queryCache.queryResult.rowCountAll == 0) {
+      _subMenu(
+        "submenu-grouped",
+        _shortcut("G", "rouped"),
+        Seq(span("Can't group attributes of empty result"))
       )
-    else
-      _cb(
-        "grouped-" + colIndex,
-        _cbLabel(s"$n", attr),
-        groupedCols.now.contains(colIndex),
-        () => toggleGrouped(colIndex)
+
+    } else if (groupableCols.isEmpty) {
+      _subMenu(
+        "submenu-grouped",
+        _shortcut("G", "rouped"),
+        Seq(span("Add `e` first of a namespace to allow grouped attrs"))
       )
-  }.now
 
-
-  def dynRender: Rx.Dynamic[TypedTag[LI]] = Rx {
-    groupableCols()
-    _subMenu(
-      "submenu-grouped",
-      _shortcut("G", "rouped"),
-      Seq(
-        cb(0, -1, "Grouped Attributes"),
-        hr
-      ) ++ groupableCols.now.zipWithIndex.map { case (colIndex, i) =>
-        val c = columns.now.find(_.colIndex == colIndex).get
-        cb(i + 1, c.colIndex, s"${c.nsAlias}/${c.attr}")
-      }
-    )
-  }
+    } else {
+      _subMenu(
+        "submenu-grouped",
+        _shortcut("G", "rouped"),
+        Seq(
+          _cb(
+            "grouped-showGrouped",
+            _cbLabel("␣", "Grouped Attributes"),
+            showGrouped,
+            () => toggleShowGrouped()
+          ),
+          hr
+        ) ++ groupableCols.zipWithIndex.map { case (c, i) =>
+          _cb(
+            "grouped-" + c.colIndex,
+            _cbLabel(s"${i + 1}", s"${c.nsAlias}/${c.attr}"),
+            groupedColIndexes.now.contains(c.colIndex),
+            () => toggleGrouped(c)
+          )
+        }
+      )
+    }
+  }.render
 }

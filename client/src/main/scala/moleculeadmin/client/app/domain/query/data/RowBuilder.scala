@@ -7,12 +7,11 @@ import rx.Ctx
 
 
 case class RowBuilder(
-  db: String,
   tableBody: TableSection,
   cols: Seq[Col],
   qr: QueryResult
 )(implicit ctx: Ctx.Owner)
-  extends Cell(db, tableBody, cols, qr) {
+  extends Cell(tableBody, cols, qr) {
 
   def append(sortIndex: Array[Int], filterIndex: Array[Int]): Unit = {
     val indexBridge: Int => Int = {

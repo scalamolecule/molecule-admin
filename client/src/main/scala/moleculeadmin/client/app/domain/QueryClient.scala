@@ -3,8 +3,8 @@ import autowire._
 import boopickle.Default._
 import moleculeadmin.client.app.domain.common.TopMenu
 import moleculeadmin.client.app.domain.query.QueryState._
-import moleculeadmin.client.app.domain.query.data.DataTable
 import moleculeadmin.client.app.domain.query._
+import moleculeadmin.client.app.domain.query.data.DataTable
 import moleculeadmin.client.app.element.AppElements
 import moleculeadmin.client.autowire.queryWire
 import moleculeadmin.client.rxstuff.RxBindings
@@ -14,7 +14,6 @@ import moleculeadmin.shared.ops.transform.Model2Molecule
 import org.scalajs.dom.document
 import rx.{Ctx, Rx}
 import scalatags.JsDom.all._
-import scala.collection.immutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 
@@ -25,6 +24,7 @@ object QueryClient extends RxBindings with TreeOps with SchemaOps with ColOps
 
   type keepBooPickleImport_QueryClient = PickleState
 
+  // Single Rx context to be passed around wherever needed
   implicit val ctx: Ctx.Owner = rx.Ctx.Owner.safe()
 
   @JSExport
@@ -63,17 +63,17 @@ object QueryClient extends RxBindings with TreeOps with SchemaOps with ColOps
 
       // Render page
       document.body.appendChild(
-        TopMenu(dbs, db, "query", RenderSubMenu(db).dynRender).render
+        TopMenu(dbs, db, "query", RenderSubMenu().dynRender).render
       )
       // make saved queries available via key command
       registerKeyEvents
       document.body.appendChild {
         _containerFluid2(
           _row(
-            RenderQueryBuilder(db, metaSchema).rxElement,
-            DataTable(db).rxElement,
-            RenderGrouped(db).rxElement,
-            RenderViews(db).rxElement,
+            RenderQueryBuilder(metaSchema).dynRender,
+            DataTable().dynRender,
+            RenderGrouped().dynRender,
+            RenderViews().dynRender,
           )
         ).render
       }

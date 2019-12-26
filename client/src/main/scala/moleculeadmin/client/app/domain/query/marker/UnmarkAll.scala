@@ -18,7 +18,6 @@ object UnmarkAll extends AppElements {
   var i = 0
 
   def apply(
-    db: String,
     tableBody: TableSection,
     colIndex: Int,
     tpe: String

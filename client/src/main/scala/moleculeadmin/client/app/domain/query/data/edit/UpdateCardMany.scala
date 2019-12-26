@@ -1,7 +1,7 @@
 package moleculeadmin.client.app.domain.query.data.edit
 import autowire._
 import boopickle.Default._
-import moleculeadmin.client.app.domain.query.QueryState.{curEntity, editCellId}
+import moleculeadmin.client.app.domain.query.QueryState.{db, curEntity, editCellId}
 import moleculeadmin.client.autowire.queryWire
 import moleculeadmin.shared.ast.query.{Col, QueryResult}
 import org.scalajs.dom.html.{TableCell, TableRow}
@@ -17,7 +17,6 @@ import scala.util.Try
  * @tparam T List[String] / List[Double]
  **/
 case class UpdateCardMany[T](
-  db: String,
   cols: Seq[Col],
   qr: QueryResult,
   origArray: Array[Option[T]],
@@ -37,7 +36,7 @@ case class UpdateCardMany[T](
   expr: String
 )(implicit ctx: Ctx.Owner)
   extends UpdateClient[T](
-    db, cols, qr, origArray, valueArray, baseClass,
+    cols, qr, origArray, valueArray, baseClass,
     colType, rowIndex, colIndex, related,
     nsAlias, nsFull, attr, attrType, card, enums
   ) {

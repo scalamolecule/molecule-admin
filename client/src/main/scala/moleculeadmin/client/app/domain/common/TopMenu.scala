@@ -11,19 +11,19 @@ import scalatags.JsDom
 import scalatags.JsDom.all._
 
 
-case class TopMenu(dbs: Seq[String],
-                   curDb: String,
-                   curPage: String,
-                   subMenu: Frag
-                  )(implicit val ctx: Ctx.Owner)
-  extends TopMenuElements with RxBindings {
+case class TopMenu(
+  dbs: Seq[String],
+  curDb: String,
+  curPage: String,
+  subMenu: Frag
+)(implicit val ctx: Ctx.Owner) extends TopMenuElements with RxBindings {
 
   def dbSelector: Select = {
     val selector = select(
-      for (db <- dbs) yield option(
-        db,
-        value := s"$curPage?db=$db",
-        if (db == curDb) selected := true else ()
+      for (db1 <- dbs) yield option(
+        db1,
+        value := s"$curPage?db=$db1",
+        if (db1 == curDb) selected := true else ()
       ),
     ).render
     selector.onchange = _ => document.location.href = selector.value

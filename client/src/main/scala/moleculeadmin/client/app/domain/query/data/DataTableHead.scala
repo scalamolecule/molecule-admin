@@ -18,10 +18,7 @@ import scalatags.JsDom
 import scalatags.JsDom.all._
 
 
-case class DataTableHead(
-  db: String,
-  tableBody: TableSection,
-)(implicit val ctx: Ctx.Owner)
+case class DataTableHead(tableBody: TableSection)(implicit val ctx: Ctx.Owner)
   extends RxBindings with ColOps with ModelOps
     with HeadElements with KeyEvents with FilterFactory
     with AppElements {
@@ -54,12 +51,12 @@ case class DataTableHead(
     }
     val save     = { _: MouseEvent =>
       colType match {
-        case "string"     => GroupSave(db, col).string()
-        case "double"     => GroupSave(db, col).double()
-        case "listString" => GroupSave(db, col).listString()
-        case "listDouble" => GroupSave(db, col).listDouble()
-        case "mapString"  => GroupSave(db, col).mapString()
-        case "mapDouble"  => GroupSave(db, col).mapDouble()
+        case "string"     => GroupSave(col).string()
+        case "double"     => GroupSave(col).double()
+        case "listString" => GroupSave(col).listString()
+        case "listDouble" => GroupSave(col).listDouble()
+        case "mapString"  => GroupSave(col).mapString()
+        case "mapDouble"  => GroupSave(col).mapDouble()
       }
     }
     val retract  = { _: MouseEvent =>
@@ -73,15 +70,15 @@ case class DataTableHead(
 
     val markers: Seq[MouseEvent => Unit] = if (attr == "e") {
       Seq(
-        { _: MouseEvent => SetMany(db, tableBody, colIndex, "star", true) },
-        { _: MouseEvent => SetMany(db, tableBody, colIndex, "flag", true) },
-        { _: MouseEvent => SetMany(db, tableBody, colIndex, "check", true) },
-        { _: MouseEvent => SetMany(db, tableBody, colIndex, "star", false) },
-        { _: MouseEvent => SetMany(db, tableBody, colIndex, "flag", false) },
-        { _: MouseEvent => SetMany(db, tableBody, colIndex, "check", false) },
-        { _: MouseEvent => UnmarkAll(db, tableBody, colIndex, "star") },
-        { _: MouseEvent => UnmarkAll(db, tableBody, colIndex, "flag") },
-        { _: MouseEvent => UnmarkAll(db, tableBody, colIndex, "check") },
+        { _: MouseEvent => SetMany(tableBody, colIndex, "star", true) },
+        { _: MouseEvent => SetMany(tableBody, colIndex, "flag", true) },
+        { _: MouseEvent => SetMany(tableBody, colIndex, "check", true) },
+        { _: MouseEvent => SetMany(tableBody, colIndex, "star", false) },
+        { _: MouseEvent => SetMany(tableBody, colIndex, "flag", false) },
+        { _: MouseEvent => SetMany(tableBody, colIndex, "check", false) },
+        { _: MouseEvent => UnmarkAll(tableBody, colIndex, "star") },
+        { _: MouseEvent => UnmarkAll(tableBody, colIndex, "flag") },
+        { _: MouseEvent => UnmarkAll(tableBody, colIndex, "check") },
       )
     } else Nil
 

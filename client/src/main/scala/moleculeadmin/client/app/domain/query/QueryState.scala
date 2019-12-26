@@ -64,10 +64,12 @@ object QueryState {
   var cachedFilters          = Map.empty[Int, Filter[_]]
   var cachedFilterIndex      = Array.empty[Int]
 
+  val renderSubMenu = Var("trigger")
+
   // Grouped --------------------------------
-  var showGrouped   = false
-  val groupableCols = Var(Seq.empty[Int])
-  val groupedCols   = Var(Set.empty[Int])
+  var showGrouped       = false
+  var groupableCols     = Seq.empty[Col]
+  val groupedColIndexes = Var(Set.empty[Int])
 
   // Views --------------------------------
   var showViews = false

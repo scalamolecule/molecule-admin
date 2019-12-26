@@ -7,23 +7,23 @@ import org.scalajs.dom.html.{TableCell, TableRow}
 import rx.Ctx
 import scalatags.JsDom.all.s
 
-abstract class UpdateClient[T](db: String,
-                               cols: Seq[Col],
-                               qr: QueryResult,
-                               origArray: Array[Option[T]],
-                               valueArray: Array[Option[T]],
-                               baseClass: String,
-                               colType: String,
-                               rowIndex: Int,
-                               colIndex: Int,
-                               related: Int,
-                               nsAlias: String,
-                               nsFull: String,
-                               attr: String,
-                               attrType: String,
-                               card: Int,
-                               enums: Seq[String]
-                              )(implicit ctx: Ctx.Owner)
+abstract class UpdateClient[T](
+  cols: Seq[Col],
+  qr: QueryResult,
+  origArray: Array[Option[T]],
+  valueArray: Array[Option[T]],
+  baseClass: String,
+  colType: String,
+  rowIndex: Int,
+  colIndex: Int,
+  related: Int,
+  nsAlias: String,
+  nsFull: String,
+  attr: String,
+  attrType: String,
+  card: Int,
+  enums: Seq[String]
+)(implicit ctx: Ctx.Owner)
   extends BodyElements with Update {
 
   val attrFull   = s":$nsFull/${clean(attr)}"
@@ -70,21 +70,21 @@ abstract class UpdateClient[T](db: String,
 
 
   def update(cellId: String,
-             cell: TableCell,
-             row: TableRow,
-             eid: Long,
-             oldVOpt: Option[T],
-             isNum: Boolean): Unit
+    cell: TableCell,
+    row: TableRow,
+    eid: Long,
+    oldVOpt: Option[T],
+    isNum: Boolean): Unit
 
   def updateClient(t: Long, tx: Long, txInstant: String,
-                   cellId: String,
-                   cell: TableCell,
-                   row: TableRow,
-                   eid: Long,
-                   oldVOpt: Option[T],
-                   isNum: Boolean,
-                   newValueOpt: Option[T]
-                  ): Unit = {
+    cellId: String,
+    cell: TableCell,
+    row: TableRow,
+    eid: Long,
+    oldVOpt: Option[T],
+    isNum: Boolean,
+    newValueOpt: Option[T]
+  ): Unit = {
 
     // Update current tx data
     curT() = t

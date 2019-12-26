@@ -2,7 +2,7 @@ package moleculeadmin.client.app.domain.query.data.edit
 import autowire._
 import boopickle.Default._
 import moleculeadmin.client.app.element.query.datatable.BodyElements
-import moleculeadmin.client.app.domain.query.QueryState.{curT, curTx, curTxInstant}
+import moleculeadmin.client.app.domain.query.QueryState.{db, curT, curTx, curTxInstant}
 import moleculeadmin.client.autowire.queryWire
 import moleculeadmin.shared.ast.query.{Col, QueryResult}
 import molecule.util.DateHandling
@@ -12,8 +12,7 @@ import scalatags.JsDom
 import scala.concurrent.ExecutionContext.Implicits.global
 
 
-abstract class TxLambdas(db: String)
-                        (implicit val ctx: Ctx.Owner)
+abstract class TxLambdas(implicit val ctx: Ctx.Owner)
   extends BodyElements with DateHandling {
 
   type keepBooPickleImport_TxLambdas = PickleState

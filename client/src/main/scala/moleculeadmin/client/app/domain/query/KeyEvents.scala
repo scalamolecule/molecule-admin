@@ -51,7 +51,7 @@ trait KeyEvents extends ColOps with MoleculeOps {
     toggleOff("shortcuts")
   }
   def toggleQueryListMenu(): Unit = {
-//    groupableCols.recalc()
+    //    groupableCols.recalc()
     toggle("query-list")
     toggleOff("views")
     toggleOff("grouped")
@@ -208,10 +208,10 @@ trait KeyEvents extends ColOps with MoleculeOps {
   }
 
   def toggleGrouped(i: Int)(implicit ctx: Ctx.Owner): Unit = {
-    if (i == -1 || i >= groupableCols.now.size)
+    if (i == -1 || i >= groupableCols.size)
       window.alert(s"Unrecognized shortcut for grouped attribute: $i")
     else
-      (new Callbacks).toggleGrouped(groupableCols.now(i))
+      (new Callbacks).toggleGrouped(groupableCols(i))
   }
 
 
@@ -332,7 +332,10 @@ trait KeyEvents extends ColOps with MoleculeOps {
             //              builderBaseSelection = "r"; builderSelection() = "r"
 
             case n if queryListOpen => n match {
-              case " " if curMolecule.now.nonEmpty => upsertCurrentQuery
+              case " " if curMolecule.now.nonEmpty =>
+                // prevent default scroll to bottom
+                e.preventDefault()
+                upsertCurrentQuery
               case r"\d"                           =>
                 if (savedQueries.count(_.isFavorite) < 10)
                   useQuery(n.toInt - 1)
@@ -342,9 +345,13 @@ trait KeyEvents extends ColOps with MoleculeOps {
             }
 
             case n if groupedOpen => n match {
-              case " "   => toggleShowGrouped
+              case " " =>
+                // prevent default scroll to bottom
+                e.preventDefault()
+                toggleShowGrouped
+
               case r"\d" =>
-                if (groupableCols.now.size < 10)
+                if (groupableCols.size < 10)
                   toggleGrouped(n.toInt - 1)
                 else
                   numberInputs(n, toggleGrouped)
@@ -352,11 +359,15 @@ trait KeyEvents extends ColOps with MoleculeOps {
             }
 
             case n if viewsOpen => n match {
-              case " "   => toggleShowViews
+              case " "   =>
+                // prevent default scroll to bottom
+                e.preventDefault()
+                toggleShowViews
               case r"\d" => numberInputs(n, toggleView)
               case _     => ()
             }
-            case _              => ()
+
+            case _ => ()
           }
 
         } else if (e.getModifierState("Shift")) {

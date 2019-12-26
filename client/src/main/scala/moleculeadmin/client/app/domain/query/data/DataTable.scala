@@ -3,12 +3,11 @@ import autowire._
 import boopickle.Default._
 import molecule.ast.model.{Atom, Model}
 import molecule.ast.query.QueryExpr
-import molecule.ops.QueryOps._
 import molecule.ops.VerifyRawModel
 import molecule.transform.{Model2Query, Query2String}
 import moleculeadmin.client.app.domain.QueryClient._
 import moleculeadmin.client.app.domain.query.KeyEvents
-import moleculeadmin.client.app.domain.query.QueryState.{columns, offset, _}
+import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.element.query.datatable.TableElements
 import moleculeadmin.client.autowire.queryWire
 import moleculeadmin.client.rxstuff.RxBindings
@@ -23,7 +22,7 @@ import scalatags.JsDom.all._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 
-case class DataTable(db: String)(implicit val ctx: Ctx.Owner)
+case class DataTable()(implicit val ctx: Ctx.Owner)
   extends RxBindings with KeyEvents with ModelOps with TableElements {
 
   type keepBooPickleImport_DataTable = PickleState
@@ -62,13 +61,18 @@ case class DataTable(db: String)(implicit val ctx: Ctx.Owner)
         //        println("QUERY")
         rowCountAll = queryResult.rowCountAll
         rowCount = queryResult.rowCount
-        DataTableBodyFoot(db).populate(tableBody, tableFoot, queryResult)
+        DataTableBodyFoot().populate(tableBody, tableFoot, queryResult)
 
       case Left(Nil) =>
+        //        println("Empty result")
         tableBody.innerHTML = ""
         tableBody.appendChild(
           tr(td(colspan := columns.now.size + 1, "Empty result set...")).render
         )
+        tableFoot.innerHTML = ""
+        rowCountAll = 0
+        renderSubMenu.recalc()
+
 
       case Left(msgs) =>
         val dataTableContainer = document.getElementById("dataTableContainer")
@@ -86,8 +90,8 @@ case class DataTable(db: String)(implicit val ctx: Ctx.Owner)
     }
   }
 
-  def rxElement: Rx.Dynamic[JsDom.TypedTag[HTMLElement]] = Rx {
-//    println("---- table")
+  def dynRender: Rx.Dynamic[JsDom.TypedTag[HTMLElement]] = Rx {
+    //    println("---- table")
 
     // Var's not to trigger this Rx
     // (`modelElements` and `maxRows` are the main triggers)
@@ -131,7 +135,7 @@ case class DataTable(db: String)(implicit val ctx: Ctx.Owner)
           _rowCol1("Please select at least one mandatory attribute")
 
         case elements =>
-//          println("----------- new model ----------")
+          //          println("----------- new model ----------")
           val elements1 = VerifyRawModel(elements)
           tree() = mkTree(mkModelTree(elements1))
           curMolecule() = model2molecule(elements1)
@@ -141,11 +145,13 @@ case class DataTable(db: String)(implicit val ctx: Ctx.Owner)
           offset() = 0
           curAttrs = columns.now.map(c => s":${c.nsFull}/${c.attr}")
 
+          groupableCols = getGroupableCols(columns.now)
+
           // trigger views (columns trigger killed, so that is dormant here)
           curViews.recalc()
 
           registerKeyEvents
-          DataTableHead(db, tableBody).populate(tableHead)
+          DataTableHead(tableBody).populate(tableHead)
           fetchAndPopulate(tableBody, tableFoot)
           tableContainer
       }

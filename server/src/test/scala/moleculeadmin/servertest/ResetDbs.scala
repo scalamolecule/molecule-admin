@@ -34,17 +34,17 @@ object ResetDbs extends TestSuite with ExampleData with Settings {
     //          resetDbs()
     //        }
 
-    //    test("Reset all and poplulate") {
-    //      resetDbs()
-    //      populateCoreTest(Conn("datomic:free://localhost:4334/CoreTest"))
-    ////      populatePartition(Conn("datomic:free://localhost:4334/Partition"))
-    ////      populateTree(Conn("datomic:free://localhost:4334/Tree"))
-    //    }
-
-    test("Reset CoreTest") {
-      resetDbs(Seq("CoreTest"))
+    test("Reset all and poplulate") {
+      resetDbs()
       populateCoreTest(Conn("datomic:free://localhost:4334/CoreTest"))
+      //      populatePartition(Conn("datomic:free://localhost:4334/Partition"))
+      //      populateTree(Conn("datomic:free://localhost:4334/Tree"))
     }
+
+    //    test("Reset CoreTest") {
+    //      resetDbs(Seq("CoreTest"))
+    //      populateCoreTest(Conn("datomic:free://localhost:4334/CoreTest"))
+    //    }
   }
 
   def resetDbs(dbs0: Seq[String] = Nil): Unit = {

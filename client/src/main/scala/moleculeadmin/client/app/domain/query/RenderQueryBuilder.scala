@@ -8,17 +8,16 @@ import org.scalajs.dom.Node
 import rx.Ctx
 import scalatags.JsDom.all.span
 
-case class RenderQueryBuilder(db: String, metaSchema: MetaSchema)(implicit val ctx: Ctx.Owner)
+case class RenderQueryBuilder(metaSchema: MetaSchema)(implicit val ctx: Ctx.Owner)
   extends RxBindings with AppElements {
 
-  def rxElement: Node = querySelection.map {
+  def dynRender: Node = querySelection.map {
     case "" => span()
     case "m" => _rowColAuto6(QueryBranches("m").dynRender)
     case key =>
-      //      println("QueryBuilder...")
       _rowColAuto(
         _row(
-          _rowCol(SchemaDropDown(db, metaSchema, key).dynRender),
+          _rowCol(SchemaDropDown(metaSchema, key).dynRender),
           // explicit render avoiding double implicit render
           _rowColAuto4(QueryBranches(key).dynRender)
         )
