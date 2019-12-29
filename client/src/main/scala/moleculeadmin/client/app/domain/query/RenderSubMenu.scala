@@ -21,6 +21,7 @@ case class RenderSubMenu()(implicit val ctx: Ctx.Owner)
 
   def dynRender: Rx.Dynamic[JsDom.TypedTag[Span]] = Rx {
     renderSubMenu()
+    //    println("RenderSubMenu")
     span(
       _maxRowsSelector,
       ul(cls := "nav nav-pills",

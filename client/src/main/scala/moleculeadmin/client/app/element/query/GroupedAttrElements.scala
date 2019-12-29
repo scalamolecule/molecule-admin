@@ -1,83 +1,143 @@
 package moleculeadmin.client.app.element.query
 
 import moleculeadmin.client.app.element.query.datatable.HeadElements
-import org.scalajs.dom.html.{Element, Table}
+import moleculeadmin.shared.styles.Color
+import org.scalajs.dom.html.{Element, HR, Span, Table, TableCell, TableRow, TableSection}
+import org.scalajs.dom.window
 import scalatags.JsDom.TypedTag
-import scalatags.JsDom.all.{h5, _}
+import scalatags.JsDom.all.{h5, tr, _}
 
 
 trait GroupedAttrElements extends SubMenuElements with HeadElements {
 
-  def _grouped(
+  def _groupedCard(
     header: String,
-    frags: Frag*
+    grouped: Span,
+    values: Table
   ): TypedTag[Element] =
     _card(
       _cardHeader(h5(header)),
-      _cardBody(frags)
+      _cardBody(
+        padding := 0,
+        grouped,
+        values
+      )
     )
 
-  def _groupedTable[T](
-    colType: String,
-    mandatory: Boolean,
-    data: Seq[(T, Int)]
-  ): TypedTag[Table] = {
-    var i = if (mandatory) 0 else -1
-    val headerRow = tr(
-      td(),
-      td(
-        span(
-          cls := "oi oi-elevator",
-          float.right,
-          color := "#bbbbbb"
-        ),
-        paddingRight := 10
-      ),
-      td(
-        _sortIcon("oi oi-caret-bottom", 0)
-      ),
-    )
 
-    val valueRows = data.map { case (value, count) =>
-      i += 1
-      tr(
-        cls := "other",
-        if (i > 0) {
-          td(i, color := "#888")
-        } else {
-          td()
-        },
-        td(
-          maxWidth := 250,
-          colType match {
-            case "double" => textAlign.right
-            case _        => ()
-          },
-          value.toString,
-          paddingRight := 10,
-          //            onclick := useSavedQuery(query)
-        ),
-        td(
-          textAlign.right,
-          a(cls := "discrete", href := "#",
+  def _groupedSelected(
+    vs: Seq[(Int, String)],
+    toggleOff: (Int, String) => Unit
+  ): Table = {
+    table(
+      cls := "tableGroupedSelected",
+      vs.map { case (n, v) =>
+        tr(
+          onclick := { () => toggleOff(n, v) },
+          td(
+            width := "5%",
+            padding := "0px 7px",
             span(
-              count,
+              cls := "oi oi-x",
+              fontSize := 9.px,
+              color := "#888",
               paddingBottom := 6
             ),
-            //              onclick := retractSavedQuery(query.molecule)
-          )
+          ),
+          td(v)
         )
-      )
-    }
+      }
+    ).render
+  }
 
+  def _separator: HR =
+    hr(
+      margin := 0,
+      borderColor := "#a6a6a6"
+    ).render
+
+  def _groupedTable(tableBody: TableSection): Table =
     table(
       cls := "tableGrouped",
-      tbody(
-        display.block,
-        maxHeight := 178,
-        overflowY.scroll,
-        headerRow +: valueRows
+      tableBody
+    ).render
+
+  def _groupedTableBody(colType: String, count: Int): TableSection =
+    tbody(
+      tr(
+        td(count),
+        td(
+          span(
+            cls := "oi oi-elevator",
+            if (colType == "double") float.right else (),
+            color := "#bbbbbb"
+          ),
+        ),
+        td(
+          _sortIcon("oi oi-caret-bottom", 0)
+        ),
       )
-    )
+    ).render
+
+
+  def _rowMaker(
+    colType: String,
+    attrType: String,
+    update: String => () => Unit,
+    toggle: (Int, String) => () => Unit,
+  ): (Int, (String, Int)) => TableRow = {
+    if (colType == "double") {
+      (i: Int, row: (String, Int)) =>
+        _rowNum(i, row._1, row._2, update, toggle)
+    } else {
+      attrType match {
+        case "String" =>
+          (i: Int, row: (String, Int)) =>
+            _rowStr(i, row._1, row._2, update, toggle)
+      }
+    }
   }
+
+
+  def _rowStr(
+    n: Int,
+    curV: String,
+    count: Int,
+    update: String => () => Unit,
+    toggle: (Int, String) => () => Unit
+  ): TableRow =
+    tr(
+      id := s"grouped-$n",
+      td(n),
+      td(
+        onblur := update(curV),
+        contenteditable := true,
+        _str2frags(curV)
+      ),
+      td(
+        count,
+        onclick := toggle(n, curV)
+      )
+    ).render
+
+  def _rowNum(
+    n: Int,
+    curV: String,
+    count: Int,
+    update: String => () => Unit,
+    toggle: (Int, String) => () => Unit
+  ): TableRow =
+    tr(
+      td(n),
+      td(
+        textAlign.right,
+        onblur := update(curV),
+        contenteditable := true,
+        curV,
+      ),
+      td(
+        count,
+        onclick := toggle(n, curV)
+      )
+    ).render
 }

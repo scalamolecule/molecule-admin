@@ -176,6 +176,8 @@ case class DataTableHead(tableBody: TableSection)(implicit val ctx: Ctx.Owner)
             case None         => filters() = filters.now - colIndex
           }
         }
+        // Update grouped values
+        groupedColIndexes.recalc()
       }
       _attrFilterCell(filterId, filterExpr, applyFilter)
     }

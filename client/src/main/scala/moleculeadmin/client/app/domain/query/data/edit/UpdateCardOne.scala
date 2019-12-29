@@ -1,7 +1,7 @@
 package moleculeadmin.client.app.domain.query.data.edit
 import autowire._
 import boopickle.Default._
-import moleculeadmin.client.app.domain.query.QueryState.{db, curEntity, editCellId}
+import moleculeadmin.client.app.domain.query.QueryState.{curEntity, db, editCellId}
 import moleculeadmin.client.autowire.queryWire
 import moleculeadmin.shared.ast.query.{Col, QueryResult}
 import org.scalajs.dom.html.{TableCell, TableRow}

@@ -98,7 +98,7 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     attr("eid") := eid,
     contenteditable := true,
     onblur := save,
-    optValue.fold("")(truncateDateStr(_))
+    optValue.fold("")(truncateDateStr)
   )
 
   // T String/Double

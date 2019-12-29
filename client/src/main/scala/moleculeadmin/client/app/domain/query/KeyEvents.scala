@@ -32,7 +32,7 @@ trait KeyEvents extends ColOps with MoleculeOps {
     }
   }
 
-  def toggleOff(id: String): Unit = {
+  def toggleOffElement(id: String): Unit = {
     val el = document.getElementById("submenu-" + id)
     if (el != null) {
       val style = el.getAttribute("style")
@@ -45,34 +45,34 @@ trait KeyEvents extends ColOps with MoleculeOps {
 
   def toggleOffAll(): Unit = {
     curEntity() = 0L
-    toggleOff("query-list")
-    toggleOff("views")
-    toggleOff("grouped")
-    toggleOff("shortcuts")
+    toggleOffElement("query-list")
+    toggleOffElement("views")
+    toggleOffElement("grouped")
+    toggleOffElement("shortcuts")
   }
   def toggleQueryListMenu(): Unit = {
     //    groupableCols.recalc()
     toggle("query-list")
-    toggleOff("views")
-    toggleOff("grouped")
-    toggleOff("shortcuts")
+    toggleOffElement("views")
+    toggleOffElement("grouped")
+    toggleOffElement("shortcuts")
   }
   def toggleViewsMenu(): Unit = {
-    toggleOff("query-list")
+    toggleOffElement("query-list")
     toggle("views")
-    toggleOff("grouped")
-    toggleOff("shortcuts")
+    toggleOffElement("grouped")
+    toggleOffElement("shortcuts")
   }
   def toggleGroupedMenu(): Unit = {
-    toggleOff("query-list")
-    toggleOff("views")
+    toggleOffElement("query-list")
+    toggleOffElement("views")
     toggle("grouped")
-    toggleOff("shortcuts")
+    toggleOffElement("shortcuts")
   }
   def toggleShortcutsMenu(): Unit = {
-    toggleOff("query-list")
-    toggleOff("views")
-    toggleOff("grouped")
+    toggleOffElement("query-list")
+    toggleOffElement("views")
+    toggleOffElement("grouped")
     toggle("shortcuts")
   }
 
@@ -198,7 +198,9 @@ trait KeyEvents extends ColOps with MoleculeOps {
 
   def groupedOpen: Boolean = {
     val element = document.getElementById("submenu-grouped")
-    element != null && element.getAttribute("style").endsWith("display:block;")
+    element != null &&
+      element.getAttribute("style").endsWith("display:block;") &&
+      element.children.length > 1
   }
 
   def toggleShowGrouped(implicit ctx: Ctx.Owner): Unit = {
@@ -366,6 +368,10 @@ trait KeyEvents extends ColOps with MoleculeOps {
               case r"\d" => numberInputs(n, toggleView)
               case _     => ()
             }
+
+            case " " =>
+              // prevent default scroll to bottom
+              e.preventDefault()
 
             case _ => ()
           }
