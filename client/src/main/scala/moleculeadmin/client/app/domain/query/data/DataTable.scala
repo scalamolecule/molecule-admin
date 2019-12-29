@@ -6,11 +6,10 @@ import molecule.ast.query.QueryExpr
 import molecule.ops.VerifyRawModel
 import molecule.transform.{Model2Query, Query2String}
 import moleculeadmin.client.app.domain.QueryClient._
-import moleculeadmin.client.app.domain.query.KeyEvents
 import moleculeadmin.client.app.domain.query.QueryState._
+import moleculeadmin.client.app.domain.query.{Callbacks, KeyEvents}
 import moleculeadmin.client.app.element.query.datatable.TableElements
 import moleculeadmin.client.autowire.queryWire
-import moleculeadmin.client.rxstuff.RxBindings
 import moleculeadmin.shared.ast.query.Filter
 import moleculeadmin.shared.ops.query.ModelOps
 import org.scalajs.dom.document
@@ -23,7 +22,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 
 case class DataTable()(implicit val ctx: Ctx.Owner)
-  extends RxBindings with KeyEvents with ModelOps with TableElements {
+  extends Callbacks with KeyEvents with ModelOps with TableElements {
 
   type keepBooPickleImport_DataTable = PickleState
 
@@ -61,7 +60,27 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
         //        println("QUERY")
         rowCountAll = queryResult.rowCountAll
         rowCount = queryResult.rowCount
+
+        // Render data table
         DataTableBodyFoot().populate(tableBody, tableFoot, queryResult)
+
+        // Render grouped
+        groupableCols = getGroupableCols(columns.now)
+        savedQueries.find(_.molecule == curMolecule.now).fold {
+          showGrouped = false
+          groupedColIndexes() = Set.empty[Int]
+        } { query =>
+          showGrouped = query.showGrouped
+          if (groupedColIndexes.now == query.groupedColIndexes)
+            groupedColIndexes.recalc()
+          else
+            groupedColIndexes() = query.groupedColIndexes
+        }
+        renderSubMenu.recalc()
+
+        recentQueries =
+          curQuery +: recentQueries.filterNot(_.molecule == curMolecule.now)
+
 
       case Left(Nil) =>
         //        println("Empty result")
@@ -135,7 +154,7 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
           _rowCol1("Please select at least one mandatory attribute")
 
         case elements =>
-          //          println("----------- new model ----------")
+//          println("----------- new model ----------")
           val elements1 = VerifyRawModel(elements)
           tree() = mkTree(mkModelTree(elements1))
           curMolecule() = model2molecule(elements1)
@@ -144,8 +163,6 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
           filters() = Map.empty[Int, Filter[_]]
           offset() = 0
           curAttrs = columns.now.map(c => s":${c.nsFull}/${c.attr}")
-
-          groupableCols = getGroupableCols(columns.now)
 
           // trigger views (columns trigger killed, so that is dormant here)
           curViews.recalc()

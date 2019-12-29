@@ -146,18 +146,6 @@ input, button, select, optgroup, textarea {
 }
 
 
-/* force show vertical scroll-bar for tables */
-::-webkit-scrollbar {
-    -webkit-appearance: none;
-    width: 7px;
-}
-::-webkit-scrollbar-thumb {
-    border-radius: 4px;
-    background-color: rgba(0,0,0,.1);
-    -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5);
-}
-
-
 table.neutral {
     width: 99%;
 }
@@ -214,33 +202,67 @@ table.tableRowLink td {
 
 
 
+table.tableGroupedSelected {
+    margin: 7px 0px 7px 0px;
+    width: 100%;
+    Xfont-size: 11px;
+}
+table.tableGroupedSelected tr {
+    cursor: pointer;
+}
+table.tableGroupedSelected tr:hover {
+    background-color: #ffc2c2;
+}
+table.tableGroupedSelected td {
+    max-width: 250px;
+}
+
 table.tableGrouped {
     width: 100%;
+    margin: 4px 0px 4px 0px;
     font-size: 11px;
 }
-table.tableGrouped tr.current {
-    color: #ababab;
+table.tableGrouped tbody {
+    display: block;
+    max-height: 178px;
+    overflow-y: scroll;
 }
-table.tableGrouped tr.current:hover {
-    color: #ababab;
-    cursor: default;
-    background-color: default;
+table.tableGrouped tr.selected {
+    background-color: #3cb7ff4f;
 }
-/*table.tableGrouped tr.other:hover {
-    color: #00a4db;
-    cursor: pointer;
+table.tableGrouped tr:nth-child(1n+2):hover {
     background-color: #eee;
-}*/
-table.tableGrouped th {
-    text-align: right;
-    vertical-align: top;
-    padding-left: 5px;
-    padding-right: 9px;
-    width: 5%;
-    font-weight: normal;
 }
 table.tableGrouped td {
-    padding: 0px 5px 0px 5px;
+    vertical-align: top;
+}
+table.tableGrouped tr:nth-child(1) td:nth-child(1) {
+    padding: 0px 6px 0px 8px;
+    color: #444;
+    cursor: default;
+    font-style: italic;
+}
+table.tableGrouped tr:nth-child(1) td:nth-child(2) {
+    padding: 0px 10px 0px 5px;
+    width: 90%;
+    cursor: pointer;
+}
+table.tableGrouped td:nth-child(1) {
+    padding: 0px 6px 0px 8px;
+    color: #888;
+    cursor: default;
+}
+table.tableGrouped td:nth-child(2) {
+    padding: 0px 10px 0px 5px;
+    max-width: 250px;
+}
+table.tableGrouped td:nth-child(3) {
+    padding: 0px 15px 0px 5px;
+    text-align: right;
+    font-family: "courier";
+    color: #00a4db;
+    font-weight: bold;
+    cursor: pointer;
 }
 
 

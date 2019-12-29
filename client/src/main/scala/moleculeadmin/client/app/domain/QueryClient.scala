@@ -19,7 +19,8 @@ import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 
 
 @JSExportTopLevel("QueryClient")
-object QueryClient extends RxBindings with TreeOps with SchemaOps with ColOps
+object QueryClient
+  extends RxBindings with TreeOps with SchemaOps with ColOps
   with Model2Molecule with AppElements with KeyEvents {
 
   type keepBooPickleImport_QueryClient = PickleState

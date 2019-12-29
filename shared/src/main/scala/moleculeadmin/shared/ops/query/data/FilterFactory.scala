@@ -123,14 +123,17 @@ trait FilterFactory extends RegexMatching with DateHandling {
   }
 
   def predString(token: String): Option[String => Boolean] = {
-    val regexNoCase    = Pattern.compile(".*", Pattern.CASE_INSENSITIVE)
-    val negRegEx       = Pattern.compile("(?!.*)")
-    val negRegExNoCase = Pattern.compile("(?!.*)", Pattern.CASE_INSENSITIVE)
     token.trim match {
       case r"/(.*)$regex/?"   => Some(s => s.matches(regex))
-      case r"i/(.*)$regex/?"  => Some(s => regexNoCase.matcher(s).matches())
-      case r"!/(.*)$regex/?"  => Some(s => negRegEx.matcher(s).matches())
-      case r"!i/(.*)$regex/?" => Some(s => negRegExNoCase.matcher(s).matches())
+      case r"i/(.*)$regex/?"  => Some(s =>
+        Pattern.compile(regex, Pattern.CASE_INSENSITIVE).matcher(s).matches()
+      )
+      case r"!/(.*)$regex/?"  => Some(s =>
+        Pattern.compile(s"(?!$regex)").matcher(s).matches()
+      )
+      case r"!i/(.*)$regex/?" => Some(s =>
+        Pattern.compile(s"(?!$regex)", Pattern.CASE_INSENSITIVE).matcher(s).matches()
+      )
       case ""                 => None
       case r"v *=>(.*)"       => None // todo?: compile Scala filter expr
       case anyStr             => Some(s => s.contains(anyStr))
@@ -143,7 +146,7 @@ trait FilterFactory extends RegexMatching with DateHandling {
     f: Set[Long],
     c: Set[Long],
   )(token: String): Option[Double => Boolean] = token.trim match {
-    case r"([sfcSFC]{1,3})$markers"         =>
+    case r"([sfcSFC]{1,3})$markers"   =>
       // check valid combination of
       // s - starred
       // f - flagged
@@ -199,13 +202,20 @@ trait FilterFactory extends RegexMatching with DateHandling {
 
   def mergedPredicate[T](
     filterExpr: String,
-    predicateFactory: String => Option[T => Boolean]
+    predicateFactory: String => Option[T => Boolean],
+    splitComma: Boolean
   ): Option[T => Boolean] = {
-    val predicates: Seq[T => Boolean] = (for {
-      lines <- filterExpr.split('\n')
-      token <- lines.split(',')
-      predicate <- predicateFactory(token)
-    } yield predicate).toList
+    val predicates: Seq[T => Boolean] = if (splitComma)
+      (for {
+        lines <- filterExpr.split('\n')
+        token <- lines.split(',')
+        predicate <- predicateFactory(token)
+      } yield predicate).toList
+    else
+      (for {
+        token <- filterExpr.split('\n')
+        predicate <- predicateFactory(token)
+      } yield predicate).toList
 
     predicates.length match {
       case 0 => None
@@ -223,6 +233,7 @@ trait FilterFactory extends RegexMatching with DateHandling {
     curStars: Set[Long] = Set.empty[Long],
     curFlags: Set[Long] = Set.empty[Long],
     curChecks: Set[Long] = Set.empty[Long],
+    splitComma: Boolean = true
   ): Option[Filter[_]] = {
     val Col(colIndex, _, _, _, _, attrType,
     colType, _, _, _, aggrType, _, _, _, _) = col
@@ -230,7 +241,7 @@ trait FilterFactory extends RegexMatching with DateHandling {
     def filter[T](
       predicateFactory: String => Option[T => Boolean]
     ): Option[Filter[T]] = {
-      mergedPredicate(filterExpr, predicateFactory) match {
+      mergedPredicate(filterExpr, predicateFactory, splitComma) match {
         case None             => Option.empty[Filter[T]]
         case Some(mergedPred) => Some(
           Filter[T](colIndex, colType, filterExpr, mergedPred)

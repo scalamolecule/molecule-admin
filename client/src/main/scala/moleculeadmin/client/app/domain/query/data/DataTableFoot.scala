@@ -1,18 +1,14 @@
 package moleculeadmin.client.app.domain.query.data
-import autowire._
 import boopickle.Default._
-import moleculeadmin.client.app.domain.query.{Callbacks, KeyEvents}
 import moleculeadmin.client.app.domain.query.QueryState._
+import moleculeadmin.client.app.domain.query.{Callbacks, KeyEvents}
 import moleculeadmin.client.app.element.query.datatable.FootElements
-import moleculeadmin.client.autowire.queryWire
 import moleculeadmin.client.rxstuff.RxBindings
 import moleculeadmin.shared.ops.query.ColOps
 import org.scalajs.dom.html.TableSection
 import org.scalajs.dom.raw.Node
-import org.scalajs.dom.window
 import rx.{Ctx, Rx}
 import scalatags.JsDom.all._
-import scala.concurrent.ExecutionContext.Implicits.global
 
 
 case class DataTableFoot()(implicit val ctx: Ctx.Owner)
