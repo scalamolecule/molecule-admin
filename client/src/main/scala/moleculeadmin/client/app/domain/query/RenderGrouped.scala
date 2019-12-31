@@ -1,15 +1,12 @@
 package moleculeadmin.client.app.domain.query
 
 import moleculeadmin.client.app.domain.query.QueryState._
-import moleculeadmin.client.app.domain.query.data.Cell
+import moleculeadmin.client.app.domain.query.grouped.GroupedData
 import moleculeadmin.client.app.element.query.GroupedAttrElements
-import moleculeadmin.shared.ast.query.{Col, QueryResult}
-import org.scalajs.dom.html.{Element, TableSection}
+import org.scalajs.dom.html.Element
 import rx.{Ctx, Rx}
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js.timers.setTimeout
 
 
@@ -24,7 +21,8 @@ case class RenderGrouped()(implicit ctx: Ctx.Owner)
       _cardsContainer(
         columns.now.collect {
           case c if groupedColIndexes.now.contains(c.colIndex)
-            && groupableCols.map(_.colIndex).contains(c.colIndex) =>
+            && groupableCols.map(_.colIndex).contains(c.colIndex) => {
+
             val grouped   = span().render
             val gd        = GroupedData(qr, c, grouped)
             val data      = gd.getData
@@ -47,6 +45,7 @@ case class RenderGrouped()(implicit ctx: Ctx.Owner)
               grouped,
               _groupedTable(tableBody)
             )
+          }
         }
       )
     } else {

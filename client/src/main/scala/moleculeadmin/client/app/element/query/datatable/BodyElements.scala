@@ -74,14 +74,14 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     cellId: String,
     eid: Long,
     optStr: Option[String],
-    save: () => Unit
+    update: () => Unit
   ): TypedTag[TableCell] = td(
     cls := cellClass,
     id := cellId,
     attr("card") := 1,
     attr("eid") := eid,
     contenteditable := true,
-    onblur := save,
+    onblur := update,
     _optStr2frags(optStr)
   )
 
@@ -90,14 +90,14 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     cellId: String,
     eid: Long,
     optValue: Option[String],
-    save: () => Unit
+    update: () => Unit
   ): TypedTag[TableCell] = td(
     cls := cellClass,
     id := cellId,
     attr("card") := 1,
     attr("eid") := eid,
     contenteditable := true,
-    onblur := save,
+    onblur := update,
     optValue.fold("")(truncateDateStr)
   )
 
@@ -107,14 +107,14 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     cellId: String,
     eid: Long,
     optValue: Option[T],
-    save: () => Unit
+    update: () => Unit
   ): TypedTag[TableCell] = td(
     cls := cellClass,
     id := cellId,
     attr("card") := 1,
     attr("eid") := eid,
     contenteditable := true,
-    onblur := save,
+    onblur := update,
     optValue.fold("")(_.toString)
   )
 
@@ -125,7 +125,7 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     optValue: Option[Double],
     curEntity: rx.Var[Long],
     onMouseover: Long => () => Unit,
-    save: () => Unit
+    update: () => Unit
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = {
     val refStr = optValue.fold("")(_.toString)
     val ref    = optValue.fold(0L)(_.toLong)
@@ -137,7 +137,7 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
       attr("card") := 1,
       attr("eid") := eid,
       contenteditable := true,
-      onblur := save,
+      onblur := update,
     )
   }
 
@@ -145,7 +145,7 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     cellId: String,
     eid: Long,
     optValue: Option[Double],
-    save: () => Unit
+    update: () => Unit
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = {
     val ref = optValue.fold("")(_.toString)
     td(
@@ -155,7 +155,7 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
       attr("card") := 1,
       attr("eid") := eid,
       contenteditable := true,
-      onblur := save,
+      onblur := update,
     )
   }
 
@@ -164,14 +164,14 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     cellId: String,
     eid: Long,
     optValue: Option[String],
-    save: () => Unit
+    update: () => Unit
   ): TypedTag[TableCell] = td(
     cls := cellClass,
     id := cellId,
     attr("card") := 1,
     attr("eid") := eid,
     contenteditable := true,
-    onblur := save,
+    onblur := update,
     optValue.fold("")(_.toString)
   )
 
@@ -262,14 +262,14 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     cellClass: String,
     cellId: String,
     eid: Long,
-    save: () => Unit
+    update: () => Unit
   ): TypedTag[TableCell] = td(
     cls := cellClass,
     id := cellId,
     attr("card") := 2,
     attr("eid") := eid,
     contenteditable := true,
-    onblur := save,
+    onblur := update,
     ul(vs.sorted.map(v => li(_str2frags(v))))
   )
 
@@ -278,21 +278,15 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     cellClass: String,
     cellId: String,
     eid: Long,
-    save: () => Unit
+    update: () => Unit
   ): TypedTag[TableCell] = td(
     cls := cellClass,
     id := cellId,
     attr("card") := 2,
     attr("eid") := eid,
     contenteditable := true,
-    onblur := save,
-    ul(vs.sorted.map(v => {
-      //      println("--------------")
-      //      println("raw date 2: " + v)
-      //      println("raw date 2: " + truncateDateStr(v))
-      //      li(truncateDateStr(v))
-      li(v)
-    }))
+    onblur := update,
+    ul(vs.sorted.map(li(_)))
   )
 
   def _tdManyStringOtherEdit(
@@ -300,14 +294,14 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     cellClass: String,
     cellId: String,
     eid: Long,
-    save: () => Unit
+    update: () => Unit
   ): TypedTag[TableCell] = td(
     cls := cellClass,
     id := cellId,
     attr("card") := 2,
     attr("eid") := eid,
     contenteditable := true,
-    onblur := save,
+    onblur := update,
     ul(vs.sorted.map(li(_)))
   )
 
@@ -316,14 +310,14 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     cellClass: String,
     cellId: String,
     eid: Long,
-    save: () => Unit
+    update: () => Unit
   ): TypedTag[TableCell] = td(
     cls := cellClass,
     id := cellId,
     attr("card") := 2,
     attr("eid") := eid,
     contenteditable := true,
-    onblur := save,
+    onblur := update,
     ul(vs.sorted.map(li(_)))
   )
 
@@ -332,14 +326,14 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     cellClass: String,
     cellId: String,
     eid: Long,
-    save: () => Unit
+    update: () => Unit
   ): TypedTag[TableCell] = td(
     cls := cellClass,
     id := cellId,
     attr("card") := 2,
     attr("eid") := eid,
     contenteditable := true,
-    onblur := save,
+    onblur := update,
     ul(vs.sorted.map(li(_)))
   )
 
@@ -349,14 +343,14 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     eid: Long,
     curEntity: rx.Var[Long],
     mouseovers: Long => () => Unit,
-    save: () => Unit
+    update: () => Unit
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = {
     td(
       id := cellId,
       attr("card") := 2,
       attr("eid") := eid,
       contenteditable := true,
-      onblur := save,
+      onblur := update,
       ul(
         refs.map(_.toLong).sorted.map(ref =>
           li(
@@ -376,7 +370,7 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     eid: Long,
     curEntity: rx.Var[Long],
     mouseovers: Long => () => Unit,
-    save: () => Unit
+    update: () => Unit
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = {
     td(
       cls := cellClass,
@@ -384,7 +378,7 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
       attr("card") := 2,
       attr("eid") := eid,
       contenteditable := true,
-      onblur := save,
+      onblur := update,
       ul(
         refs.map(_.toLong).sorted.map(ref =>
           li(
@@ -405,7 +399,7 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     cellClass: String,
     cellId: String,
     eid: Long,
-    save: () => Unit,
+    update: () => Unit,
     pairs: Seq[(String, T)],
     processPair: (String, T) => Frag
   ): TypedTag[TableCell] = td(
@@ -414,7 +408,7 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     attr("card") := 3,
     attr("eid") := eid,
     contenteditable := true,
-    onblur := save,
+    onblur := update,
     ul(pairs.map { case (k, v) => li(processPair(k, v)) })
   )
 
@@ -423,9 +417,9 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     cellClass: String,
     cellId: String,
     eid: Long,
-    save: () => Unit
+    update: () => Unit
   ): TypedTag[TableCell] =
-    _tdMapEdit(cellClass, cellId, eid, save,
+    _tdMapEdit(cellClass, cellId, eid, update,
       vs.toSeq.sortBy(_._1),
       (k: String, v: String) => _str2frags(k + " -> " + v)
     )
@@ -435,9 +429,9 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     cellClass: String,
     cellId: String,
     eid: Long,
-    save: () => Unit
+    update: () => Unit
   ): TypedTag[TableCell] =
-    _tdMapEdit(cellClass, cellId, eid, save,
+    _tdMapEdit(cellClass, cellId, eid, update,
       vs.toSeq.sortBy(_._1),
       (k: String, v: String) => k + " -> " + truncateDateStr(v)
     )
@@ -447,9 +441,9 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     cellClass: String,
     cellId: String,
     eid: Long,
-    save: () => Unit
+    update: () => Unit
   ): TypedTag[TableCell] =
-    _tdMapEdit(cellClass, cellId, eid, save,
+    _tdMapEdit(cellClass, cellId, eid, update,
       vs.toSeq.sortBy(_._1),
       (k: String, v: String) => k + " -> " + v
     )
@@ -459,9 +453,9 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     cellClass: String,
     cellId: String,
     eid: Long,
-    save: () => Unit
+    update: () => Unit
   ): TypedTag[TableCell] =
-    _tdMapEdit(cellClass, cellId, eid, save,
+    _tdMapEdit(cellClass, cellId, eid, update,
       vs.toSeq.sortBy(_._1),
       (k: String, v: Double) => k + " -> " + v
     )

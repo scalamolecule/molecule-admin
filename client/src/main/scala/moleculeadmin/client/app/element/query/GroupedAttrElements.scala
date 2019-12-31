@@ -5,7 +5,8 @@ import moleculeadmin.shared.styles.Color
 import org.scalajs.dom.html.{Element, HR, Span, Table, TableCell, TableRow, TableSection}
 import org.scalajs.dom.window
 import scalatags.JsDom.TypedTag
-import scalatags.JsDom.all.{h5, tr, _}
+import scalatags.JsDom.all._
+import scalatags.JsDom.styles2.wordBreak
 
 
 trait GroupedAttrElements extends SubMenuElements with HeadElements {
@@ -26,14 +27,15 @@ trait GroupedAttrElements extends SubMenuElements with HeadElements {
 
 
   def _groupedSelected(
-    vs: Seq[(Int, String)],
-    toggleOff: (Int, String) => Unit
+    colType: String,
+    vs: Seq[(Int, String, Int)],
+    toggleOff: (Int, String, Int) => Unit
   ): Table = {
     table(
       cls := "tableGroupedSelected",
-      vs.map { case (n, v) =>
+      vs.map { case (n, v, c) =>
         tr(
-          onclick := { () => toggleOff(n, v) },
+          onclick := { () => toggleOff(n, v, c) },
           td(
             width := "5%",
             padding := "0px 7px",
@@ -44,7 +46,11 @@ trait GroupedAttrElements extends SubMenuElements with HeadElements {
               paddingBottom := 6
             ),
           ),
-          td(v)
+          td(
+            if(colType == "double") color := "#49a523" else (),
+            v
+          ),
+          td(c)
         )
       }
     ).render
@@ -81,63 +87,74 @@ trait GroupedAttrElements extends SubMenuElements with HeadElements {
 
 
   def _rowMaker(
+    colIndex: Int,
     colType: String,
     attrType: String,
-    update: String => () => Unit,
-    toggle: (Int, String) => () => Unit,
+    update: (Int, String, Int) => () => Unit,
+    toggle: (Int, String, Int) => () => Unit,
   ): (Int, (String, Int)) => TableRow = {
     if (colType == "double") {
       (i: Int, row: (String, Int)) =>
-        _rowNum(i, row._1, row._2, update, toggle)
+        _rowNum(colIndex, i, row._1, row._2, update, toggle)
     } else {
       attrType match {
         case "String" =>
           (i: Int, row: (String, Int)) =>
-            _rowStr(i, row._1, row._2, update, toggle)
+            _rowStr(colIndex, i, row._1, row._2, update, toggle)
+
+        case "Date" =>
+          (i: Int, row: (String, Int)) =>
+            _rowStr(colIndex, i, row._1, row._2, update, toggle)
       }
     }
   }
 
 
   def _rowStr(
+    colIndex: Int,
     n: Int,
     curV: String,
     count: Int,
-    update: String => () => Unit,
-    toggle: (Int, String) => () => Unit
+    update: (Int, String, Int) => () => Unit,
+    toggle: (Int, String, Int) => () => Unit
   ): TableRow =
     tr(
-      id := s"grouped-$n",
+      id := s"grouped-row-$colIndex-$n",
       td(n),
       td(
-        onblur := update(curV),
+        id := s"grouped-cell-$colIndex-$n",
         contenteditable := true,
+        onblur := update(n, curV, count),
         _str2frags(curV)
       ),
       td(
         count,
-        onclick := toggle(n, curV)
+        onclick := toggle(n, curV, count)
       )
     ).render
 
   def _rowNum(
+    colIndex: Int,
     n: Int,
     curV: String,
     count: Int,
-    update: String => () => Unit,
-    toggle: (Int, String) => () => Unit
+    update: (Int, String, Int) => () => Unit,
+    toggle: (Int, String, Int) => () => Unit
   ): TableRow =
     tr(
+      id := s"grouped-row-$colIndex-$n",
       td(n),
       td(
+        id := s"grouped-cell-$colIndex-$n",
         textAlign.right,
-        onblur := update(curV),
+        color := "#49a523",
+        onblur := update(n, curV, count),
         contenteditable := true,
         curV,
       ),
       td(
         count,
-        onclick := toggle(n, curV)
+        onclick := toggle(n, curV, count)
       )
     ).render
 }

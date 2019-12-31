@@ -428,7 +428,7 @@ trait KeyEvents extends ColOps with MoleculeOps {
             val curRow  = curCell.parentNode
             val prevRow = curRow.previousSibling
             if (prevRow != null) {
-              val colNo     = curCell.id.substring(4, 6).trim.toInt
+              val colNo     = getColNo(curCell.id)
               val cellAbove = prevRow.childNodes.item(colNo)
               selectContent(cellAbove.asInstanceOf[HTMLInputElement])
             }
@@ -438,7 +438,7 @@ trait KeyEvents extends ColOps with MoleculeOps {
             val curRow  = curCell.parentNode
             val nextRow = curRow.nextSibling
             if (nextRow != null) {
-              val colNo     = curCell.id.substring(4, 6).trim.toInt
+              val colNo     = getColNo(curCell.id)
               val cellBelow = nextRow.childNodes.item(colNo)
               selectContent(cellBelow.asInstanceOf[HTMLInputElement])
             }
@@ -503,7 +503,7 @@ trait KeyEvents extends ColOps with MoleculeOps {
             val nextRow = curRow.nextSibling
             editCellId = curCell.id
             if (nextRow != null) {
-              val colNo     = curCell.id.substring(4, 6).trim.toInt
+              val colNo     = getColNo(editCellId)
               val cellBelow = nextRow.childNodes.item(colNo)
               // Select content of cell below
               // Fires blur-callback (save) on current cell
@@ -523,6 +523,9 @@ trait KeyEvents extends ColOps with MoleculeOps {
       }
     }
   }
+
+  def getColNo(id: String): Int =
+    if (id.startsWith("grouped-cell-")) 1 else id.substring(4, 6).trim.toInt
 
   def selectContent(elem: Node): Unit = {
     val range = document.createRange()

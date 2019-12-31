@@ -5,9 +5,9 @@ import moleculeadmin.client.app.domain.query.QueryState.{curEntity, db, editCell
 import moleculeadmin.client.autowire.queryWire
 import moleculeadmin.shared.ast.query.{Col, QueryResult}
 import org.scalajs.dom.html.{TableCell, TableRow}
-import org.scalajs.dom.window
+import org.scalajs.dom.{NodeList, window}
 import rx.{Ctx, Rx}
-import scalatags.JsDom.all.{attr, _}
+import scalatags.JsDom.all._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success, Try}
 
@@ -19,7 +19,7 @@ case class UpdateCardOne[T](
   cols: Seq[Col],
   qr: QueryResult,
   origArray: Array[Option[T]],
-  valueArray: Array[Option[T]],
+  editArray: Array[Option[T]],
   baseClass: String,
   colType: String,
   rowIndex: Int,
@@ -29,14 +29,12 @@ case class UpdateCardOne[T](
   nsFull: String,
   attrName: String,
   attrType: String,
-  card: Int,
   enums: Seq[String],
   expr: String
 )(implicit ctx: Ctx.Owner)
   extends UpdateClient[T](
-    cols, qr, origArray, valueArray, baseClass,
-    colType, rowIndex, colIndex, related,
-    nsAlias, nsFull, attrName, attrType, card, enums
+    cols, qr, origArray, editArray, baseClass,
+    rowIndex, related, nsAlias, nsFull, attrName, enums
   ) {
 
   type keepBooPickleImport_UpdateCardOne = PickleState
@@ -96,7 +94,7 @@ case class UpdateCardOne[T](
       } else if (expr == "edit") {
         println(s"$eid $attrFull $newVopt")
         if (related == 0) {
-          valueArray(rowIndex) = newVopt
+          editArray(rowIndex) = newVopt
           setCellEditMode(cell, newVopt)
 
         } else {
@@ -105,7 +103,7 @@ case class UpdateCardOne[T](
           var i      = 0
           while (i < eArray.length) {
             eArray(i) match {
-              case Some(`eid`) => valueArray(i) = newVopt
+              case Some(`eid`) => editArray(i) = newVopt
               case _           =>
             }
             i += 1
@@ -114,12 +112,12 @@ case class UpdateCardOne[T](
 
       } else {
         // Raw collapsed string has visible characters
-        val update = cell.textContent.trim.nonEmpty
-        val value  = if (update) newStr else oldStr
+        val nonEmpty = cell.textContent.trim.nonEmpty
+        val value    = if (nonEmpty) newStr else oldStr
 
-        // Update value cell
+        // Update edit cell
         cell.innerHTML = ""
-        if (update) {
+        if (nonEmpty) {
           if (attrType == "ref") {
             // Need to replace whole cell, otherwise we can't
             // assign new Rx to class name - wonder why...
@@ -145,13 +143,13 @@ case class UpdateCardOne[T](
 
         // update db
         val save = if (colType == "double") {
-          val data = if (update)
+          val data = if (nonEmpty)
             Seq((eid, Nil, Seq(value.toDouble)))
           else
             Seq((eid, Seq(value.toDouble), Nil))
           queryWire().updateNum(db, attrFull, attrType, data).call()
         } else {
-          val data = if (update)
+          val data = if (nonEmpty)
             Seq((eid, Nil, Seq(value)))
           else
             Seq((eid, Seq(value), Nil))
@@ -159,22 +157,19 @@ case class UpdateCardOne[T](
         }
         save.map {
           case Right((t, tx, txInstant)) =>
-            updateClient(
-              t, tx, txInstant,
-              cellId, cell, row, eid, oldVOpt, isNum, newVopt
-            )
-            if (update)
-              println(s"Successfully saved $attrFull value `$newStr`")
+            updateClient(t, tx, txInstant, cell, row, eid, newVopt)
+            if (nonEmpty)
+              println(s"Successfully updated $attrFull value from `$oldStr` to `$newStr`")
             else
-              println(s"Successfully retracted $attrFull value `$oldStr`")
+              println(s"Successfully retracted $attrFull value from `$oldStr` to `$oldStr`")
 
           case Left(err) =>
             editCellId = ""
             selectContent(cell)
-            if (update)
-              window.alert(s"Error saving $attrFull value `$newStr`:\n$err")
+            if (nonEmpty)
+              window.alert(s"Error updating $attrFull value from `$oldStr` to `$newStr`:\n$err")
             else
-              window.alert(s"Error retracting $attrFull value `$oldStr`:\n$err")
+              window.alert(s"Error retracting $attrFull value from `$oldStr` to `$oldStr`:\n$err")
             cell.focus()
         }
       }

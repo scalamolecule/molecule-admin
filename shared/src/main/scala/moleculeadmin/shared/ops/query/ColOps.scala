@@ -2,7 +2,7 @@ package moleculeadmin.shared.ops.query
 
 import molecule.ast.model._
 import molecule.transform.Model2Query.coalesce
-import moleculeadmin.shared.ast.query.Col
+import moleculeadmin.shared.ast.query.{Col, QueryResult}
 import moleculeadmin.shared.ast.schema.{Attr, Ns}
 import moleculeadmin.shared.util.HelpersAdmin
 import scala.collection.mutable.ListBuffer
@@ -63,7 +63,6 @@ trait ColOps extends HelpersAdmin {
     "aggrInt", "aggrDouble", "aggrSingle", "aggrSingleSample")
 
   val nonMenuExprs = Seq(
-    //    "edit",
     "orig",
     "count", "count-distinct",
     "sum", "avg", "median", "variance", "stddev",
@@ -128,6 +127,52 @@ trait ColOps extends HelpersAdmin {
     }
   }
 
+  def getTxArrays(
+    cols: Seq[Col],
+    qr: QueryResult,
+    nsAlias: String,
+    nsFull: String,
+    attr: String
+  ): (
+    Int,
+      Option[Array[Option[Double]]], Int,
+      Option[Array[Option[Double]]], Int,
+      Option[Array[Option[String]]], Int
+    ) = {
+    cols.foldLeft(
+      0,
+      Option.empty[Array[Option[Double]]], 0,
+      Option.empty[Array[Option[Double]]], 0,
+      Option.empty[Array[Option[String]]], 0
+    ) {
+      case (_, Col(colIndex1, _, `nsAlias`, `nsFull`, "e", _, _, _, _, _, _, _, _, _, _)) =>
+        (colIndex1, None, 0, None, 0, None, 0)
+
+      case (
+        (eColIndex, _, _, _, _, _, _),
+        Col(colIndex1, _, _, `nsFull`, `attr`, _, _, _, _, _, _, "t", _, _, _)
+        ) =>
+        (eColIndex,
+          Some(qr.num(qr.arrayIndexes(colIndex1))), colIndex1, None, 0, None, 0)
+
+      case (
+        (eColIndex, tArray, tIndex, _, _, _, _),
+        Col(colIndex1, _, _, `nsFull`, `attr`, _, _, _, _, _, _, "tx", _, _, _)
+        ) =>
+        (eColIndex, tArray, tIndex,
+          Some(qr.num(qr.arrayIndexes(colIndex1))), colIndex1, None, 0)
+
+      case (
+        (eColIndex, tArray, tIndex, txArray, txIndex, _, _),
+        Col(colIndex1, _, _, `nsFull`, `attr`, _, _, _, _, _, _, "txInstant", _, _, _)
+        ) =>
+        (eColIndex, tArray, tIndex, txArray, txIndex,
+          Some(qr.str(qr.arrayIndexes(colIndex1))), colIndex1)
+
+      case (acc, _) => acc
+    }
+  }
+
   def getEidTableColIndexes(cols: Seq[Col]): Seq[Int] = {
     cols.collect {
       case Col(colIndex, _, _, _, "e", _, _, _, _, _, _, _, _, _, _) => colIndex + 1
@@ -142,11 +187,11 @@ trait ColOps extends HelpersAdmin {
 
       // new namespace
       case ((0, curNsAlias, cols), Col(_, _, nsAlias, _, "e", _, _, _, _, _, _, _, _, _, _))
-      if curNsAlias != nsAlias =>
+        if curNsAlias != nsAlias =>
         (1, nsAlias, cols)
 
-      case ((1, curNsAlias, cols), col@Col(_, _, nsAlias, _, _, _, _, _, _, _, _, _, _, _, _))
-        if curNsAlias == nsAlias =>
+      case ((1, curNsAlias, cols), col@Col(_, _, nsAlias, _, _, _, _, _, _, _, _, attrExpr, _, _, _))
+        if curNsAlias == nsAlias && !nonMenuExprs.contains(attrExpr) =>
         (1, nsAlias, cols :+ col)
 
       case ((_, _, cols), Col(_, _, nsAlias, _, _, _, _, _, _, _, _, _, _, _, _)) =>

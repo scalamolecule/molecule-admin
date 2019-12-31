@@ -205,7 +205,6 @@ table.tableRowLink td {
 table.tableGroupedSelected {
     margin: 7px 0px 7px 0px;
     width: 100%;
-    Xfont-size: 11px;
 }
 table.tableGroupedSelected tr {
     cursor: pointer;
@@ -215,6 +214,12 @@ table.tableGroupedSelected tr:hover {
 }
 table.tableGroupedSelected td {
     max-width: 250px;
+}
+table.tableGroupedSelected td:nth-child(3) {
+    padding: 0px 15px 0px 10px;
+    text-align: right;
+    font-family: "courier";
+    color: #666;
 }
 
 table.tableGrouped {
@@ -237,23 +242,23 @@ table.tableGrouped td {
     vertical-align: top;
 }
 table.tableGrouped tr:nth-child(1) td:nth-child(1) {
-    padding: 0px 6px 0px 8px;
-    color: #444;
+    padding: 0px 5px 0px 8px;
+    color: #666;
     cursor: default;
-    font-style: italic;
+    font-family: "courier";
 }
 table.tableGrouped tr:nth-child(1) td:nth-child(2) {
-    padding: 0px 10px 0px 5px;
+    padding: 0px 5px 0px 5px;
     width: 90%;
     cursor: pointer;
 }
 table.tableGrouped td:nth-child(1) {
-    padding: 0px 6px 0px 8px;
+    padding: 0px 5px 0px 8px;
     color: #888;
     cursor: default;
 }
 table.tableGrouped td:nth-child(2) {
-    padding: 0px 10px 0px 5px;
+    padding: 0px 5px 0px 5px;
     max-width: 250px;
 }
 table.tableGrouped td:nth-child(3) {

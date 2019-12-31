@@ -18,7 +18,7 @@ case class EntityHistory()(implicit ctx: Ctx.Owner) extends Base() {
     (curEntity(), entityHistorySort()) match {
       case (0, _) => // no entity id marked yet
 
-      case (eid, sort) if curViews.now.contains("viewEntityHistory") =>
+      case (eid, sort) if curViews.now.contains("view05_EntityHistory") =>
         val view = document.getElementById("entityHistoryEid")
         if (view == null) {
           // Start fresh

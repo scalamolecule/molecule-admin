@@ -8,6 +8,7 @@ import moleculeadmin.shared.ast.query.{QueryResult, _}
 import moleculeadmin.shared.ops.query.ColOps
 import org.scalajs.dom.document
 import org.scalajs.dom.html.{TableCell, TableRow, TableSection}
+import org.scalajs.dom.raw.NodeList
 import rx.Ctx
 import scalatags.JsDom
 import scalatags.JsDom.all._
@@ -28,7 +29,7 @@ abstract class Cell(
     val arrayIndex = qr.arrayIndexes(colIndex)
 
     val Col(_, related, nsAlias, nsFull, attr, attrType, colType,
-    card, _, enums, _, expr, _, _,_) = cols(colIndex)
+    card, _, enums, _, expr, _, _, _) = cols(colIndex)
 
     lazy val noCount    = expr != "count" && expr != "count-distinct"
     lazy val aggregates = Seq(
@@ -60,34 +61,31 @@ abstract class Cell(
      *           cardinality 2: List[String] / List[Double]
      *           cardinality 3: Map[String, String] / Map[String, Double]
      **/
-    def save[T](
+    def update[T](
       origArray: Array[Option[T]],
-      valueArray: Array[Option[T]],
+      editArray: Array[Option[T]],
       rowIndex: Int,
       baseClass: String
     ): () => Unit = {
       () => {
         val cellId : String    = idBase(colIndex)(rowIndex)
-        val oldVOpt: Option[T] = valueArray(rowIndex)
+        val oldVOpt: Option[T] = editArray(rowIndex)
         val isNum  : Boolean   = Seq("Int", "Long", "ref", "datom", "Float", "Double").contains(attrType)
         val cell   : TableCell = document.getElementById(cellId).asInstanceOf[TableCell]
         val row    : TableRow  = cell.parentNode.asInstanceOf[TableRow]
         val eid    : Long      = cell.getAttribute("eid").toLong
         val updater            = card match {
           case 1 => UpdateCardOne(
-            cols, qr, origArray, valueArray, baseClass,
-            colType, rowIndex, colIndex, related,
-            nsAlias, nsFull, attr, attrType, card, enums, expr
+            cols, qr, origArray, editArray, baseClass, colType, rowIndex,
+            colIndex, related, nsAlias, nsFull, attr, attrType, enums, expr
           )
           case 2 => UpdateCardMany(
-            cols, qr, origArray, valueArray, baseClass,
-            colType, rowIndex, colIndex, related,
-            nsAlias, nsFull, attr, attrType, card, enums, cellType, expr
+            cols, qr, origArray, editArray, baseClass, colType, rowIndex,
+            related, nsAlias, nsFull, attr, attrType, enums, cellType, expr
           )
           case 3 => UpdateCardMap(
-            cols, qr, origArray, valueArray, baseClass,
-            colType, rowIndex, colIndex, related,
-            nsAlias, nsFull, attr, attrType, card, enums, expr
+            cols, qr, origArray, editArray, baseClass, rowIndex, related,
+            nsAlias, nsFull, attr, attrType, enums, expr
           )
         }
         updater.update(cellId, cell, row, eid, oldVOpt, isNum)
@@ -103,12 +101,12 @@ abstract class Cell(
 
     def getClassLambda[T](
       origArray: Array[Option[T]],
-      valueArray: Array[Option[T]]
+      editArray: Array[Option[T]]
     ): (String, Int) => String = {
       if (groupEdit)
         (baseClass: String, rowIndex: Int) => {
           val oldV = origArray(rowIndex)
-          val newV = valueArray(rowIndex)
+          val newV = editArray(rowIndex)
           if (oldV == newV)
             baseClass
           else
@@ -128,45 +126,45 @@ abstract class Cell(
       // card one --------------------------------------------------------------
 
       case "string" =>
-        val origArray  = getOrigArray(qr.str)
-        val valueArray = qr.str(arrayIndex)
-        val getCls     = getClassLambda(origArray, valueArray)
+        val origArray = getOrigArray(qr.str)
+        val editArray = qr.str(arrayIndex)
+        val getCls    = getClassLambda(origArray, editArray)
         cellType match {
           case "str" if editable =>
             (rowIndex: Int) =>
               _tdOneStrEdit(
                 getCls("str", rowIndex),
-                id(rowIndex), e, valueArray(rowIndex),
-                save(origArray, valueArray, rowIndex, "str")
+                id(rowIndex), e, editArray(rowIndex),
+                update(origArray, editArray, rowIndex, "str")
               )
 
           case "date" if editable =>
             (rowIndex: Int) =>
               _tdOneDateEdit(
                 getCls("date", rowIndex),
-                id(rowIndex), e, valueArray(rowIndex),
-                save(origArray, valueArray, rowIndex, "date")
+                id(rowIndex), e, editArray(rowIndex),
+                update(origArray, editArray, rowIndex, "date")
               )
 
           case "big" if editable =>
             (rowIndex: Int) =>
               _tdOneNumEdit(
                 getCls("num", rowIndex),
-                id(rowIndex), e, valueArray(rowIndex),
-                save(origArray, valueArray, rowIndex, "num")
+                id(rowIndex), e, editArray(rowIndex),
+                update(origArray, editArray, rowIndex, "num")
               )
 
           case _ if editable =>
             (rowIndex: Int) =>
               _tdOneEdit(
                 getCls("", rowIndex),
-                id(rowIndex), e, valueArray(rowIndex),
-                save(origArray, valueArray, rowIndex, "")
+                id(rowIndex), e, editArray(rowIndex),
+                update(origArray, editArray, rowIndex, "")
               )
 
           case "str" =>
             (rowIndex: Int) =>
-              valueArray(rowIndex).fold(_tdNoEdit)(s =>
+              editArray(rowIndex).fold(_tdNoEdit)(s =>
                 _tdNoEdit(_str2frags(s)))
 
           case "aggr" =>
@@ -178,7 +176,7 @@ abstract class Cell(
 
           case "date" =>
             (rowIndex: Int) =>
-              valueArray(rowIndex).fold(_tdNoEdit) { d =>
+              editArray(rowIndex).fold(_tdNoEdit) { d =>
 
 
                 _tdOneDate(truncateDateStr(d))
@@ -186,7 +184,7 @@ abstract class Cell(
 
           case "big" =>
             (rowIndex: Int) =>
-              valueArray(rowIndex).fold(_tdNoEdit)(
+              editArray(rowIndex).fold(_tdNoEdit)(
                 _tdOneNumNoEdit(_))
 
           case "txI" =>
@@ -194,18 +192,18 @@ abstract class Cell(
 
           case _ =>
             (rowIndex: Int) =>
-              valueArray(rowIndex).fold(_tdNoEdit)(
+              editArray(rowIndex).fold(_tdNoEdit)(
                 _tdNoEdit(_))
         }
 
 
       case "double" =>
-        val origArray  = getOrigArray(qr.num)
-        val valueArray = qr.num(arrayIndex)
-        val getCls     = getClassLambda(origArray, valueArray)
+        val origArray = getOrigArray(qr.num)
+        val editArray = qr.num(arrayIndex)
+        val getCls    = getClassLambda(origArray, editArray)
         cellType match {
           case "eid" =>
-            val length      = valueArray.length
+            val length      = editArray.length
             val starIndex   = new Array[Boolean](length)
             val flagIndex   = new Array[Boolean](length)
             val checkIndex  = new Array[Boolean](length)
@@ -213,7 +211,7 @@ abstract class Cell(
             var eid         = 0L
             var i           = 0
             while (i < length) {
-              eid = valueArray(i).get.toLong
+              eid = editArray(i).get.toLong
               entityIndex.get(eid) match {
                 case Some(ii) => entityIndex(eid) = ii :+ i
                 case None     => entityIndex(eid) = List(i)
@@ -236,7 +234,7 @@ abstract class Cell(
 
             (rowIndex: Int) =>
               // Set entity id for updates of subsequent attribute values
-              e = valueArray(rowIndex).fold(0L)(_.toLong)
+              e = editArray(rowIndex).fold(0L)(_.toLong)
               val eid = e
               _tdOneEid(
                 eid,
@@ -256,8 +254,8 @@ abstract class Cell(
               _tdOneRefEdit2(
                 id(rowIndex),
                 e,
-                valueArray(rowIndex),
-                save(origArray, valueArray, rowIndex, "num")
+                editArray(rowIndex),
+                update(origArray, editArray, rowIndex, "num")
               )
 
           case "ref" if editable =>
@@ -265,23 +263,23 @@ abstract class Cell(
               _tdOneRefEdit(
                 id(rowIndex),
                 e,
-                valueArray(rowIndex),
+                editArray(rowIndex),
                 curEntity,
                 (ref: Long) => () => curEntity() = ref,
-                save(origArray, valueArray, rowIndex, "num")
+                update(origArray, editArray, rowIndex, "num")
               )
 
           case _ if editable =>
             (rowIndex: Int) =>
               _tdOneNumEdit(
                 getCls("num", rowIndex),
-                id(rowIndex), e, valueArray(rowIndex),
-                save(origArray, valueArray, rowIndex, "num")
+                id(rowIndex), e, editArray(rowIndex),
+                update(origArray, editArray, rowIndex, "num")
               )
 
           case "ref" =>
             (rowIndex: Int) =>
-              valueArray(rowIndex).fold(_tdNoEdit)(v =>
+              editArray(rowIndex).fold(_tdNoEdit)(v =>
                 _tdOneRef(
                   v.toLong,
                   curEntity,
@@ -290,96 +288,96 @@ abstract class Cell(
               )
 
           case "aggr" => (rowIndex: Int) =>
-            valueArray(rowIndex).fold(_tdNoAggrEdit)(_tdOneNumNoAggrEdit(_))
+            editArray(rowIndex).fold(_tdNoAggrEdit)(_tdOneNumNoAggrEdit(_))
 
           case "t"  => tLambda(qr, arrayIndex, cols, colIndex)
           case "tx" => txLambda(qr, arrayIndex, cols, colIndex)
 
           case _ =>
             (rowIndex: Int) =>
-              valueArray(rowIndex).fold(_tdNoEdit)(_tdOneNumNoEdit(_))
+              editArray(rowIndex).fold(_tdNoEdit)(_tdOneNumNoEdit(_))
         }
 
 
       // card many -------------------------------------------------------------
 
       case "listString" =>
-        val origArray  = getOrigArray(qr.listStr)
-        val valueArray = qr.listStr(arrayIndex)
-        val getCls     = getClassLambda(origArray, valueArray)
+        val origArray = getOrigArray(qr.listStr)
+        val editArray = qr.listStr(arrayIndex)
+        val getCls    = getClassLambda(origArray, editArray)
         cellType match {
           case "str" if editable =>
             (rowIndex: Int) =>
-              valueArray(rowIndex).fold(_tdNoEdit)(vs =>
+              editArray(rowIndex).fold(_tdNoEdit)(vs =>
                 _tdManyStringEdit(
                   vs, getCls("items", rowIndex), id(rowIndex), e,
-                  save(origArray, valueArray, rowIndex, "items")
+                  update(origArray, editArray, rowIndex, "items")
                 )
               )
 
           case "date" if editable =>
             (rowIndex: Int) =>
-              valueArray(rowIndex).fold(_tdNoEdit)(vs =>
+              editArray(rowIndex).fold(_tdNoEdit)(vs =>
                 _tdManyDateEdit(
                   vs, getCls("str", rowIndex), id(rowIndex), e,
-                  save(origArray, valueArray, rowIndex, "str")
+                  update(origArray, editArray, rowIndex, "str")
                 )
               )
 
           case "big" if editable =>
             (rowIndex: Int) =>
-              valueArray(rowIndex).fold(_tdNoEdit)(vs =>
+              editArray(rowIndex).fold(_tdNoEdit)(vs =>
                 _tdManyStringBigEdit(
                   vs, getCls("num", rowIndex), id(rowIndex), e,
-                  save(origArray, valueArray, rowIndex, "num")
+                  update(origArray, editArray, rowIndex, "num")
                 )
               )
 
           case _ if editable =>
             (rowIndex: Int) =>
-              valueArray(rowIndex).fold(_tdNoEdit)(vs =>
+              editArray(rowIndex).fold(_tdNoEdit)(vs =>
                 _tdManyStringOtherEdit(
                   vs, getCls("str", rowIndex), id(rowIndex), e,
-                  save(origArray, valueArray, rowIndex, "str")
+                  update(origArray, editArray, rowIndex, "str")
                 )
               )
 
           case "str" =>
             (rowIndex: Int) =>
-              valueArray(rowIndex).fold(_tdNoEdit)(
+              editArray(rowIndex).fold(_tdNoEdit)(
                 _tdManyString(_, "items", showAll))
 
           case "date" =>
             (rowIndex: Int) =>
-              valueArray(rowIndex).fold(_tdNoEdit)(
+              editArray(rowIndex).fold(_tdNoEdit)(
                 _tdManyDate(_, showAll))
 
           case "big" =>
             (rowIndex: Int) =>
-              valueArray(rowIndex).fold(_tdNoEdit)(
+              editArray(rowIndex).fold(_tdNoEdit)(
                 _tdManyString(_, "num", showAll))
 
           case _ =>
             (rowIndex: Int) =>
-              valueArray(rowIndex).fold(_tdNoEdit)(
+              editArray(rowIndex).fold(_tdNoEdit)(
                 _tdManyString(_, "str", showAll))
         }
 
       case "listDouble" =>
-        val origArray  = getOrigArray(qr.listNum)
-        val valueArray = qr.listNum(arrayIndex)
-        val getCls     = getClassLambda(origArray, valueArray)
+        val origArray = getOrigArray(qr.listNum)
+        val editArray = qr.listNum(arrayIndex)
+        val getCls    = getClassLambda(origArray, editArray)
         cellType match {
           case "eid" =>
             (rowIndex: Int) =>
-              valueArray(rowIndex).fold(_tdNoEdit)(vs =>
+              editArray(rowIndex).fold(_tdNoEdit)(vs =>
                 _tdManyRef(vs, curEntity,
                   (eid: Long) => () => curEntity() = eid))
 
           case "ref" if groupEdit =>
             println("_tdManyRefEdit2")
             (rowIndex: Int) =>
-              valueArray(rowIndex).fold(_tdNoEdit)(vs =>
+              editArray(rowIndex).fold(_tdNoEdit)(vs =>
                 _tdManyRefEdit2(
                   vs,
                   getCls("num", rowIndex),
@@ -387,41 +385,41 @@ abstract class Cell(
                   e,
                   curEntity,
                   (ref: Long) => () => curEntity() = ref,
-                  save(origArray, valueArray, rowIndex, "")
+                  update(origArray, editArray, rowIndex, "")
                 )
               )
           case "ref" if editable  =>
             println("_tdManyRefEdit")
             (rowIndex: Int) =>
-              valueArray(rowIndex).fold(_tdNoEdit)(vs =>
+              editArray(rowIndex).fold(_tdNoEdit)(vs =>
                 _tdManyRefEdit(
                   vs,
                   id(rowIndex),
                   e,
                   curEntity,
                   (ref: Long) => () => curEntity() = ref,
-                  save(origArray, valueArray, rowIndex, "")
+                  update(origArray, editArray, rowIndex, "")
                 )
               )
 
           case "ref" =>
             (rowIndex: Int) =>
-              valueArray(rowIndex).fold(_tdNoEdit)(vs =>
+              editArray(rowIndex).fold(_tdNoEdit)(vs =>
                 _tdManyRef(vs, curEntity,
                   (eid: Long) => () => curEntity() = eid, true))
 
           case _ if editable =>
             (rowIndex: Int) =>
-              valueArray(rowIndex).fold(_tdNoEdit)(vs =>
+              editArray(rowIndex).fold(_tdNoEdit)(vs =>
                 _tdManyDoubleEdit(
                   vs, getCls("num", rowIndex), id(rowIndex), e,
-                  save(origArray, valueArray, rowIndex, "num")
+                  update(origArray, editArray, rowIndex, "num")
                 )
               )
 
           case _ =>
             (rowIndex: Int) =>
-              valueArray(rowIndex).fold(_tdNoEdit)(
+              editArray(rowIndex).fold(_tdNoEdit)(
                 _tdManyDouble(_, showAll))
         }
 
@@ -429,65 +427,65 @@ abstract class Cell(
       // map -------------------------------------------------------------------
 
       case "mapString" =>
-        val origArray  = getOrigArray(qr.mapStr)
-        val valueArray = qr.mapStr(arrayIndex)
-        val getCls     = getClassLambda(origArray, valueArray)
+        val origArray = getOrigArray(qr.mapStr)
+        val editArray = qr.mapStr(arrayIndex)
+        val getCls    = getClassLambda(origArray, editArray)
         cellType match {
           case "str" if editable =>
             (rowIndex: Int) =>
-              valueArray(rowIndex).fold(_tdNoEdit)(vs =>
+              editArray(rowIndex).fold(_tdNoEdit)(vs =>
                 _tdMapStrEdit(
                   vs, getCls("items", rowIndex), id(rowIndex), e,
-                  save(origArray, valueArray, rowIndex, "items")
+                  update(origArray, editArray, rowIndex, "items")
                 )
               )
 
           case "date" if editable =>
             (rowIndex: Int) =>
-              valueArray(rowIndex).fold(_tdNoEdit)(vs =>
+              editArray(rowIndex).fold(_tdNoEdit)(vs =>
                 _tdMapDateEdit(
                   vs, getCls("str", rowIndex), id(rowIndex), e,
-                  save(origArray, valueArray, rowIndex, "str")
+                  update(origArray, editArray, rowIndex, "str")
                 )
               )
 
           case _ if editable =>
             (rowIndex: Int) =>
-              valueArray(rowIndex).fold(_tdNoEdit)(vs =>
+              editArray(rowIndex).fold(_tdNoEdit)(vs =>
                 _tdMapStrOtherEdit(
                   vs, getCls("str", rowIndex), id(rowIndex), e,
-                  save(origArray, valueArray, rowIndex, "str")
+                  update(origArray, editArray, rowIndex, "str")
                 )
               )
 
           case "date" =>
             (rowIndex: Int) =>
-              valueArray(rowIndex).fold(_tdNoEdit)(_tdMapDate)
+              editArray(rowIndex).fold(_tdNoEdit)(_tdMapDate)
 
           case "str" =>
             (rowIndex: Int) =>
-              valueArray(rowIndex).fold(_tdNoEdit)(_tdMapStr)
+              editArray(rowIndex).fold(_tdNoEdit)(_tdMapStr)
 
           case _ =>
             (rowIndex: Int) =>
-              valueArray(rowIndex).fold(_tdNoEdit)(_tdMapStrOther)
+              editArray(rowIndex).fold(_tdNoEdit)(_tdMapStrOther)
         }
 
       case "mapDouble" =>
-        val origArray  = getOrigArray(qr.mapNum)
-        val valueArray = qr.mapNum(arrayIndex)
-        val getCls     = getClassLambda(origArray, valueArray)
+        val origArray = getOrigArray(qr.mapNum)
+        val editArray = qr.mapNum(arrayIndex)
+        val getCls    = getClassLambda(origArray, editArray)
         if (editable) {
           rowIndex: Int =>
-            valueArray(rowIndex).fold(_tdNoEdit)(vs =>
+            editArray(rowIndex).fold(_tdNoEdit)(vs =>
               _tdMapDoubleEdit(
                 vs, getCls("str", rowIndex), id(rowIndex), e,
-                save(origArray, valueArray, rowIndex, "str")
+                update(origArray, editArray, rowIndex, "str")
               )
             )
         } else {
           rowIndex: Int =>
-            valueArray(rowIndex).fold(_tdNoEdit)(_tdMapDouble)
+            editArray(rowIndex).fold(_tdNoEdit)(_tdMapDouble)
         }
     }
   }

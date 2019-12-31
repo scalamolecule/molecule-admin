@@ -20,25 +20,22 @@ case class UpdateCardMany[T](
   cols: Seq[Col],
   qr: QueryResult,
   origArray: Array[Option[T]],
-  valueArray: Array[Option[T]],
+  editArray: Array[Option[T]],
   baseClass: String,
   colType: String,
   rowIndex: Int,
-  colIndex: Int,
   related: Int,
   nsAlias: String,
   nsFull: String,
   attr: String,
   attrType: String,
-  card: Int,
   enums: Seq[String],
   cellType: String,
   expr: String
 )(implicit ctx: Ctx.Owner)
   extends UpdateClient[T](
-    cols, qr, origArray, valueArray, baseClass,
-    colType, rowIndex, colIndex, related,
-    nsAlias, nsFull, attr, attrType, card, enums
+    cols, qr, origArray, editArray, baseClass,
+    rowIndex, related, nsAlias, nsFull, attr, enums
   ) {
 
   type keepBooPickleImport_UpdateCardMany = PickleState
@@ -151,13 +148,13 @@ case class UpdateCardMany[T](
       } else if (expr == "edit") {
         println(s"$eid $attrFull $newVopt")
         if (related == 0) {
-          valueArray(rowIndex) = newVopt
+          editArray(rowIndex) = newVopt
           setCellEditMode(cell, newVopt)
         }
 
       } else {
 
-        // Update value cell
+        // Update edit cell
         redrawCell()
 
         // update db
@@ -170,10 +167,7 @@ case class UpdateCardMany[T](
         }
         save.map {
           case Right((t, tx, txInstant)) =>
-            updateClient(
-              t, tx, txInstant,
-              cellId, cell, row, eid, oldVOpt, isNum, newVopt
-            )
+            updateClient(t, tx, txInstant, cell, row, eid, newVopt)
             println(s"Successfully updated $attrFull: $retractsAsserts")
 
           case Left(err) =>

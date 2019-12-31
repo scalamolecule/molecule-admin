@@ -128,7 +128,7 @@ case class DataTableHead(tableBody: TableSection)(implicit val ctx: Ctx.Owner)
     val filterId  = "filter-" + colIndex
     val cleanAttr = clean(attr)
 
-    def lambdaCell(): JsDom.TypedTag[TableHeaderCell] = {
+    def editCell(): JsDom.TypedTag[TableHeaderCell] = {
       def s(i: Int) = "\u00a0" * i
       val lambdaRaw = card match {
         case 1 if opt =>
@@ -182,7 +182,7 @@ case class DataTableHead(tableBody: TableSection)(implicit val ctx: Ctx.Owner)
       _attrFilterCell(filterId, filterExpr, applyFilter)
     }
 
-    if (attrExpr == "edit") lambdaCell() else filterCell()
+    if (attrExpr == "edit") editCell() else filterCell()
   }
 
 

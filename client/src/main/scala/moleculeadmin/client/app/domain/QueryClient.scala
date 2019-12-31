@@ -3,7 +3,7 @@ import autowire._
 import boopickle.Default._
 import moleculeadmin.client.app.domain.common.TopMenu
 import moleculeadmin.client.app.domain.query.QueryState._
-import moleculeadmin.client.app.domain.query._
+import moleculeadmin.client.app.domain.query.{RenderGrouped, RenderQueryBuilder, RenderSubMenu, RenderViews, _}
 import moleculeadmin.client.app.domain.query.data.DataTable
 import moleculeadmin.client.app.element.AppElements
 import moleculeadmin.client.autowire.queryWire
