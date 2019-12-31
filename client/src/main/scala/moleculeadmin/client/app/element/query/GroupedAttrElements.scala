@@ -1,30 +1,26 @@
 package moleculeadmin.client.app.element.query
 
 import moleculeadmin.client.app.element.query.datatable.HeadElements
-import moleculeadmin.shared.styles.Color
-import org.scalajs.dom.html.{Element, HR, Span, Table, TableCell, TableRow, TableSection}
-import org.scalajs.dom.window
+import org.scalajs.dom.html._
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
-import scalatags.JsDom.styles2.wordBreak
 
 
 trait GroupedAttrElements extends SubMenuElements with HeadElements {
 
   def _groupedCard(
     header: String,
-    grouped: Span,
+    spanOfSelected: Span,
     values: Table
   ): TypedTag[Element] =
     _card(
       _cardHeader(h5(header)),
       _cardBody(
         padding := 0,
-        grouped,
+        spanOfSelected,
         values
       )
     )
-
 
   def _groupedSelected(
     colType: String,
@@ -47,7 +43,7 @@ trait GroupedAttrElements extends SubMenuElements with HeadElements {
             ),
           ),
           td(
-            if(colType == "double") color := "#49a523" else (),
+            if (colType == "double") color := "#49a523" else (),
             v
           ),
           td(c)
@@ -68,54 +64,51 @@ trait GroupedAttrElements extends SubMenuElements with HeadElements {
       tableBody
     ).render
 
-  def _groupedTableBody(colType: String, count: Int): TableSection =
+
+  def _groupedTableBody(colIndex: Int): TableSection =
     tbody(
-      tr(
-        td(count),
-        td(
-          span(
-            cls := "oi oi-elevator",
-            if (colType == "double") float.right else (),
-            color := "#bbbbbb"
-          ),
-        ),
-        td(
-          _sortIcon("oi oi-caret-bottom", 0)
-        ),
-      )
+      id := s"grouped-table-$colIndex"
     ).render
 
-
-  def _rowMaker(
-    colIndex: Int,
+  def _headRow(
     colType: String,
-    attrType: String,
-    update: (Int, String, Int) => () => Unit,
-    toggle: (Int, String, Int) => () => Unit,
-  ): (Int, (String, Int)) => TableRow = {
-    if (colType == "double") {
-      (i: Int, row: (String, Int)) =>
-        _rowNum(colIndex, i, row._1, row._2, update, toggle)
-    } else {
-      attrType match {
-        case "String" =>
-          (i: Int, row: (String, Int)) =>
-            _rowStr(colIndex, i, row._1, row._2, update, toggle)
-
-        case "Date" =>
-          (i: Int, row: (String, Int)) =>
-            _rowStr(colIndex, i, row._1, row._2, update, toggle)
-      }
+    count: Int,
+    sort: String => () => Unit,
+    ordering: Int
+  ): TableRow = {
+    val (sortV, sortC) = ordering match {
+      case 1 => (_noSort(colType), _sort(colType, s"bottom"))
+      case 2 => (_noSort(colType), _sort(colType, s"top"))
+      case 3 => (_sort(colType, s"top"), _noSort(colType))
+      case 4 => (_sort(colType, s"bottom"), _noSort(colType))
     }
+    tr(
+      td(count),
+      td(sortV, onclick := sort("value")),
+      td(sortC, onclick := sort("count")),
+    ).render
   }
 
+  def _sort(colType: String, dir: String): TypedTag[Span] =
+    _sortIcon(s"oi oi-caret-$dir", 0)(
+      marginTop := -1,
+      if (colType == "double") float.right else float.left
+    )
+
+  def _noSort(colType: String): TypedTag[Span] =
+    span(
+      cls := s"oi oi-elevator",
+      if (colType == "double") float.right else (),
+      color := "#bbbbbb",
+      marginTop := 2,
+    )
 
   def _rowStr(
     colIndex: Int,
     n: Int,
     curV: String,
     count: Int,
-    update: (Int, String, Int) => () => Unit,
+    update: Int => () => Unit,
     toggle: (Int, String, Int) => () => Unit
   ): TableRow =
     tr(
@@ -124,7 +117,7 @@ trait GroupedAttrElements extends SubMenuElements with HeadElements {
       td(
         id := s"grouped-cell-$colIndex-$n",
         contenteditable := true,
-        onblur := update(n, curV, count),
+        onblur := update(n),
         _str2frags(curV)
       ),
       td(
@@ -138,7 +131,7 @@ trait GroupedAttrElements extends SubMenuElements with HeadElements {
     n: Int,
     curV: String,
     count: Int,
-    update: (Int, String, Int) => () => Unit,
+    update: Int => () => Unit,
     toggle: (Int, String, Int) => () => Unit
   ): TableRow =
     tr(
@@ -148,7 +141,7 @@ trait GroupedAttrElements extends SubMenuElements with HeadElements {
         id := s"grouped-cell-$colIndex-$n",
         textAlign.right,
         color := "#49a523",
-        onblur := update(n, curV, count),
+        onblur := update(n),
         contenteditable := true,
         curV,
       ),
