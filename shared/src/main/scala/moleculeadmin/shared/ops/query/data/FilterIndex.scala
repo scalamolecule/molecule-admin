@@ -20,7 +20,10 @@ trait FilterIndex {
       values: Array[Option[T]],
       predicate: T => Boolean
     ): Int => Boolean = {
+      val pred1 = (opt: Option[T]) => opt.isEmpty
+      val pred2 = (opt: Option[T]) => opt.fold(false)(s => s == "b")
       if (sortIndex.isEmpty) {
+//        i: Int => pred2(values(i))
         i: Int => values(i).fold(false)(predicate(_))
       } else {
         i: Int => values(sortIndex(i)).fold(false)(predicate(_))

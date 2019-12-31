@@ -42,7 +42,7 @@ case class Grouped[T](col: Col)
   val groupedTableBody = _groupedTableBody(colIndex)
 
   def render: JsDom.TypedTag[Element] = {
-    calculateGroupedData()
+    extractGroupedData()
     populate(1)
     _groupedCard(
       s"$nsFull/$attr",
@@ -113,7 +113,7 @@ case class Grouped[T](col: Col)
     val filterExpr = if (attrType == "String")
       "/" + selected.map(_._2).mkString("\n/")
     else
-      "" + selected.map(_._2).mkString("\n")
+      selected.map(_._2).mkString("\n")
 
     val filter = createFilter(col, filterExpr, splitComma = false).get
     filters() = filters.now.filterNot(_._1 == colIndex) + (colIndex -> filter)
