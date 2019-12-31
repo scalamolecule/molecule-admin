@@ -21,24 +21,20 @@ case class UpdateCardMap[T](
   cols: Seq[Col],
   qr: QueryResult,
   origArray: Array[Option[T]],
-  valueArray: Array[Option[T]],
+  editArray: Array[Option[T]],
   baseClass: String,
-  colType: String,
   rowIndex: Int,
-  colIndex: Int,
   related: Int,
   nsAlias: String,
   nsFull: String,
   attr: String,
   attrType: String,
-  card: Int,
   enums: Seq[String],
   expr: String
 )(implicit ctx: Ctx.Owner)
   extends UpdateClient[T](
-    cols, qr, origArray, valueArray, baseClass,
-    colType, rowIndex, colIndex, related,
-    nsAlias, nsFull, attr, attrType, card, enums
+    cols, qr, origArray, editArray, baseClass,
+    rowIndex, related, nsAlias, nsFull, attr, enums
   ) {
 
   type keepBooPickleImport_UpdateCardMap = PickleState
@@ -166,23 +162,20 @@ case class UpdateCardMap[T](
       } else if (expr == "edit") {
         println(s"$eid $attrFull $newVopt")
         if (related == 0) {
-          valueArray(rowIndex) = newVopt
+          editArray(rowIndex) = newVopt
           setCellEditMode(cell, newVopt)
         }
 
       } else {
 
-        // Update value cell
+        // Update edit cell
         redrawCell()
 
         // update db
         val data = Seq((eid, retracts, asserts))
         queryWire().updateStr(db, attrFull, "String", "", data).call().map {
           case Right((t, tx, txInstant)) =>
-            updateClient(
-              t, tx, txInstant,
-              cellId, cell, row, eid, oldVopt, isNum, newVopt
-            )
+            updateClient(t, tx, txInstant, cell, row, eid, newVopt)
             println(s"Successfully updated $attrFull: $retractsAsserts")
 
           case Left(err) =>

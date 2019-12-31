@@ -12,7 +12,7 @@ case class Entity()(implicit ctx: Ctx.Owner) extends Base() {
     curEntity() match {
       case 0 => // no entity id marked yet
 
-      case eid if curViews.now.contains("viewEntity") =>
+      case eid if curViews.now.contains("view04_Entity") =>
         val view = document.getElementById("entityViewTable")
         if (view == null) {
           // Start fresh

@@ -1,7 +1,8 @@
 package moleculeadmin.client.app.domain.query
-import moleculeadmin.client.app.element.AppElements
+
 import moleculeadmin.client.app.domain.query.QueryState.querySelection
 import moleculeadmin.client.app.domain.query.builder.{QueryBranches, SchemaDropDown}
+import moleculeadmin.client.app.element.AppElements
 import moleculeadmin.client.rxstuff.RxBindings
 import moleculeadmin.shared.ast.schema.MetaSchema
 import org.scalajs.dom.Node

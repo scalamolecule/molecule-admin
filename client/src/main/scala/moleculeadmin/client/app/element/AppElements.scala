@@ -34,8 +34,8 @@ trait AppElements extends Bootstrap {
     optStr.fold(Seq.empty[Frag])(_str2frags)
 
   def _str2frags(s0: String): Seq[Frag] = {
-    // All spaces as &nbsp;
-    val s = s0.replaceAllLiterally(" ", "\u00a0")
+    // All extra spaces as &nbsp;
+    val s = s0.replaceAllLiterally("  ", "\u00a0 ") // &nbsp;
     if (s.contains('\n')) {
       if (s0.replaceAllLiterally("\n", " ").trim.isEmpty)
         s"{$s}".split("\n").toSeq.flatMap(s1 => Seq(StringFrag(s1), br)).init
@@ -155,7 +155,7 @@ trait AppElements extends Bootstrap {
     val starOff  = "far fa-star starOff"
     val flagOn   = "fas fa-flag flagOn"
     val flagOff  = "far fa-flag flagOff"
-//    val checkOn  = "oi oi-check checkOn"
+    //    val checkOn  = "oi oi-check checkOn"
     val checkOn  = "fas fa-check-circle checkOn"
     val checkOff = "fas fa-check checkOff"
   }

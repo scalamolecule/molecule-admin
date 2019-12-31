@@ -512,7 +512,6 @@ class QueryBackend extends QueryApi with Base {
   def update[T](
     db: String,
     attrFull: String,
-    attrType: String,
     data: Seq[(Long, Seq[T], Seq[T])],
     cast: T => Any,
   ): Either[String, (Long, Long, String)] = {
@@ -539,7 +538,7 @@ class QueryBackend extends QueryApi with Base {
     enumPrefix: String,
     data: Seq[(Long, Seq[String], Seq[String])]
   ): Either[String, (Long, Long, String)] = {
-    update(db, attrFull, attrFull, data, getStrCaster(attrType, enumPrefix))
+    update(db, attrFull, data, getStrCaster(attrType, enumPrefix))
   }
 
 
@@ -549,6 +548,6 @@ class QueryBackend extends QueryApi with Base {
     attrType: String,
     data: Seq[(Long, Seq[Double], Seq[Double])],
   ): Either[String, (Long, Long, String)] = {
-    update(db, attrFull, attrFull, data, getNumCaster(attrType))
+    update(db, attrFull, data, getNumCaster(attrType))
   }
 }

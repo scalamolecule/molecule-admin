@@ -1,8 +1,8 @@
 package moleculeadmin.client.app.domain.query
+
 import moleculeadmin.client.app.domain.query.QueryState._
-import moleculeadmin.client.app.domain.query.submenu.{SubMenuQueryList, _}
+import moleculeadmin.client.app.domain.query.submenu.{SubMenuGrouped, SubMenuQueryList, SubMenuShortCuts, SubMenuViews}
 import moleculeadmin.client.app.element.query.SubMenuElements
-import moleculeadmin.client.rxstuff.RxBindings
 import org.scalajs.dom.html.Span
 import rx.{Ctx, Rx}
 import scalatags.JsDom

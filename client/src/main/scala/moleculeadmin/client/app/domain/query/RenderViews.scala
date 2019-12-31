@@ -1,4 +1,5 @@
 package moleculeadmin.client.app.domain.query
+
 import molecule.ast.model.Model
 import molecule.transform.Model2Query
 import moleculeadmin.client.app.domain.query.QueryState._

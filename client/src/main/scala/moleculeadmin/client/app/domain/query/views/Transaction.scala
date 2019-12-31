@@ -19,7 +19,7 @@ case class Transaction()(implicit ctx: Ctx.Owner) extends Base {
     curTx() match {
       case 0 => // no entity id marked yet
 
-      case tx if curViews.now.contains("viewTransaction") =>
+      case tx if curViews.now.contains("view03_Transaction") =>
         val view = document.getElementById("txViewTable")
         if (view == null) {
           // Start fresh
