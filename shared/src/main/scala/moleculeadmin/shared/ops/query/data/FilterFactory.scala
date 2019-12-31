@@ -134,6 +134,7 @@ trait FilterFactory extends RegexMatching with DateHandling {
       case r"!i/(.*)$regex/?" => Some(s =>
         Pattern.compile(s"(?!$regex)", Pattern.CASE_INSENSITIVE).matcher(s).matches()
       )
+      case "nil"              => Some(s => s.isEmpty)
       case ""                 => None
       case r"v *=>(.*)"       => None // todo?: compile Scala filter expr
       case anyStr             => Some(s => s.contains(anyStr))

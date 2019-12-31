@@ -9,11 +9,10 @@ import rx.Ctx
 abstract class GroupedData[T](col: Col)(implicit ctx: Ctx.Owner)
   extends KeyEvents {
 
-  val qr = queryCache.queryResult
-
   val Col(colIndex, _, nsAlias, nsFull, attr, attrType, colType, _,
   opt, enums, _, _, _, _, _) = col
 
+  val qr = queryCache.queryResult
   val attrFull   = s":$nsFull/${clean(attr)}"
   val enumPrefix = if (enums.isEmpty) "" else s":$nsAlias.${clean(attr)}/"
   val isNum      = Seq("Int", "Long", "Float", "Double").contains(attrType)
@@ -22,29 +21,29 @@ abstract class GroupedData[T](col: Col)(implicit ctx: Ctx.Owner)
   private var rawData = Seq.empty[(T, Int)]
   var groupedData = Seq.empty[(String, Int)]
 
-  def sortStr(ordering: Int, data: Seq[(String, Int)]): Seq[(String, Int)] = ordering match {
-    case 1 => data.sortBy { case (v, c) => (-c, v) }
-    case 2 => data.sortBy { case (v, c) => (c, v) }
-    case 3 => data.sortBy(_._1)
-    case 4 => data.sortBy(_._1).reverse
-  }
-  def sortNum(ordering: Int, data: Seq[(Double, Int)]): Seq[(Double, Int)] = ordering match {
-    case 1 => data.sortBy { case (v, c) => (-c, v) }
-    case 2 => data.sortBy { case (v, c) => (c, v) }
-    case 3 => data.sortBy(_._1)
-    case 4 => data.sortBy(_._1).reverse
-  }
 
   def sortData(ordering: Int): Unit = {
     groupedData =
-      if (colType == "double")
-        sortNum(ordering, rawData.asInstanceOf[Seq[(Double, Int)]])
-          .map { case (v, c) => (v.toString, c) }
-      else
-        sortStr(ordering, rawData.asInstanceOf[Seq[(String, Int)]])
+      if (colType == "double") {
+        val data = rawData.asInstanceOf[Seq[(Double, Int)]]
+        (ordering match {
+          case 1 => data.sortBy { case (v, c) => (-c, v) }
+          case 2 => data.sortBy { case (v, c) => (c, v) }
+          case 3 => data.sortBy(_._1)
+          case 4 => data.sortBy(_._1).reverse
+        }).map { case (v, c) => (v.toString, c) }
+      } else {
+        val data = rawData.asInstanceOf[Seq[(String, Int)]]
+        ordering match {
+          case 1 => data.sortBy { case (v, c) => (-c, v) }
+          case 2 => data.sortBy { case (v, c) => (c, v) }
+          case 3 => data.sortBy(_._1)
+          case 4 => data.sortBy(_._1).reverse
+        }
+      }
   }
 
-  def calculateGroupedData(): Unit = {
+  def extractGroupedData(): Unit = {
     val filterIndex = queryCache.filterIndex
     val indexBridge = {
       if (filterIndex.nonEmpty)
@@ -52,7 +51,6 @@ abstract class GroupedData[T](col: Col)(implicit ctx: Ctx.Owner)
       else
         (i: Int) => i
     }
-
     rawData = (colType match {
       case "string" if mandatory =>
         val valueArray = qr.str(qr.arrayIndexes(colIndex))
