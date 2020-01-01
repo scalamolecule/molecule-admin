@@ -6,7 +6,7 @@ import moleculeadmin.shared.util.HelpersAdmin
 import scala.scalajs.js.Date
 import scala.util.{Failure, Success, Try}
 
-trait Update extends HelpersAdmin with KeyEvents {
+trait TypeValidation extends HelpersAdmin {
 
   protected def valid(attrType: String, s: String): Boolean = if (s.isEmpty)
     true
@@ -24,7 +24,4 @@ trait Update extends HelpersAdmin with KeyEvents {
       case "BigDecimal" => s.matches("\\d+(\\.\\d+)?")
       case _            => true // String, UUID, URI
     }
-
-  protected def idBase(colIndex: Int): Int => String =
-    (rowIndex: Int) => s"col-${colIndex + 1} row-${rowIndex + 1}"
 }

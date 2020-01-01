@@ -20,7 +20,7 @@ abstract class Cell(
   cols: Seq[Col],
   qr: QueryResult
 )(implicit ctx: Ctx.Owner)
-  extends TxLambdas with Update with BodyElements with ColOps {
+  extends TxLambdas with TypeValidation with BodyElements with ColOps {
 
   // current entity id for updates of subsequent attributes on each row
   var e = 0L
@@ -53,6 +53,10 @@ abstract class Cell(
     val groupEdit = expr == "edit"
     val editable  = groupEdit || isEditable(cols, colIndex, nsAlias, nsFull)
     lazy val showAll = expr == "orig" || expr == "edit"
+
+
+    def idBase(colIndex: Int): Int => String =
+      (rowIndex: Int) => s"col-${colIndex + 1} row-${rowIndex + 1}"
 
     def id: Int => String = idBase(colIndex)
 

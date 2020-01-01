@@ -1,6 +1,7 @@
 package moleculeadmin.client.app.domain.query.data
 
 import moleculeadmin.client.app.domain.query.QueryState.offset
+import moleculeadmin.client.app.domain.query.keyEvents.Paging
 import moleculeadmin.shared.ast.query.{QueryResult, _}
 import org.scalajs.dom.html.TableSection
 import rx.Ctx
@@ -11,7 +12,7 @@ case class RowBuilder(
   cols: Seq[Col],
   qr: QueryResult
 )(implicit ctx: Ctx.Owner)
-  extends Cell(tableBody, cols, qr) {
+  extends Cell(tableBody, cols, qr) with Paging {
 
   def append(sortIndex: Array[Int], filterIndex: Array[Int]): Unit = {
     val indexBridge: Int => Int = {

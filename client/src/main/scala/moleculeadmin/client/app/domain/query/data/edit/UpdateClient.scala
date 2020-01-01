@@ -1,7 +1,9 @@
 package moleculeadmin.client.app.domain.query.data.edit
 import moleculeadmin.client.app.domain.query.QueryState._
+import moleculeadmin.client.app.domain.query.keyEvents.Editing
 import moleculeadmin.client.app.element.query.datatable.BodyElements
 import moleculeadmin.shared.ast.query.{Col, QueryResult}
+import moleculeadmin.shared.ops.query.ColOps
 import org.scalajs.dom.html.{TableCell, TableRow}
 import org.scalajs.dom.raw.NodeList
 import rx.Ctx
@@ -19,7 +21,7 @@ abstract class UpdateClient[T](
   attr: String,
   enums: Seq[String]
 )(implicit ctx: Ctx.Owner)
-  extends BodyElements with Update {
+  extends BodyElements with TypeValidation with ColOps with Editing {
 
   var i          = 0
   val attrFull   = s":$nsFull/${clean(attr)}"

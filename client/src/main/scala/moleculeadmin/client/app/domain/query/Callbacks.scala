@@ -19,6 +19,13 @@ class Callbacks(implicit ctx: Ctx.Owner)
 
   type keepBooPickleImport_Callbacks = PickleState
 
+
+  // New ------------------------------
+
+
+
+  // Query list ------------------------------
+
   private def sorted(query: QueryDTO): QueryDTO = query.copy(
     colSettings = columns.now.map(c => (c.colIndex, c.sortDir, c.sortPos)))
 
