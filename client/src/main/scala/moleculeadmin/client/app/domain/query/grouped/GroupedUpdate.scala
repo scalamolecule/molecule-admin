@@ -3,7 +3,7 @@ package moleculeadmin.client.app.domain.query.grouped
 import autowire._
 import boopickle.Default._
 import moleculeadmin.client.app.domain.query.QueryState._
-import moleculeadmin.client.app.domain.query.data.edit.Update
+import moleculeadmin.client.app.domain.query.data.edit.TypeValidation
 import moleculeadmin.client.app.element.query.GroupedAttrElements
 import moleculeadmin.client.autowire.queryWire
 import moleculeadmin.shared.ast.query.Col
@@ -17,7 +17,7 @@ import scala.util.{Failure, Success, Try}
 
 
 abstract class GroupedUpdate[T](col: Col)(implicit ctx: Ctx.Owner)
-  extends GroupedData(col) with GroupedAttrElements with Update {
+  extends GroupedData(col) with GroupedAttrElements with TypeValidation {
 
   type keepBooPickleImport_GroupedUpdate = PickleState
 

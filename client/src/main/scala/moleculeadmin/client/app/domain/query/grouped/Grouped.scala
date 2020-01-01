@@ -2,7 +2,7 @@ package moleculeadmin.client.app.domain.query.grouped
 
 import moleculeadmin.client.app.domain.query.KeyEvents
 import moleculeadmin.client.app.domain.query.QueryState._
-import moleculeadmin.client.app.domain.query.data.edit.Update
+import moleculeadmin.client.app.domain.query.data.edit.TypeValidation
 import moleculeadmin.client.app.element.query.GroupedAttrElements
 import moleculeadmin.shared.ast.query.Col
 import moleculeadmin.shared.ops.query.data.FilterFactory
@@ -16,7 +16,7 @@ import scala.scalajs.js.timers.setTimeout
 
 case class Grouped[T](col: Col)
   (implicit ctx: Ctx.Owner) extends GroupedUpdate[T](col)
-  with GroupedAttrElements with KeyEvents with FilterFactory with Update {
+  with GroupedAttrElements with KeyEvents with FilterFactory with TypeValidation {
 
   val tableRows     = document.getElementById("tableBody").childNodes
   val valueColIndex = colIndex + 1
@@ -110,7 +110,6 @@ case class Grouped[T](col: Col)
   }
 
   def setFilter(): Unit = {
-    println("selected " + selected)
     val filterExpr = if (attrType == "String") {
       if (selected.length == 1 && selected.head._2 == "-")
         "-"

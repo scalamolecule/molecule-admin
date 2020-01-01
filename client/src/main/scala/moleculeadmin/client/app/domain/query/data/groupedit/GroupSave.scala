@@ -5,6 +5,7 @@ import boopickle.Default._
 import moleculeadmin.client.app.domain.query.KeyEvents
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.domain.query.data.Indexes
+import moleculeadmin.client.app.domain.query.keyEvents.Paging
 import moleculeadmin.client.app.element.query.datatable.BodyElements
 import moleculeadmin.client.autowire.queryWire
 import moleculeadmin.client.rxstuff.RxBindings
@@ -20,7 +21,10 @@ import scala.concurrent.Future
 import scalatags.JsDom.all._
 
 case class GroupSave(col: Col)(implicit val ctx: Ctx.Owner)
-  extends RxBindings with ColOps with BodyElements with KeyEvents {
+  extends RxBindings with ColOps with BodyElements
+//    with KeyEvents
+  with Paging
+{
   type keepBooPickleImport_GroupSave = PickleState
 
   val Col(colIndex, _, nsAlias, nsFull, attr, attrType, colType,
