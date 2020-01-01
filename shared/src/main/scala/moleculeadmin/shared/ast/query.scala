@@ -50,13 +50,13 @@ object query extends HelpersAdmin {
    * @tparam T Double or String
    * @param colIndex   Column index
    * @param filterExpr Filter expression including possible newlines
-   * @param pred       Scala predicate to filter each value
+   * @param pred       Predicate to filter each value
    **/
   case class Filter[T](
     colIndex: Int,
     colType: String,
     filterExpr: String,
-    pred: T => Boolean
+    pred: Option[T] => Boolean
   )
 
 

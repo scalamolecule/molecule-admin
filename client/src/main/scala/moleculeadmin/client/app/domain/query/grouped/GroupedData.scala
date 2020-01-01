@@ -87,7 +87,7 @@ abstract class GroupedData[T](col: Col)(implicit ctx: Ctx.Owner)
           case ((nil, vs), Some(v)) if v.trim.isEmpty => (nil, vs :+ s"{$v}")
           case ((nil, vs), Some(v))                   => (nil, vs :+ v)
         }
-        ("<nil>", nil.length) +: vs.groupBy(identity).mapValues(_.length).toSeq
+        ("-", nil.length) +: vs.groupBy(identity).mapValues(_.length).toSeq
 
       case "double" =>
         val (nil, vs) = qr.num(qr.arrayIndexes(colIndex)).toList.foldLeft(
@@ -96,7 +96,7 @@ abstract class GroupedData[T](col: Col)(implicit ctx: Ctx.Owner)
           case ((nil, vs), None)    => (nil :+ 1, vs)
           case ((nil, vs), Some(v)) => (nil, vs :+ v)
         }
-        ("<nil>", nil.length) +: vs.groupBy(identity).mapValues(_.length).toSeq
+        ("-", nil.length) +: vs.groupBy(identity).mapValues(_.length).toSeq
 
       case _ => Nil
     }).asInstanceOf[Seq[(T, Int)]]

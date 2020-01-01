@@ -2,11 +2,9 @@ package moleculeadmin.client.app.domain.query.data.edit
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.element.query.datatable.BodyElements
 import moleculeadmin.shared.ast.query.{Col, QueryResult}
-import org.scalajs.dom.NodeList
 import org.scalajs.dom.html.{TableCell, TableRow}
 import org.scalajs.dom.raw.NodeList
 import rx.Ctx
-import scalatags.JsDom.all._
 
 abstract class UpdateClient[T](
   cols: Seq[Col],
