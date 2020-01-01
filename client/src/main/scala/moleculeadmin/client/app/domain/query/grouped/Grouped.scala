@@ -38,7 +38,7 @@ case class Grouped[T](col: Col)
   // Current ordering of grouped data
   var curOrdering = 1
 
-  val spanOfSelected = span().render
+  val spanOfSelected   = span().render
   val groupedTableBody = _groupedTableBody(colIndex)
 
   def render: JsDom.TypedTag[Element] = {
@@ -110,10 +110,15 @@ case class Grouped[T](col: Col)
   }
 
   def setFilter(): Unit = {
-    val filterExpr = if (attrType == "String")
-      "/" + selected.map(_._2).mkString("\n/")
-    else
+    println("selected " + selected)
+    val filterExpr = if (attrType == "String") {
+      if (selected.length == 1 && selected.head._2 == "-")
+        "-"
+      else
+        "/" + selected.map(_._2).mkString("\n/")
+    } else {
       selected.map(_._2).mkString("\n")
+    }
 
     val filter = createFilter(col, filterExpr, splitComma = false).get
     filters() = filters.now.filterNot(_._1 == colIndex) + (colIndex -> filter)
@@ -123,7 +128,27 @@ case class Grouped[T](col: Col)
     document.getElementById(s"grouped-row-$colIndex-$n")
       .setAttribute("class", "selected")
     spanOfSelected.innerHTML = ""
-    selected = selected :+ (n, curV, count)
+    if (selected.map(_._2).contains("-")) {
+      selected = selected.flatMap {
+        case (n, "-", _) =>
+          // Un-mark grouped value for None value
+          document.getElementById(s"grouped-row-$colIndex-$n")
+            .removeAttribute("class")
+          None
+        case s           => Some(s)
+      } :+ (n, curV, count)
+    } else if (curV == "-" && selected.nonEmpty) {
+      // Un-mark previous grouped when applying None
+      selected.foreach {
+        case (n, _, _) =>
+          document.getElementById(s"grouped-row-$colIndex-$n")
+            .removeAttribute("class")
+      }
+      // Mark None only
+      selected = Seq((n, curV, count))
+    } else {
+      selected = selected :+ (n, curV, count)
+    }
     showGrouped()
     setFilter()
   }

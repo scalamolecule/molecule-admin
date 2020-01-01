@@ -33,9 +33,14 @@ object FilterCreate extends TestSuite with FilterFactory {
 
   def testDoubleExpr(filterExpr: String, attrType: String) = {
     mkFilter(0, attrType, "double", filterExpr) match {
-      case Some(f: Filter[_]) if attrType == "Int"    => num filter f.asInstanceOf[Filter[Double]].pred
-      case Some(f: Filter[_]) if attrType == "Double" => dec filter f.asInstanceOf[Filter[Double]].pred
-      case _                                          => Nil
+      case Some(f: Filter[_]) if attrType == "Int"    =>
+        num.map(Some(_)) filter f.asInstanceOf[Filter[Double]].pred
+
+      case Some(f: Filter[_]) if attrType == "Double" =>
+        dec.map(Some(_)) filter f.asInstanceOf[Filter[Double]].pred
+
+      case _                                          =>
+        Nil
     }
   }
 

@@ -18,57 +18,60 @@ trait FilterIndex {
     // (Use nil in query buildup to get non-values)
     def lambdaOne[T](
       values: Array[Option[T]],
-      predicate: T => Boolean
+      predicate: Option[T] => Boolean
     ): Int => Boolean = {
-      val pred1 = (opt: Option[T]) => opt.isEmpty
-      val pred2 = (opt: Option[T]) => opt.fold(false)(s => s == "b")
       if (sortIndex.isEmpty) {
-//        i: Int => pred2(values(i))
-        i: Int => values(i).fold(false)(predicate(_))
+        i: Int => predicate(values(i))
       } else {
-        i: Int => values(sortIndex(i)).fold(false)(predicate(_))
+        i: Int => predicate(values(sortIndex(i)))
       }
     }
 
     // Card many lambdas
 
     // At least one value in a Set should satisfy the predicate
-    // None doesn't satisfy any predicate.
-    // (Use nil in query buildup to get non-values)
     def lambdaMany[T](
       values: Array[Option[List[T]]],
-      predicate: T => Boolean
+      predicate: Option[T] => Boolean
     ): Int => Boolean = {
       if (sortIndex.isEmpty) {
-        i: Int => values(i).fold(false)(_.exists(predicate))
+        i: Int =>
+          values(i) match {
+            case Some(vs) => vs.exists(v => predicate(Some(v)))
+            case None     => predicate(None)
+          }
       } else {
-        i: Int => values(sortIndex(i)).fold(false)(_.exists(predicate))
+        i: Int =>
+          values(sortIndex(i)) match {
+            case Some(vs) => vs.exists(v => predicate(Some(v)))
+            case None     => predicate(None)
+          }
       }
     }
 
     def double(f: Filter[_]): Int => Boolean = {
       val arrayIndex = qr.arrayIndexes(f.colIndex)
       val values     = qr.num(arrayIndex)
-      val predicate  = f.pred.asInstanceOf[Double => Boolean]
+      val predicate  = f.pred.asInstanceOf[Option[Double] => Boolean]
       lambdaOne(values, predicate)
     }
     def string(f: Filter[_]): Int => Boolean = {
       val arrayIndex = qr.arrayIndexes(f.colIndex)
       val values     = qr.str(arrayIndex)
-      val predicate  = f.pred.asInstanceOf[String => Boolean]
+      val predicate  = f.pred.asInstanceOf[Option[String] => Boolean]
       lambdaOne(values, predicate)
     }
 
     def listDouble(f: Filter[_]): Int => Boolean = {
       val arrayIndex = qr.arrayIndexes(f.colIndex)
       val values     = qr.listNum(arrayIndex)
-      val predicate  = f.pred.asInstanceOf[Double => Boolean]
+      val predicate  = f.pred.asInstanceOf[Option[Double] => Boolean]
       lambdaMany(values, predicate)
     }
     def listString(f: Filter[_]): Int => Boolean = {
       val arrayIndex = qr.arrayIndexes(f.colIndex)
       val values     = qr.listStr(arrayIndex)
-      val predicate  = f.pred.asInstanceOf[String => Boolean]
+      val predicate  = f.pred.asInstanceOf[Option[String] => Boolean]
       lambdaMany(values, predicate)
     }
 
@@ -78,11 +81,11 @@ trait FilterIndex {
     val positives                        = new Array[Int](lastRow)
     val predicates: List[Int => Boolean] = filters.values.toList.map { f =>
       f.colType match {
-        case "double"            => double(f)
-        case "string"            => string(f)
-        case "listDouble"        => listDouble(f)
-        case "listString"        => listString(f)
-        case _                   => _: Int => true
+        case "double"     => double(f)
+        case "string"     => string(f)
+        case "listDouble" => listDouble(f)
+        case "listString" => listString(f)
+        case _            => _: Int => true
       }
     }
 
