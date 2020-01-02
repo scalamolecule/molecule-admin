@@ -1,8 +1,9 @@
 package moleculeadmin.servertest
 import db.admin.dsl.meta.user_ColSetting
+import db.core.dsl.coreTest._
 import molecule.api.out10._
 import molecule.facade.Conn
-import moleculeadmin.shared.testdata.{ExampleData, mBrainzSchema}
+import moleculeadmin.shared.testdata.{CoreSchema, ExampleData, mBrainzSchema}
 import moleculeadmin.shared.util.HelpersAdmin
 import org.specs2.mutable._
 import scala.languageFeature.implicitConversions._
@@ -21,8 +22,8 @@ object Adhoc extends Specification
   "Adhoc" >> {
 
 //          implicit val conn = Conn(base + "/meta")
-    //      implicit val conn = Conn(base + "/CoreTest")
-    implicit val conn = Conn(base + "/mbrainz-1968-1973")
+          implicit val conn = Conn(base + "/CoreTest")
+//    implicit val conn = Conn(base + "/mbrainz-1968-1973")
 
     //      val eid = 716881581322888L
 //    val eid = 17592186072911L
@@ -36,6 +37,8 @@ object Adhoc extends Specification
 //
 //    println(eid.touchQuoted)
 
+    Ns.e.str.int.debugGet
+    Ns.str.int.debugInsert("a", 42)
 
 
     ok

@@ -1,10 +1,9 @@
-package moleculeadmin.client.app.domain.query.data.edit
+package moleculeadmin.client.app.domain.query.data
+
 import java.net.URI
 import java.util.UUID
-import moleculeadmin.client.app.domain.query.KeyEvents
 import moleculeadmin.shared.util.HelpersAdmin
-import scala.scalajs.js.Date
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 
 trait TypeValidation extends HelpersAdmin {
 

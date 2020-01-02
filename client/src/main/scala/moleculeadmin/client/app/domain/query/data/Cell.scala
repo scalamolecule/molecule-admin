@@ -1,7 +1,7 @@
 package moleculeadmin.client.app.domain.query.data
 
 import moleculeadmin.client.app.domain.query.QueryState._
-import moleculeadmin.client.app.domain.query.data.edit._
+import moleculeadmin.client.app.domain.query.data.update._
 import moleculeadmin.client.app.domain.query.marker.ToggleOne
 import moleculeadmin.client.app.element.query.datatable.BodyElements
 import moleculeadmin.shared.ast.query.{QueryResult, _}

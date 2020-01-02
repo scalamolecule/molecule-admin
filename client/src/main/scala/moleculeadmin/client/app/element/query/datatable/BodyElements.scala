@@ -8,7 +8,7 @@ import org.scalajs.dom.window
 import rx.{Ctx, Rx}
 import scalatags.JsDom
 import scalatags.JsDom.TypedTag
-import scalatags.JsDom.all.{ul, _}
+import scalatags.JsDom.all._
 
 
 trait BodyElements extends AppElements with DateHandling with RxBindings {

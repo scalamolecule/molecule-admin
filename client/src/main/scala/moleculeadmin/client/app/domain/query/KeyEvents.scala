@@ -33,10 +33,10 @@ trait KeyEvents
             case "v"                   => toggleViewsMenu()
             case "g"                   => toggleGroupedMenu()
             case "q"                   => toggleQueryBuilder
-            case k if queryBuilderOpen => queryBuilder(k)
             case k if queryListOpen    => queryList(e, k)
             case k if groupedOpen      => grouped(e, k)
             case k if viewsOpen        => views(e, k)
+            case k if queryBuilderOpen => queryBuilder(k)
             case " "                   => noBottomScroll(e)
             case _                     => ()
           }
@@ -51,8 +51,9 @@ trait KeyEvents
       } else if (document.activeElement.isInstanceOf[TableCell]) {
         e.key match {
           case x if insertMode     => x match {
-            case "Escape" =>
+            case "Escape" => abortInsert()
             case "Enter"  => insertNewRow(e)
+            case _        => ()
           }
           case "Escape"            => blur()
           case "ArrowUp" if ctrl   => cellUp()

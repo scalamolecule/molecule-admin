@@ -72,6 +72,9 @@
     width: 20px;
     cursor: default;
 }
+.tableData tBody td i {
+    cursor: pointer;
+}
 
 .tableData td.eid {
     text-align: right;

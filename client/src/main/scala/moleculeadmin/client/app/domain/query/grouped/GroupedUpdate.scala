@@ -3,7 +3,7 @@ package moleculeadmin.client.app.domain.query.grouped
 import autowire._
 import boopickle.Default._
 import moleculeadmin.client.app.domain.query.QueryState._
-import moleculeadmin.client.app.domain.query.data.edit.TypeValidation
+import moleculeadmin.client.app.domain.query.data.TypeValidation
 import moleculeadmin.client.app.element.query.GroupedAttrElements
 import moleculeadmin.client.autowire.queryWire
 import moleculeadmin.shared.ast.query.Col

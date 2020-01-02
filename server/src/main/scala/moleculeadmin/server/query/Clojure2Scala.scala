@@ -3,12 +3,12 @@ package moleculeadmin.server.query
 import java.lang.{Double => jDouble, Long => jLong}
 import java.util.{Date, List => jList, Map => jMap}
 import clojure.lang.{Keyword, LazySeq, PersistentHashSet, PersistentVector}
-import moleculeadmin.shared.ast.query.Col
 import molecule.util.DateHandling
+import moleculeadmin.shared.ast.query.Col
 import moleculeadmin.shared.util.HelpersAdmin
 import scala.collection.mutable.ListBuffer
 
-class CastHelpers(rowCount: Int) extends HelpersAdmin with DateHandling {
+class Clojure2Scala(rowCount: Int) extends HelpersAdmin with DateHandling {
 
   protected var strArrays     = /* 1 */ List.empty[Array[Option[String]]]
   protected var numArrays     = /* 2 */ List.empty[Array[Option[Double]]]
@@ -22,21 +22,12 @@ class CastHelpers(rowCount: Int) extends HelpersAdmin with DateHandling {
   private val indexCounts = new Array[Int](7)
 
   def updateColTypes(colIndex: Int, arrayNo: Int): Unit = {
-    val colInfo = Map(
-      1 -> "string",
-      2 -> "double",
-      3 -> "listString",
-      4 -> "listDouble",
-      5 -> "mapString",
-      6 -> "mapDouble"
-    )
-    val colType = colInfo(arrayNo)
     arrayIndexes = arrayIndexes + (colIndex -> indexCounts(arrayNo))
     indexCounts(arrayNo) = indexCounts(arrayNo) + 1
   }
 
 
-  // Card one ================================================================================================
+  // Card one ==================================================================
 
   // Mandatory ------------------------------------
 
@@ -479,16 +470,6 @@ class CastHelpers(rowCount: Int) extends HelpersAdmin with DateHandling {
     updateColTypes(colIndex, 5)
     var vs = new Array[String](2)
     col.attrType match {
-//      case "Date" =>
-//        (row: jList[AnyRef], i: Int) =>
-//          val it  = row.get(colIndex).asInstanceOf[PersistentHashSet].iterator
-//          var map = Map.empty[String, String]
-//          while (it.hasNext) {
-//            vs = it.next.toString.split("@", 2)
-//            map = map + (vs(0) -> date2str(str2date(vs(1))))
-//          }
-//          array(i) = Some(map)
-
       case _      =>
         (row: jList[AnyRef], i: Int) =>
           val it  = row.get(colIndex).asInstanceOf[PersistentHashSet].iterator
