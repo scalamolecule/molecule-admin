@@ -1,15 +1,16 @@
 package moleculeadmin.server.query
 
-
 import moleculeadmin.shared.api.QueryApi
 import moleculeadmin.shared.ast.query.{Col, QueryResult}
 import moleculeadmin.shared.util.HelpersAdmin
 
-case class Rows2QueryResult(rowCollection: java.util.Collection[java.util.List[AnyRef]],
-                            rowCountAll: Int,
-                            rowCount: Int,
-                            cols: Seq[Col],
-                            queryTime: Long) extends CastHelpers(rowCount) with QueryApi with HelpersAdmin {
+case class Rows2QueryResult(
+  rowCollection: java.util.Collection[java.util.List[AnyRef]],
+  rowCountAll: Int,
+  rowCount: Int,
+  cols: Seq[Col],
+  queryTime: Long
+) extends Clojure2Scala(rowCount) with QueryApi with HelpersAdmin {
 
   def getCastingLambda(colIndex: Int): (java.util.List[AnyRef], Int) => Unit = {
     val col = cols(colIndex)
@@ -228,15 +229,15 @@ case class Rows2QueryResult(rowCollection: java.util.Collection[java.util.List[A
         }
 
       case 10 =>
-        val cast1 = getCastingLambda(0)
-        val cast2 = getCastingLambda(1)
-        val cast3 = getCastingLambda(2)
-        val cast4 = getCastingLambda(3)
-        val cast5 = getCastingLambda(4)
-        val cast6 = getCastingLambda(5)
-        val cast7 = getCastingLambda(6)
-        val cast8 = getCastingLambda(7)
-        val cast9 = getCastingLambda(8)
+        val cast1  = getCastingLambda(0)
+        val cast2  = getCastingLambda(1)
+        val cast3  = getCastingLambda(2)
+        val cast4  = getCastingLambda(3)
+        val cast5  = getCastingLambda(4)
+        val cast6  = getCastingLambda(5)
+        val cast7  = getCastingLambda(6)
+        val cast8  = getCastingLambda(7)
+        val cast9  = getCastingLambda(8)
         val cast10 = getCastingLambda(9)
         while (i < rowCount) {
           row = rows.next()
@@ -254,15 +255,15 @@ case class Rows2QueryResult(rowCollection: java.util.Collection[java.util.List[A
         }
 
       case 11 =>
-        val cast1 = getCastingLambda(0)
-        val cast2 = getCastingLambda(1)
-        val cast3 = getCastingLambda(2)
-        val cast4 = getCastingLambda(3)
-        val cast5 = getCastingLambda(4)
-        val cast6 = getCastingLambda(5)
-        val cast7 = getCastingLambda(6)
-        val cast8 = getCastingLambda(7)
-        val cast9 = getCastingLambda(8)
+        val cast1  = getCastingLambda(0)
+        val cast2  = getCastingLambda(1)
+        val cast3  = getCastingLambda(2)
+        val cast4  = getCastingLambda(3)
+        val cast5  = getCastingLambda(4)
+        val cast6  = getCastingLambda(5)
+        val cast7  = getCastingLambda(6)
+        val cast8  = getCastingLambda(7)
+        val cast9  = getCastingLambda(8)
         val cast10 = getCastingLambda(9)
         val cast11 = getCastingLambda(10)
         while (i < rowCount) {
@@ -282,15 +283,15 @@ case class Rows2QueryResult(rowCollection: java.util.Collection[java.util.List[A
         }
 
       case 12 =>
-        val cast1 = getCastingLambda(0)
-        val cast2 = getCastingLambda(1)
-        val cast3 = getCastingLambda(2)
-        val cast4 = getCastingLambda(3)
-        val cast5 = getCastingLambda(4)
-        val cast6 = getCastingLambda(5)
-        val cast7 = getCastingLambda(6)
-        val cast8 = getCastingLambda(7)
-        val cast9 = getCastingLambda(8)
+        val cast1  = getCastingLambda(0)
+        val cast2  = getCastingLambda(1)
+        val cast3  = getCastingLambda(2)
+        val cast4  = getCastingLambda(3)
+        val cast5  = getCastingLambda(4)
+        val cast6  = getCastingLambda(5)
+        val cast7  = getCastingLambda(6)
+        val cast8  = getCastingLambda(7)
+        val cast9  = getCastingLambda(8)
         val cast10 = getCastingLambda(9)
         val cast11 = getCastingLambda(10)
         val cast12 = getCastingLambda(11)
@@ -312,15 +313,15 @@ case class Rows2QueryResult(rowCollection: java.util.Collection[java.util.List[A
         }
 
       case 13 =>
-        val cast1 = getCastingLambda(0)
-        val cast2 = getCastingLambda(1)
-        val cast3 = getCastingLambda(2)
-        val cast4 = getCastingLambda(3)
-        val cast5 = getCastingLambda(4)
-        val cast6 = getCastingLambda(5)
-        val cast7 = getCastingLambda(6)
-        val cast8 = getCastingLambda(7)
-        val cast9 = getCastingLambda(8)
+        val cast1  = getCastingLambda(0)
+        val cast2  = getCastingLambda(1)
+        val cast3  = getCastingLambda(2)
+        val cast4  = getCastingLambda(3)
+        val cast5  = getCastingLambda(4)
+        val cast6  = getCastingLambda(5)
+        val cast7  = getCastingLambda(6)
+        val cast8  = getCastingLambda(7)
+        val cast9  = getCastingLambda(8)
         val cast10 = getCastingLambda(9)
         val cast11 = getCastingLambda(10)
         val cast12 = getCastingLambda(11)
@@ -344,15 +345,15 @@ case class Rows2QueryResult(rowCollection: java.util.Collection[java.util.List[A
         }
 
       case 14 =>
-        val cast1 = getCastingLambda(0)
-        val cast2 = getCastingLambda(1)
-        val cast3 = getCastingLambda(2)
-        val cast4 = getCastingLambda(3)
-        val cast5 = getCastingLambda(4)
-        val cast6 = getCastingLambda(5)
-        val cast7 = getCastingLambda(6)
-        val cast8 = getCastingLambda(7)
-        val cast9 = getCastingLambda(8)
+        val cast1  = getCastingLambda(0)
+        val cast2  = getCastingLambda(1)
+        val cast3  = getCastingLambda(2)
+        val cast4  = getCastingLambda(3)
+        val cast5  = getCastingLambda(4)
+        val cast6  = getCastingLambda(5)
+        val cast7  = getCastingLambda(6)
+        val cast8  = getCastingLambda(7)
+        val cast9  = getCastingLambda(8)
         val cast10 = getCastingLambda(9)
         val cast11 = getCastingLambda(10)
         val cast12 = getCastingLambda(11)
@@ -378,15 +379,15 @@ case class Rows2QueryResult(rowCollection: java.util.Collection[java.util.List[A
         }
 
       case 15 =>
-        val cast1 = getCastingLambda(0)
-        val cast2 = getCastingLambda(1)
-        val cast3 = getCastingLambda(2)
-        val cast4 = getCastingLambda(3)
-        val cast5 = getCastingLambda(4)
-        val cast6 = getCastingLambda(5)
-        val cast7 = getCastingLambda(6)
-        val cast8 = getCastingLambda(7)
-        val cast9 = getCastingLambda(8)
+        val cast1  = getCastingLambda(0)
+        val cast2  = getCastingLambda(1)
+        val cast3  = getCastingLambda(2)
+        val cast4  = getCastingLambda(3)
+        val cast5  = getCastingLambda(4)
+        val cast6  = getCastingLambda(5)
+        val cast7  = getCastingLambda(6)
+        val cast8  = getCastingLambda(7)
+        val cast9  = getCastingLambda(8)
         val cast10 = getCastingLambda(9)
         val cast11 = getCastingLambda(10)
         val cast12 = getCastingLambda(11)
@@ -414,15 +415,15 @@ case class Rows2QueryResult(rowCollection: java.util.Collection[java.util.List[A
         }
 
       case 16 =>
-        val cast1 = getCastingLambda(0)
-        val cast2 = getCastingLambda(1)
-        val cast3 = getCastingLambda(2)
-        val cast4 = getCastingLambda(3)
-        val cast5 = getCastingLambda(4)
-        val cast6 = getCastingLambda(5)
-        val cast7 = getCastingLambda(6)
-        val cast8 = getCastingLambda(7)
-        val cast9 = getCastingLambda(8)
+        val cast1  = getCastingLambda(0)
+        val cast2  = getCastingLambda(1)
+        val cast3  = getCastingLambda(2)
+        val cast4  = getCastingLambda(3)
+        val cast5  = getCastingLambda(4)
+        val cast6  = getCastingLambda(5)
+        val cast7  = getCastingLambda(6)
+        val cast8  = getCastingLambda(7)
+        val cast9  = getCastingLambda(8)
         val cast10 = getCastingLambda(9)
         val cast11 = getCastingLambda(10)
         val cast12 = getCastingLambda(11)
@@ -452,15 +453,15 @@ case class Rows2QueryResult(rowCollection: java.util.Collection[java.util.List[A
         }
 
       case 17 =>
-        val cast1 = getCastingLambda(0)
-        val cast2 = getCastingLambda(1)
-        val cast3 = getCastingLambda(2)
-        val cast4 = getCastingLambda(3)
-        val cast5 = getCastingLambda(4)
-        val cast6 = getCastingLambda(5)
-        val cast7 = getCastingLambda(6)
-        val cast8 = getCastingLambda(7)
-        val cast9 = getCastingLambda(8)
+        val cast1  = getCastingLambda(0)
+        val cast2  = getCastingLambda(1)
+        val cast3  = getCastingLambda(2)
+        val cast4  = getCastingLambda(3)
+        val cast5  = getCastingLambda(4)
+        val cast6  = getCastingLambda(5)
+        val cast7  = getCastingLambda(6)
+        val cast8  = getCastingLambda(7)
+        val cast9  = getCastingLambda(8)
         val cast10 = getCastingLambda(9)
         val cast11 = getCastingLambda(10)
         val cast12 = getCastingLambda(11)
@@ -492,15 +493,15 @@ case class Rows2QueryResult(rowCollection: java.util.Collection[java.util.List[A
         }
 
       case 18 =>
-        val cast1 = getCastingLambda(0)
-        val cast2 = getCastingLambda(1)
-        val cast3 = getCastingLambda(2)
-        val cast4 = getCastingLambda(3)
-        val cast5 = getCastingLambda(4)
-        val cast6 = getCastingLambda(5)
-        val cast7 = getCastingLambda(6)
-        val cast8 = getCastingLambda(7)
-        val cast9 = getCastingLambda(8)
+        val cast1  = getCastingLambda(0)
+        val cast2  = getCastingLambda(1)
+        val cast3  = getCastingLambda(2)
+        val cast4  = getCastingLambda(3)
+        val cast5  = getCastingLambda(4)
+        val cast6  = getCastingLambda(5)
+        val cast7  = getCastingLambda(6)
+        val cast8  = getCastingLambda(7)
+        val cast9  = getCastingLambda(8)
         val cast10 = getCastingLambda(9)
         val cast11 = getCastingLambda(10)
         val cast12 = getCastingLambda(11)
@@ -534,15 +535,15 @@ case class Rows2QueryResult(rowCollection: java.util.Collection[java.util.List[A
         }
 
       case 19 =>
-        val cast1 = getCastingLambda(0)
-        val cast2 = getCastingLambda(1)
-        val cast3 = getCastingLambda(2)
-        val cast4 = getCastingLambda(3)
-        val cast5 = getCastingLambda(4)
-        val cast6 = getCastingLambda(5)
-        val cast7 = getCastingLambda(6)
-        val cast8 = getCastingLambda(7)
-        val cast9 = getCastingLambda(8)
+        val cast1  = getCastingLambda(0)
+        val cast2  = getCastingLambda(1)
+        val cast3  = getCastingLambda(2)
+        val cast4  = getCastingLambda(3)
+        val cast5  = getCastingLambda(4)
+        val cast6  = getCastingLambda(5)
+        val cast7  = getCastingLambda(6)
+        val cast8  = getCastingLambda(7)
+        val cast9  = getCastingLambda(8)
         val cast10 = getCastingLambda(9)
         val cast11 = getCastingLambda(10)
         val cast12 = getCastingLambda(11)
@@ -578,15 +579,15 @@ case class Rows2QueryResult(rowCollection: java.util.Collection[java.util.List[A
         }
 
       case 20 =>
-        val cast1 = getCastingLambda(0)
-        val cast2 = getCastingLambda(1)
-        val cast3 = getCastingLambda(2)
-        val cast4 = getCastingLambda(3)
-        val cast5 = getCastingLambda(4)
-        val cast6 = getCastingLambda(5)
-        val cast7 = getCastingLambda(6)
-        val cast8 = getCastingLambda(7)
-        val cast9 = getCastingLambda(8)
+        val cast1  = getCastingLambda(0)
+        val cast2  = getCastingLambda(1)
+        val cast3  = getCastingLambda(2)
+        val cast4  = getCastingLambda(3)
+        val cast5  = getCastingLambda(4)
+        val cast6  = getCastingLambda(5)
+        val cast7  = getCastingLambda(6)
+        val cast8  = getCastingLambda(7)
+        val cast9  = getCastingLambda(8)
         val cast10 = getCastingLambda(9)
         val cast11 = getCastingLambda(10)
         val cast12 = getCastingLambda(11)
@@ -624,15 +625,15 @@ case class Rows2QueryResult(rowCollection: java.util.Collection[java.util.List[A
         }
 
       case 21 =>
-        val cast1 = getCastingLambda(0)
-        val cast2 = getCastingLambda(1)
-        val cast3 = getCastingLambda(2)
-        val cast4 = getCastingLambda(3)
-        val cast5 = getCastingLambda(4)
-        val cast6 = getCastingLambda(5)
-        val cast7 = getCastingLambda(6)
-        val cast8 = getCastingLambda(7)
-        val cast9 = getCastingLambda(8)
+        val cast1  = getCastingLambda(0)
+        val cast2  = getCastingLambda(1)
+        val cast3  = getCastingLambda(2)
+        val cast4  = getCastingLambda(3)
+        val cast5  = getCastingLambda(4)
+        val cast6  = getCastingLambda(5)
+        val cast7  = getCastingLambda(6)
+        val cast8  = getCastingLambda(7)
+        val cast9  = getCastingLambda(8)
         val cast10 = getCastingLambda(9)
         val cast11 = getCastingLambda(10)
         val cast12 = getCastingLambda(11)
@@ -672,15 +673,15 @@ case class Rows2QueryResult(rowCollection: java.util.Collection[java.util.List[A
         }
 
       case 22 =>
-        val cast1 = getCastingLambda(0)
-        val cast2 = getCastingLambda(1)
-        val cast3 = getCastingLambda(2)
-        val cast4 = getCastingLambda(3)
-        val cast5 = getCastingLambda(4)
-        val cast6 = getCastingLambda(5)
-        val cast7 = getCastingLambda(6)
-        val cast8 = getCastingLambda(7)
-        val cast9 = getCastingLambda(8)
+        val cast1  = getCastingLambda(0)
+        val cast2  = getCastingLambda(1)
+        val cast3  = getCastingLambda(2)
+        val cast4  = getCastingLambda(3)
+        val cast5  = getCastingLambda(4)
+        val cast6  = getCastingLambda(5)
+        val cast7  = getCastingLambda(6)
+        val cast8  = getCastingLambda(7)
+        val cast9  = getCastingLambda(8)
         val cast10 = getCastingLambda(9)
         val cast11 = getCastingLambda(10)
         val cast12 = getCastingLambda(11)

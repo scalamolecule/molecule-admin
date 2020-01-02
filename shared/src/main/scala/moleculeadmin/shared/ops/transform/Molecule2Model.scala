@@ -14,11 +14,13 @@ import scala.collection.mutable.ListBuffer
 
 
 object Molecule2Model {
-  def apply(molecule: String)(implicit nsMap: Map[String, Ns]): Either[String, Seq[Element]] =
+  def apply(molecule: String)
+    (implicit nsMap: Map[String, Ns]): Either[String, Seq[Element]] =
     new Molecule2Model(molecule, nsMap).getModel
 }
 
-class Molecule2Model(molecule0: String, nsMap: Map[String, Ns]) extends QueryApi with Base with HelpersAdmin with Model2Molecule {
+class Molecule2Model(molecule0: String, nsMap: Map[String, Ns])
+  extends QueryApi with Base with HelpersAdmin with Model2Molecule {
 
   // Schema extractions
 

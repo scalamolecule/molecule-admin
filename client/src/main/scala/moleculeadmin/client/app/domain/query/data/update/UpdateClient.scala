@@ -1,5 +1,6 @@
-package moleculeadmin.client.app.domain.query.data.edit
+package moleculeadmin.client.app.domain.query.data.update
 import moleculeadmin.client.app.domain.query.QueryState._
+import moleculeadmin.client.app.domain.query.data.TypeValidation
 import moleculeadmin.client.app.domain.query.keyEvents.Editing
 import moleculeadmin.client.app.element.query.datatable.BodyElements
 import moleculeadmin.shared.ast.query.{Col, QueryResult}

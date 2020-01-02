@@ -155,7 +155,6 @@ trait AppElements extends Bootstrap {
     val starOff  = "far fa-star starOff"
     val flagOn   = "fas fa-flag flagOn"
     val flagOff  = "far fa-flag flagOff"
-    //    val checkOn  = "oi oi-check checkOn"
     val checkOn  = "fas fa-check-circle checkOn"
     val checkOff = "fas fa-check checkOff"
   }

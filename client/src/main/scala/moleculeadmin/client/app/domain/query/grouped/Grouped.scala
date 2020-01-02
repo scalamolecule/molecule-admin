@@ -2,7 +2,7 @@ package moleculeadmin.client.app.domain.query.grouped
 
 import moleculeadmin.client.app.domain.query.KeyEvents
 import moleculeadmin.client.app.domain.query.QueryState._
-import moleculeadmin.client.app.domain.query.data.edit.TypeValidation
+import moleculeadmin.client.app.domain.query.data.TypeValidation
 import moleculeadmin.client.app.element.query.GroupedAttrElements
 import moleculeadmin.shared.ast.query.Col
 import moleculeadmin.shared.ops.query.data.FilterFactory

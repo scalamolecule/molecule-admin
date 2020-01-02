@@ -1,11 +1,11 @@
-package moleculeadmin.client.app.domain.query.data.edit
+package moleculeadmin.client.app.domain.query.data.update
 import autowire._
 import boopickle.Default._
 import moleculeadmin.client.app.domain.query.QueryState.{curEntity, db, editCellId}
 import moleculeadmin.client.autowire.queryWire
 import moleculeadmin.shared.ast.query.{Col, QueryResult}
 import org.scalajs.dom.html.{TableCell, TableRow}
-import org.scalajs.dom.{NodeList, window}
+import org.scalajs.dom.window
 import rx.{Ctx, Rx}
 import scalatags.JsDom.all._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -159,26 +159,26 @@ case class UpdateCardOne[T](
           case Right((t, tx, txInstant)) =>
             updateClient(t, tx, txInstant, cell, row, eid, newVopt)
             if (nonEmpty)
-              println(s"Successfully updated $attrFull value from `$oldStr` to `$newStr`")
+              println(s"Successfully updated `$attrFull` value from `$oldStr` to `$newStr`")
             else
-              println(s"Successfully retracted $attrFull value from `$oldStr` to `$oldStr`")
+              println(s"Successfully retracted `$attrFull` value from `$oldStr` to `$oldStr`")
 
           case Left(err) =>
             editCellId = ""
             selectContent(cell)
             if (nonEmpty)
-              window.alert(s"Error updating $attrFull value from `$oldStr` to `$newStr`:\n$err")
+              window.alert(s"Error updating `$attrFull` value from `$oldStr` to `$newStr`:\n$err")
             else
-              window.alert(s"Error retracting $attrFull value from `$oldStr` to `$oldStr`:\n$err")
+              window.alert(s"Error retracting `$attrFull` value from `$oldStr` to `$oldStr`:\n$err")
             cell.focus()
         }
       }
     } else if (eid > 0 && oldStr != newStr) {
       if (!valid(attrType, newStr)) {
-        window.alert(s"Invalid $attrFull value of type `$attrType`:\n$newStr")
+        window.alert(s"Invalid `$attrFull` value of type `$attrType`:\n$newStr")
         cell.focus()
       } else {
-        println(s"OBS: New $attrFull value `$newStr` will not be saved " +
+        println(s"OBS: New `$attrFull` value `$newStr` will not be saved " +
           s"unless you leave cell by pressing Enter/Return.")
       }
     }

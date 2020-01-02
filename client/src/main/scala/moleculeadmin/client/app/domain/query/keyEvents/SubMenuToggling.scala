@@ -74,7 +74,7 @@ trait SubMenuToggling extends Base with RegexMatching {
     element != null && element.getAttribute("style").endsWith("display:block;")
   }
 
-  def queryList(e: KeyboardEvent, key: String): Unit =
+  def queryList(e: KeyboardEvent, key: String)(implicit ctx: Ctx.Owner): Unit =
     key match {
       case " " if curMolecule.now.nonEmpty => upsertCurrentQuery(e)
       case r"\d"                           =>
@@ -109,7 +109,7 @@ trait SubMenuToggling extends Base with RegexMatching {
       element.children.length > 1
   }
 
-  def grouped(e: KeyboardEvent, key: String): Unit =
+  def grouped(e: KeyboardEvent, key: String)(implicit ctx: Ctx.Owner): Unit =
     key match {
       case " "   => toggleShowGrouped(e)
       case r"\d" =>
@@ -143,7 +143,7 @@ trait SubMenuToggling extends Base with RegexMatching {
     element != null && element.getAttribute("style").endsWith("display:block;")
   }
 
-  def views(e: KeyboardEvent, key: String): Unit =
+  def views(e: KeyboardEvent, key: String)(implicit ctx: Ctx.Owner): Unit =
     key match {
       case " "   => toggleShowViews(e)
       case r"\d" => numberInputs(key, toggleView)

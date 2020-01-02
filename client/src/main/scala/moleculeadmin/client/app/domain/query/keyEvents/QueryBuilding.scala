@@ -10,7 +10,7 @@ trait QueryBuilding {
 
   def queryBuilderOpen: Boolean = querySelection.now.nonEmpty
 
-  def queryBuilder(key: String): Unit =
+  def queryBuilder(key: String)(implicit ctx: Ctx.Owner): Unit =
     key match {
       case "m" if modelElements.now.nonEmpty => toggleMinimize
       case "a" if querySelection.now != "a"  =>
@@ -19,6 +19,7 @@ trait QueryBuilding {
       //              builderBaseSelection = "v"; builderSelection() = "v"
       //            case "r" if builderSelection.now != "r" =>
       //              builderBaseSelection = "r"; builderSelection() = "r"
+      case _ => ()
     }
 
   def toggleQueryBuilder(implicit ctx: Ctx.Owner): Rx.Dynamic[Unit] = Rx {

@@ -1,5 +1,5 @@
 package moleculeadmin.client.app.domain.query.grouped
-import moleculeadmin.client.app.domain.query.data.edit.UpdateClient
+import moleculeadmin.client.app.domain.query.data.update.UpdateClient
 import moleculeadmin.shared.ast.query.{Col, QueryResult}
 import org.scalajs.dom.html.{TableCell, TableRow}
 import org.scalajs.dom.raw.NodeList

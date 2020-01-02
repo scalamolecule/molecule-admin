@@ -8,12 +8,14 @@ import db.admin.dsl.meta._
 import db.core.dsl.coreTest.Ns
 import molecule.api.Entity
 import molecule.api.out10._
-import molecule.ast.model.NoValue
+import molecule.ast.model.{Atom, Model, NoValue}
 import molecule.ast.transactionModel.{Add, Retract}
 import molecule.facade.{Conn, TxReport}
+import molecule.transform.Model2Transaction
 import moleculeadmin.server.query.Rows2QueryResult
 import moleculeadmin.shared.api.QueryApi
 import moleculeadmin.shared.ast.query.{Col, QueryDTO, QueryResult}
+import moleculeadmin.shared.ops.transform.Molecule2Model
 import scala.collection.JavaConverters._
 
 
@@ -86,9 +88,10 @@ class QueryBackend extends QueryApi with Base {
     if (rowCount == 0)
       Left(Nil)
     else {
-      val arrays = Rows2QueryResult(allRows, rowCountAll, rowCount, cols, queryTime).get
-      //      t.log(2, "To arrays")
-      Right(arrays)
+      val queryResult = Rows2QueryResult(
+        allRows, rowCountAll, rowCount, cols, queryTime).get
+      //      t.log(2, "To QueryResult")
+      Right(queryResult)
     }
   } catch {
     case t: Throwable => Left(t.getMessage +: t.getStackTrace.toSeq.map(_.toString))
@@ -549,5 +552,46 @@ class QueryBackend extends QueryApi with Base {
     data: Seq[(Long, Seq[Double], Seq[Double])],
   ): Either[String, (Long, Long, String)] = {
     update(db, attrFull, data, getNumCaster(attrType))
+  }
+
+  import moleculeadmin.shared.ast.schema
+
+  override def insert(
+    db: String,
+    molecule: String,
+    nsMap: Map[String, schema.Ns],
+    rawData: Seq[String]
+  ): Either[String, Long] = {
+    // Model without initial entity id
+    val elements = new Molecule2Model(molecule, nsMap).getModel.right.get.tail
+    implicit val conn = Conn(base + "/" + db)
+    val data = elements.zipWithIndex.map {
+      case (a: Atom, i) =>
+        val v = rawData(i)
+        a.tpe match {
+          case "String"           => a.enumPrefix.getOrElse("") + v
+          case "Int" | "Long"     => v.toLong
+          case "Float" | "Double" => v.toDouble
+          case "Boolean"          => v.toBoolean
+          case "Date"             => str2date(v)
+          case "UUID"             => UUID.fromString(v)
+          case "URI"              => new URI(v)
+          case "BigInt"           => BigInt(v)
+          case "BigDecimal"       => BigDecimal(v)
+        }
+      case other =>
+        throw new IllegalArgumentException("Unexpected Model Element: " + other)
+    }
+
+    val stmtss = Model2Transaction(conn, Model(elements)).insertStmts(Seq(data))
+    stmtss.head foreach println
+
+    withTransactor {
+      try {
+        Right(conn.transact(stmtss).eid)
+      } catch {
+        case t: Throwable => Left(t.getMessage)
+      }
+    }
   }
 }
