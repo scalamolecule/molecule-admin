@@ -9,7 +9,7 @@ import db.core.dsl.coreTest.Ns
 import molecule.api.Entity
 import molecule.api.out10._
 import molecule.ast.model.{Atom, Model, NoValue}
-import molecule.ast.transactionModel.{Add, Retract}
+import molecule.ast.transactionModel.{Add, Retract, RetractEntity}
 import molecule.facade.{Conn, TxReport}
 import molecule.transform.Model2Transaction
 import moleculeadmin.server.query.Rows2QueryResult
@@ -582,13 +582,24 @@ class QueryBackend extends QueryApi with Base {
       case other =>
         throw new IllegalArgumentException("Unexpected Model Element: " + other)
     }
-
     val stmtss = Model2Transaction(conn, Model(elements)).insertStmts(Seq(data))
-    stmtss.head foreach println
-
     withTransactor {
       try {
         Right(conn.transact(stmtss).eid)
+      } catch {
+        case t: Throwable => Left(t.getMessage)
+      }
+    }
+  }
+
+  override def retractEntity(db: String, eid: Long): Either[String, Long] = {
+    implicit val conn = Conn(base + "/" + db)
+    val stmtss = Seq(Seq(RetractEntity(eid)))
+    println("retractEntity: " + stmtss)
+    withTransactor {
+      try {
+        val txR: TxReport = conn.transact(stmtss)
+        Right(txR.tx)
       } catch {
         case t: Throwable => Left(t.getMessage)
       }

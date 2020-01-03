@@ -28,9 +28,9 @@ object SetMany extends AppElements {
   )(implicit ctx: Ctx.Owner): Unit = {
 
     val (curMarkerIndexes, onCls, offCls, iconIndex) = tpe match {
-      case "star"  => (curStarIndexes, mark.starOn, mark.starOff, 0)
-      case "flag"  => (curFlagIndexes, mark.flagOn, mark.flagOff, 1)
-      case "check" => (curCheckIndexes, mark.checkOn, mark.checkOff, 2)
+      case "star"  => (curStarIndexes, mark.starOn, mark.starOff, 1)
+      case "flag"  => (curFlagIndexes, mark.flagOn, mark.flagOff, 2)
+      case "check" => (curCheckIndexes, mark.checkOn, mark.checkOff, 3)
     }
 
     val eids: Set[Long] = {

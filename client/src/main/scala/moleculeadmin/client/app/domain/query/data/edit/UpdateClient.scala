@@ -1,4 +1,4 @@
-package moleculeadmin.client.app.domain.query.data.update
+package moleculeadmin.client.app.domain.query.data.edit
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.domain.query.data.TypeValidation
 import moleculeadmin.client.app.domain.query.keyEvents.Editing
