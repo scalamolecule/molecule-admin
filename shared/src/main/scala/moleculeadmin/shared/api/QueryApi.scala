@@ -86,4 +86,6 @@ trait QueryApi extends BaseApi {
     nsMap: Map[String, schema.Ns],
     data: Seq[String]
   ): Either[String, Long] = ???
+
+  def retractEntity(db: String, eid: Long): Either[String, Long] = ???
 }

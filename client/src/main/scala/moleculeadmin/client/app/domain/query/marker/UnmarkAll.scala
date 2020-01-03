@@ -24,9 +24,9 @@ object UnmarkAll extends AppElements {
   )(implicit ctx: Ctx.Owner): Unit = {
 
     val (curMarkerIndexes, offCls, iconIndex, marked) = tpe match {
-      case "star"  => (curStarIndexes, mark.starOff, 0, "Unstarred")
-      case "flag"  => (curFlagIndexes, mark.flagOff, 1, "Unflagged")
-      case "check" => (curCheckIndexes, mark.checkOff, 2, "Unchecked")
+      case "star"  => (curStarIndexes, mark.starOff, 1, "Unstarred")
+      case "flag"  => (curFlagIndexes, mark.flagOff, 2, "Unflagged")
+      case "check" => (curCheckIndexes, mark.checkOff, 3, "Unchecked")
     }
 
     // Toggle off marker icon in all entity columns

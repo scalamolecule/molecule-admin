@@ -22,6 +22,11 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     cells
   ).render
 
+  def _xRetract(retract: () => Unit): TypedTag[Element] = i(
+    cls := "oi oi-x retractEntity",
+    onclick := retract
+  )
+
 
   // Card one ======================================================
 
@@ -37,23 +42,18 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     starCls: String,
     flagCls: String,
     checkCls: String,
+    retract: () => Unit,
     starToggle: () => Unit,
     flagToggle: () => Unit,
     checkToggle: () => Unit,
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = {
-    // markers
-    val starElement  = i(cls := starCls).render
-    val flagElement  = i(cls := flagCls).render
-    val checkElement = i(cls := checkCls).render
-    starElement.onclick = _ => starToggle()
-    flagElement.onclick = _ => flagToggle()
-    checkElement.onclick = _ => checkToggle()
     td(
       cls := Rx(if (eid == curEntity()) "eidChosen" else "eid"),
+      _xRetract(retract),
       eid,
-      starElement,
-      flagElement,
-      checkElement,
+      i(cls := starCls, onclick := starToggle),
+      i(cls := flagCls, onclick := flagToggle),
+      i(cls := checkCls, onclick := checkToggle),
       onmouseover := mouseover,
     )
   }

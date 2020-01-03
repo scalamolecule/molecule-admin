@@ -16,9 +16,9 @@ case class ToggleOne(tableBody: TableSection, tpe: String) extends AppElements {
   type keepBooPickleImport_ToggleOne = PickleState
 
   val (curMarkerIndexes, onCls, offCls, iconIndex) = tpe match {
-    case "star"  => (curStarIndexes, mark.starOn, mark.starOff, 0)
-    case "flag"  => (curFlagIndexes, mark.flagOn, mark.flagOff, 1)
-    case "check" => (curCheckIndexes, mark.checkOn, mark.checkOff, 2)
+    case "star"  => (curStarIndexes, mark.starOn, mark.starOff, 1)
+    case "flag"  => (curFlagIndexes, mark.flagOn, mark.flagOff, 2)
+    case "check" => (curCheckIndexes, mark.checkOn, mark.checkOff, 3)
   }
 
   var cells: HTMLCollection = null

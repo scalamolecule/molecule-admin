@@ -72,8 +72,21 @@
     width: 20px;
     cursor: default;
 }
+
+/* Entity id icons */
 .tableData tBody td i {
     cursor: pointer;
+}
+.tableData tBody td i.retractEntity {
+    font-size: 8px;
+    color: #aaa;
+    float: left;
+    margin-top: 3px;
+    padding-right: 4px;
+    cursor: pointer;
+}
+.tableData tBody td i.retractEntity:hover {
+    color: red;
 }
 
 .tableData td.eid {

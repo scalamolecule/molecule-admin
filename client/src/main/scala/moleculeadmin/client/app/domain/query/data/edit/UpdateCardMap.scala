@@ -1,4 +1,4 @@
-package moleculeadmin.client.app.domain.query.data.update
+package moleculeadmin.client.app.domain.query.data.edit
 import autowire._
 import boopickle.Default._
 import moleculeadmin.client.app.domain.query.QueryState.{db, curEntity, editCellId}
@@ -9,20 +9,20 @@ import org.scalajs.dom.raw.Node
 import org.scalajs.dom.window
 import rx.{Ctx, Rx}
 import scalatags.JsDom.all._
+import scala.collection.immutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Try
 
 
 /**
- * @tparam T List[String] / List[Double]
+ * @tparam T Map[String, String] / Map[String, Double]
  **/
-case class UpdateCardMany[T](
+case class UpdateCardMap[T](
   cols: Seq[Col],
   qr: QueryResult,
   origArray: Array[Option[T]],
   editArray: Array[Option[T]],
   baseClass: String,
-  colType: String,
   rowIndex: Int,
   related: Int,
   nsAlias: String,
@@ -30,7 +30,6 @@ case class UpdateCardMany[T](
   attr: String,
   attrType: String,
   enums: Seq[String],
-  cellType: String,
   expr: String
 )(implicit ctx: Ctx.Owner)
   extends UpdateClient[T](
@@ -38,41 +37,40 @@ case class UpdateCardMany[T](
     rowIndex, related, nsAlias, nsFull, attr, enums
   ) {
 
-  type keepBooPickleImport_UpdateCardMany = PickleState
+  type keepBooPickleImport_UpdateCardMap = PickleState
 
   def update(
     cellId: String,
     cell: TableCell,
     row: TableRow,
     eid: Long,
-    oldVOpt: Option[T],
+    oldVopt: Option[T],
     isNum: Boolean
   ): Unit = {
 
-    val oldStrs: List[String] = oldVOpt.fold(List.empty[String]) {
-      case vs: List[_] =>
-        vs.map(_.toString).distinct.sorted
-    }
+    val oldPairs: List[(String, String)] =
+      oldVopt.fold(List.empty[(String, String)]) {
+        case vs: Map[_, _] =>
+          vs.map { case (k, v) => (k.toString, v.toString) }
+            .toList.distinct.sortBy(_._1)
+      }
 
     val raw = cell.innerHTML
 
-    val strs = if (cellType == "ref") {
-      val s1 = raw.replaceAll("</*ul[^>]*>", "")
-      s1.substring(s1.indexOf(">", 5) + 1, s1.length - 5)
-        .replaceAll("(<br>)*$", "")
-        .split("""</li><li class="eid(Chosen)*">""").toList
-    } else {
-      raw.substring(8, raw.length - 10).split("</li><li>").toList
-    }
+    val strs = raw
+      .substring(8, raw.length - 10)
+      .split("</li><li>")
+      .toList
 
     val vs = if (attrType == "String" && enums.isEmpty) {
-      strs.map(_
-        .replaceAllLiterally("&nbsp;", " ")
-        .replaceAllLiterally("&lt;", "<")
-        .replaceAllLiterally("&gt;", ">")
-        .replaceAllLiterally("&amp;", "&")
-        .replaceAllLiterally("<br>", "\n")
-        .trim)
+      strs
+        .map(_
+          .replaceAllLiterally("&nbsp;", " ")
+          .replaceAllLiterally("&lt;", "<")
+          .replaceAllLiterally("&gt;", ">")
+          .replaceAllLiterally("&amp;", "&")
+          .replaceAllLiterally("<br>", "\n")
+          .trim)
         .filter(_.nonEmpty)
         .map(_html2str)
     } else {
@@ -88,61 +86,77 @@ case class UpdateCardMany[T](
       )
     }
 
-    val newStrs: List[String] = vs.distinct.sorted
+    val newPairs: List[(String, String)] = vs.map { pair =>
+      val k = pair.substring(0, pair.indexOf("->")).trim
+      val v = pair.substring(pair.indexOf("->") + 2).trim
+      if (attrType == "Date")
+        (k, truncateDateStr(v))
+      else
+        (k, v)
+    }.toMap.toList // remove pairs with duplicate keys
+      .sortBy(_._1)
+
+    println(newPairs)
 
     val newVopt: Option[T] = {
-      if (newStrs.isEmpty)
+      if (newPairs.isEmpty)
         Option.empty[T]
       else if (isNum)
-        Some(newStrs.map(_.toDouble)).asInstanceOf[Option[T]]
+        Some(newPairs.map {
+          case (k, v) => (k, v.toDouble)
+        }.toMap).asInstanceOf[Option[T]]
       else
-        Some(newStrs).asInstanceOf[Option[T]]
+        Some(newPairs.toMap).asInstanceOf[Option[T]]
     }
 
     def redrawCell(): Node = {
       cell.innerHTML = ""
-      val items = if (cellType == "ref")
-        newStrs.map(_.toLong).sorted.map(ref =>
-          li(
-            cls := Rx(if (ref == curEntity()) "eidChosen" else "eid"),
-            ref,
-            onmouseover := { () => curEntity() = ref }
-          )
-        )
-      else if (isNum)
-        newStrs.map(_.toDouble).sorted.map(li(_))
-      else if (attrType == "String")
-        newStrs.sorted.map(s => li(_str2frags(s)))
+      val items = if (attrType == "String")
+        newPairs.sorted.map {
+          case (k, v) => li(_str2frags(k + " -> " + v))
+        }
       else
-        newStrs.sorted.map(li(_))
+        newPairs.sorted.map {
+          case (k, v) => li(k + " -> " + v)
+        }
 
       cell.appendChild(ul(items).render)
     }
 
+    val retracts = oldPairs.diff(newPairs).map { case (k, v) => s"$k@$v" }
+    val asserts  = newPairs.diff(oldPairs).map { case (k, v) => s"$k@$v" }
+
     if (editCellId.nonEmpty
       && editCellId == cell.id
       && eid > 0
-      && oldStrs != newStrs
+      && oldPairs != newPairs
     ) {
-      val (retracts, asserts) = (oldStrs.diff(newStrs), newStrs.diff(oldStrs))
+      val newKeys       = newPairs.map(_._1)
+      val duplicateKeys = newKeys.length - newKeys.distinct.length
 
       val retractsAsserts = (if (retracts.isEmpty) "" else
         retracts.mkString("\nRETRACT: `", "`\nRETRACT: `", "`")) +
         (if (asserts.isEmpty) "" else
           asserts.mkString("\nASSERT : `", "`\nASSERT : `", "`"))
 
-      if (enums.nonEmpty && !newStrs.forall(enums.contains(_))) {
+      if (!newPairs.forall { case (k, v) => k.nonEmpty && v.nonEmpty }) {
         editCellId = ""
-        window.alert(
-          s"Can't update $attrFull with non-defined enum value(s): $retractsAsserts" +
-            "\nThe following enum values are defined:\n  " +
-            enums.mkString("\n  ")
-        )
+        window.alert(s"Can't update $attrFull with invalid pair(s): $retractsAsserts")
         cell.focus()
 
-      } else if (!newStrs.forall(valid(attrType, _))) {
+      } else if (!newPairs.forall(pair => valid(attrType, pair._2))) {
         editCellId = ""
         window.alert(s"Can't update $attrFull with invalid value(s): $retractsAsserts")
+        cell.focus()
+
+      } else if (duplicateKeys == 1) {
+        editCellId = ""
+        window.alert(s"Can't update $attrFull having two pairs with duplicate key: $retractsAsserts")
+        cell.focus()
+
+      } else if (duplicateKeys > 1) {
+        editCellId = ""
+        window.alert(s"Can't update $attrFull with $duplicateKeys duplicate key(s): $retractsAsserts")
         cell.focus()
 
       } else if (expr == "edit") {
@@ -158,14 +172,8 @@ case class UpdateCardMany[T](
         redrawCell()
 
         // update db
-        val save = if (colType == "listDouble") {
-          val data = Seq((eid, retracts.map(_.toDouble), asserts.map(_.toDouble)))
-          queryWire().updateNum(db, attrFull, attrType, data).call()
-        } else {
-          val data = Seq((eid, retracts, asserts))
-          queryWire().updateStr(db, attrFull, attrType, enumPrefix, data).call()
-        }
-        save.map {
+        val data = Seq((eid, retracts, asserts))
+        queryWire().updateStr(db, attrFull, "String", "", data).call().map {
           case Right((t, tx, txInstant)) =>
             updateClient(t, tx, txInstant, cell, row, eid, newVopt)
             println(s"Successfully updated $attrFull: $retractsAsserts")
@@ -177,17 +185,17 @@ case class UpdateCardMany[T](
             cell.focus()
         }
       }
-    } else if (eid > 0 && oldStrs != newStrs) {
-      if (!newStrs.forall(valid(attrType, _))) {
+    } else if (eid > 0 && oldPairs != newPairs) {
+      if (!newPairs.forall(pair => valid(attrType, pair._2))) {
         window.alert(
           s"Invalid $attrFull values of type `$attrType`:\n  " +
-            newStrs.mkString("\n  ")
+            newPairs.mkString("\n  ")
         )
         cell.focus()
       } else {
         println(s"OBS: New $attrFull value will not be saved " +
           s"unless you leave cell by pressing Enter/Return. Values:\n  " +
-          newStrs.mkString("\n  ")
+          newPairs.mkString("\n  ")
         )
       }
     } else {

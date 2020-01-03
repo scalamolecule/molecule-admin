@@ -1,4 +1,4 @@
-package moleculeadmin.client.app.domain.query.data.update
+package moleculeadmin.client.app.domain.query.data.edit
 import autowire._
 import boopickle.Default._
 import moleculeadmin.client.app.element.query.datatable.BodyElements

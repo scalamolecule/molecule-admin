@@ -1,7 +1,7 @@
 package moleculeadmin.client.app.domain.query.data
 
 import moleculeadmin.client.app.domain.query.QueryState._
-import moleculeadmin.client.app.domain.query.data.update._
+import moleculeadmin.client.app.domain.query.data.edit._
 import moleculeadmin.client.app.domain.query.marker.ToggleOne
 import moleculeadmin.client.app.element.query.datatable.BodyElements
 import moleculeadmin.shared.ast.query.{QueryResult, _}
@@ -13,6 +13,7 @@ import rx.Ctx
 import scalatags.JsDom
 import scalatags.JsDom.all._
 import scala.collection.mutable
+import moleculeadmin.client.app.domain.query.data.edit.RetractEid
 
 
 abstract class Cell(
@@ -247,6 +248,7 @@ abstract class Cell(
                 if (starIndex(rowIndex)) mark.starOn else mark.starOff,
                 if (flagIndex(rowIndex)) mark.flagOn else mark.flagOff,
                 if (checkIndex(rowIndex)) mark.checkOn else mark.checkOff,
+                () => RetractEid(eid),
                 () => star.toggle(eid, starIndex(rowIndex)),
                 () => flag.toggle(eid, flagIndex(rowIndex)),
                 () => check.toggle(eid, checkIndex(rowIndex)),
