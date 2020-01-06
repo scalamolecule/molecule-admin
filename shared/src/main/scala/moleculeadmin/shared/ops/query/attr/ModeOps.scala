@@ -3,10 +3,10 @@ package moleculeadmin.shared.ops.query.attr
 import moleculeadmin.shared.api.QueryApi
 import moleculeadmin.shared.ast.schema.{Attr, Ns}
 import molecule.ast.model._
-import moleculeadmin.shared.ops.query.Base
+import moleculeadmin.shared.ops.query.BaseQuery
 
 
-trait ModeOps extends QueryApi with Base {
+trait ModeOps extends QueryApi with BaseQuery {
 
   def toggleMode(model: Seq[Element], path: Seq[(String, String)], selAttr: String)(implicit nsMap: Map[String, Ns]): Seq[Element] = {
     val ns                      = path.last._2

@@ -58,7 +58,7 @@ trait Editing {
     }
   }
 
-  def multilineNewline(e: KeyboardEvent): Unit = {
+  def multilineSoftNewLine(e: KeyboardEvent): Unit = {
     val curCell = document.activeElement
     val card    = curCell.getAttribute("card")
     val cls     = curCell.getAttribute("class")
@@ -73,10 +73,12 @@ trait Editing {
           |- Cardinality-many attributes
           |- Cardinality-one String attributes
           |""".stripMargin)
+    } else {
+      // Otherwise allow soft new line within cell
     }
   }
 
-  def multilineSaveEdit(e: KeyboardEvent): Unit = {
+  def multilineAddItem(e: KeyboardEvent): Unit = {
     val curCell = document.activeElement
     // Create new empty String item (since we have multiline values)
     if (curCell.getAttribute("class") == "items") {

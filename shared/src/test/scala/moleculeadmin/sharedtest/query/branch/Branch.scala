@@ -8,7 +8,7 @@ import utest._
 import scala.languageFeature.implicitConversions._
 
 
-object Branch extends TestSuite with TreeSchema with TreeOps with query.Base {
+object Branch extends TestSuite with TreeSchema with TreeOps with query.BaseQuery {
 
   val tests = Tests {
 

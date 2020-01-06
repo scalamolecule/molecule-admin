@@ -4,11 +4,11 @@ import java.net.URI
 import java.util.{Date, UUID}
 import moleculeadmin.shared.api.QueryApi
 import moleculeadmin.shared.ast.schema.{Attr, Ns}
-import moleculeadmin.shared.ops.query.Base
+import moleculeadmin.shared.ops.query.BaseQuery
 import moleculeadmin.shared.api.QueryApi
 import moleculeadmin.shared.ast.schema._
 import molecule.ast.model._
-import moleculeadmin.shared.ops.query.Base
+import moleculeadmin.shared.ops.query.BaseQuery
 import moleculeadmin.shared.util.HelpersAdmin
 import scala.collection.mutable.ListBuffer
 
@@ -20,7 +20,7 @@ object Molecule2Model {
 }
 
 class Molecule2Model(molecule0: String, nsMap: Map[String, Ns])
-  extends QueryApi with Base with HelpersAdmin with Model2Molecule {
+  extends QueryApi with BaseQuery with HelpersAdmin with Model2Molecule {
 
   // Schema extractions
 

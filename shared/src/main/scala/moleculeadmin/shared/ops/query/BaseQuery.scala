@@ -3,7 +3,7 @@ import molecule.ast.model._
 import moleculeadmin.shared.util.HelpersAdmin
 
 
-trait Base extends HelpersAdmin {
+trait BaseQuery extends HelpersAdmin {
 
 
   def isNumber(attrType: String) = Seq("Int", "Long", "Float", "Double", "BigInt", "BigDecimal").contains(attrType)

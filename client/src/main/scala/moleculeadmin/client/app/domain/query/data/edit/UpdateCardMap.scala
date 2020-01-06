@@ -87,6 +87,10 @@ case class UpdateCardMap[T](
     }
 
     val newPairs: List[(String, String)] = vs.map { pair =>
+      if (!pair.contains("->")) {
+        window.alert("Key/value should be separated by '->'")
+        return
+      }
       val k = pair.substring(0, pair.indexOf("->")).trim
       val v = pair.substring(pair.indexOf("->") + 2).trim
       if (attrType == "Date")
@@ -96,7 +100,7 @@ case class UpdateCardMap[T](
     }.toMap.toList // remove pairs with duplicate keys
       .sortBy(_._1)
 
-    println(newPairs)
+    //    println(newPairs)
 
     val newVopt: Option[T] = {
       if (newPairs.isEmpty)

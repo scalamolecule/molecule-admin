@@ -13,8 +13,6 @@ object RetractEid {
 
   type keepBooPickleImport_UpdateCardOne = PickleState
 
-  println("RetractEntity init")
-
   def apply(eid: Long)(implicit ctx: Ctx.Owner): Unit = {
     queryWire().retractEntity(db, eid).call().foreach {
       case Right(tx) =>

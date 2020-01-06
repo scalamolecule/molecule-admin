@@ -556,33 +556,54 @@ class QueryBackend extends QueryApi with Base {
 
   import moleculeadmin.shared.ast.schema
 
+
   override def insert(
     db: String,
     molecule: String,
     nsMap: Map[String, schema.Ns],
-    rawData: Seq[String]
+    rowValues: Seq[Seq[String]]
   ): Either[String, Long] = {
     // Model without initial entity id
     val elements = new Molecule2Model(molecule, nsMap).getModel.right.get.tail
+
+    elements foreach println
+
     implicit val conn = Conn(base + "/" + db)
-    val data = elements.zipWithIndex.map {
-      case (a: Atom, i) =>
-        val v = rawData(i)
-        a.tpe match {
-          case "String"           => a.enumPrefix.getOrElse("") + v
-          case "Int" | "Long"     => v.toLong
-          case "Float" | "Double" => v.toDouble
-          case "Boolean"          => v.toBoolean
-          case "Date"             => str2date(v)
-          case "UUID"             => UUID.fromString(v)
-          case "URI"              => new URI(v)
-          case "BigInt"           => BigInt(v)
-          case "BigDecimal"       => BigDecimal(v)
+    val data   = elements.zipWithIndex.map {
+      case (Atom(_, _, tpe, card, _, _, _, _), i) =>
+        val cast = tpe match {
+          case "String"               => (v: String) => v
+          case "Int" | "Long" | "ref" => (v: String) => v.toLong
+          case "Float" | "Double"     => (v: String) => v.toDouble
+          case "Boolean"              => (v: String) => v.toBoolean
+          case "Date"                 => (v: String) => str2date(v)
+          case "UUID"                 => (v: String) => UUID.fromString(v)
+          case "URI"                  => (v: String) => new URI(v)
+          case "BigInt"               => (v: String) => BigInt(v)
+          case "BigDecimal"           => (v: String) => BigDecimal(v)
         }
+        val vs   = rowValues(i)
+        if (vs.isEmpty) {
+          None
+        } else {
+          // value/Seq/Map depending on cardinality
+          card match {
+            case 1 => cast(vs.head)
+            case 2 => vs.map(cast).toList
+            case 3 => vs.map{ str =>
+              val List(k, v) = str.split("__~~__", 1).toList
+              k -> v
+            }.toMap
+          }
+        }
+
       case other =>
         throw new IllegalArgumentException("Unexpected Model Element: " + other)
     }
     val stmtss = Model2Transaction(conn, Model(elements)).insertStmts(Seq(data))
+
+    stmtss.head foreach println
+
     withTransactor {
       try {
         Right(conn.transact(stmtss).eid)
