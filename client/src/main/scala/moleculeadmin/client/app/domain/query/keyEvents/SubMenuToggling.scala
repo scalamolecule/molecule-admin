@@ -79,20 +79,27 @@ trait SubMenuToggling extends BaseKeyEvents with RegexMatching {
       case " " if curMolecule.now.nonEmpty => upsertCurrentQuery(e)
       case r"\d"                           =>
         if (savedQueries.count(_.isFavorite) < 10)
-          useQuery(key.toInt - 1)
+          favoriteQuery(key.toInt - 1)
         else
-          numberInputs(key, useQuery)
+          numberInputs(key, favoriteQuery)
       case _                               => ()
     }
 
-  def useQuery(i: Int)(implicit ctx: Ctx.Owner): Unit =
-    if (i < savedQueries.size) {
-      (new Callbacks).useQuery(savedQueries.sortBy(_.molecule).apply(i))
+  def favoriteQuery(i: Int)(implicit ctx: Ctx.Owner): Unit = {
+    val favoriteQueries = savedQueries.filter(_.isFavorite)
+    if (i < favoriteQueries.size) {
+      (new Callbacks).useQuery(
+        favoriteQueries.sortBy(_.molecule).apply(i)
+      )
     } else {
-      window.alert(s"Only ${savedQueries.size} queries saved.")
+      window.alert(s"Only ${favoriteQueries.size} queries saved as favorites.")
     }
+  }
 
   def upsertCurrentQuery(e: KeyboardEvent)(implicit ctx: Ctx.Owner): Unit = {
+
+    println("upsertCurrentQuery...")
+
     // prevent default scroll to bottom
     e.preventDefault()
     val callback = new Callbacks

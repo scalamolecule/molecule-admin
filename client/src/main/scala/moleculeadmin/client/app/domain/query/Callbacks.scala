@@ -23,7 +23,6 @@ class Callbacks(implicit ctx: Ctx.Owner)
   // New ------------------------------
 
 
-
   // Query list ------------------------------
 
   private def sorted(query: QueryDTO): QueryDTO = query.copy(
@@ -64,13 +63,19 @@ class Callbacks(implicit ctx: Ctx.Owner)
         //        println("Inserted query: " + query)
         savedQueries = savedQueries :+ query
         setColumns(query)
-        if (refreshSubmenu) curMolecule.recalc()
+        if (refreshSubmenu) {
+          curMolecule.recalc()
+          renderSubMenu.recalc()
+        }
 
       case Right("Successfully updated query") =>
         //        println("Updated query: " + query)
         updateQueryCaches(query)
         setColumns(query)
-        if (refreshSubmenu) curMolecule.recalc()
+        if (refreshSubmenu) {
+          curMolecule.recalc()
+          renderSubMenu.recalc()
+        }
 
       case Right(msg) =>
         window.alert(s"Unexpected successful query upsertion: $msg")

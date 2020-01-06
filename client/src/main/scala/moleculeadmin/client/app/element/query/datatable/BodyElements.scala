@@ -1,10 +1,9 @@
 package moleculeadmin.client.app.element.query.datatable
+import molecule.util.DateHandling
 import moleculeadmin.client.app.element.AppElements
 import moleculeadmin.client.rxstuff.RxBindings
-import molecule.util.DateHandling
 import org.scalajs.dom.html.{Element, TableCell, TableRow}
 import org.scalajs.dom.raw.Node
-import org.scalajs.dom.window
 import rx.{Ctx, Rx}
 import scalatags.JsDom
 import scalatags.JsDom.TypedTag

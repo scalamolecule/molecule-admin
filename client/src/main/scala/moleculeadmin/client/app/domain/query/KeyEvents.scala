@@ -55,6 +55,7 @@ trait KeyEvents
             case "Enter" if shift => multilineSoftNewLine(e)
             case "Enter" if ctrl  => multilineAddItem(e)
             case "Enter"          => insertNewRow(e)
+            case "Tab"            => continueInserting()
             case _                => ()
           }
           case "Escape"            => blur()

@@ -566,7 +566,7 @@ class QueryBackend extends QueryApi with Base {
     // Model without initial entity id
     val elements = new Molecule2Model(molecule, nsMap).getModel.right.get.tail
 
-    elements foreach println
+//    elements foreach println
 
     implicit val conn = Conn(base + "/" + db)
     val data   = elements.zipWithIndex.map {
@@ -591,7 +591,7 @@ class QueryBackend extends QueryApi with Base {
             case 1 => cast(vs.head)
             case 2 => vs.map(cast).toList
             case 3 => vs.map{ str =>
-              val List(k, v) = str.split("__~~__", 1).toList
+              val List(k, v) = str.split("__~~__", 2).toList
               k -> v
             }.toMap
           }
@@ -602,7 +602,7 @@ class QueryBackend extends QueryApi with Base {
     }
     val stmtss = Model2Transaction(conn, Model(elements)).insertStmts(Seq(data))
 
-    stmtss.head foreach println
+//    stmtss.head foreach println
 
     withTransactor {
       try {
