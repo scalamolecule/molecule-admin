@@ -8,7 +8,7 @@ import org.scalajs.dom.{KeyboardEvent, document, window}
 import rx.Ctx
 
 
-trait SubMenuToggling extends Base with RegexMatching {
+trait SubMenuToggling extends BaseKeyEvents with RegexMatching {
 
   def toggle(id: String): Unit = {
     val el = document.getElementById("submenu-" + id)

@@ -5,7 +5,7 @@ import org.scalajs.dom.raw.{HTMLInputElement, KeyboardEvent}
 import scala.scalajs.js.timers.setTimeout
 
 
-trait Base {
+trait BaseKeyEvents {
 
   private var firstNumber  = -1
   private var secondNumber = -1

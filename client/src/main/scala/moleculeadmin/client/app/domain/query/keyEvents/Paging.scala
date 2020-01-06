@@ -5,7 +5,7 @@ import rx.Ctx
 import scala.scalajs.js.Date
 
 
-trait Paging extends Base {
+trait Paging extends BaseKeyEvents {
 
   // Page throttling params
   private var beginning   = 0.0

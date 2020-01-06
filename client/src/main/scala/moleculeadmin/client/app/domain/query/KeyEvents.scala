@@ -51,16 +51,18 @@ trait KeyEvents
       } else if (document.activeElement.isInstanceOf[TableCell]) {
         e.key match {
           case x if insertMode     => x match {
-            case "Escape" => abortInsert()
-            case "Enter"  => insertNewRow(e)
-            case _        => ()
+            case "Escape"         => abortInsert()
+            case "Enter" if shift => multilineSoftNewLine(e)
+            case "Enter" if ctrl  => multilineAddItem(e)
+            case "Enter"          => insertNewRow(e)
+            case _                => ()
           }
           case "Escape"            => blur()
           case "ArrowUp" if ctrl   => cellUp()
           case "ArrowDown" if ctrl => cellDown()
           case "Backspace"         => deleteItem(e)
-          case "Enter" if shift    => multilineNewline(e)
-          case "Enter" if ctrl     => multilineSaveEdit(e)
+          case "Enter" if shift    => multilineSoftNewLine(e)
+          case "Enter" if ctrl     => multilineAddItem(e)
           case "Enter"             => saveEdit(e)
           case _                   => ()
         }

@@ -4,7 +4,7 @@ import moleculeadmin.shared.api.QueryApi
 import molecule.ast.model._
 
 
-trait DebugBranches extends QueryApi with Base {
+trait DebugBranches extends QueryApi with BaseQuery {
 
 
   protected def debugBeforeAfter(before: Seq[Element], branch: Seq[Element], after: Seq[Element]): Unit = {

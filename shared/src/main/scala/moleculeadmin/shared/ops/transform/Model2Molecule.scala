@@ -5,10 +5,10 @@ import moleculeadmin.shared.api.QueryApi
 import molecule.ast.model
 import molecule.ast.model._
 import molecule.util.DateHandling
-import moleculeadmin.shared.ops.query.Base
+import moleculeadmin.shared.ops.query.BaseQuery
 
 
-trait Model2Molecule extends QueryApi with Base with DateHandling {
+trait Model2Molecule extends QueryApi with BaseQuery with DateHandling {
 
 
   def model2molecule(elements: Seq[Element]): String = onClient(true).model2molecule(elements)

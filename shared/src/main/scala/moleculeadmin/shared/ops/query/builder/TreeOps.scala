@@ -5,10 +5,10 @@ import moleculeadmin.shared.api.QueryApi
 import moleculeadmin.shared.ast.schema.{Attr, Ns}
 import moleculeadmin.shared.ast.tree.Tree
 import molecule.ast.model._
-import moleculeadmin.shared.ops.query.Base
+import moleculeadmin.shared.ops.query.BaseQuery
 
 
-trait TreeOps extends QueryApi with Base {
+trait TreeOps extends QueryApi with BaseQuery {
 
 
   private def refs(ns: String)
