@@ -51,6 +51,7 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
     val rules        = if (query.i.rules.nonEmpty)
       Some("[" + (query.i.rules map resolve mkString " ") + "]") else None
     val (l, ll, lll) = encodeInputs(query)
+    groupableCols = getGroupableCols(columns.now)
 
     // Fetch data from db asynchronously
     queryWire()
@@ -65,7 +66,6 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
         DataTableBodyFoot().populate(tableBody, tableFoot, queryResult)
 
         // Render grouped
-        groupableCols = getGroupableCols(columns.now)
         savedQueries.find(_.molecule == curMolecule.now).fold {
           showGrouped = false
           groupedColIndexes() = Set.empty[Int]
@@ -85,10 +85,10 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
       case Left(Nil) =>
         //        println("Empty result")
         tableBody.innerHTML = ""
-        tableBody.appendChild(
+        tableFoot.innerHTML = ""
+        tableFoot.appendChild(
           tr(td(colspan := columns.now.size + 1, "Empty result set...")).render
         )
-        tableFoot.innerHTML = ""
         rowCountAll = 0
         renderSubMenu.recalc()
 
@@ -154,7 +154,7 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
           _rowCol1("Please select at least one mandatory attribute")
 
         case elements =>
-//          println("----------- new model ----------")
+          //          println("----------- new model ----------")
           val elements1 = VerifyRawModel(elements)
           tree() = mkTree(mkModelTree(elements1))
           curMolecule() = model2molecule(elements1)

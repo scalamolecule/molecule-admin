@@ -194,6 +194,18 @@ trait SubMenuElements extends AppElements with DropdownMenu {
                 tr(
                   id := "saved" + i,
                   cls := (if (cur) "current" else "other"),
+                  td(
+                    textAlign.right,
+                    span(
+                      cls := "discrete",
+                      span(cls := "oi oi-x", fontSize := 9.px,
+                        color := "#888", paddingBottom := 6),
+                      onclick := { () =>
+                        document.getElementById("saved" + i).innerText = ""
+                        retract(q)()
+                      }
+                    )
+                  ),
                   td(m, paddingRight := 20, if (cur) () else onclick := use(q)),
                   td(
                     textAlign.right,
@@ -206,18 +218,6 @@ trait SubMenuElements extends AppElements with DropdownMenu {
                       onclick := { () => action }
                     )
                   ),
-                  td(
-                    textAlign.right,
-                    span(
-                      cls := "discrete",
-                      span(cls := "oi oi-x", fontSize := 9.px,
-                        color := "#888", paddingBottom := 6),
-                      onclick := { () =>
-                        document.getElementById("saved" + i).innerText = ""
-                        retract(q)()
-                      }
-                    )
-                  )
                 )
               }
             )

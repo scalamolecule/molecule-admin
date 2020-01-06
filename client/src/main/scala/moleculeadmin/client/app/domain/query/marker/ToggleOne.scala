@@ -51,7 +51,7 @@ case class ToggleOne(tableBody: TableSection, tpe: String) extends AppElements {
       case Left(err)            => window.alert(err)
       case Right(dbSettingsId1) =>
         dbSettingsIdOpt = Some(dbSettingsId1)
-        println(s"Entity id $eid $marked")
+      //        println(s"Entity id $eid $marked")
     }
 
     def toggleIcon(tableCol: Int): Unit = {

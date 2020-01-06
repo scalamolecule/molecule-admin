@@ -381,7 +381,6 @@ abstract class Cell(
                   (eid: Long) => () => curEntity() = eid))
 
           case "ref" if groupEdit =>
-            println("_tdManyRefEdit2")
             (rowIndex: Int) =>
               editArray(rowIndex).fold(_tdNoEdit)(vs =>
                 _tdManyRefEdit2(
@@ -395,7 +394,6 @@ abstract class Cell(
                 )
               )
           case "ref" if editable  =>
-            println("_tdManyRefEdit")
             (rowIndex: Int) =>
               editArray(rowIndex).fold(_tdNoEdit)(vs =>
                 _tdManyRefEdit(
