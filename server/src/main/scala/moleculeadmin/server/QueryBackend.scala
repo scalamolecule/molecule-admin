@@ -565,12 +565,12 @@ class QueryBackend extends QueryApi with Base {
   ): Either[String, Long] = {
     // Model without initial entity id
     val elements = new Molecule2Model(molecule, nsMap).getModel.right.get.tail
-
-//    elements foreach println
-
+    //    println(rowValues)
+    //    elements foreach println
     implicit val conn = Conn(base + "/" + db)
-    val data   = elements.zipWithIndex.map {
-      case (Atom(_, _, tpe, card, _, _, _, _), i) =>
+    var i      = 0
+    val data   = elements.collect {
+      case Atom(_, _, tpe, card, _, _, _, _) =>
         val cast = tpe match {
           case "String"               => (v: String) => v
           case "Int" | "Long" | "ref" => (v: String) => v.toLong
@@ -583,6 +583,7 @@ class QueryBackend extends QueryApi with Base {
           case "BigDecimal"           => (v: String) => BigDecimal(v)
         }
         val vs   = rowValues(i)
+        i += 1
         if (vs.isEmpty) {
           None
         } else {
@@ -590,20 +591,16 @@ class QueryBackend extends QueryApi with Base {
           card match {
             case 1 => cast(vs.head)
             case 2 => vs.map(cast).toList
-            case 3 => vs.map{ str =>
+            case 3 => vs.map { str =>
               val List(k, v) = str.split("__~~__", 2).toList
               k -> v
             }.toMap
           }
         }
-
-      case other =>
-        throw new IllegalArgumentException("Unexpected Model Element: " + other)
     }
     val stmtss = Model2Transaction(conn, Model(elements)).insertStmts(Seq(data))
-
-//    stmtss.head foreach println
-
+    //    println(data)
+    //    stmtss.head foreach println
     withTransactor {
       try {
         Right(conn.transact(stmtss).eid)
