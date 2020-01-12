@@ -25,9 +25,9 @@ case class RenderViews()(implicit val ctx: Ctx.Owner)
         curViews.now.sorted.collect {
           case "view01_Molecule"      => moleculeView: Frag
           case "view02_Datalog"       => Datalog(): Frag
-          case "view03_Transaction"   => Transaction().view: Frag
-          case "view04_Entity"        => Entity().view: Frag
-          case "view05_EntityHistory" => EntityHistory().view: Frag
+          case "view03_Entity"        => Entity().view: Frag
+          case "view04_EntityHistory" => EntityHistory().view: Frag
+          case "view05_Transaction"   => Transaction().view: Frag
           case "view06_MoleculeModel" => moleculeModelView: Frag
           case "view07_MoleculeQuery" => moleculeQueryView: Frag
           case "view08_Columns"       => columnsView: Frag

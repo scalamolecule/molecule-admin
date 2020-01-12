@@ -18,7 +18,6 @@ case class RenderGrouped()(implicit ctx: Ctx.Owner)
   def dynRender: Rx.Dynamic[TypedTag[Element]] = Rx {
     groupedColIndexes()
     if (showGrouped && groupedColIndexes.now.nonEmpty) {
-      val qr = queryCache.queryResult
       _cardsContainer(
         columns.now.collect {
           case col if groupedColIndexes.now.contains(col.colIndex)

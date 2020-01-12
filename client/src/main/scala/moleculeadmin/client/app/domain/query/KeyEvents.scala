@@ -14,6 +14,7 @@ trait KeyEvents
     with QueryBuilding
     with SubMenuToggling
     with Inserting
+    with Undoing
     with Editing {
 
   def registerKeyEvents(implicit ctx: Ctx.Owner, nsMap: Map[String, Ns]): Unit = {
@@ -30,6 +31,7 @@ trait KeyEvents
             case "Escape"              => toggleOffAll()
             case "l"                   => toggleQueryListMenu()
             case "n"                   => addInsertNewDataRow0(e)
+            case "u"                   => toggleUndo()
             case "v"                   => toggleViewsMenu()
             case "g"                   => toggleGroupedMenu()
             case "q"                   => toggleQueryBuilder

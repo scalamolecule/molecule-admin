@@ -66,6 +66,9 @@ object QueryState {
 
   val renderSubMenu = Var("trigger")
 
+  // Undo --------------------------------
+  var showUndo = Var(false)
+
   // Grouped --------------------------------
   var showGrouped       = false
   var groupableCols     = Seq.empty[Col]
@@ -76,9 +79,9 @@ object QueryState {
   val allViews  = Seq(
     ("view01_Molecule", "Molecule"),
     ("view02_Datalog", "Datalog"),
-    ("view03_Transaction", "Transaction"),
-    ("view04_Entity", "Entity"),
-    ("view05_EntityHistory", "Entity History"),
+    ("view03_Entity", "Entity"),
+    ("view04_EntityHistory", "Entity History"),
+    ("view05_Transaction", "Transaction"),
     ("view06_MoleculeModel", "Molecule Model"),
     ("view07_MoleculeQuery", "Molecule Query"),
     ("view08_Columns", "Columns"),

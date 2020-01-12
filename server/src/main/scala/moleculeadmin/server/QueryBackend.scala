@@ -1,9 +1,11 @@
 package moleculeadmin.server
 
+import java.{lang, util}
 import java.lang.{Long => jLong}
 import java.net.URI
-import java.util.{Date, UUID}
-import datomic.{Peer, Util}
+import java.text.SimpleDateFormat
+import java.util.{Date, UUID, Collection => jCollection, List => jList}
+import datomic.{Datom, Peer, Util}
 import db.admin.dsl.meta._
 import db.core.dsl.coreTest.Ns
 import molecule.api.Entity
@@ -40,6 +42,9 @@ class QueryBackend extends QueryApi with Base {
     case ("URI", v)        => new java.net.URI(v).asInstanceOf[Object]
     case _                 => sys.error("Unexpected input pair to cast")
   }
+
+  private def localDate(date: Date): String =
+    new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(date)
 
   def inputs(lists: Seq[(Int, AnyRef)]): Seq[Object] = lists.sortBy(_._1).map(_._2).map {
     case l: Seq[_]                   => Util.list(l.map {
@@ -101,11 +106,11 @@ class QueryBackend extends QueryApi with Base {
     val conn = Conn(base + "/" + db)
     Entity(conn.db.entity(eid), conn, eid.asInstanceOf[Object]).touchListMax(1)
       .map {
-        case (a, date: Date) => (a, date2str(date))
+        case (a, date: Date) => (a, localDate(date))
         case (a, vs: Seq[_]) =>
           if (vs.nonEmpty && vs.head.isInstanceOf[Date])
             (a, vs.map(v =>
-              date2str(v.asInstanceOf[Date])
+              localDate(v.asInstanceOf[Date])
             ).mkString("__~~__"))
           else
             (a, vs.mkString("__~~__"))
@@ -113,13 +118,26 @@ class QueryBackend extends QueryApi with Base {
       }
   }
 
-  def formatEmpty(v: Any): String = {
+  private def formatEmpty(v: Any): String = {
     val s = v.toString
     if (s.trim.isEmpty) s"{$s}" else s
   }
 
   private def ident(conn: Conn, e: jLong): String =
     conn.db.entity(e).get(":db/ident").toString
+
+  private def formatValue(
+    conn: Conn,
+    attr: String,
+    v: Any,
+    enumAttrs: Seq[String]
+  ): String = v match {
+    case s: String                            => formatEmpty(s)
+    case e: jLong if enumAttrs.contains(attr) => ident(conn, e)
+    case d: Date                              => localDate(d)
+    case v                                    => formatEmpty(v)
+  }
+
 
   override def getTxData(
     db: String,
@@ -148,17 +166,65 @@ class QueryBackend extends QueryApi with Base {
       rows(i) = (
         row.get(0).asInstanceOf[Long],
         attr,
-        row.get(2) match {
-          case s: String                            => formatEmpty(s)
-          case e: jLong if enumAttrs.contains(attr) => ident(conn, e)
-          case d: Date                              => date2str(d)
-          case v                                    => formatEmpty(v)
-        },
+        formatValue(conn, attr, row.get(2), enumAttrs),
         row.get(3).asInstanceOf[Boolean]
       )
       i += 1
     }
     rows.sortBy(t => (t._1, t._2, t._4, t._3))
+  }
+
+
+  override def getLastTxs(
+    db: String,
+    chunks: Int,
+    enumAttrs: Seq[String]
+  ): Array[(Long, Long, String, Array[(Long, String, String, Boolean)])] = {
+    implicit val conn = Conn(base + "/" + db)
+    val datomicDb = conn.db
+
+    // Go arbitrary number of txs back
+    val firstT = datomicDb.basisT() - chunks * 100
+
+    println("firstT: " + firstT)
+
+    val txs = conn.datomicConn.log.txRange(firstT, null).asScala
+    println("txs: " + txs.size)
+
+
+    val txCount  = txs.size
+    val txData   = new Array[(Long, Long, String, Array[(Long, String, String, Boolean)])](txCount)
+    var i        = 0
+    var d: Datom = null
+    var attr     = ""
+    var j        = 0
+    txs.foreach { txMap =>
+      val t          = txMap.get(datomic.Log.T).asInstanceOf[Long]
+      val tx         = Peer.toTx(t).asInstanceOf[Long]
+      val txInstant  = localDate(datomicDb.entity(tx).get(":db/txInstant").asInstanceOf[Date])
+      val rawDatoms  = txMap.get(datomic.Log.DATA).asInstanceOf[jList[Datom]]
+      val datomCount = rawDatoms.size()
+      val datoms     = new Array[(Long, String, String, Boolean)](datomCount)
+      d = null
+      attr = ""
+      j = 0
+      if (datomCount > 0) {
+        while (j < datomCount) {
+          d = rawDatoms.get(j)
+          attr = datomicDb.ident(d.a).toString
+          datoms(j) = (
+            d.e.asInstanceOf[Long],
+            attr,
+            formatValue(conn, attr, d.v, enumAttrs),
+            d.added
+          )
+          j += 1
+        }
+      }
+      txData(i) = (t, tx, txInstant, datoms)
+      i += 1
+    }
+    txData
   }
 
   override def getEntityHistory(
@@ -172,15 +238,10 @@ class QueryBackend extends QueryApi with Base {
       case (t, tx, txInstant, op, attr, v) =>
         (t,
           tx,
-          date2str(txInstant),
+          localDate(txInstant),
           op,
           attr,
-          v match {
-            case s: String                            => formatEmpty(s)
-            case e: jLong if enumAttrs.contains(attr) => ident(conn, e)
-            case d: Date                              => date2str(d)
-            case v                                    => formatEmpty(v)
-          }
+          formatValue(conn, attr, v, enumAttrs)
         )
     }
   }
@@ -527,7 +588,7 @@ class QueryBackend extends QueryApi with Base {
     withTransactor {
       try {
         val txR: TxReport = conn.transact(stmtss)
-        Right((txR.t, txR.tx, date2str(txR.inst)))
+        Right((txR.t, txR.tx, localDate(txR.inst)))
       } catch {
         case t: Throwable => Left(t.getMessage)
       }

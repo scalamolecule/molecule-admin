@@ -31,11 +31,19 @@ trait QueryApi extends BaseApi {
     enumAttrs: Seq[String]
   ): Array[(Long, String, String, Boolean)] = ???
 
+  def getLastTxs(
+    db: String,
+    noOfTxs: Int,
+    enumAttrs: Seq[String]
+  ): Array[(Long, Long, String, Array[(Long, String, String, Boolean)])] = ???
+
   def getEntityHistory(
     db: String,
     eid: Long,
     enumAttrs: Seq[String]
   ): List[(Long, Long, String, Boolean, String, String)] = ???
+
+
 
   def upsertQuery(db: String, query: QueryDTO): Either[String, String] = ???
   def updateQuery(db: String, query: QueryDTO): Either[String, String] = ???
