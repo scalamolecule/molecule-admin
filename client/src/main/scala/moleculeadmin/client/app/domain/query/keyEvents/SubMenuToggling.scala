@@ -97,9 +97,6 @@ trait SubMenuToggling extends BaseKeyEvents with RegexMatching {
   }
 
   def upsertCurrentQuery(e: KeyboardEvent)(implicit ctx: Ctx.Owner): Unit = {
-
-    println("upsertCurrentQuery...")
-
     // prevent default scroll to bottom
     e.preventDefault()
     val callback = new Callbacks

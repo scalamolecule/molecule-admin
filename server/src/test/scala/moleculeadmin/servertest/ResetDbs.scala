@@ -1,16 +1,18 @@
 package moleculeadmin.servertest
 
 import ammonite.ops.{home, write}
+import datomic.Peer
 import db.admin.schema.MetaSchema
 import db.core.dsl.coreTest._
 import db.core.dsl.tree._
-import db.core.schema.{CoreTestSchema, TreeSchema}
+import db.core.schema.{CoreTestSchema, CoreTestSchema2, TreeSchema}
 import db.integration.MBrainzSchemaLowerToUpper1
 import db.migration.dsl.partition.b_Bb
 import db.migration.schema.{Partition1Schema, PartitionSchema}
 import molecule.api.out10._
 import molecule.boilerplate.attributes.EnumValue
 import molecule.facade.Conn
+import moleculeadmin.server.QueryBackend
 import moleculeadmin.servertest.schema.withPartitions.Settings
 import moleculeadmin.shared.testdata.ExampleData
 import moleculeadmin.server.utils.DefFile
@@ -34,17 +36,49 @@ object ResetDbs extends TestSuite with ExampleData with Settings {
     //          resetDbs()
     //        }
 
-    test("Reset all and poplulate") {
-      resetDbs()
-      populateCoreTest(Conn("datomic:free://localhost:4334/CoreTest"))
-      //      populatePartition(Conn("datomic:free://localhost:4334/Partition"))
-      //      populateTree(Conn("datomic:free://localhost:4334/Tree"))
-    }
+//        test("Reset all and poplulate") {
+//          resetDbs()
+////                populateCoreTest(Conn("datomic:free://localhost:4334/CoreTest"))
+//          //      populatePartition(Conn("datomic:free://localhost:4334/Partition"))
+//          //      populateTree(Conn("datomic:free://localhost:4334/Tree"))
+//        }
 
     //    test("Reset CoreTest") {
     //      resetDbs(Seq("CoreTest"))
     //      populateCoreTest(Conn("datomic:free://localhost:4334/CoreTest"))
     //    }
+
+    test("Reset CoreTest") {
+      implicit val conn = recreateDbFrom(CoreTestSchema, "localhost:4334/CoreTest", protocol)
+      //      Ns.int(1).Ref1.int1(2).Ref2.int2(3).debugSave
+      //      Ns.int(1).Ref1.int1(2).Ref2.int2(3).save
+      //
+      //      Ns.int(4).Ref1.int1(5).Ref2.int2(6).save
+
+      import datomic.Util
+      conn.datomicConn.transact(Util.list(
+        Util.list(":db/add", Peer.tempid(":db.part/user"), ":Ns/int", 1.asInstanceOf[Object]),
+      ).asInstanceOf[java.util.List[AnyRef]]).get
+
+      conn.datomicConn.transact(Util.list(
+        Util.list(":db/add", Peer.tempid(":db.part/user"), ":Ns/int", 2.asInstanceOf[Object]),
+      ).asInstanceOf[java.util.List[AnyRef]]).get
+
+      conn.datomicConn.transact(Util.list(
+        Util.list(":db/add", Peer.tempid(":db.part/user"), ":Ns/int", 3.asInstanceOf[Object]),
+      ).asInstanceOf[java.util.List[AnyRef]]).get
+
+      //      Ns.int.debugInsert(1, 2, 3)
+      ////      Ns.int.insert(1, 2, 3)
+      //      Ns.int.str insert List((1, "a"))
+      //      Ns.int.str debugInsert List(
+      //        (2, "b"),
+      //        (3, "c"),
+      //        (4, "d"),
+      //      )
+
+      (new QueryBackend).getLastTxs("CoreTest", 5, Nil)
+    }
   }
 
   def resetDbs(dbs0: Seq[String] = Nil): Unit = {
@@ -72,7 +106,8 @@ object ResetDbs extends TestSuite with ExampleData with Settings {
         if (debug) println("- CoreTest")
         write.over(coreDefFilePath, coreDefFile)
         DefFile("CoreTest", Some(coreDefFilePath.toString)).saveToMetaDb
-        recreateDbFrom(CoreTestSchema, "localhost:4334/CoreTest", protocol)
+        //        recreateDbFrom(CoreTestSchema, "localhost:4334/CoreTest", protocol)
+        recreateDbFrom(CoreTestSchema2, "localhost:4334/CoreTest", protocol)
 
       case "Partition" =>
         if (debug) println("- Partition")

@@ -1,11 +1,11 @@
 package moleculeadmin.client.app.domain.query.data.edit
 import autowire._
 import boopickle.Default._
+import molecule.util.DateHandling
+import moleculeadmin.client.app.domain.query.QueryState.{curT, curTx, curTxInstant, db}
 import moleculeadmin.client.app.element.query.datatable.BodyElements
-import moleculeadmin.client.app.domain.query.QueryState.{db, curT, curTx, curTxInstant}
 import moleculeadmin.client.autowire.queryWire
 import moleculeadmin.shared.ast.query.{Col, QueryResult}
-import molecule.util.DateHandling
 import org.scalajs.dom.html.TableCell
 import rx.Ctx
 import scalatags.JsDom
@@ -18,29 +18,29 @@ abstract class TxLambdas(implicit val ctx: Ctx.Owner)
   type keepBooPickleImport_TxLambdas = PickleState
 
 
-  def tLambda(qr: QueryResult,
-              arrayIndex: Int,
-              cols: Seq[Col],
-              colIndex: Int
-             )(implicit ctx: Ctx.Owner): Int => JsDom.TypedTag[TableCell] = {
+  def tLambda(
+    qr: QueryResult,
+    arrayIndex: Int,
+    cols: Seq[Col],
+    colIndex: Int
+  )(implicit ctx: Ctx.Owner): Int => JsDom.TypedTag[TableCell] = {
     val arrayT = qr.num(arrayIndex)
     val tx_    = cols.isDefinedAt(colIndex + 1) && cols(colIndex + 1).attrExpr == "tx"
     val j      = if (tx_) 2 else 1
     val txI_   = cols.isDefinedAt(colIndex + j) && cols(colIndex + j).attrExpr == "txInstant"
     (tx_, txI_) match {
-      // t
       case (false, false) =>
         (rowIndex: Int) =>
           arrayT(rowIndex).fold(_tdNoEdit)(t1 =>
             _tdOneT(
               t1.toLong,
               curT,
-              (t2: Long) => { () =>
-                curT() = t2
-                queryWire().getTxFromT(t2).call().foreach {
-                  tx => curTx() = tx
-                }
-              }))
+              { () =>
+                val t = arrayT(rowIndex).get.toLong
+                curT() = t
+                queryWire().getTxFromT(t).call().foreach(curTx() = _)
+              }
+            ))
 
       // t + tx
       case (true, false) =>
@@ -51,9 +51,9 @@ abstract class TxLambdas(implicit val ctx: Ctx.Owner)
               t1.toLong,
               arrayTx(rowIndex).get.toLong,
               curT,
-              (t2: Long, tx2: Long) => { () =>
-                curT() = t2
-                curTx() = tx2
+              { () =>
+                curT() = arrayT(rowIndex).get.toLong
+                curTx() = arrayTx(rowIndex).get.toLong
               }))
 
       // t + txInstant
@@ -66,12 +66,11 @@ abstract class TxLambdas(implicit val ctx: Ctx.Owner)
               t1.toLong,
               arrayTxInstant(rowIndex).get,
               curT,
-              (t2: Long, txInstant2: String) => { () =>
-                curT() = t2
-                curTxInstant() = truncateDateStr(txInstant2)
-                queryWire().getTxFromT(t2).call().foreach {
-                  tx => curTx() = tx
-                }
+              { () =>
+                val t = arrayT(rowIndex).get.toLong
+                curT() = t
+                curTxInstant() = truncateDateStr(arrayTxInstant(rowIndex).get)
+                queryWire().getTxFromT(t).call().foreach(curTx() = _)
               }))
 
       // t + tx + txInstant
@@ -86,20 +85,20 @@ abstract class TxLambdas(implicit val ctx: Ctx.Owner)
               arrayTx(rowIndex).get.toLong,
               arrayTxInstant(rowIndex).get,
               curT,
-              (t2: Long, tx2: Long, txInstant2: String) => { () =>
-                curT() = t2
-                curTx() = tx2
-                curTxInstant() = truncateDateStr(txInstant2)
+              { () =>
+                curT() = arrayT(rowIndex).get.toLong
+                curTx() = arrayTx(rowIndex).get.toLong
+                curTxInstant() = truncateDateStr(arrayTxInstant(rowIndex).get)
               }))
     }
   }
 
 
   def txLambda(qr: QueryResult,
-               arrayIndex: Int,
-               cols: Seq[Col],
-               colIndex: Int
-              )(implicit ctx: Ctx.Owner): Int => JsDom.TypedTag[TableCell] = {
+    arrayIndex: Int,
+    cols: Seq[Col],
+    colIndex: Int
+  )(implicit ctx: Ctx.Owner): Int => JsDom.TypedTag[TableCell] = {
     val arrayTx = qr.num(arrayIndex)
     val t_      = cols.isDefinedAt(colIndex - 1) && cols(colIndex - 1).attrExpr == "t"
     val txI_    = cols.isDefinedAt(colIndex + 1) && cols(colIndex + 1).attrExpr == "txInstant"
@@ -111,11 +110,10 @@ abstract class TxLambdas(implicit val ctx: Ctx.Owner)
             _tdOneTx(
               tx1.toLong,
               curTx,
-              (tx2: Long) => { () =>
-                curTx() = tx2
-                queryWire().getTFromTx(tx2).call().foreach {
-                  t => curT() = t
-                }
+              { () =>
+                val tx = arrayTx(rowIndex).get.toLong
+                curTx() = tx
+                queryWire().getTFromTx(tx).call().foreach(curT() = _)
               }))
 
       // tx + t
@@ -127,9 +125,9 @@ abstract class TxLambdas(implicit val ctx: Ctx.Owner)
               tx1.toLong,
               arrayT(rowIndex).get.toLong,
               curTx,
-              (tx2: Long, t2: Long) => { () =>
-                curTx() = tx2
-                curT() = t2
+              { () =>
+                curTx() = arrayTx(rowIndex).get.toLong
+                curT() = arrayT(rowIndex).get.toLong
               }))
 
       // tx + txInstant
@@ -142,12 +140,11 @@ abstract class TxLambdas(implicit val ctx: Ctx.Owner)
               tx1.toLong,
               arrayTxInstant(rowIndex).get,
               curTx,
-              (tx2: Long, txInstant2: String) => { () =>
-                curTx() = tx2
-                curTxInstant() = truncateDateStr(txInstant2)
-                queryWire().getTFromTx(tx2).call().foreach {
-                  t => curT() = t
-                }
+              { () =>
+                val tx = arrayTx(rowIndex).get.toLong
+                curTx() = tx
+                curTxInstant() = truncateDateStr(arrayTxInstant(rowIndex).get)
+                queryWire().getTFromTx(tx).call().foreach(curT() = _)
               }))
 
       // tx + t + txInstant
@@ -162,24 +159,26 @@ abstract class TxLambdas(implicit val ctx: Ctx.Owner)
               arrayT(rowIndex).get.toLong,
               arrayTxInstant(rowIndex).get,
               curTx,
-              (tx2: Long, t2: Long, txInstant2: String) => { () =>
-                curTx() = tx2
-                curT() = t2
-                curTxInstant() = truncateDateStr(txInstant2)
+              { () =>
+                curTx() = arrayTx(rowIndex).get.toLong
+                curT() = arrayT(rowIndex).get.toLong
+                curTxInstant() = truncateDateStr(arrayTxInstant(rowIndex).get)
               }))
     }
   }
 
 
   def txInstantLambda(qr: QueryResult,
-                      arrayIndex: Int,
-                      cols: Seq[Col],
-                      colIndex: Int
-                     )(implicit ctx: Ctx.Owner): Int => JsDom.TypedTag[TableCell] = {
+    arrayIndex: Int,
+    cols: Seq[Col],
+    colIndex: Int
+  )(implicit ctx: Ctx.Owner): Int => JsDom.TypedTag[TableCell] = {
     val arrayTxInstant = qr.str(arrayIndex)
-    val tx_            = cols.isDefinedAt(colIndex - 1) && cols(colIndex - 1).attrExpr == "tx"
+    val tx_            = cols.isDefinedAt(colIndex - 1) &&
+      cols(colIndex - 1).attrExpr == "tx"
     val j              = if (tx_) 2 else 1
-    val t_             = cols.isDefinedAt(colIndex - j) && cols(colIndex - j).attrExpr == "t"
+    val t_             = cols.isDefinedAt(colIndex - j) &&
+      cols(colIndex - j).attrExpr == "t"
     (t_, tx_) match {
       // txInstant
       case (false, false) =>
@@ -188,9 +187,10 @@ abstract class TxLambdas(implicit val ctx: Ctx.Owner)
             _tdOneTxInstant(
               truncateDateStr(d),
               curTxInstant,
-              (txInstant2: String) => { () =>
-                curTxInstant() = txInstant2
-                queryWire().getTTxFromTxInstant(db, txInstant2).call().foreach {
+              { () =>
+                val txInstant = arrayTxInstant(rowIndex).get
+                curTxInstant() = txInstant
+                queryWire().getTTxFromTxInstant(db, txInstant).call().foreach {
                   case (t, tx) =>
                     curT() = t
                     curTx() = tx
@@ -207,10 +207,11 @@ abstract class TxLambdas(implicit val ctx: Ctx.Owner)
               truncateDateStr(d),
               arrayT(rowIndex).get.toLong,
               curTxInstant,
-              (txInstant2: String, t2: Long) => { () =>
-                curTxInstant() = txInstant2
-                curT() = t2
-                queryWire().getTTxFromTxInstant(db, txInstant2).call().foreach {
+              { () =>
+                val txInstant = arrayTxInstant(rowIndex).get
+                curTxInstant() = txInstant
+                curT() = arrayT(rowIndex).get.toLong
+                queryWire().getTTxFromTxInstant(db, txInstant).call().foreach {
                   case (_, tx) => curTx() = tx
                 }
               }))
@@ -225,10 +226,11 @@ abstract class TxLambdas(implicit val ctx: Ctx.Owner)
               truncateDateStr(d),
               arrayTx(rowIndex).get.toLong,
               curTxInstant,
-              (txInstant2: String, tx2: Long) => { () =>
-                curTxInstant() = txInstant2
-                curTx() = tx2
-                queryWire().getTTxFromTxInstant(db, txInstant2).call().foreach {
+              { () =>
+                val txInstant = arrayTxInstant(rowIndex).get
+                curTxInstant() = txInstant
+                curTx() = arrayTx(rowIndex).get.toLong
+                queryWire().getTTxFromTxInstant(db, txInstant).call().foreach {
                   case (t, _) => curT() = t
                 }
               }))
@@ -246,10 +248,10 @@ abstract class TxLambdas(implicit val ctx: Ctx.Owner)
               arrayT(rowIndex).get.toLong,
               arrayTx(rowIndex).get.toLong,
               curTxInstant,
-              (txInstant2: String, t2: Long, tx2: Long) => { () =>
-                curTxInstant() = txInstant2
-                curT() = t2
-                curTx() = tx2
+              { () =>
+                curTxInstant() = arrayTxInstant(rowIndex).get
+                curT() = arrayT(rowIndex).get.toLong
+                curTx() = arrayTx(rowIndex).get.toLong
               }))
     }
   }

@@ -73,6 +73,7 @@ object QueryClient
           _row(
             RenderQueryBuilder(metaSchema).dynRender,
             DataTable().dynRender,
+            RenderUndo().dynRender,
             RenderGrouped().dynRender,
             RenderViews().dynRender,
           )

@@ -480,41 +480,53 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
 
   // t ----------------------------------------
 
+//  def _tdOneT(
+//    t: Long,
+//    curT: rx.Var[Long],
+//    mouseover: Long => () => Unit
+//  )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = td(
+//    cls := Rx(if (curT() == t) "txChosen" else "tx"),
+//    t,
+//    onmouseover := mouseover(t),
+//    //    attr("t") := t,
+//    noAggrEdit
+//  )
   def _tdOneT(
     t: Long,
     curT: rx.Var[Long],
-    mouseover: Long => () => Unit
+    mouseover:  () => Unit
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = td(
     cls := Rx(if (curT() == t) "txChosen" else "tx"),
-    t, onmouseover := mouseover(t), noAggrEdit
+    t, onmouseover := mouseover, noAggrEdit
   )
+
   def _tdOneT_tx(
     t: Long,
     tx: Long,
     curT: rx.Var[Long],
-    mouseover: (Long, Long) => () => Unit
+    mouseover: () => Unit
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = td(
     cls := Rx(if (curT() == t) "txChosen" else "tx"),
-    t, onmouseover := mouseover(t, tx), noAggrEdit
+    t, onmouseover := mouseover, noAggrEdit
   )
   def _tdOneT_inst(
     t: Long,
     txInstant: String,
     curT: rx.Var[Long],
-    mouseover: (Long, String) => () => Unit
+    mouseover: () => Unit
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = td(
     cls := Rx(if (curT() == t) "txChosen" else "tx"),
-    t, onmouseover := mouseover(t, txInstant), noAggrEdit
+    t, onmouseover := mouseover, noAggrEdit
   )
   def _tdOneT_tx_inst(
     t: Long,
     tx: Long,
     txInstant: String,
     curT: rx.Var[Long],
-    mouseover: (Long, Long, String) => () => Unit
+    mouseover: () => Unit
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = td(
     cls := Rx(if (curT() == t) "txChosen" else "tx"),
-    t, onmouseover := mouseover(t, tx, txInstant), noAggrEdit
+    t, onmouseover := mouseover, noAggrEdit
   )
 
   // tx ----------------------------------------
@@ -522,38 +534,38 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
   def _tdOneTx(
     tx: Long,
     curTx: rx.Var[Long],
-    mouseover: Long => () => Unit
+    mouseover: () => Unit
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = td(
     cls := Rx(if (curTx() == tx) "txChosen" else "tx"),
-    tx, onmouseover := mouseover(tx), noAggrEdit
+    tx, onmouseover := mouseover, noAggrEdit
   )
   def _tdOneTx_t(
     tx: Long,
     t: Long,
     curTx: rx.Var[Long],
-    mouseover: (Long, Long) => () => Unit
+    mouseover: () => Unit
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = td(
     cls := Rx(if (curTx() == tx) "txChosen" else "tx"),
-    tx, onmouseover := mouseover(tx, t), noAggrEdit
+    tx, onmouseover := mouseover, noAggrEdit
   )
   def _tdOneTx_inst(
     tx: Long,
     txInstant: String,
     curTx: rx.Var[Long],
-    mouseover: (Long, String) => () => Unit
+    mouseover: () => Unit
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = td(
     cls := Rx(if (curTx() == tx) "txChosen" else "tx"),
-    tx, onmouseover := mouseover(tx, txInstant), noAggrEdit
+    tx, onmouseover := mouseover, noAggrEdit
   )
   def _tdOneTx_t_inst(
     tx: Long,
     t: Long,
     txInstant: String,
     curTx: rx.Var[Long],
-    mouseover: (Long, Long, String) => () => Unit
+    mouseover: () => Unit
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = td(
     cls := Rx(if (curTx() == tx) "txChosen" else "tx"),
-    tx, onmouseover := mouseover(tx, t, txInstant), noAggrEdit
+    tx, onmouseover := mouseover, noAggrEdit
   )
 
   // txInstant -----------------------------------
@@ -561,38 +573,38 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
   def _tdOneTxInstant(
     txInstant: String,
     curTxInstant: rx.Var[String],
-    mouseover: String => () => Unit
+    mouseover: () => Unit
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = td(
     cls := Rx(if (curTxInstant() == txInstant) "txChosen" else "tx"),
-    txInstant, onmouseover := mouseover(txInstant), noAggrEdit
+    txInstant, onmouseover := mouseover, noAggrEdit
   )
   def _tdOneTxInstant_t(
     txInstant: String,
     t: Long,
     curTxInstant: rx.Var[String],
-    mouseover: (String, Long) => () => Unit
+    mouseover: () => Unit
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = td(
     cls := Rx(if (curTxInstant() == txInstant) "txChosen" else "tx"),
-    txInstant, onmouseover := mouseover(txInstant, t), noAggrEdit
+    txInstant, onmouseover := mouseover, noAggrEdit
   )
   def _tdOneTxInstant_tx(
     txInstant: String,
     tx: Long,
     curTxInstant: rx.Var[String],
-    mouseover: (String, Long) => () => Unit
+    mouseover: () => Unit
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = td(
     cls := Rx(if (curTxInstant() == txInstant) "txChosen" else "tx"),
-    txInstant, onmouseover := mouseover(txInstant, tx), noAggrEdit
+    txInstant, onmouseover := mouseover, noAggrEdit
   )
   def _tdOneTxInstant_t_tx(
     txInstant: String,
     t: Long,
     tx: Long,
     curTxInstant: rx.Var[String],
-    mouseover: (String, Long, Long) => () => Unit
+    mouseover: () => Unit
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = td(
     cls := Rx(if (curTxInstant() == txInstant) "txChosen" else "tx"),
-    txInstant, onmouseover := mouseover(txInstant, t, tx), noAggrEdit
+    txInstant, onmouseover := mouseover, noAggrEdit
   )
 
 }

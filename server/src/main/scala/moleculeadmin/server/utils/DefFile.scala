@@ -40,7 +40,7 @@ case class DefFile(db: String, path: Option[String] = None, schemaDefFile: Optio
   def saveToMetaDb: Either[String, Long] = getDefFile match {
     case Left(msg)          => Left(msg)
     case Right(defFilePath) =>
-      val d = parse(defFilePath)
+      val d                   = parse(defFilePath)
       val (nss, pkg, in, out) = (d.nss, d.pkg, d.in, d.out)
 
       // Use id of existing meta db or create new meta db
@@ -49,7 +49,7 @@ case class DefFile(db: String, path: Option[String] = None, schemaDefFile: Optio
       // Recursively retract partitions, namespaces and attributes
       meta_Db(dbId).partitions.get.foreach(_.foreach(_.retract))
 
-      val str0 = Option.empty[String]
+      val str0   = Option.empty[String]
       val enums0 = Set.empty[String]
 
       def refNsAttrs(ns0: String): Seq[String] = nss.filter(_.ns == ns0).head.attrs.map(_.attrClean)
@@ -58,7 +58,7 @@ case class DefFile(db: String, path: Option[String] = None, schemaDefFile: Optio
         ((part, partDescr), i) <- nss.map(ns => (ns.part, ns.partDescr)).distinct.zipWithIndex
         partN = i + 1
       } yield {
-        var nsN = 0
+        var nsN                                                               = 0
         val namespaces: Seq[(Int, String, String, Option[String], Set[Long])] = for {
           ns <- nss if ns.part == part && ns.ns.nonEmpty // exclude namespaces with no attributes defined (ns name is empty)
         } yield {
@@ -77,19 +77,24 @@ case class DefFile(db: String, path: Option[String] = None, schemaDefFile: Optio
 
             case Ref(a, ac, clazz, _, _, _, refNs, ops, bi, _, attrGroup) =>
               val (card, tpe) = cardType(clazz, bi)
-              val descrAttr = Seq("nameSort", "name").find(refNsAttrs(refNs) contains _)
+              val descrAttr   = Seq("nameSort", "name").find(refNsAttrs(refNs) contains _)
               Some((attrN, ac, card, tpe, enums0, Some(refNs), opts(ops), doc(ops), attrGroup, descrAttr))
 
             case _: BackRef => None
           }).flatten
-          val attrIds = meta_Attribute.pos.name.card.tpe.enums.refNs$.options.doc$.attrGroup$.descrAttr$.insert(attributes).eids.toSet
+
+          val attrIds = if (attributes.isEmpty) Set.empty[Long] else
+              meta_Attribute.pos.name.card.tpe.enums.refNs$.options.doc$.attrGroup$.descrAttr$.insert(attributes).eidSet
           (nsN, ns.ns.split("_").last, ns.ns, ns.nsDescr, attrIds)
         }
 
-        val nsIds = meta_Namespace.pos.name.nameFull.descr$.attrs.insert(namespaces).eids.toSet
+        val nsIds = if(namespaces.isEmpty) Set.empty[Long] else
+          meta_Namespace.pos.name.nameFull.descr$.attrs.insert(namespaces).eidSet
         (partN, part.low, partDescr, nsIds)
       }
-      val partIds = meta_Partition.pos.name.descr$.namespaces.insert(partitions).eids
+
+      val partIds = if (partitions.isEmpty) Set.empty[Long] else
+        meta_Partition.pos.name.descr$.namespaces.insert(partitions).eidSet
 
       // Update meta db
       path match {
@@ -106,7 +111,7 @@ case class DefFile(db: String, path: Option[String] = None, schemaDefFile: Optio
       case Left(msg)       => throw new RuntimeException(msg) // lazy for now
       case Right(defFile1) => defFile1
     }
-    var i = 0
+    var i       = 0
     (for {
       Namespace(part, partDescr, ns, nsDescr, _, attrs) <- parse(defFile).nss
       attrDef <- attrs if attrDef.attr.head != '_'
@@ -114,22 +119,22 @@ case class DefFile(db: String, path: Option[String] = None, schemaDefFile: Optio
       attrDef match {
         case Enum(_, attr, clazz, _, _, enums, ops, _, _, attrGroup) =>
           i += 1
-          val options = opts2(ops).filterNot(_ == "indexed").sorted
+          val options     = opts2(ops).filterNot(_ == "indexed").sorted
           val (card, tpe) = cardType(clazz)
           Some(FlatAttr(i, part, partDescr, ns.split("_").last, ns, nsDescr, attr, card, tpe, enums, None, options, doc(ops), attrGroup))
 
         case Val(_, attr, clazz, _, _, _, ops, _, _, attrGroup) =>
           i += 1
-          val options = opts2(ops).filterNot(_ == "indexed").sorted
+          val options     = opts2(ops).filterNot(_ == "indexed").sorted
           val (card, tpe) = cardType(clazz)
           Some(FlatAttr(i, part, partDescr, ns.split("_").last, ns, nsDescr, attr, card, tpe, Nil, None, options, doc(ops), attrGroup))
 
         case Ref(_, attr, clazz, _, _, _, refNs, ops, bi, _, attrGroup) =>
           i += 1
-          val options = opts2(ops).filterNot(_ == "indexed").sorted
+          val options     = opts2(ops).filterNot(_ == "indexed").sorted
           val (card, tpe) = cardType(clazz, bi)
           Some(FlatAttr(i, part, partDescr, ns.split("_").last, ns, nsDescr, attr, card, tpe, Nil, Some(refNs), options, doc(ops), attrGroup))
-//          Some(Attr(i, part, partDescr, ns.split("_").last, ns, nsDescr, attr, card, tpe, Nil, Some(refNs.low), options, doc(ops), attrGroup))
+        //          Some(Attr(i, part, partDescr, ns.split("_").last, ns, nsDescr, attr, card, tpe, Nil, Some(refNs.low), options, doc(ops), attrGroup))
 
         case _ => None // BackRef's ignored
       }
@@ -216,7 +221,7 @@ case class DefFile(db: String, path: Option[String] = None, schemaDefFile: Optio
 
     def genAttr(part: String, attribute: Attr, longest: Int, allAttrs: Seq[String]): String = {
       val Attr(i, attr, card0, attrType, enums0, ref, options0, doc0, attrGroup, _, _, descrAttr, _) = attribute
-      val valIndent = if (part == "db.part/user") "    " else "      "
+      val valIndent                                                                                  = if (part == "db.part/user") "    " else "      "
 
       val attrFull = if (scalaKeywords.contains(attr)) s"`$attr`" else attr
 
@@ -235,7 +240,7 @@ case class DefFile(db: String, path: Option[String] = None, schemaDefFile: Optio
           case None                               => cardPrefix + attrType.capitalize
           case Some(refNs) if refNs.contains('_') =>
             val Array(refPart, refNs1) = refNs.split("_")
-            val resolvedNs = if (refPart == part)
+            val resolvedNs             = if (refPart == part)
               refNs1
             else if (allAttrs.contains(refPart))
               db.capitalize + s"Definition.$refPart.$refNs1"
@@ -277,20 +282,20 @@ case class DefFile(db: String, path: Option[String] = None, schemaDefFile: Optio
 
     def genNs(part: String, namespace: Ns): String = {
       val Ns(_, ns, _, descr0, _, attrs) = namespace
-      val nsIndent = if (part == "db.part/user") "  " else "    "
+      val nsIndent                       = if (part == "db.part/user") "  " else "    "
       if (ns.isEmpty) "" else {
         val allAttrs = attrs.map(_.name)
 
         val attrGroups: Seq[Seq[Attr]] = attrs.foldLeft(Seq.empty[Seq[Attr]]) {
-          case (groups, a) if groups.isEmpty   => Seq(Seq(a))
-          case (groups, a) if a.attrGroup$.isDefined   => groups :+ Seq(a)
-          case (groups, a) if groups.size == 1 => Seq(groups.head :+ a)
-          case (groups, a)                     => groups.init :+ (groups.last :+ a)
+          case (groups, a) if groups.isEmpty         => Seq(Seq(a))
+          case (groups, a) if a.attrGroup$.isDefined => groups :+ Seq(a)
+          case (groups, a) if groups.size == 1       => Seq(groups.head :+ a)
+          case (groups, a)                           => groups.init :+ (groups.last :+ a)
         }
 
         val attrGroupSections = attrGroups.map { g =>
-          val longest: Int = if (g.nonEmpty) g.map(_.name.length).max else 0
-          val attrs1: Seq[String] = g.map(attr => genAttr(part, attr, longest, allAttrs))
+          val longest: Int         = if (g.nonEmpty) g.map(_.name.length).max else 0
+          val attrs1 : Seq[String] = g.map(attr => genAttr(part, attr, longest, allAttrs))
           attrs1.mkString("\n")
         }
 
@@ -309,7 +314,7 @@ case class DefFile(db: String, path: Option[String] = None, schemaDefFile: Optio
 
     def genPart(partition: Part): String = {
       val Part(_, part, descr0, _, nss) = partition
-      val descr = descr0 match {
+      val descr                         = descr0 match {
         case None    => "  "
         case Some(d) =>
           val line = "-" * (90 - d.length)

@@ -18,7 +18,7 @@ case class EntityHistory()(implicit ctx: Ctx.Owner) extends Base() {
     (curEntity(), entityHistorySort()) match {
       case (0, _) => // no entity id marked yet
 
-      case (eid, sort) if curViews.now.contains("view05_EntityHistory") =>
+      case (eid, sort) if curViews.now.contains("view04_EntityHistory") =>
         val view = document.getElementById("entityHistoryEid")
         if (view == null) {
           // Start fresh
@@ -74,7 +74,8 @@ case class EntityHistory()(implicit ctx: Ctx.Owner) extends Base() {
               val vElementId = parentElementId + " " + attr + " " + i
 
               val txCell    = td(
-                s"$t / $tx",
+//                s"$t / $tx",
+                t,
                 cls := Rx(if (tx == curTx()) "txChosen" else "tx"),
                 onmouseover := { () =>
                   curT() = t
@@ -93,9 +94,7 @@ case class EntityHistory()(implicit ctx: Ctx.Owner) extends Base() {
                   if (tx != txPrev) txCell else td(),
                   if (tx != txPrev) td(txInstant) else td(),
                   attrCell,
-                  //                  valueCell
                   valueCell(if (asserted) () else cls := "retracted")
-
                 ).render
               )
               txPrev = tx
@@ -116,7 +115,8 @@ case class EntityHistory()(implicit ctx: Ctx.Owner) extends Base() {
               val cellType   = viewCellTypes(attr)
               val vElementId = parentElementId + " " + attr + " " + i
               val txCell     = td(
-                s"$t / $tx",
+//                s"$t / $tx",
+                t,
                 cls := Rx(if (tx == curTx()) "txChosen" else "tx"),
                 onmouseover := { () =>
                   curT() = t

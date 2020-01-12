@@ -19,8 +19,14 @@ class Callbacks(implicit ctx: Ctx.Owner)
 
   type keepBooPickleImport_Callbacks = PickleState
 
+  def saveSettings2(pairs: Seq[(String, String)]): Unit =
+    queryWire().saveSettings(pairs).call().foreach {
+      case Right(_) =>
+      //        println(s"Saved settings: " + pairs.mkString(", "))
+      case Left(err) => window.alert(err)
+    }
 
-  // New ------------------------------
+  def saveSetting(pair: (String, String)): Unit = saveSettings2(Seq(pair))
 
 
   // Query list ------------------------------
@@ -35,16 +41,6 @@ class Callbacks(implicit ctx: Ctx.Owner)
       column.copy(sortDir = sort, sortPos = sortPos)
     }
   }
-
-  def saveSettings2(pairs: Seq[(String, String)]): Unit =
-    queryWire().saveSettings(pairs).call().foreach {
-      case Right(_) =>
-      //        println(s"Saved settings: " + pairs.mkString(", "))
-      case Left(err) => window.alert(err)
-    }
-
-  def saveSetting(pair: (String, String)): Unit = saveSettings2(Seq(pair))
-
   private def updateQueryCaches(query: QueryDTO) = {
     val m = query.molecule
     savedQueries = savedQueries.map {
@@ -156,6 +152,12 @@ class Callbacks(implicit ctx: Ctx.Owner)
   protected val useQueryCallback: QueryDTO => () => Unit =
     (query: QueryDTO) => () => useQuery(query)
 
+
+  // Undo ------------------------------
+
+//  def toggleUndo(): Rx.Dynamic[Unit] = Rx{
+//    showUndo() = !showUndo.now
+//  }
 
   // Grouped ------------------------------
 

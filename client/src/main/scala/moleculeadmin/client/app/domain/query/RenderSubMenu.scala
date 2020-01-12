@@ -1,7 +1,7 @@
 package moleculeadmin.client.app.domain.query
 
 import moleculeadmin.client.app.domain.query.QueryState._
-import moleculeadmin.client.app.domain.query.submenu.{SubMenuGrouped, SubMenuNew, SubMenuQueryList, SubMenuShortCuts, SubMenuViews}
+import moleculeadmin.client.app.domain.query.submenu.{SubMenuGrouped, SubMenuNew, SubMenuQueryList, SubMenuShortCuts, SubMenuUndo, SubMenuViews}
 import moleculeadmin.client.app.element.query.SubMenuElements
 import org.scalajs.dom.html.Span
 import rx.{Ctx, Rx}
@@ -36,6 +36,7 @@ case class RenderSubMenu()(implicit val ctx: Ctx.Owner)
 
         if (modelElements.now.nonEmpty && rowCountAll > 0) {
           Seq(
+            SubMenuUndo().render,
             SubMenuGrouped().render,
             SubMenuViews().render,
           )

@@ -19,7 +19,7 @@ case class Transaction()(implicit ctx: Ctx.Owner) extends Base {
     curTx() match {
       case 0 => // no entity id marked yet
 
-      case tx if curViews.now.contains("view03_Transaction") =>
+      case tx if curViews.now.contains("view05_Transaction") =>
         val view = document.getElementById("txViewTable")
         if (view == null) {
           // Start fresh
@@ -53,7 +53,8 @@ case class Transaction()(implicit ctx: Ctx.Owner) extends Base {
           val vElementId = parentElementId + attr + v.take(20)
 
           val entityCell = if (i == 1)
-            td(s"${curT.now} / $e", cls := "txChosen")
+//            td(s"${curT.now} / $e", cls := "txChosen")
+            td(s"${curT.now}", cls := "txChosen")
           else
             th(e, cls := Rx(if (e == curEntity()) "eidChosen" else "eid"),
               onmouseover := { () => curEntity() = e })
