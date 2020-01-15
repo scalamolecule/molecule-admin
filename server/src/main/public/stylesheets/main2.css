@@ -35,7 +35,8 @@ a {
 }
 a:hover {
     color: #00A0D6;
-    text-decoration: none;
+    /*text-decoration: none;*/
+    text-decoration: underline;
 }
 
 a.discrete {
@@ -345,6 +346,81 @@ table.tableTx td.num {
     color: #49a523;
 }
 table.tableTx ul {
+    list-style-type: disc;
+    padding-inline-start: 15px;
+    margin-bottom: 0;
+    cursor: pointer;
+}
+
+
+
+
+
+table.undoTxs {
+    display: block;
+    max-height: 600px;
+    overflow-y: scroll;
+    font-size: 11px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+table.undoTxs tr.txMetaData {
+    color: #aaa;
+}
+table.undoTxs tr.txMetaData.chosen {
+    color: #888;
+    background-color: #173eff2e;
+}
+
+table.undoTxs tr.chosen {
+    background-color: #173eff2e;
+}
+
+table.undoTxs td {
+    padding: 0px 5px 0px 5px;
+    vertical-align: top;
+    cursor: default;
+}
+table.undoTxs td:nth-child(3) {
+    padding: 0px 15px 0px 5px;
+    max-width: 250px;
+}
+
+table.undoTxs td.header {
+    padding: 8px 5px 2px 5px;
+    border-top-style: solid;
+    border-top-width: 1px;
+    border-top-color: grey;
+    color: #a54ffa;
+}
+table.undoTxs td.header:nth-child(2) {
+    padding-right: 15px;
+}
+table.undoTxs td.header.chosen {
+    background-color: #173eff2e;
+}
+table.undoTxs td.header.chosen a:hover {
+    text-decoration: underline;
+}
+
+table.undoTxs td.eid {
+    font-weight: normal;
+    color: #2b7dbe;
+    vertical-align: top;
+    padding-top: 0px;
+    padding-right: 10px;
+}
+table.undoTxs td.eid.chosen {
+    color: #2400ff;
+    background-color: #3cb7ff4f;
+}
+table.undoTxs td.retracted {
+    background-color: #ffcbcb;
+}
+table.undoTxs td.num {
+    color: #49a523;
+}
+table.undoTxs ul {
     list-style-type: disc;
     padding-inline-start: 15px;
     margin-bottom: 0;

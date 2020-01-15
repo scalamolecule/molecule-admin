@@ -64,18 +64,14 @@ case class EntityHistory()(implicit ctx: Ctx.Owner) extends Base() {
           var txCur   = 0L
           var txCount = 0
           data.sortBy(t => (t._1, t._5, t._4, t._6)).foreach {
-            case (t, tx, txInstant, asserted, attr, v) => {
+            case (t, tx, txInstant, op, a, v) => {
               i += 1
               if (tx != txPrev) {
                 txCur = tx
                 txCount += 1
               }
-              val cellType   = viewCellTypes(attr)
-              val vElementId = parentElementId + " " + attr + " " + i
-
-              val txCell    = td(
-//                s"$t / $tx",
-                t,
+              val txCell     = td(
+                s"$t / $tx",
                 cls := Rx(if (tx == curTx()) "txChosen" else "tx"),
                 onmouseover := { () =>
                   curT() = t
@@ -83,18 +79,17 @@ case class EntityHistory()(implicit ctx: Ctx.Owner) extends Base() {
                   curTxInstant() = txInstant
                 }
               )
-              val valueCell = getValueCell(cellType, vElementId, v, true, 0, asserted)
-              val attrCell  = getAttrCell(attr, cellType, vElementId, valueCell, true)
+              val cellType   = viewCellTypes(a)
+              val vElementId = parentElementId + " " + a + " " + i
+              val valueCell  = getValueCell(cellType, vElementId, v, true, 0, op)
+              val attrCell   = getAttrCell(a, cellType, vElementId, valueCell, true)
               viewElement.appendChild(
                 tr(
-                  if (txCount % 2 == 0)
-                    cls := "even"
-                  else
-                    (),
+                  if (txCount % 2 == 0) cls := "even" else (),
                   if (tx != txPrev) txCell else td(),
                   if (tx != txPrev) td(txInstant) else td(),
                   attrCell,
-                  valueCell(if (asserted) () else cls := "retracted")
+                  valueCell(if (op) () else cls := "retracted")
                 ).render
               )
               txPrev = tx
@@ -102,21 +97,16 @@ case class EntityHistory()(implicit ctx: Ctx.Owner) extends Base() {
           }
 
         } else {
-          var attrCur   = ""
           var attrCount = 0
           var attrPrev  = ""
           data.sortBy(t => (t._5, t._1, t._4, t._6)).foreach {
-            case (t, tx, txInstant, asserted, attr, v) => {
+            case (t, tx, txInstant, asserted, a, v) => {
               i += 1
-              if (attr != attrPrev) {
-                attrCur = attr
+              if (a != attrPrev) {
                 attrCount += 1
               }
-              val cellType   = viewCellTypes(attr)
-              val vElementId = parentElementId + " " + attr + " " + i
               val txCell     = td(
-//                s"$t / $tx",
-                t,
+                s"$t / $tx",
                 cls := Rx(if (tx == curTx()) "txChosen" else "tx"),
                 onmouseover := { () =>
                   curT() = t
@@ -124,14 +114,13 @@ case class EntityHistory()(implicit ctx: Ctx.Owner) extends Base() {
                   curTxInstant() = txInstant
                 }
               )
+              val cellType   = viewCellTypes(a)
+              val vElementId = parentElementId + " " + a + " " + i
               val valueCell  = getValueCell(cellType, vElementId, v, true, 0, asserted)
-              val attrCell   = getAttrCell(attr, cellType, vElementId, valueCell, true)
+              val attrCell   = getAttrCell(a, cellType, vElementId, valueCell, true)
               viewElement.appendChild(
                 tr(
-                  if (attrCount % 2 == 0)
-                    cls := "even"
-                  else
-                    (),
+                  if (attrCount % 2 == 0) cls := "even" else (),
                   txCell,
                   td(txInstant),
                   attrCell(fontWeight.bold),
@@ -140,7 +129,7 @@ case class EntityHistory()(implicit ctx: Ctx.Owner) extends Base() {
                 ).render
               )
               txPrev = tx
-              attrPrev = attr
+              attrPrev = a
             }
           }
         }

@@ -36,12 +36,12 @@ object ResetDbs extends TestSuite with ExampleData with Settings {
     //          resetDbs()
     //        }
 
-//        test("Reset all and poplulate") {
-//          resetDbs()
-////                populateCoreTest(Conn("datomic:free://localhost:4334/CoreTest"))
-//          //      populatePartition(Conn("datomic:free://localhost:4334/Partition"))
-//          //      populateTree(Conn("datomic:free://localhost:4334/Tree"))
-//        }
+    //        test("Reset all and poplulate") {
+    //          resetDbs()
+    ////                populateCoreTest(Conn("datomic:free://localhost:4334/CoreTest"))
+    //          //      populatePartition(Conn("datomic:free://localhost:4334/Partition"))
+    //          //      populateTree(Conn("datomic:free://localhost:4334/Tree"))
+    //        }
 
     //    test("Reset CoreTest") {
     //      resetDbs(Seq("CoreTest"))
@@ -271,5 +271,9 @@ object ResetDbs extends TestSuite with ExampleData with Settings {
     Ns.int.uriMap$ insert List((9, None), (9, Some(Map("a" -> uri1, "bb" -> uri2))))
     Ns.int.bigIntMap$ insert List((11, None), (11, Some(Map("a" -> bigInt1, "bb" -> bigInt2))))
     Ns.int.bigDecMap$ insert List((12, None), (12, Some(Map("a" -> bigDec1, "bb" -> bigDec2))))
+
+
+    Ns.long(222).Tx(Ns.str("meta info")).save
+    Ns.long(333).Tx(Ns.str("meta with ref").Ref1.int1(444)).save
   }
 }

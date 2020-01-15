@@ -36,32 +36,35 @@ case class Transaction()(implicit ctx: Ctx.Owner) extends Base {
   def addTxRows(parentElementId: String, tx: Long, level: Int): Unit = {
     val viewElement = document.getElementById(parentElementId)
     if (viewElement != null) {
+      var isTxData = true
       queryWire().getTxData(db, tx, enumAttrs).call().foreach { data =>
         viewElement.innerHTML = ""
-        var i        = 0
-        var ePrev    = 0L
-        var eCur     = 0L
-        var eCount   = 0
-        var attrPrev = ""
-        data.foreach { case (e, attr, v, asserted) =>
+        var i      = 0
+        var ePrev  = 0L
+        var aPrev  = ""
+        var eCount = 0
+
+        data.foreach { case (e, a, v, op) =>
           i += 1
           if (e != ePrev) {
-            eCur = e
             eCount += 1
+            if (i > 1)
+              isTxData = false
           }
-          val cellType   = viewCellTypes(attr)
-          val vElementId = parentElementId + attr + v.take(20)
+          val entityCell =
+            if (i == 1 && isTxData)
+              td(s"${curT.now} / $e", cls := "txChosen")
+            else if (isTxData)
+              td()
+            else
+              th(e, cls := Rx(if (e == curEntity()) "eidChosen" else "eid"),
+                onmouseover := { () => curEntity() = e })
 
-          val entityCell = if (i == 1)
-//            td(s"${curT.now} / $e", cls := "txChosen")
-            td(s"${curT.now}", cls := "txChosen")
-          else
-            th(e, cls := Rx(if (e == curEntity()) "eidChosen" else "eid"),
-              onmouseover := { () => curEntity() = e })
-
-          val valueCell = getValueCell(cellType, vElementId, v, true, level, asserted)
-          val attr1     = if (attrPrev != attr || ePrev != e) attr else ""
-          val attrCell  = getAttrCell(attr1, cellType, vElementId, valueCell, true)
+          val cellType   = viewCellTypes(a)
+          val vElementId = s"$parentElementId $a $i"
+          val attr1      = if (e != ePrev || a != aPrev) a else ""
+          val valueCell  = getValueCell(cellType, vElementId, v, true, level, op)
+          val attrCell   = getAttrCell(attr1, cellType, vElementId, valueCell, true)
           viewElement.appendChild(
             tr(
               if (i == 1)
@@ -78,10 +81,9 @@ case class Transaction()(implicit ctx: Ctx.Owner) extends Base {
           )
 
           ePrev = e
-          attrPrev = attr
+          aPrev = a
         }
       }
     }
   }
-
 }
