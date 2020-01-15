@@ -12,33 +12,23 @@ import scala.languageFeature.implicitConversions._
 object Adhoc extends Specification
   with HelpersAdmin
   with ExampleData
-//  with TreeSchema
-  with mBrainzSchema
-{
+  //  with TreeSchema
+  with mBrainzSchema {
 
   val base = "datomic:free://localhost:4334"
 
 
   "Adhoc" >> {
 
-//          implicit val conn = Conn(base + "/meta")
-          implicit val conn = Conn(base + "/CoreTest")
-//    implicit val conn = Conn(base + "/mbrainz-1968-1973")
+    //    implicit val conn = Conn(base + "/meta")
+    //    implicit val conn = Conn(base + "/mbrainz-1968-1973")
+    implicit val conn = Conn(base + "/CoreTest")
 
-    //      val eid = 716881581322888L
-//    val eid = 17592186072911L
-//
-//    Schema.a.get.sorted foreach println
-//
-//    println(Schema.a(":Release/country").get)
-//    println(Schema.a(":country/US").get)
-//    println(Schema.a(":Country/US").get)
-//
-//
-//    println(eid.touchQuoted)
 
-    Ns.e.str.int.debugGet
-    Ns.str.int.debugInsert("a", 42)
+//    Ns.int(222).Tx(Ns.str("meta info")).save
+    Ns.int(333).Tx(Ns.str("meta with ref").Ref1.int1(444)).save
+
+
 
 
     ok

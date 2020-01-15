@@ -7,6 +7,13 @@ import scala.collection.mutable.ListBuffer
 
 trait QueryApi extends BaseApi {
 
+  type DatomTuple = (Long, String, String, Boolean) // e a v op
+  type TxData = (
+    Long, Long, String, // t, tx, txInstant (as String)
+      ListBuffer[DatomTuple], // Tx meta datoms
+      ListBuffer[DatomTuple] // datoms
+    )
+
   def query(
     db: String,
     datalogQuery: String,
@@ -29,20 +36,19 @@ trait QueryApi extends BaseApi {
     db: String,
     tx: Long,
     enumAttrs: Seq[String]
-  ): Array[(Long, String, String, Boolean)] = ???
+  ): Array[DatomTuple] = ???
 
   def getLastTxs(
     db: String,
     noOfTxs: Int,
     enumAttrs: Seq[String]
-  ): Array[(Long, Long, String, Array[(Long, String, String, Boolean)])] = ???
+  ): Array[TxData] = ???
 
   def getEntityHistory(
     db: String,
     eid: Long,
     enumAttrs: Seq[String]
   ): List[(Long, Long, String, Boolean, String, String)] = ???
-
 
 
   def upsertQuery(db: String, query: QueryDTO): Either[String, String] = ???

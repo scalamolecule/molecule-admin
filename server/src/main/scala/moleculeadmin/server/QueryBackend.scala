@@ -19,6 +19,8 @@ import moleculeadmin.shared.api.QueryApi
 import moleculeadmin.shared.ast.query.{Col, QueryDTO, QueryResult}
 import moleculeadmin.shared.ops.transform.Molecule2Model
 import scala.collection.JavaConverters._
+import scala.collection.mutable.ListBuffer
+import scala.util.Try
 
 
 class QueryBackend extends QueryApi with Base {
@@ -179,52 +181,65 @@ class QueryBackend extends QueryApi with Base {
     db: String,
     chunks: Int,
     enumAttrs: Seq[String]
-  ): Array[(Long, Long, String, Array[(Long, String, String, Boolean)])] = {
-    implicit val conn = Conn(base + "/" + db)
-    val datomicDb = conn.db
-
-    // Go arbitrary number of txs back
-    val firstT = datomicDb.basisT() - chunks * 100
-
-    println("firstT: " + firstT)
-
-    val txs = conn.datomicConn.log.txRange(firstT, null).asScala
-    println("txs: " + txs.size)
-
-
-    val txCount  = txs.size
-    val txData   = new Array[(Long, Long, String, Array[(Long, String, String, Boolean)])](txCount)
-    var i        = 0
-    var d: Datom = null
-    var attr     = ""
-    var j        = 0
+  ): Array[TxData] = {
+    val conn              = Conn(base + "/" + db)
+    val datomicDb         = conn.db
+    val firstT            = datomicDb.basisT() - chunks * 10
+    val txs               = conn.datomicConn.log.txRange(firstT, null).asScala
+    val txData            = new Array[TxData](txs.size)
+    var txIndex           = 0
+    var safeTx            = true
+    var e                 = 0L
+    var eidInTx           = 0L
+    var attr              = ""
+    var v                 = ""
+    var prevValue         = ""
+    var datom: DatomTuple = null
     txs.foreach { txMap =>
-      val t          = txMap.get(datomic.Log.T).asInstanceOf[Long]
-      val tx         = Peer.toTx(t).asInstanceOf[Long]
-      val txInstant  = localDate(datomicDb.entity(tx).get(":db/txInstant").asInstanceOf[Date])
-      val rawDatoms  = txMap.get(datomic.Log.DATA).asInstanceOf[jList[Datom]]
-      val datomCount = rawDatoms.size()
-      val datoms     = new Array[(Long, String, String, Boolean)](datomCount)
-      d = null
+      val t            = txMap.get(datomic.Log.T).asInstanceOf[Long]
+      val tx           = Peer.toTx(t).asInstanceOf[Long]
+      val txInstant    = localDate(datomicDb.entity(tx).get(":db/txInstant").asInstanceOf[Date])
+      val rawDatoms    = txMap.get(datomic.Log.DATA).asInstanceOf[jList[Datom]]
+      val datomCount   = rawDatoms.size()
+      val txMetaDatoms = new ListBuffer[DatomTuple]
+      val datoms       = new ListBuffer[DatomTuple]
+      e = 0L
       attr = ""
-      j = 0
+      safeTx = true
       if (datomCount > 0) {
-        while (j < datomCount) {
-          d = rawDatoms.get(j)
-          attr = datomicDb.ident(d.a).toString
-          datoms(j) = (
-            d.e.asInstanceOf[Long],
-            attr,
-            formatValue(conn, attr, d.v, enumAttrs),
-            d.added
+        rawDatoms.forEach { d =>
+          if (safeTx) {
+            attr = datomicDb.ident(d.a).toString
+            // Skip schema transaction
+            safeTx = attr.nonEmpty && !attr.startsWith(":db.install")
+            if (attr != ":db/txInstant") {
+              e = d.e.asInstanceOf[Long]
+              v = formatValue(conn, attr, d.v, enumAttrs)
+              if (e == tx || Try(prevValue.toLong).isSuccess && e == prevValue.toLong)
+                eidInTx = e
+              datom = (e, attr, v, d.added)
+              if (e == tx || e == eidInTx)
+                txMetaDatoms += datom
+              else
+                datoms += datom
+              prevValue = v
+            }
+          }
+        }
+        if (safeTx) {
+          txData(txIndex) = (
+            t, tx, txInstant,
+            txMetaDatoms,
+            datoms.sortBy(t => (t._1, t._2, t._4, t._3))
           )
-          j += 1
+          txIndex += 1
         }
       }
-      txData(i) = (t, tx, txInstant, datoms)
-      i += 1
     }
-    txData
+    // Return data transactions (without schema txs)
+    val txData1 = new Array[TxData](txIndex)
+    System.arraycopy(txData, 0, txData1, 0, txIndex)
+    txData1
   }
 
   override def getEntityHistory(
