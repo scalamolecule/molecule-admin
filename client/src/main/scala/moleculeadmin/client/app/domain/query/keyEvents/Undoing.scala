@@ -1,5 +1,4 @@
 package moleculeadmin.client.app.domain.query.keyEvents
-
 import autowire._
 import boopickle.Default._
 import moleculeadmin.client.app.domain.query.QueryState._
@@ -21,11 +20,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 trait Undoing  {
   type keepBooPickleImport_Undoing = PickleState
 
-
   def toggleUndo(): Unit = {
-    println("undo...")
     showUndo() = !showUndo.now
   }
-
-
 }

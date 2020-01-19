@@ -3,23 +3,20 @@ package moleculeadmin.client.app.domain.query
 import autowire._
 import boopickle.Default._
 import moleculeadmin.client.app.domain.query.QueryState._
-import moleculeadmin.client.app.domain.query.grouped.Grouped
 import moleculeadmin.client.app.domain.query.views.Base
 import moleculeadmin.client.app.element.query.GroupedAttrElements
 import moleculeadmin.client.autowire.queryWire
-import moleculeadmin.shared.styles.Color
-import org.scalajs.dom.document
-import org.scalajs.dom.html.{Element, Table}
+import org.scalajs.dom.html.Element
+import org.scalajs.dom.window
 import rx.{Ctx, Rx}
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
 import scala.concurrent.ExecutionContext.Implicits.global
-import org.scalajs.dom.{document, window}
-import scala.scalajs.js
 
 
 case class RenderUndo()(implicit ctx: Ctx.Owner)
   extends Base() with GroupedAttrElements {
+
   type keepBooPickleImport_RenderUndo = PickleState
 
   val datomTable = table(
@@ -30,10 +27,8 @@ case class RenderUndo()(implicit ctx: Ctx.Owner)
 
   def dynRender: Rx.Dynamic[TypedTag[Element]] = Rx {
     showUndo()
-    // Update after edit
-    curEntity()
     if (showUndo.now) {
-      queryWire().getLastTxs(db, 1, enumAttrs).call().foreach(addRows)
+      queryWire().getLastTxs(db, 1, enumAttrs).call().foreach(setUndoRows)
       _cardsContainer(
         _card(
           _cardHeader(h5("Undo")),
@@ -49,7 +44,22 @@ case class RenderUndo()(implicit ctx: Ctx.Owner)
     }
   }
 
-  def addRows(txs: Array[TxData]): Unit = {
+  def undoTxs(
+    txs: Array[TxData],
+    firstT: Long,
+    lastT: Long
+  ): Unit = {
+    queryWire().undoTxs(db, txs, firstT, lastT, enumAttrs).call().foreach {
+      case Right(newTxs) =>
+        setUndoRows(newTxs)
+        // Update dataTable
+        modelElements.recalc()
+      case Left(err)     => window.alert(err)
+    }
+
+  }
+
+  def setUndoRows(txs: Array[TxData]): Unit = {
     datomTable.innerHTML = ""
     datomTable.appendChild(
       tr(
@@ -91,15 +101,14 @@ case class RenderUndo()(implicit ctx: Ctx.Owner)
 
               if (i > 1) a(
                 href := "#",
-//                s"Undo last $i txs",
                 s"Undo this and following txs",
-                onclick := { () => }
+                onclick := { () => undoTxs(txs, t, txs.last._1) }
               ) else (),
               a(
                 href := "#",
                 marginLeft := 15,
                 "Undo this tx",
-                onclick := { () => }
+                onclick := { () => undoTxs(txs, t, t) }
               ),
             )
           ).render

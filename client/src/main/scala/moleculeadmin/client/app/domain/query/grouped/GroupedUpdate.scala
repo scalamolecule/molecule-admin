@@ -17,21 +17,16 @@ import scala.util.{Failure, Success, Try}
 
 
 abstract class GroupedUpdate[T](col: Col)(implicit ctx: Ctx.Owner)
-  extends GroupedData(col) with GroupedAttrElements with TypeValidation {
+  extends GroupedData[T](col) with GroupedAttrElements with TypeValidation {
 
   type keepBooPickleImport_GroupedUpdate = PickleState
 
-  def updateLambda(
-    tableRows: NodeList,
-    valueColIndex: Int,
-    eidArray: Array[Option[Double]],
-    valueArray: Array[Option[T]],
-  ): Int => () => Unit = {
+  def updateLambda(tableRows: NodeList): Int => () => Unit = {
     rowIndex: Int =>
       () => {
         val (oldStr, count) = groupedData(rowIndex)
 
-        val groupedCell    = document.getElementById(s"grouped-cell-$colIndex-$rowIndex")
+        val groupedCell    = document.getElementById(cellId(rowIndex))
           .asInstanceOf[HTMLInputElement]
         val newStr: String = _html2str(groupedCell.innerHTML)
 
@@ -171,8 +166,10 @@ abstract class GroupedUpdate[T](col: Col)(implicit ctx: Ctx.Owner)
             save.foreach {
               case Right((t, tx, txInstant)) =>
                 // Update client tx cells and arrays
-                UpdateClientTx(
-                  qr, valueArray, nsAlias, nsFull, attr, attrType, enums
+                GroupedUpdateClient(
+                  qr, valueArray,
+                  arrayIndex, colIndex,
+                  nsAlias, nsFull, attr, attrType, enums
                 ).updateClient(
                   t, tx, txInstant,
                   tableRows, newVopt, oldVopt, valueColIndex,

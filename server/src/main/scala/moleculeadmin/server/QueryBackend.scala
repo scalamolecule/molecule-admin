@@ -11,7 +11,7 @@ import db.core.dsl.coreTest.Ns
 import molecule.api.Entity
 import molecule.api.out10._
 import molecule.ast.model.{Atom, Model, NoValue}
-import molecule.ast.transactionModel.{Add, Retract, RetractEntity}
+import molecule.ast.transactionModel.{Add, Retract, RetractEntity, Statement}
 import molecule.facade.{Conn, TxReport}
 import molecule.transform.Model2Transaction
 import moleculeadmin.server.query.Rows2QueryResult
@@ -189,33 +189,37 @@ class QueryBackend extends QueryApi with Base with DateStrLocal {
     var safeTx            = true
     var e                 = 0L
     var eidInTx           = 0L
-    var attr              = ""
+    var a                 = ""
     var v                 = ""
     var prevValue         = ""
     var datom: DatomTuple = null
     txs.foreach { txMap =>
       val t            = txMap.get(datomic.Log.T).asInstanceOf[Long]
       val tx           = Peer.toTx(t).asInstanceOf[Long]
-      val txInstant    = date2strLocal(datomicDb.entity(tx).get(":db/txInstant").asInstanceOf[Date])
+      val txInstantStr = date2strLocal(datomicDb.entity(tx)
+        .get(":db/txInstant").asInstanceOf[Date])
       val rawDatoms    = txMap.get(datomic.Log.DATA).asInstanceOf[jList[Datom]]
+      //      println(t)
+      //      rawDatoms.forEach(d => println(d))
+      //      println("------")
       val datomCount   = rawDatoms.size()
       val txMetaDatoms = new ListBuffer[DatomTuple]
       val datoms       = new ListBuffer[DatomTuple]
-      e = 0L
-      attr = ""
       safeTx = true
       if (datomCount > 0) {
         rawDatoms.forEach { d =>
           if (safeTx) {
-            attr = datomicDb.ident(d.a).toString
+            a = datomicDb.ident(d.a).toString
             // Skip schema transaction
-            safeTx = attr.nonEmpty && !attr.startsWith(":db.install")
-            if (attr != ":db/txInstant") {
+            safeTx = a.nonEmpty && !a.startsWith(":db.install")
+            if (a != ":db/txInstant") {
               e = d.e.asInstanceOf[Long]
-              v = formatValue(conn, attr, d.v, enumAttrs)
-              if (e == tx || Try(prevValue.toLong).isSuccess && e == prevValue.toLong)
-                eidInTx = e
-              datom = (e, attr, v, d.added)
+              v = formatValue(conn, a, d.v, enumAttrs)
+              if (
+                e == tx ||
+                  Try(prevValue.toLong).isSuccess && e == prevValue.toLong
+              ) eidInTx = e
+              datom = (e, a, v, d.added)
               if (e == tx || e == eidInTx)
                 txMetaDatoms += datom
               else
@@ -224,11 +228,13 @@ class QueryBackend extends QueryApi with Base with DateStrLocal {
             }
           }
         }
+        //        datoms foreach println
+        //        println("=========================")
         if (safeTx) {
           txData(txIndex) = (
-            t, tx, txInstant,
+            t, tx, txInstantStr,
             txMetaDatoms,
-            datoms.sortBy(t => (t._1, t._2, t._4, t._3))
+            datoms.distinct.sortBy(t => (t._1, t._2, t._4, t._3))
           )
           txIndex += 1
         }
@@ -239,6 +245,74 @@ class QueryBackend extends QueryApi with Base with DateStrLocal {
     System.arraycopy(txData, 0, txData1, 0, txIndex)
     txData1
   }
+
+  override def undoTxs(
+    db: String,
+    txs0: Array[TxData],
+    firstT: Long,
+    lastT: Long,
+    enumAttrs: Seq[String]
+  ): Either[String, Array[TxData]] = {
+    implicit val conn = Conn(base + "/" + db)
+    val datomicDb = conn.db
+    val txs       =
+    // Reverse transactions backwards
+      conn.datomicConn.log.txRange(firstT, lastT + 1).asScala.toSeq.reverse
+    val undoneTxs = new Array[TxData](txs.size)
+    val datoms    = new ListBuffer[DatomTuple]
+    var txIndex   = 0
+    var e         = 0L
+    var a         = ""
+    var v         = ""
+    var prevValue = ""
+    withTransactor {
+      try {
+        txs.foreach { txMap =>
+          val t         = txMap.get(datomic.Log.T).asInstanceOf[Long]
+          val tx        = Peer.toTx(t).asInstanceOf[Long]
+          val rawDatoms = txMap.get(datomic.Log.DATA)
+            .asInstanceOf[jList[Datom]].asScala.distinct
+          datoms.clear()
+          val stmts        = rawDatoms.flatMap { d =>
+            e = d.e.asInstanceOf[Long]
+            a = datomicDb.ident(d.a).toString
+            v = formatValue(conn, a, d.v, enumAttrs)
+            //            println(s"e: $e  t: $t  tx: $tx  v: $v  prevV: $prevValue")
+            val stmt: Option[Statement] =
+              if (a == ":db/txInstant" ||
+                e == tx ||
+                Try(prevValue.toLong).isSuccess && e == prevValue.toLong) {
+                // metadata - todo: do we catch all this way?
+                None
+              } else {
+                datoms += ((e, a, v, !d.added))
+                if (d.added) {
+                  Some(Retract(e, a, d.v, NoValue))
+                } else {
+                  Some(Add(e, a, d.v, NoValue))
+                }
+              }
+            prevValue = v
+            stmt
+          }
+          val sortedDatoms = datoms.sortBy(t => (t._1, t._2, t._4, t._3))
+          //          sortedDatoms foreach println
+          val txR          = conn.transact(Seq(stmts))
+          val txInstantStr = date2strLocal(txR.inst)
+          undoneTxs(txIndex) = (
+            txR.t, txR.tx, txInstantStr,
+            ListBuffer.empty[DatomTuple],
+            sortedDatoms
+          )
+          txIndex += 1
+        }
+        Right(txs0 ++ undoneTxs)
+      } catch {
+        case t: Throwable => Left(t.getMessage)
+      }
+    }
+  }
+
 
   override def getEntityHistory(
     db: String,
@@ -564,6 +638,20 @@ class QueryBackend extends QueryApi with Base with DateStrLocal {
     }
   }
 
+  def getCaster(tpe: String, enumPrefix: String): String => Any = {
+    tpe match {
+      case "String"               => (v: String) => enumPrefix + v
+      case "Int" | "Long" | "ref" => (v: String) => v.toLong
+      case "Float" | "Double"     => (v: String) => v.toDouble
+      case "Boolean"              => (v: String) => v.toBoolean
+      case "Date"                 => (v: String) => str2date(v)
+      case "UUID"                 => (v: String) => UUID.fromString(v)
+      case "URI"                  => (v: String) => new URI(v)
+      case "BigInt"               => (v: String) => BigInt(v)
+      case "BigDecimal"           => (v: String) => BigDecimal(v)
+    }
+  }
+
   def getStrCaster(tpe: String, enumPrefix: String): String => Any = {
     tpe match {
       case "String"     => (v: String) => enumPrefix + v
@@ -626,8 +714,6 @@ class QueryBackend extends QueryApi with Base with DateStrLocal {
   }
 
   import moleculeadmin.shared.ast.schema
-
-
   override def insert(
     db: String,
     molecule: String,
@@ -642,17 +728,7 @@ class QueryBackend extends QueryApi with Base with DateStrLocal {
     var i      = 0
     val data   = elements.collect {
       case Atom(_, _, tpe, card, _, _, _, _) =>
-        val cast = tpe match {
-          case "String"               => (v: String) => v
-          case "Int" | "Long" | "ref" => (v: String) => v.toLong
-          case "Float" | "Double"     => (v: String) => v.toDouble
-          case "Boolean"              => (v: String) => v.toBoolean
-          case "Date"                 => (v: String) => str2date(v)
-          case "UUID"                 => (v: String) => UUID.fromString(v)
-          case "URI"                  => (v: String) => new URI(v)
-          case "BigInt"               => (v: String) => BigInt(v)
-          case "BigDecimal"           => (v: String) => BigDecimal(v)
-        }
+        val cast = getCaster(tpe, "")
         val vs   = rowValues(i)
         i += 1
         if (vs.isEmpty) {

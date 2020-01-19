@@ -105,6 +105,7 @@ trait GroupedAttrElements extends SubMenuElements with HeadElements {
 
   def _rowStr(
     rowId: String,
+    cellId: String,
     rowIndex: Int,
     curV: String,
     count: Int,
@@ -115,6 +116,7 @@ trait GroupedAttrElements extends SubMenuElements with HeadElements {
       id := rowId,
       td(rowIndex + 1),
       td(
+        id := cellId,
         contenteditable := true,
         onblur := update,
         _str2frags(curV)
@@ -127,6 +129,7 @@ trait GroupedAttrElements extends SubMenuElements with HeadElements {
 
   def _rowNum(
     rowId: String,
+    cellId: String,
     rowIndex: Int,
     curV: String,
     count: Int,
@@ -137,6 +140,7 @@ trait GroupedAttrElements extends SubMenuElements with HeadElements {
       id := rowId,
       td(rowIndex + 1),
       td(
+        id := cellId,
         textAlign.right,
         color := "#49a523",
         onblur := update,

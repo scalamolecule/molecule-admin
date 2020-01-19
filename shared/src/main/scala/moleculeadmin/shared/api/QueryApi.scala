@@ -44,6 +44,14 @@ trait QueryApi extends BaseApi {
     enumAttrs: Seq[String]
   ): Array[TxData] = ???
 
+  def undoTxs(
+    db: String,
+    txs: Array[TxData],
+    firstT: Long,
+    lastT: Long,
+    enumAttrs: Seq[String]
+  ): Either[String, Array[TxData]] = ???
+
   def getEntityHistory(
     db: String,
     eid: Long,

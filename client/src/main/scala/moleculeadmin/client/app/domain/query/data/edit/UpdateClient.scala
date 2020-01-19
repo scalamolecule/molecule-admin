@@ -13,9 +13,11 @@ abstract class UpdateClient[T](
   origArray: Array[Option[T]],
   editArray: Array[Option[T]],
   baseClass: String,
-  rowIndex: Int,
+
   arrayIndex: Int,
   colIndex: Int,
+  rowIndex: Int,
+
   related: Int,
   nsAlias: String,
   nsFull: String,
@@ -24,7 +26,6 @@ abstract class UpdateClient[T](
 )(implicit ctx: Ctx.Owner)
   extends TxLambdas(cols, qr) with TypeValidation with ColOps with Editing {
 
-  var i          = 0
   val attrFull   = s":$nsFull/${clean(attr)}"
   val enumPrefix = if (enums.isEmpty) "" else s":$nsAlias.${clean(attr)}/"
 
@@ -116,7 +117,7 @@ abstract class UpdateClient[T](
       } else {
         // Update all rows with this eid
         val eArray = qr.num(qr.arrayIndexes(eIndex))
-        i = 0
+        var i      = 0
         while (i < eArray.length) {
           eArray(i) match {
             case Some(`eid`) => updateArrays(i)
@@ -126,84 +127,100 @@ abstract class UpdateClient[T](
         }
       }
     } else {
-      i = 0
+      var i = 0
       while (i < affectedIndexes.length) {
         updateArrays(affectedIndexes(i))
         i += 1
       }
     }
 
-    // Update table row(s) ---------------------------------------
+    // Replace table tx cells ---------------------------------------
 
-    val highlightT = (curRow: TableRow) => {
+    val replaceT = (rowIndex1: Int, curRow: TableRow) => {
       // Update callback with new t
       val newCell = tLambda(
-        qr.arrayIndexes(tIndex), tIndex)(ctx)(rowIndex).render
+        qr.arrayIndexes(tIndex), tIndex)(ctx)(rowIndex1).render
       val oldCell = curRow.childNodes.item(tIndex + 1)
       curRow.replaceChild(newCell, oldCell)
     }
 
-    val highlightTx = (curRow: TableRow) => {
+    val replaceTx = (rowIndex1: Int, curRow: TableRow) => {
       // Update callback with new tx
       val newCell = txLambda(
-        qr.arrayIndexes(txIndex), txIndex)(ctx)(rowIndex).render
+        qr.arrayIndexes(txIndex), txIndex)(ctx)(rowIndex1).render
       val oldCell = curRow.childNodes.item(txIndex + 1)
       curRow.replaceChild(newCell, oldCell)
     }
 
-    val highlightTxInstant = (curRow: TableRow) => {
+    val replaceTxInstant = (rowIndex1: Int, curRow: TableRow) => {
       // Update callback with new txInstant
       val newCell = txInstantLambda(
-        qr.arrayIndexes(txInstantIndex), txInstantIndex)(ctx)(rowIndex).render
+        qr.arrayIndexes(txInstantIndex), txInstantIndex)(ctx)(rowIndex1).render
       val oldCell = curRow.childNodes.item(txInstantIndex + 1)
       curRow.replaceChild(newCell, oldCell)
     }
 
 
-    val highlightTxCells: TableRow => Unit = {
+    val replaceTxCells: (Int, TableRow) => Unit = {
       (tArray, txArray, txInstantArray) match {
-        case (None, None, None) => (_: TableRow) => ()
-        case (_, None, None)    => (curRow: TableRow) =>
-          highlightT(curRow)
-        case (None, _, None)    => (curRow: TableRow) =>
-          highlightTx(curRow)
-        case (None, None, _)    => (curRow: TableRow) =>
-          highlightTxInstant(curRow)
-        case (_, None, _)       => (curRow: TableRow) =>
-          highlightT(curRow)
-          highlightTxInstant(curRow)
-        case (None, _, _)       => (curRow: TableRow) =>
-          highlightTx(curRow)
-          highlightTxInstant(curRow)
-        case (_, _, None)       => (curRow: TableRow) =>
-          highlightT(curRow)
-          highlightTx(curRow)
-        case (_, _, _)          => (curRow: TableRow) =>
-          highlightT(curRow)
-          highlightTx(curRow)
-          highlightTxInstant(curRow)
+        case (None, None, None) =>
+          (_: Int, _: TableRow) => ()
+
+        case (_, None, None) =>
+          (rowIndex1: Int, curRow: TableRow) =>
+            replaceT(rowIndex1, curRow)
+
+        case (None, _, None) =>
+          (rowIndex1: Int, curRow: TableRow) =>
+            replaceTx(rowIndex1, curRow)
+
+        case (None, None, _) =>
+          (rowIndex1: Int, curRow: TableRow) =>
+            replaceTxInstant(rowIndex1, curRow)
+
+        case (_, None, _) =>
+          (rowIndex1: Int, curRow: TableRow) =>
+            replaceT(rowIndex1, curRow)
+            replaceTxInstant(rowIndex1, curRow)
+
+        case (None, _, _) =>
+          (rowIndex1: Int, curRow: TableRow) =>
+            replaceTx(rowIndex1, curRow)
+            replaceTxInstant(rowIndex1, curRow)
+
+        case (_, _, None) =>
+          (rowIndex1: Int, curRow: TableRow) =>
+            replaceT(rowIndex1, curRow)
+            replaceTx(rowIndex1, curRow)
+
+        case (_, _, _) =>
+          (rowIndex1: Int, curRow: TableRow) =>
+            replaceT(rowIndex1, curRow)
+            replaceTx(rowIndex1, curRow)
+            replaceTxInstant(rowIndex1, curRow)
       }
     }
 
     if (valueColIndex == -1) {
       if (related == 0) {
         // Only one row updated
-        highlightTxCells(row)
+        replaceTxCells(rowIndex, row)
       } else {
         val tableRows = row.parentNode.childNodes
-        while (i < tableRows.length) {
-          val curRow = tableRows.item(i)
+        var rowIndex  = 0
+        while (rowIndex < tableRows.length) {
+          val curRow = tableRows.item(rowIndex)
           // Update all rows matching current eid
           if (curRow.childNodes.item(eIndex + 1).textContent == s"$eid") {
-            highlightTxCells(curRow.asInstanceOf[TableRow])
+            replaceTxCells(rowIndex, curRow.asInstanceOf[TableRow])
           }
-          i += 1
+          rowIndex += 1
         }
       }
     } else {
       val tableRows = row.parentNode.childNodes
       affectedRows.foreach { rowIndex =>
-        highlightTxCells(tableRows.item(rowIndex).asInstanceOf[TableRow])
+        replaceTxCells(rowIndex, tableRows.item(rowIndex).asInstanceOf[TableRow])
       }
     }
 
@@ -213,6 +230,12 @@ abstract class UpdateClient[T](
     curT() = t
     curTx() = tx
     curTxInstant() = txInstant
+
+    // Re-calculate undo
+    showUndo.recalc()
+
+    // Re-calculate grouped
+    groupedColIndexes.recalc()
 
     // Show entity and make sure it is recalculated if it was already chosen
     curEntity() = eid
