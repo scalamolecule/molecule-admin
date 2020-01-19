@@ -30,6 +30,8 @@ case class RenderUndo()(implicit ctx: Ctx.Owner)
 
   def dynRender: Rx.Dynamic[TypedTag[Element]] = Rx {
     showUndo()
+    // Update after edit
+    curEntity()
     if (showUndo.now) {
       queryWire().getLastTxs(db, 1, enumAttrs).call().foreach(addRows)
       _cardsContainer(

@@ -18,7 +18,8 @@ case class UpdateClientTx[T](
   enums: Seq[String],
 )(implicit ctx: Ctx.Owner) extends UpdateClient[T](
   columns.now, qr, Array.empty[Option[T]], valueArray, "",
-  -1, -1, nsAlias, nsFull, attrName, enums
+  -1, -1, -1,
+  -1, nsAlias, nsFull, attrName, enums
 ) {
 
   // Not used by GroupedData

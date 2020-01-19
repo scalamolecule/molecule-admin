@@ -27,11 +27,11 @@ abstract class GroupedUpdate[T](col: Col)(implicit ctx: Ctx.Owner)
     eidArray: Array[Option[Double]],
     valueArray: Array[Option[T]],
   ): Int => () => Unit = {
-    (n: Int) =>
+    rowIndex: Int =>
       () => {
-        val (oldStr, count) = groupedData(n - 1)
+        val (oldStr, count) = groupedData(rowIndex)
 
-        val groupedCell    = document.getElementById(s"grouped-cell-$colIndex-$n")
+        val groupedCell    = document.getElementById(s"grouped-cell-$colIndex-$rowIndex")
           .asInstanceOf[HTMLInputElement]
         val newStr: String = _html2str(groupedCell.innerHTML)
 
@@ -88,7 +88,7 @@ abstract class GroupedUpdate[T](col: Col)(implicit ctx: Ctx.Owner)
             val value    = if (nonEmpty) newStr else oldStr
 
             // Update grouped data
-            groupedData = groupedData.updated(n - 1, (value, count))
+            groupedData = groupedData.updated(rowIndex, (value, count))
 
             // Update edit cell in grouped data table
             groupedCell.innerHTML = ""

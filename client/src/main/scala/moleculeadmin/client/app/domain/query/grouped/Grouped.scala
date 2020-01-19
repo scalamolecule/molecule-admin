@@ -32,7 +32,7 @@ case class Grouped[T](col: Col)
 
   // Local caches
 
-  // Selected triples of groupRowNumber/value/count
+  // Selected triples of rowIndex/value/count
   var selected = Seq.empty[(Int, String, Int)]
 
   // Current ordering of grouped data
@@ -98,7 +98,7 @@ case class Grouped[T](col: Col)
     var rowIndex = first
     while (rowIndex < last) {
       groupedTableBody.appendChild(
-        rowMaker(rowIndex + 1, groupedData(rowIndex))
+        rowMaker(rowIndex, groupedData(rowIndex))
       )
       rowIndex += 1
     }
@@ -123,40 +123,40 @@ case class Grouped[T](col: Col)
     filters() = filters.now.filterNot(_._1 == colIndex) + (colIndex -> filter)
   }
 
-  def toggleOn(n: Int, curV: String, count: Int): Unit = {
-    document.getElementById(s"grouped-row-$colIndex-$n")
+  def toggleOn(rowIndex: Int, curV: String, count: Int): Unit = {
+    document.getElementById(s"grouped-row-$rowIndex")
       .setAttribute("class", "selected")
     spanOfSelected.innerHTML = ""
     if (selected.map(_._2).contains("-")) {
       selected = selected.flatMap {
-        case (n, "-", _) =>
+        case (rowIndex1, "-", _) =>
           // Un-mark grouped value for None value
-          document.getElementById(s"grouped-row-$colIndex-$n")
+          document.getElementById(s"grouped-row-$rowIndex1")
             .removeAttribute("class")
           None
-        case s           => Some(s)
-      } :+ (n, curV, count)
+        case s                   => Some(s)
+      } :+ (rowIndex, curV, count)
     } else if (curV == "-" && selected.nonEmpty) {
       // Un-mark previous grouped when applying None
       selected.foreach {
-        case (n, _, _) =>
-          document.getElementById(s"grouped-row-$colIndex-$n")
+        case (rowIndex1, _, _) =>
+          document.getElementById(s"grouped-row-$rowIndex1")
             .removeAttribute("class")
       }
       // Mark None only
-      selected = Seq((n, curV, count))
+      selected = Seq((rowIndex, curV, count))
     } else {
-      selected = selected :+ (n, curV, count)
+      selected = selected :+ (rowIndex, curV, count)
     }
     showGrouped()
     setFilter()
   }
 
-  def toggleOff(n: Int, curV: String, count: Int): Unit = {
-    document.getElementById(s"grouped-row-$colIndex-$n")
+  def toggleOff(rowIndex: Int, curV: String, count: Int): Unit = {
+    document.getElementById(s"grouped-row-$rowIndex")
       .removeAttribute("class")
     spanOfSelected.innerHTML = ""
-    selected = selected.filterNot(_ == (n, curV, count))
+    selected = selected.filterNot(_ == (rowIndex, curV, count))
     if (selected.isEmpty) {
       filters() = filters.now - colIndex
     } else {
@@ -165,28 +165,33 @@ case class Grouped[T](col: Col)
     }
   }
 
-  val toggle = (n: Int, curV: String, count: Int) => () =>
-    if (selected.contains((n, curV, count)))
-      toggleOff(n, curV, count)
+  val toggle = (rowIndex: Int, curV: String, count: Int) => () =>
+    if (selected.contains((rowIndex, curV, count)))
+      toggleOff(rowIndex, curV, count)
     else
-      toggleOn(n, curV, count)
+      toggleOn(rowIndex, curV, count)
 
 
   val update = updateLambda(tableRows, valueColIndex, eidArray, valueArray)
 
+  def rowId(rowIndex: Int) = s"grouped-row-$rowIndex"
+
   val rowMaker: (Int, (String, Int)) => TableRow = {
     if (colType == "double") {
-      (i: Int, row: (String, Int)) =>
-        _rowNum(colIndex, i, row._1, row._2, update, toggle)
+      (rowIndex: Int, vc: (String, Int)) =>
+        _rowNum(rowId(rowIndex), rowIndex, vc._1, vc._2,
+          update(rowIndex), toggle(rowIndex, vc._1, vc._2))
     } else {
       attrType match {
         case "String" =>
-          (i: Int, row: (String, Int)) =>
-            _rowStr(colIndex, i, row._1, row._2, update, toggle)
+          (rowIndex: Int, vc: (String, Int)) =>
+            _rowStr(rowId(rowIndex), rowIndex, vc._1, vc._2,
+              update(rowIndex), toggle(rowIndex, vc._1, vc._2))
 
         case "Date" =>
-          (i: Int, row: (String, Int)) =>
-            _rowStr(colIndex, i, row._1, row._2, update, toggle)
+          (rowIndex: Int, vc: (String, Int)) =>
+            _rowStr(rowId(rowIndex), rowIndex, vc._1, vc._2,
+              update(rowIndex), toggle(rowIndex, vc._1, vc._2))
       }
     }
   }
