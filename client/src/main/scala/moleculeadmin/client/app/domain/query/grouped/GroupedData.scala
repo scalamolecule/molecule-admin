@@ -4,6 +4,7 @@ import moleculeadmin.client.app.domain.query.KeyEvents
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.shared.ast.query.Col
 import rx.Ctx
+import scalatags.JsDom.all.s
 
 
 abstract class GroupedData[T](col: Col)(implicit ctx: Ctx.Owner)
@@ -12,15 +13,25 @@ abstract class GroupedData[T](col: Col)(implicit ctx: Ctx.Owner)
   val Col(colIndex, _, nsAlias, nsFull, attr, attrType, colType, _,
   opt, enums, _, _, _, _, _) = col
 
-  val qr = queryCache.queryResult
-  val attrFull   = s":$nsFull/${clean(attr)}"
-  val enumPrefix = if (enums.isEmpty) "" else s":$nsAlias.${clean(attr)}/"
-  val isNum      = Seq("Int", "Long", "Float", "Double").contains(attrType)
-  val mandatory  = !opt
+  val qr            = queryCache.queryResult
+  val attrFull      = s":$nsFull/${clean(attr)}"
+  val enumPrefix    = if (enums.isEmpty) "" else s":$nsAlias.${clean(attr)}/"
+  val isNum         = Seq("Int", "Long", "Float", "Double").contains(attrType)
+  val mandatory     = !opt
+  val valueColIndex = colIndex + 1
+  val eidIndex      = getEidColIndex(columns.now, colIndex, nsAlias, nsFull)
+  val eidArray      = qr.num(eidIndex)
+  val arrayIndex    = qr.arrayIndexes(colIndex)
+  val valueArray    = (
+    if (colType == "double") qr.num(arrayIndex) else qr.str(arrayIndex)
+    ).asInstanceOf[Array[Option[T]]]
 
   private var rawData = Seq.empty[(T, Int)]
   var groupedData = Seq.empty[(String, Int)]
 
+
+  def rowId(rowIndex: Int) = s"grouped-row-$colIndex-$rowIndex"
+  def cellId(rowIndex: Int) = s"grouped-cell-$colIndex-$rowIndex"
 
   def sortData(ordering: Int): Unit = {
     groupedData =

@@ -8,9 +8,13 @@ import scalatags.JsDom.all.td
 import moleculeadmin.client.app.domain.query.QueryState._
 
 // Facade to UpdateClient to avoid redundant code in GroupedData
-case class UpdateClientTx[T](
+case class GroupedUpdateClient[T](
   qr: QueryResult,
   valueArray: Array[Option[T]],
+
+  arrayIndex: Int,
+  colIndex: Int,
+
   nsAlias: String,
   nsFull: String,
   attrName: String,
@@ -18,7 +22,7 @@ case class UpdateClientTx[T](
   enums: Seq[String],
 )(implicit ctx: Ctx.Owner) extends UpdateClient[T](
   columns.now, qr, Array.empty[Option[T]], valueArray, "",
-  -1, -1, -1,
+  arrayIndex, colIndex, -1,
   -1, nsAlias, nsFull, attrName, enums
 ) {
 

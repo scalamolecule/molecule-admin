@@ -18,18 +18,6 @@ case class Grouped[T](col: Col)
   (implicit ctx: Ctx.Owner) extends GroupedUpdate[T](col)
   with GroupedAttrElements with KeyEvents with FilterFactory with TypeValidation {
 
-  val tableRows     = document.getElementById("tableBody").childNodes
-  val valueColIndex = colIndex + 1
-  val eidIndex      = getEidColIndex(columns.now, colIndex, nsAlias, nsFull)
-  val eidArray      = qr.num(eidIndex)
-  val arrayIndex    = qr.arrayIndexes(col.colIndex)
-  val valueArray    =
-    (if (colType == "double")
-      qr.num(arrayIndex)
-    else
-      qr.str(arrayIndex)).asInstanceOf[Array[Option[T]]]
-
-
   // Local caches
 
   // Selected triples of rowIndex/value/count
@@ -40,6 +28,7 @@ case class Grouped[T](col: Col)
 
   val spanOfSelected   = span().render
   val groupedTableBody = _groupedTableBody(colIndex)
+
 
   def render: JsDom.TypedTag[Element] = {
     extractGroupedData()
@@ -124,14 +113,14 @@ case class Grouped[T](col: Col)
   }
 
   def toggleOn(rowIndex: Int, curV: String, count: Int): Unit = {
-    document.getElementById(s"grouped-row-$rowIndex")
+    document.getElementById(rowId(rowIndex))
       .setAttribute("class", "selected")
     spanOfSelected.innerHTML = ""
     if (selected.map(_._2).contains("-")) {
       selected = selected.flatMap {
         case (rowIndex1, "-", _) =>
           // Un-mark grouped value for None value
-          document.getElementById(s"grouped-row-$rowIndex1")
+          document.getElementById(rowId(rowIndex1))
             .removeAttribute("class")
           None
         case s                   => Some(s)
@@ -140,7 +129,7 @@ case class Grouped[T](col: Col)
       // Un-mark previous grouped when applying None
       selected.foreach {
         case (rowIndex1, _, _) =>
-          document.getElementById(s"grouped-row-$rowIndex1")
+          document.getElementById(rowId(rowIndex1))
             .removeAttribute("class")
       }
       // Mark None only
@@ -153,7 +142,7 @@ case class Grouped[T](col: Col)
   }
 
   def toggleOff(rowIndex: Int, curV: String, count: Int): Unit = {
-    document.getElementById(s"grouped-row-$rowIndex")
+    document.getElementById(rowId(rowIndex))
       .removeAttribute("class")
     spanOfSelected.innerHTML = ""
     selected = selected.filterNot(_ == (rowIndex, curV, count))
@@ -172,25 +161,23 @@ case class Grouped[T](col: Col)
       toggleOn(rowIndex, curV, count)
 
 
-  val update = updateLambda(tableRows, valueColIndex, eidArray, valueArray)
-
-  def rowId(rowIndex: Int) = s"grouped-row-$rowIndex"
+  val update = updateLambda(document.getElementById("tableBody").childNodes)
 
   val rowMaker: (Int, (String, Int)) => TableRow = {
     if (colType == "double") {
       (rowIndex: Int, vc: (String, Int)) =>
-        _rowNum(rowId(rowIndex), rowIndex, vc._1, vc._2,
+        _rowNum(rowId(rowIndex), cellId(rowIndex), rowIndex, vc._1, vc._2,
           update(rowIndex), toggle(rowIndex, vc._1, vc._2))
     } else {
       attrType match {
         case "String" =>
           (rowIndex: Int, vc: (String, Int)) =>
-            _rowStr(rowId(rowIndex), rowIndex, vc._1, vc._2,
+            _rowStr(rowId(rowIndex), cellId(rowIndex), rowIndex, vc._1, vc._2,
               update(rowIndex), toggle(rowIndex, vc._1, vc._2))
 
         case "Date" =>
           (rowIndex: Int, vc: (String, Int)) =>
-            _rowStr(rowId(rowIndex), rowIndex, vc._1, vc._2,
+            _rowStr(rowId(rowIndex), cellId(rowIndex), rowIndex, vc._1, vc._2,
               update(rowIndex), toggle(rowIndex, vc._1, vc._2))
       }
     }

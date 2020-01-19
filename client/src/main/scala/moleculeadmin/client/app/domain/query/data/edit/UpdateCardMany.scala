@@ -23,9 +23,11 @@ case class UpdateCardMany[T](
   editArray: Array[Option[T]],
   baseClass: String,
   colType: String,
-  rowIndex: Int,
+
   arrayIndex: Int,
   colIndex: Int,
+  rowIndex: Int,
+
   related: Int,
   nsAlias: String,
   nsFull: String,
@@ -37,7 +39,8 @@ case class UpdateCardMany[T](
 )(implicit ctx: Ctx.Owner)
   extends UpdateClient[T](
     cols, qr, origArray, editArray, baseClass,
-    rowIndex, arrayIndex, colIndex, related, nsAlias, nsFull, attr, enums
+    arrayIndex, colIndex, rowIndex,
+    related, nsAlias, nsFull, attr, enums
   ) {
 
   type keepBooPickleImport_UpdateCardMany = PickleState

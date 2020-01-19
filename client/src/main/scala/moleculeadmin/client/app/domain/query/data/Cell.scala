@@ -78,17 +78,17 @@ abstract class Cell(
       val updater            = card match {
         case 1 => UpdateCardOne(
           cols, qr, origArray, editArray, baseClass, colType,
-          rowIndex, arrayIndex, colIndex,
+          arrayIndex, colIndex, rowIndex,
           related, nsAlias, nsFull, attr, attrType, enums, expr
         )
         case 2 => UpdateCardMany(
           cols, qr, origArray, editArray, baseClass, colType,
-          rowIndex, arrayIndex, colIndex,
+          arrayIndex, colIndex, rowIndex,
           related, nsAlias, nsFull, attr, attrType, enums, cellType, expr
         )
         case 3 => UpdateCardMap(
           cols, qr, origArray, editArray, baseClass,
-          rowIndex, arrayIndex, colIndex,
+          arrayIndex, colIndex, rowIndex,
           related, nsAlias, nsFull, attr, attrType, enums, expr
         )
       }

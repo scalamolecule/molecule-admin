@@ -22,9 +22,11 @@ case class UpdateCardOne[T](
   editArray: Array[Option[T]],
   baseClass: String,
   colType: String,
-  rowIndex: Int,
+
   arrayIndex: Int,
   colIndex: Int,
+  rowIndex: Int,
+
   related: Int,
   nsAlias: String,
   nsFull: String,
@@ -35,7 +37,8 @@ case class UpdateCardOne[T](
 )(implicit ctx: Ctx.Owner)
   extends UpdateClient[T](
     cols, qr, origArray, editArray, baseClass,
-    rowIndex, arrayIndex, colIndex, related, nsAlias, nsFull, attrName, enums
+    arrayIndex, colIndex, rowIndex,
+    related, nsAlias, nsFull, attrName, enums
   ) {
 
   type keepBooPickleImport_UpdateCardOne = PickleState
@@ -174,6 +177,7 @@ case class UpdateCardOne[T](
             cell.focus()
         }
       }
+
     } else if (eid > 0 && oldStr != newStr) {
       if (!valid(attrType, newStr)) {
         window.alert(s"Invalid `$attrFull` value of type `$attrType`:\n$newStr")
@@ -182,7 +186,9 @@ case class UpdateCardOne[T](
         println(s"OBS: New `$attrFull` value `$newStr` will not be saved " +
           s"unless you leave cell by pressing Enter/Return.")
       }
+
+    } else {
+      // do nothing if no change
     }
-    // do nothing if no change
   }
 }
