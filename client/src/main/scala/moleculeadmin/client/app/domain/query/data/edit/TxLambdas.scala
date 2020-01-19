@@ -12,43 +12,45 @@ import scalatags.JsDom
 import scala.concurrent.ExecutionContext.Implicits.global
 
 
-abstract class TxLambdas(implicit val ctx: Ctx.Owner)
+abstract class TxLambdas(
+  cols: Seq[Col],
+  qr: QueryResult,
+)(implicit val ctx: Ctx.Owner)
   extends BodyElements with DateHandling {
 
   type keepBooPickleImport_TxLambdas = PickleState
 
 
   def tLambda(
-    qr: QueryResult,
     arrayIndex: Int,
-    cols: Seq[Col],
-    colIndex: Int
+    colIndex: Int,
   )(implicit ctx: Ctx.Owner): Int => JsDom.TypedTag[TableCell] = {
     val arrayT = qr.num(arrayIndex)
     val tx_    = cols.isDefinedAt(colIndex + 1) && cols(colIndex + 1).attrExpr == "tx"
     val j      = if (tx_) 2 else 1
     val txI_   = cols.isDefinedAt(colIndex + j) && cols(colIndex + j).attrExpr == "txInstant"
     (tx_, txI_) match {
+      // t
       case (false, false) =>
         (rowIndex: Int) =>
-          arrayT(rowIndex).fold(_tdNoEdit)(t1 =>
+          arrayT(rowIndex).fold(_tdNoEdit){t =>
             _tdOneT(
-              t1.toLong,
+              t.toLong,
               curT,
               { () =>
-                val t = arrayT(rowIndex).get.toLong
-                curT() = t
-                queryWire().getTxFromT(t).call().foreach(curTx() = _)
+                val t1 = arrayT(rowIndex).get.toLong
+                curT() = t1
+                queryWire().getTxFromT(t1).call().foreach(curTx() = _)
               }
-            ))
+            )}
 
       // t + tx
       case (true, false) =>
         val arrayTx = qr.num(arrayIndex + 1) // tx is next
         (rowIndex: Int) =>
-          arrayT(rowIndex).fold(_tdNoEdit)(t1 =>
+          arrayT(rowIndex).fold(_tdNoEdit)(t =>
             _tdOneT_tx(
-              t1.toLong,
+              t.toLong,
               arrayTx(rowIndex).get.toLong,
               curT,
               { () =>
@@ -61,16 +63,16 @@ abstract class TxLambdas(implicit val ctx: Ctx.Owner)
         val arrayIndexTxInstant = qr.arrayIndexes(colIndex + j)
         val arrayTxInstant      = qr.str(arrayIndexTxInstant)
         (rowIndex: Int) =>
-          arrayT(rowIndex).fold(_tdNoEdit)(t1 =>
+          arrayT(rowIndex).fold(_tdNoEdit)(t =>
             _tdOneT_inst(
-              t1.toLong,
+              t.toLong,
               arrayTxInstant(rowIndex).get,
               curT,
               { () =>
-                val t = arrayT(rowIndex).get.toLong
-                curT() = t
-                curTxInstant() = truncateDateStr(arrayTxInstant(rowIndex).get)
-                queryWire().getTxFromT(t).call().foreach(curTx() = _)
+                val t1 = arrayT(rowIndex).get.toLong
+                curT() = t1
+                curTxInstant() = arrayTxInstant(rowIndex).get
+                queryWire().getTxFromT(t1).call().foreach(curTx() = _)
               }))
 
       // t + tx + txInstant
@@ -88,15 +90,14 @@ abstract class TxLambdas(implicit val ctx: Ctx.Owner)
               { () =>
                 curT() = arrayT(rowIndex).get.toLong
                 curTx() = arrayTx(rowIndex).get.toLong
-                curTxInstant() = truncateDateStr(arrayTxInstant(rowIndex).get)
+                curTxInstant() = arrayTxInstant(rowIndex).get
               }))
     }
   }
 
 
-  def txLambda(qr: QueryResult,
+  def txLambda(
     arrayIndex: Int,
-    cols: Seq[Col],
     colIndex: Int
   )(implicit ctx: Ctx.Owner): Int => JsDom.TypedTag[TableCell] = {
     val arrayTx = qr.num(arrayIndex)
@@ -106,14 +107,14 @@ abstract class TxLambdas(implicit val ctx: Ctx.Owner)
       // tx
       case (false, false) =>
         (rowIndex: Int) =>
-          arrayTx(rowIndex).fold(_tdNoEdit)(tx1 =>
+          arrayTx(rowIndex).fold(_tdNoEdit)(tx =>
             _tdOneTx(
-              tx1.toLong,
+              tx.toLong,
               curTx,
               { () =>
-                val tx = arrayTx(rowIndex).get.toLong
-                curTx() = tx
-                queryWire().getTFromTx(tx).call().foreach(curT() = _)
+                val tx1 = arrayTx(rowIndex).get.toLong
+                curTx() = tx1
+                queryWire().getTFromTx(tx1).call().foreach(curT() = _)
               }))
 
       // tx + t
@@ -135,16 +136,16 @@ abstract class TxLambdas(implicit val ctx: Ctx.Owner)
         val arrayIndexTxInstant = qr.arrayIndexes(colIndex + 1)
         val arrayTxInstant      = qr.str(arrayIndexTxInstant)
         (rowIndex: Int) =>
-          arrayTx(rowIndex).fold(_tdNoEdit)(tx1 =>
+          arrayTx(rowIndex).fold(_tdNoEdit)(tx =>
             _tdOneTx_inst(
-              tx1.toLong,
+              tx.toLong,
               arrayTxInstant(rowIndex).get,
               curTx,
               { () =>
-                val tx = arrayTx(rowIndex).get.toLong
-                curTx() = tx
-                curTxInstant() = truncateDateStr(arrayTxInstant(rowIndex).get)
-                queryWire().getTFromTx(tx).call().foreach(curT() = _)
+                val tx1 = arrayTx(rowIndex).get.toLong
+                curTx() = tx1
+                curTxInstant() = arrayTxInstant(rowIndex).get
+                queryWire().getTFromTx(tx1).call().foreach(curT() = _)
               }))
 
       // tx + t + txInstant
@@ -153,24 +154,23 @@ abstract class TxLambdas(implicit val ctx: Ctx.Owner)
         val arrayIndexTxInstant = qr.arrayIndexes(colIndex + 1)
         val arrayTxInstant      = qr.str(arrayIndexTxInstant)
         (rowIndex: Int) =>
-          arrayTx(rowIndex).fold(_tdNoEdit)(tx1 =>
+          arrayTx(rowIndex).fold(_tdNoEdit)(tx =>
             _tdOneTx_t_inst(
-              tx1.toLong,
+              tx.toLong,
               arrayT(rowIndex).get.toLong,
               arrayTxInstant(rowIndex).get,
               curTx,
               { () =>
                 curTx() = arrayTx(rowIndex).get.toLong
                 curT() = arrayT(rowIndex).get.toLong
-                curTxInstant() = truncateDateStr(arrayTxInstant(rowIndex).get)
+                curTxInstant() = arrayTxInstant(rowIndex).get
               }))
     }
   }
 
 
-  def txInstantLambda(qr: QueryResult,
+  def txInstantLambda(
     arrayIndex: Int,
-    cols: Seq[Col],
     colIndex: Int
   )(implicit ctx: Ctx.Owner): Int => JsDom.TypedTag[TableCell] = {
     val arrayTxInstant = qr.str(arrayIndex)
@@ -185,7 +185,7 @@ abstract class TxLambdas(implicit val ctx: Ctx.Owner)
         (rowIndex: Int) =>
           arrayTxInstant(rowIndex).fold(_tdNoEdit)(d =>
             _tdOneTxInstant(
-              truncateDateStr(d),
+              d,
               curTxInstant,
               { () =>
                 val txInstant = arrayTxInstant(rowIndex).get
@@ -204,7 +204,7 @@ abstract class TxLambdas(implicit val ctx: Ctx.Owner)
         (rowIndex: Int) =>
           arrayTxInstant(rowIndex).fold(_tdNoEdit)(d =>
             _tdOneTxInstant_t(
-              truncateDateStr(d),
+              d,
               arrayT(rowIndex).get.toLong,
               curTxInstant,
               { () =>
@@ -223,7 +223,7 @@ abstract class TxLambdas(implicit val ctx: Ctx.Owner)
         (rowIndex: Int) =>
           arrayTxInstant(rowIndex).fold(_tdNoEdit)(d =>
             _tdOneTxInstant_tx(
-              truncateDateStr(d),
+              d,
               arrayTx(rowIndex).get.toLong,
               curTxInstant,
               { () =>
@@ -244,7 +244,7 @@ abstract class TxLambdas(implicit val ctx: Ctx.Owner)
         (rowIndex: Int) =>
           arrayTxInstant(rowIndex).fold(_tdNoEdit)(d =>
             _tdOneTxInstant_t_tx(
-              truncateDateStr(d),
+              d,
               arrayT(rowIndex).get.toLong,
               arrayTx(rowIndex).get.toLong,
               curTxInstant,
@@ -255,5 +255,4 @@ abstract class TxLambdas(implicit val ctx: Ctx.Owner)
               }))
     }
   }
-
 }

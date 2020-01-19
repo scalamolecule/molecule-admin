@@ -15,6 +15,7 @@ import molecule.ast.transactionModel.{Add, Retract, RetractEntity}
 import molecule.facade.{Conn, TxReport}
 import molecule.transform.Model2Transaction
 import moleculeadmin.server.query.Rows2QueryResult
+import moleculeadmin.server.utils.DateStrLocal
 import moleculeadmin.shared.api.QueryApi
 import moleculeadmin.shared.ast.query.{Col, QueryDTO, QueryResult}
 import moleculeadmin.shared.ops.transform.Molecule2Model
@@ -23,7 +24,7 @@ import scala.collection.mutable.ListBuffer
 import scala.util.Try
 
 
-class QueryBackend extends QueryApi with Base {
+class QueryBackend extends QueryApi with Base with DateStrLocal {
 
   // Todo: this works but seems like a hack that would be nice to avoid although the impact of
   // a few input variables is negible.
@@ -44,9 +45,6 @@ class QueryBackend extends QueryApi with Base {
     case ("URI", v)        => new java.net.URI(v).asInstanceOf[Object]
     case _                 => sys.error("Unexpected input pair to cast")
   }
-
-  private def localDate(date: Date): String =
-    new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(date)
 
   def inputs(lists: Seq[(Int, AnyRef)]): Seq[Object] = lists.sortBy(_._1).map(_._2).map {
     case l: Seq[_]                   => Util.list(l.map {
@@ -108,11 +106,11 @@ class QueryBackend extends QueryApi with Base {
     val conn = Conn(base + "/" + db)
     Entity(conn.db.entity(eid), conn, eid.asInstanceOf[Object]).touchListMax(1)
       .map {
-        case (a, date: Date) => (a, localDate(date))
+        case (a, date: Date) => (a, date2strLocal(date))
         case (a, vs: Seq[_]) =>
           if (vs.nonEmpty && vs.head.isInstanceOf[Date])
             (a, vs.map(v =>
-              localDate(v.asInstanceOf[Date])
+              date2strLocal(v.asInstanceOf[Date])
             ).mkString("__~~__"))
           else
             (a, vs.mkString("__~~__"))
@@ -136,7 +134,7 @@ class QueryBackend extends QueryApi with Base {
   ): String = v match {
     case s: String                            => formatEmpty(s)
     case e: jLong if enumAttrs.contains(attr) => ident(conn, e)
-    case d: Date                              => localDate(d)
+    case d: Date                              => date2strLocal(d)
     case v                                    => formatEmpty(v)
   }
 
@@ -198,7 +196,7 @@ class QueryBackend extends QueryApi with Base {
     txs.foreach { txMap =>
       val t            = txMap.get(datomic.Log.T).asInstanceOf[Long]
       val tx           = Peer.toTx(t).asInstanceOf[Long]
-      val txInstant    = localDate(datomicDb.entity(tx).get(":db/txInstant").asInstanceOf[Date])
+      val txInstant    = date2strLocal(datomicDb.entity(tx).get(":db/txInstant").asInstanceOf[Date])
       val rawDatoms    = txMap.get(datomic.Log.DATA).asInstanceOf[jList[Datom]]
       val datomCount   = rawDatoms.size()
       val txMetaDatoms = new ListBuffer[DatomTuple]
@@ -253,7 +251,7 @@ class QueryBackend extends QueryApi with Base {
       case (t, tx, txInstant, op, attr, v) =>
         (t,
           tx,
-          localDate(txInstant),
+          date2strLocal(txInstant),
           op,
           attr,
           formatValue(conn, attr, v, enumAttrs)
@@ -266,19 +264,16 @@ class QueryBackend extends QueryApi with Base {
   override def getTxFromT(t: Long): Long = Peer.toTx(t).asInstanceOf[Long]
 
   override def getTTxFromTxInstant(db: String, txInstantStr: String): (Long, Long) = {
-    val rawConn   = Conn(base + "/" + db).datomicConn
-    val txInstant = str2date(txInstantStr)
-    val result    = datomic.Peer.q(
-      """[:find ?t ?tx
-        |:in $ ?log ?tx
-        |:where [?tx :db/txInstant ?txInstant]
-        |       [(datomic.Peer/toT ^Long ?tx) ?t]
-        |]""".stripMargin,
+    val rawConn = Conn(base + "/" + db).datomicConn
+    val result  = datomic.Peer.q(
+      """[:find  ?t ?tx
+        | :in    $ ?txInstant
+        | :where [?tx :db/txInstant ?txInstant]
+        |        [(datomic.Peer/toT ^Long ?tx) ?t]]""".stripMargin,
       rawConn.db(),
-      rawConn.log(),
-      txInstant.asInstanceOf[Object]
+      strLocal2date(txInstantStr).asInstanceOf[Object]
     )
-    val row       = result.iterator().next()
+    val row     = result.iterator().next()
     (row.get(0).asInstanceOf[Long], row.get(1).asInstanceOf[Long])
   }
 
@@ -603,7 +598,7 @@ class QueryBackend extends QueryApi with Base {
     withTransactor {
       try {
         val txR: TxReport = conn.transact(stmtss)
-        Right((txR.t, txR.tx, localDate(txR.inst)))
+        Right((txR.t, txR.tx, date2strLocal(txR.inst)))
       } catch {
         case t: Throwable => Left(t.getMessage)
       }

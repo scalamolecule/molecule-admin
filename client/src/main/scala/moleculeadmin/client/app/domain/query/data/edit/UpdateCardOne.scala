@@ -23,6 +23,7 @@ case class UpdateCardOne[T](
   baseClass: String,
   colType: String,
   rowIndex: Int,
+  arrayIndex: Int,
   colIndex: Int,
   related: Int,
   nsAlias: String,
@@ -34,7 +35,7 @@ case class UpdateCardOne[T](
 )(implicit ctx: Ctx.Owner)
   extends UpdateClient[T](
     cols, qr, origArray, editArray, baseClass,
-    rowIndex, related, nsAlias, nsFull, attrName, enums
+    rowIndex, arrayIndex, colIndex, related, nsAlias, nsFull, attrName, enums
   ) {
 
   type keepBooPickleImport_UpdateCardOne = PickleState

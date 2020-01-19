@@ -2,11 +2,9 @@ package moleculeadmin.client.app.domain.query.data.edit
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.domain.query.data.TypeValidation
 import moleculeadmin.client.app.domain.query.keyEvents.Editing
-import moleculeadmin.client.app.element.query.datatable.BodyElements
 import moleculeadmin.shared.ast.query.{Col, QueryResult}
 import moleculeadmin.shared.ops.query.ColOps
 import org.scalajs.dom.html.{TableCell, TableRow}
-import org.scalajs.dom.raw.NodeList
 import rx.Ctx
 
 abstract class UpdateClient[T](
@@ -16,13 +14,15 @@ abstract class UpdateClient[T](
   editArray: Array[Option[T]],
   baseClass: String,
   rowIndex: Int,
+  arrayIndex: Int,
+  colIndex: Int,
   related: Int,
   nsAlias: String,
   nsFull: String,
   attr: String,
   enums: Seq[String]
 )(implicit ctx: Ctx.Owner)
-  extends BodyElements with TypeValidation with ColOps with Editing {
+  extends TxLambdas(cols, qr) with TypeValidation with ColOps with Editing {
 
   var i          = 0
   val attrFull   = s":$nsFull/${clean(attr)}"
@@ -36,6 +36,7 @@ abstract class UpdateClient[T](
     txInstantArray, txInstantIndex
     ) = getTxArrays(cols, qr, nsAlias, nsFull, attr)
 
+  // Interface for all cardinalities
   def update(
     cellId: String,
     cell: TableCell,
@@ -56,85 +57,7 @@ abstract class UpdateClient[T](
     affectedIndexes: Array[Int] = Array.empty[Int]
   ): Unit = {
 
-    // Update table row(s)
-
-    val (tString, txString) = (t.toString, tx.toString)
-
-    val tLambda = if (tIndex > 0) {
-      rowCells: NodeList => {
-        val tCell = rowCells.item(tIndex + 1).asInstanceOf[TableCell]
-        tCell.textContent = tString
-        tCell.className = "txChosen"
-      }
-    } else (_: NodeList) => ()
-
-    val txLambda = if (tIndex > 0) {
-      rowCells: NodeList => {
-        val txCell = rowCells.item(txIndex + 1).asInstanceOf[TableCell]
-        txCell.textContent = txString
-        txCell.className = "txChosen"
-      }
-    } else (_: NodeList) => ()
-
-    val txInstantLambda = if (tIndex > 0) {
-      rowCells: NodeList => {
-        val txInstantCell = rowCells.item(txInstantIndex + 1).asInstanceOf[TableCell]
-        txInstantCell.textContent = txInstant
-        txInstantCell.className = "txChosen"
-      }
-    } else (_: NodeList) => ()
-
-
-    val updateTxCells: NodeList => Unit = {
-      (tArray, txArray, txInstantArray) match {
-        case (None, None, None) => (_: NodeList) => ()
-        case (_, None, None)    => (rowCells: NodeList) =>
-          tLambda(rowCells)
-        case (None, _, None)    => (rowCells: NodeList) =>
-          txLambda(rowCells)
-        case (None, None, _)    => (rowCells: NodeList) =>
-          txInstantLambda(rowCells)
-        case (_, None, _)       => (rowCells: NodeList) =>
-          tLambda(rowCells)
-          txInstantLambda(rowCells)
-        case (None, _, _)       => (rowCells: NodeList) =>
-          txLambda(rowCells)
-          txInstantLambda(rowCells)
-        case (_, _, None)       => (rowCells: NodeList) =>
-          tLambda(rowCells)
-          txLambda(rowCells)
-        case (_, _, _)          => (rowCells: NodeList) =>
-          tLambda(rowCells)
-          txLambda(rowCells)
-          txInstantLambda(rowCells)
-      }
-    }
-
-    if (valueColIndex == -1) {
-      if (related == 0) {
-        // Only one row updated
-        updateTxCells(cell.parentNode.childNodes)
-      } else {
-        val tableRows = row.parentNode.childNodes
-        while (i < tableRows.length) {
-          val rowCells = tableRows.item(i).childNodes
-          // Update all rows matching current eid
-          if (rowCells.item(eIndex + 1).textContent == s"$eid") {
-            updateTxCells(rowCells)
-          }
-          i += 1
-        }
-      }
-    } else {
-      val tableRows = row.parentNode.childNodes
-      affectedRows.foreach { rowIndex =>
-        val rowCells = tableRows.item(rowIndex).childNodes
-        updateTxCells(rowCells)
-      }
-    }
-
-
-    // Update arrays in client memory
+    // Update arrays in client memory ---------------------------------------
 
     val updateArrays = {
       val (tDouble, txDouble) = (t.toDouble, tx.toDouble)
@@ -210,18 +133,90 @@ abstract class UpdateClient[T](
       }
     }
 
+    // Update table row(s) ---------------------------------------
 
-    // Update current tx data
+    val highlightT = (curRow: TableRow) => {
+      // Update callback with new t
+      val newCell = tLambda(
+        qr.arrayIndexes(tIndex), tIndex)(ctx)(rowIndex).render
+      val oldCell = curRow.childNodes.item(tIndex + 1)
+      curRow.replaceChild(newCell, oldCell)
+    }
+
+    val highlightTx = (curRow: TableRow) => {
+      // Update callback with new tx
+      val newCell = txLambda(
+        qr.arrayIndexes(txIndex), txIndex)(ctx)(rowIndex).render
+      val oldCell = curRow.childNodes.item(txIndex + 1)
+      curRow.replaceChild(newCell, oldCell)
+    }
+
+    val highlightTxInstant = (curRow: TableRow) => {
+      // Update callback with new txInstant
+      val newCell = txInstantLambda(
+        qr.arrayIndexes(txInstantIndex), txInstantIndex)(ctx)(rowIndex).render
+      val oldCell = curRow.childNodes.item(txInstantIndex + 1)
+      curRow.replaceChild(newCell, oldCell)
+    }
+
+
+    val highlightTxCells: TableRow => Unit = {
+      (tArray, txArray, txInstantArray) match {
+        case (None, None, None) => (_: TableRow) => ()
+        case (_, None, None)    => (curRow: TableRow) =>
+          highlightT(curRow)
+        case (None, _, None)    => (curRow: TableRow) =>
+          highlightTx(curRow)
+        case (None, None, _)    => (curRow: TableRow) =>
+          highlightTxInstant(curRow)
+        case (_, None, _)       => (curRow: TableRow) =>
+          highlightT(curRow)
+          highlightTxInstant(curRow)
+        case (None, _, _)       => (curRow: TableRow) =>
+          highlightTx(curRow)
+          highlightTxInstant(curRow)
+        case (_, _, None)       => (curRow: TableRow) =>
+          highlightT(curRow)
+          highlightTx(curRow)
+        case (_, _, _)          => (curRow: TableRow) =>
+          highlightT(curRow)
+          highlightTx(curRow)
+          highlightTxInstant(curRow)
+      }
+    }
+
+    if (valueColIndex == -1) {
+      if (related == 0) {
+        // Only one row updated
+        highlightTxCells(row)
+      } else {
+        val tableRows = row.parentNode.childNodes
+        while (i < tableRows.length) {
+          val curRow = tableRows.item(i)
+          // Update all rows matching current eid
+          if (curRow.childNodes.item(eIndex + 1).textContent == s"$eid") {
+            highlightTxCells(curRow.asInstanceOf[TableRow])
+          }
+          i += 1
+        }
+      }
+    } else {
+      val tableRows = row.parentNode.childNodes
+      affectedRows.foreach { rowIndex =>
+        highlightTxCells(tableRows.item(rowIndex).asInstanceOf[TableRow])
+      }
+    }
+
+
+    // Update current tx data ---------------------------------------
+
     curT() = t
     curTx() = tx
     curTxInstant() = txInstant
 
-    // Force marking the entity changed
+    // Show entity and make sure it is recalculated if it was already chosen
     curEntity() = eid
-
-    // don't know why we need to poke curEntity twice to redraw Entity view...
     curEntity.recalc()
-    entityHistorySort.recalc()
   }
 
   def setCellEditMode(cell: TableCell, newVopt: Option[T]): Unit = {

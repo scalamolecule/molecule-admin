@@ -1,5 +1,6 @@
 package moleculeadmin.client.app.element.query.datatable
 import molecule.util.DateHandling
+import moleculeadmin.client.app.domain.query.QueryState.editCellId
 import moleculeadmin.client.app.element.AppElements
 import moleculeadmin.client.rxstuff.RxBindings
 import org.scalajs.dom.html.{Element, TableCell, TableRow}
@@ -8,6 +9,7 @@ import rx.{Ctx, Rx}
 import scalatags.JsDom
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
+import org.scalajs.dom.{MouseEvent, document, window}
 
 
 trait BodyElements extends AppElements with DateHandling with RxBindings {
@@ -480,25 +482,15 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
 
   // t ----------------------------------------
 
-//  def _tdOneT(
-//    t: Long,
-//    curT: rx.Var[Long],
-//    mouseover: Long => () => Unit
-//  )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = td(
-//    cls := Rx(if (curT() == t) "txChosen" else "tx"),
-//    t,
-//    onmouseover := mouseover(t),
-//    //    attr("t") := t,
-//    noAggrEdit
-//  )
   def _tdOneT(
     t: Long,
     curT: rx.Var[Long],
-    mouseover:  () => Unit
+    mouseover: () => Unit
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = td(
     cls := Rx(if (curT() == t) "txChosen" else "tx"),
     t, onmouseover := mouseover, noAggrEdit
   )
+
 
   def _tdOneT_tx(
     t: Long,

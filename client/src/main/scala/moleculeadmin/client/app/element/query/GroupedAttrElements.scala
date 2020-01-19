@@ -104,50 +104,48 @@ trait GroupedAttrElements extends SubMenuElements with HeadElements {
     )
 
   def _rowStr(
-    colIndex: Int,
-    n: Int,
+    rowId: String,
+    rowIndex: Int,
     curV: String,
     count: Int,
-    update: Int => () => Unit,
-    toggle: (Int, String, Int) => () => Unit
+    update: () => Unit,
+    toggle: () => Unit
   ): TableRow =
     tr(
-      id := s"grouped-row-$colIndex-$n",
-      td(n),
+      id := rowId,
+      td(rowIndex + 1),
       td(
-        id := s"grouped-cell-$colIndex-$n",
         contenteditable := true,
-        onblur := update(n),
+        onblur := update,
         _str2frags(curV)
       ),
       td(
         count,
-        onclick := toggle(n, curV, count)
+        onclick := toggle
       )
     ).render
 
   def _rowNum(
-    colIndex: Int,
-    n: Int,
+    rowId: String,
+    rowIndex: Int,
     curV: String,
     count: Int,
-    update: Int => () => Unit,
-    toggle: (Int, String, Int) => () => Unit
+    update: () => Unit,
+    toggle: () => Unit
   ): TableRow =
     tr(
-      id := s"grouped-row-$colIndex-$n",
-      td(n),
+      id := rowId,
+      td(rowIndex + 1),
       td(
-        id := s"grouped-cell-$colIndex-$n",
         textAlign.right,
         color := "#49a523",
-        onblur := update(n),
+        onblur := update,
         contenteditable := true,
         curV,
       ),
       td(
         count,
-        onclick := toggle(n, curV, count)
+        onclick := toggle
       )
     ).render
 }

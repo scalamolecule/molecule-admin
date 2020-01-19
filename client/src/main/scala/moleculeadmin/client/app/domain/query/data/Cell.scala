@@ -21,7 +21,7 @@ abstract class Cell(
   cols: Seq[Col],
   qr: QueryResult
 )(implicit ctx: Ctx.Owner)
-  extends TxLambdas with TypeValidation with BodyElements with ColOps {
+  extends TxLambdas(cols, qr) with TypeValidation with BodyElements with ColOps {
 
   // current entity id for updates of subsequent attributes on each row
   var e = 0L
@@ -72,27 +72,30 @@ abstract class Cell(
       rowIndex: Int,
       baseClass: String
     ): () => Unit = {
+      val cellId : String    = idBase(colIndex)(rowIndex)
+      val oldVOpt: Option[T] = editArray(rowIndex)
+      val isNum  : Boolean   = Seq("Int", "Long", "ref", "datom", "Float", "Double").contains(attrType)
+      val updater            = card match {
+        case 1 => UpdateCardOne(
+          cols, qr, origArray, editArray, baseClass, colType,
+          rowIndex, arrayIndex, colIndex,
+          related, nsAlias, nsFull, attr, attrType, enums, expr
+        )
+        case 2 => UpdateCardMany(
+          cols, qr, origArray, editArray, baseClass, colType,
+          rowIndex, arrayIndex, colIndex,
+          related, nsAlias, nsFull, attr, attrType, enums, cellType, expr
+        )
+        case 3 => UpdateCardMap(
+          cols, qr, origArray, editArray, baseClass,
+          rowIndex, arrayIndex, colIndex,
+          related, nsAlias, nsFull, attr, attrType, enums, expr
+        )
+      }
       () => {
-        val cellId : String    = idBase(colIndex)(rowIndex)
-        val oldVOpt: Option[T] = editArray(rowIndex)
-        val isNum  : Boolean   = Seq("Int", "Long", "ref", "datom", "Float", "Double").contains(attrType)
-        val cell   : TableCell = document.getElementById(cellId).asInstanceOf[TableCell]
-        val row    : TableRow  = cell.parentNode.asInstanceOf[TableRow]
-        val eid    : Long      = cell.getAttribute("eid").toLong
-        val updater            = card match {
-          case 1 => UpdateCardOne(
-            cols, qr, origArray, editArray, baseClass, colType, rowIndex,
-            colIndex, related, nsAlias, nsFull, attr, attrType, enums, expr
-          )
-          case 2 => UpdateCardMany(
-            cols, qr, origArray, editArray, baseClass, colType, rowIndex,
-            related, nsAlias, nsFull, attr, attrType, enums, cellType, expr
-          )
-          case 3 => UpdateCardMap(
-            cols, qr, origArray, editArray, baseClass, rowIndex, related,
-            nsAlias, nsFull, attr, attrType, enums, expr
-          )
-        }
+        val cell: TableCell = document.getElementById(cellId).asInstanceOf[TableCell]
+        val row : TableRow  = cell.parentNode.asInstanceOf[TableRow]
+        val eid : Long      = cell.getAttribute("eid").toLong
         updater.update(cellId, cell, row, eid, oldVOpt, isNum)
       }
     }
@@ -193,7 +196,7 @@ abstract class Cell(
                 _tdOneNumNoEdit(_))
 
           case "txI" =>
-            txInstantLambda(qr, arrayIndex, cols, colIndex)
+            txInstantLambda(arrayIndex, colIndex)
 
           case _ =>
             (rowIndex: Int) =>
@@ -296,8 +299,8 @@ abstract class Cell(
           case "aggr" => (rowIndex: Int) =>
             editArray(rowIndex).fold(_tdNoAggrEdit)(_tdOneNumNoAggrEdit(_))
 
-          case "t"  => tLambda(qr, arrayIndex, cols, colIndex)
-          case "tx" => txLambda(qr, arrayIndex, cols, colIndex)
+          case "t"  => tLambda(arrayIndex, colIndex)
+          case "tx" => txLambda(arrayIndex, colIndex)
 
           case _ =>
             (rowIndex: Int) =>

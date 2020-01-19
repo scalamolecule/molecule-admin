@@ -4,11 +4,13 @@ import java.lang.{Double => jDouble, Long => jLong}
 import java.util.{Date, List => jList, Map => jMap}
 import clojure.lang.{Keyword, LazySeq, PersistentHashSet, PersistentVector}
 import molecule.util.DateHandling
+import moleculeadmin.server.utils.DateStrLocal
 import moleculeadmin.shared.ast.query.Col
 import moleculeadmin.shared.util.HelpersAdmin
 import scala.collection.mutable.ListBuffer
 
-class Clojure2Scala(rowCount: Int) extends HelpersAdmin with DateHandling {
+class Clojure2Scala(rowCount: Int)
+  extends HelpersAdmin with DateHandling with DateStrLocal {
 
   protected var strArrays     = /* 1 */ List.empty[Array[Option[String]]]
   protected var numArrays     = /* 2 */ List.empty[Array[Option[Double]]]
@@ -36,8 +38,15 @@ class Clojure2Scala(rowCount: Int) extends HelpersAdmin with DateHandling {
     strArrays = strArrays :+ array
     updateColTypes(colIndex, 1)
     col.attrType match {
-      case "Date" => (row: jList[AnyRef], i: Int) => array(i) = Some(date2str(row.get(colIndex).asInstanceOf[Date]))
-      case _      => (row: jList[AnyRef], i: Int) => array(i) = Some(row.get(colIndex).toString)
+      case "Date" if col.attrExpr == "txInstant" =>
+        (row: jList[AnyRef], i: Int) =>
+          array(i) = Some(date2strLocal(row.get(colIndex).asInstanceOf[Date]))
+      case "Date"                                =>
+        (row: jList[AnyRef], i: Int) =>
+          array(i) = Some(date2str(row.get(colIndex).asInstanceOf[Date]))
+      case _                                     =>
+        (row: jList[AnyRef], i: Int) =>
+          array(i) = Some(row.get(colIndex).toString)
     }
   }
 
@@ -470,7 +479,7 @@ class Clojure2Scala(rowCount: Int) extends HelpersAdmin with DateHandling {
     updateColTypes(colIndex, 5)
     var vs = new Array[String](2)
     col.attrType match {
-      case _      =>
+      case _ =>
         (row: jList[AnyRef], i: Int) =>
           val it  = row.get(colIndex).asInstanceOf[PersistentHashSet].iterator
           var map = Map.empty[String, String]
