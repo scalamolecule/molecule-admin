@@ -2,6 +2,7 @@ package moleculeadmin.servertest
 
 import ammonite.ops.{home, write}
 import datomic.Peer
+import db.admin.dsl.meta.{user_DbSettings, user_User}
 import db.admin.schema.MetaSchema
 import db.core.dsl.coreTest._
 import db.core.dsl.tree._
@@ -31,10 +32,11 @@ object ResetDbs extends TestSuite with ExampleData with Settings {
   val protocol = "free"
   val base     = "datomic:free://localhost:4334"
 
+
   val tests = Tests {
-    //        test("Reset all") {
-    //          resetDbs()
-    //        }
+    //    test("Reset all") {
+    //      resetDbs()
+    //    }
 
     //        test("Reset all and poplulate") {
     //          resetDbs()
@@ -50,10 +52,6 @@ object ResetDbs extends TestSuite with ExampleData with Settings {
 
     test("Reset CoreTest") {
       implicit val conn = recreateDbFrom(CoreTestSchema, "localhost:4334/CoreTest", protocol)
-      //      Ns.int(1).Ref1.int1(2).Ref2.int2(3).debugSave
-      //      Ns.int(1).Ref1.int1(2).Ref2.int2(3).save
-      //
-      //      Ns.int(4).Ref1.int1(5).Ref2.int2(6).save
 
       import datomic.Util
       conn.datomicConn.transact(Util.list(
@@ -68,14 +66,10 @@ object ResetDbs extends TestSuite with ExampleData with Settings {
         Util.list(":db/add", Peer.tempid(":db.part/user"), ":Ns/int", 3.asInstanceOf[Object]),
       ).asInstanceOf[java.util.List[AnyRef]]).get
 
-      //      Ns.int.debugInsert(1, 2, 3)
-      ////      Ns.int.insert(1, 2, 3)
-      //      Ns.int.str insert List((1, "a"))
-      //      Ns.int.str debugInsert List(
-      //        (2, "b"),
-      //        (3, "c"),
-      //        (4, "d"),
-      //      )
+      val metaConn     = Conn(base + "/meta")
+      val dbSettingsId = user_User.username_("admin")
+        .DbSettings.e.Db.name_("CoreTest").get(metaConn)
+      user_DbSettings(dbSettingsId).undoneTs().update(metaConn)
 
       (new QueryBackend).getLastTxs("CoreTest", 5, Nil)
     }

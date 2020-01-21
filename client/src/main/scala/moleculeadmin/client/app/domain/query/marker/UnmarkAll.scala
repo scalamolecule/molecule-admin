@@ -15,8 +15,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 object UnmarkAll extends AppElements {
   type keepBooPickleImport_UnmarkAll = PickleState
 
-  var i = 0
-
   def apply(
     tableBody: TableSection,
     colIndex: Int,
@@ -32,6 +30,7 @@ object UnmarkAll extends AppElements {
     // Toggle off marker icon in all entity columns
     val rows : HTMLCollection = tableBody.children
     var cells: HTMLCollection = null
+    var i                     = 0
     while (i < rows.length) {
       cells = rows(i).children
       eidCols.foreach { col =>
@@ -45,10 +44,10 @@ object UnmarkAll extends AppElements {
     // Save asynchronously in meta db
     queryWire().unmarkAll(db, dbSettingsIdOpt, tpe).call()
       .foreach {
-        case Left(err)            => window.alert(err)
         case Right(dbSettingsId1) =>
           dbSettingsIdOpt = Some(dbSettingsId1)
           println(marked + s" $rowCount entity ids")
+        case Left(err)            => window.alert(err)
       }
 
     // Forget eids
@@ -61,9 +60,10 @@ object UnmarkAll extends AppElements {
     // Set marker to false for all entity id columns
     eidCols.foreach { col =>
       // Update cached marker index
-      val curMarkerIndex = curMarkerIndexes(col)
-      i = 0
-      while (i < curMarkerIndex.length) {
+      val curMarkerIndex       = curMarkerIndexes(col)
+      var i                    = 0
+      val curMarkerIndexLength = curMarkerIndex.length
+      while (i < curMarkerIndexLength) {
         curMarkerIndex(i) = false
         i += 1
       }

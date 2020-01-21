@@ -107,9 +107,10 @@ abstract class GroupedUpdate[T](col: Col)(implicit ctx: Ctx.Owner)
               )
             }
 
-            var affectedRows = List.empty[Int]
-            var i            = 0
-            while (i < tableRows.length) {
+            var affectedRows    = List.empty[Int]
+            var i               = 0
+            val tableRowsLength = tableRows.length
+            while (i < tableRowsLength) {
               val cell  = tableRows.item(i).childNodes.item(valueColIndex).asInstanceOf[TableCell]
               val cellV = html2value(cell.innerHTML)
               if (oldStr == cellV) {
@@ -121,20 +122,20 @@ abstract class GroupedUpdate[T](col: Col)(implicit ctx: Ctx.Owner)
             }
 
             // Update value array and collect entity ids
-            val filterIndex = queryCache.filterIndex
-            val indexBridge = {
+            val filterIndex      = queryCache.filterIndex
+            val indexBridge      = {
               if (filterIndex.nonEmpty)
                 (i: Int) => filterIndex(i)
               else
                 (i: Int) => i
             }
-            val length      = actualRowCount // (filtered)
-            val positives   = new Array[Int](length)
-            var eids        = List.empty[Long]
+            val filteredRowCount = actualRowCount
+            val positives        = new Array[Int](filteredRowCount)
+            var eids             = List.empty[Long]
             i = 0
             var posIndex = 0
             var j        = 0
-            while (i < length) {
+            while (i < filteredRowCount) {
               j = indexBridge(i)
               if (valueArray(j) == oldVopt) {
                 eids = eidArray(j).get.toLong :: eids

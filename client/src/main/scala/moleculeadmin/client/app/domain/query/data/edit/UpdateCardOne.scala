@@ -105,7 +105,8 @@ case class UpdateCardOne[T](
           // todo: should we allow group editing related values at all?
           val eArray = qr.num(qr.arrayIndexes(eIndex))
           var i      = 0
-          while (i < eArray.length) {
+          val length = eArray.length
+          while (i < length) {
             eArray(i) match {
               case Some(`eid`) => editArray(i) = newVopt
               case _           =>

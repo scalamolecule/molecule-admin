@@ -5,7 +5,6 @@ import moleculeadmin.shared.ast.query.{Col, QueryResult}
 
 trait SortIndex {
 
-  var i = 0
 
   def getSortIndex(
     qr: QueryResult,
@@ -45,7 +44,7 @@ trait SortIndex {
     ord1: Ordering[T1],
     ord2: Ordering[T2]): Array[Int] = {
     val indexArray = new Array[(Int, T1, T2)](rowCount)
-    i = 0
+    var i = 0
     while (i < rowCount) {
       indexArray(i) = (i, array1(i), array2(i))
       i += 1
@@ -67,7 +66,7 @@ trait SortIndex {
     ord2: Ordering[T2],
     ord3: Ordering[T3]): Array[Int] = {
     val indexArray = new Array[(Int, T1, T2, T3)](rowCount)
-    i = 0
+    var i = 0
     while (i < rowCount) {
       indexArray(i) = (i, array1(i), array2(i), array3(i))
       i += 1
@@ -97,7 +96,7 @@ trait SortIndex {
     ord3: Ordering[T3],
     ord4: Ordering[T4]): Array[Int] = {
     val indexArray = new Array[(Int, T1, T2, T3, T4)](rowCount)
-    i = 0
+    var i = 0
     while (i < rowCount) {
       indexArray(i) = (i, array1(i), array2(i), array3(i), array4(i))
       i += 1
@@ -131,7 +130,7 @@ trait SortIndex {
     ord4: Ordering[T4],
     ord5: Ordering[T5]): Array[Int] = {
     val indexArray = new Array[(Int, T1, T2, T3, T4, T5)](rowCount)
-    i = 0
+    var i = 0
     while (i < rowCount) {
       indexArray(i) = (i, array1(i), array2(i), array3(i), array4(i), array5(i))
       i += 1

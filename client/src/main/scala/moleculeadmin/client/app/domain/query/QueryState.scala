@@ -112,6 +112,10 @@ object QueryState {
   var curFlags  = Set.empty[Long]
   var curChecks = Set.empty[Long]
 
+  // Undo pairs
+  var undone2new = Map.empty[Long, Long]
+  var new2undone = Map.empty[Long, Long]
+
   // Transactions
   val curTxD       = Var((0L, 0L, ""))
   val curT         = Var(0L)

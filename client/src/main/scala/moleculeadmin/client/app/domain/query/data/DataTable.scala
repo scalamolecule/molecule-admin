@@ -103,7 +103,7 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
             p(), p(b("Query")), pre(query.toString()),
             p(), p(b("Datalog")), pre(datalogQuery),
             p(), p(b("Cols")), pre(columns.now.mkString("\n")),
-            p(), p(b("Stacktrace")), ul(for (l <- msgs.tail) yield li(l))
+            p(), p(b("Stacktrace")), ul(msgs.tail.map(li(_)))
           ).render
         )
     }
@@ -137,7 +137,7 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
           columns() = getCols(elements)
           _rowCol1(
             "Please select non-generic attr/ref in empty namespaces:",
-            ul(for (ns <- emptyNamespaces(elements)) yield li(ns))
+            ul(emptyNamespaces(elements).map(li(_)))
           )
         }
 
@@ -164,7 +164,9 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
           offset() = 0
           curAttrs = columns.now.map(c => s":${c.nsFull}/${c.attr}")
 
-          // trigger views (columns trigger killed, so that is dormant here)
+          // Re-calculate other elements
+          showUndo.recalc()
+          groupedColIndexes.recalc()
           curViews.recalc()
 
           registerKeyEvents
