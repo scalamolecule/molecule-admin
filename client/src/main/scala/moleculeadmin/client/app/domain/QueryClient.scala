@@ -21,7 +21,7 @@ import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 @JSExportTopLevel("QueryClient")
 object QueryClient
   extends RxBindings with TreeOps with SchemaOps with ColOps
-  with Model2Molecule with AppElements with KeyEvents {
+    with Model2Molecule with AppElements with KeyEvents {
 
   type keepBooPickleImport_QueryClient = PickleState
 
@@ -30,7 +30,11 @@ object QueryClient
 
   @JSExport
   def load(db0: String): Unit = queryWire().loadMetaData(db0).call().map {
-    case (dbs, metaSchema, (settings, stars, flags, checks, queries)) =>
+    case (
+      dbs,
+      metaSchema,
+      (settings, stars, flags, checks, undoneTs, queries)
+      ) =>
 
       // Uncomment to test dynamic ScalaFiddle compilation
       // import moleculeadmin.client.app.domain.query.data.groupedit.compileTest.TestScalaFiddle
@@ -41,6 +45,7 @@ object QueryClient
       nsMap = mkNsMap(metaSchema)
       viewCellTypes = mkViewCellTypes(nsMap)
       enumAttrs = mkEnumAttrs(nsMap)
+
 
       //      settings.toList.sortBy(_._1) foreach println
       //      println("---------")
@@ -53,9 +58,20 @@ object QueryClient
         limit() = settings.getOrElse("limit", "20").toInt
         querySelection() = settings.getOrElse("querySelection", "a")
         showViews = settings.getOrElse("showViews", "false").toBoolean
+
         curViews() = settings.collect {
           case (k, "true") if k.startsWith("view") => k
         }.toSeq
+
+        var undoneT = 0L
+        var newT = 0L
+        undoneTs.foreach { pair =>
+          undoneT = pair & 0xFFFFFFF
+          newT = pair >> 32
+          undone2new = undone2new + (undoneT -> newT)
+          new2undone = new2undone + (newT -> undoneT)
+        }
+
         savedQueries = queries
         curStars = stars
         curFlags = flags

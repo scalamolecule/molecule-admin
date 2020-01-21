@@ -4,40 +4,42 @@ import autowire._
 import boopickle.Default._
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.domain.query.views.Base
-import moleculeadmin.client.app.element.query.GroupedAttrElements
+import moleculeadmin.client.app.element.query.{GroupedAttrElements, UndoElements}
 import moleculeadmin.client.autowire.queryWire
 import org.scalajs.dom.html.Element
 import org.scalajs.dom.window
 import rx.{Ctx, Rx}
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
+import scala.collection.mutable.ListBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
 
 
 case class RenderUndo()(implicit ctx: Ctx.Owner)
-  extends Base() with GroupedAttrElements {
+  extends Base() with UndoElements {
 
   type keepBooPickleImport_RenderUndo = PickleState
 
-  val datomTable = table(
-    cls := "undoTxs",
-    id := "undoTxs"
-  ).render
+  var t2tx           = Map.empty[Long, Long]
+  var t2txInstant    = Map.empty[Long, String]
+  var cleanMouseover = true
 
 
   def dynRender: Rx.Dynamic[TypedTag[Element]] = Rx {
     showUndo()
     if (showUndo.now) {
-      queryWire().getLastTxs(db, 1, enumAttrs).call().foreach(setUndoRows)
-      _cardsContainer(
-        _card(
-          _cardHeader(h5("Undo")),
-          _cardBody(
-            padding := 0,
-            datomTable
-          )
-        )
-      )
+      queryWire().getLastTxs(db, 1, enumAttrs).call().foreach {
+        case Right(txData) =>
+          txData.foreach { txD =>
+            t2tx = t2tx + (txD._1 -> txD._2)
+            t2txInstant = t2txInstant + (txD._1 -> txD._3)
+          }
+          setUndoRows(txData)
+
+        case Left(err) =>
+          setUndoRows(Array.empty[TxData], err)
+      }
+      container
     }
     else {
       span()
@@ -46,12 +48,21 @@ case class RenderUndo()(implicit ctx: Ctx.Owner)
 
   def undoTxs(
     txs: Array[TxData],
-    firstT: Long,
-    lastT: Long
+    ts: Seq[Long]
   ): Unit = {
-    queryWire().undoTxs(db, txs, firstT, lastT, enumAttrs).call().foreach {
+    val tsNotUndone = ts.diff(undone2new.keySet.toList).sorted
+    queryWire().undoTxs(db, tsNotUndone, enumAttrs).call().foreach {
       case Right(newTxs) =>
-        setUndoRows(newTxs)
+        // Update local undone t pair caches
+        tsNotUndone.reverse.zip(newTxs).foreach {
+          case (t, newTx) =>
+            undone2new = undone2new + (t -> newTx._1)
+            new2undone = new2undone + (newTx._1 -> t)
+        }
+
+        // Render undo
+        setUndoRows(txs ++ newTxs)
+
         // Update dataTable
         modelElements.recalc()
       case Left(err)     => window.alert(err)
@@ -59,127 +70,104 @@ case class RenderUndo()(implicit ctx: Ctx.Owner)
 
   }
 
-  def setUndoRows(txs: Array[TxData]): Unit = {
+
+  def setUndoRows(txs: Array[TxData], err: String = ""): Unit = {
+    def from(t: Long): Seq[Long] = {
+      txs.collect {
+        case tx if tx._1 >= t && tx._5.nonEmpty => tx._1
+      }
+    }
+
+    var countDown = txs.length
+    var ePrev     = 0L
+    var aPrev     = ""
+
+
+    val loadMore = { () => println("todo...") }
+
+
+    // Fill datomTable
     datomTable.innerHTML = ""
     datomTable.appendChild(
-      tr(
-        td(
-          colspan := 3,
-          paddingBottom := 5,
-          a(href := "#", "Load more...")
-        )
-      ).render
+      _loadMoreRow(err, loadMore)
     )
-
-    var i     = txs.length
-    var ePrev = 0L
-    var aPrev = ""
 
     txs.foreach {
       case (t, tx, txInstant, txMetaDatoms, datoms) =>
         ePrev = 0L
         aPrev = ""
         val setTx = { () =>
-          curT() = t
-          curTx() = tx
-          curTxInstant() = txInstant
-        }
-
-        // t -------------------------------------------------------------------
-
-        datomTable.appendChild(
-          tr(
-            onmouseover := setTx,
-            td(
-              cls := Rx(if (tx == curTx()) "header chosen" else "header"),
-              t
-            ),
-            td(
-              colspan := 2,
-              cls := Rx(if (tx == curTx()) "header chosen" else "header"),
-              textAlign.right,
-
-              if (i > 1) a(
-                href := "#",
-                s"Undo this and following txs",
-                onclick := { () => undoTxs(txs, t, txs.last._1) }
-              ) else (),
-              a(
-                href := "#",
-                marginLeft := 15,
-                "Undo this tx",
-                onclick := { () => undoTxs(txs, t, t) }
-              ),
-            )
-          ).render
-        )
-
-
-        // txInstant -----------------------------------------------------------
-
-        datomTable.appendChild(
-          tr(
-            cls := Rx(if (tx == curTx()) "txMetaData chosen" else "txMetaData"),
-            onmouseover := setTx,
-            td(tx),
-            td(":db/txInstant"),
-            td(txInstant),
-          ).render
-        )
-
-
-        // tx meta data --------------------------------------------------------
-
-        txMetaDatoms.foreach {
-          case (e, a, v, _) => {
-            datomTable.appendChild(
-              tr(
-                cls := Rx(if (tx == curTx()) "txMetaData chosen" else "txMetaData"),
-                onmouseover := setTx,
-                td(e),
-                td(a),
-                td(v),
-              ).render
-            )
+          if (cleanMouseover) {
+            curT() = t
+            curTx() = tx
+            curTxInstant() = txInstant
+          } else {
+            cleanMouseover = true
           }
         }
 
-
-        // tx data -------------------------------------------------------------
-
-        datoms.foreach {
-          case (e, a, v, op) => {
-            val entityCell =
-              if (e != ePrev)
-                td(
-                  e,
-                  cls := Rx(if (e == curEntity()) "eid chosen" else "eid"),
-                  onmouseover := { () => curEntity() = e }
-                )
-              else
-                td()
-
-            val cellType   = viewCellTypes(a)
-            val vElementId = s"undoTxs $i $t $a"
-            val attr1      = if (e != ePrev || a != aPrev) a else ""
-            val valueCell  = getValueCell(cellType, vElementId, v, true, 0, op)
-            val attrCell   = getAttrCell(attr1, cellType, vElementId, valueCell, true)
-
-            datomTable.appendChild(
-              tr(
-                cls := Rx(if (tx == curTx()) "chosen" else ""),
-                onmouseover := setTx,
-                entityCell,
-                attrCell,
-                valueCell
-              ).render
-            )
-            ePrev = e
-            aPrev = a
+        val highlightUndoneT = { () =>
+          new2undone.get(t).fold(()) { undoneT =>
+            cleanMouseover = false
+            curT() = undoneT
+            t2tx.get(undoneT).fold(())(curTx() = _)
+            t2txInstant.get(undoneT).fold(())(curTxInstant() = _)
           }
         }
+        val highlightNewT    = { () =>
+          undone2new.get(t).fold(()) { newT =>
+            cleanMouseover = false
+            curT() = newT
+            t2tx.get(newT).fold(())(curTx() = _)
+            t2txInstant.get(newT).fold(())(curTxInstant() = _)
+          }
+        }
+        val canUndo          = !(datoms.isEmpty || undone2new.contains(t))
+        val notLast          = countDown > 1
+        val undoFollowing    = { () => undoTxs(txs, from(t)) }
+        val undoThis         = { () => undoTxs(txs, Seq(t)) }
 
-        i -= 1
+        datomTable.appendChild(
+          _headerRow(
+            t, tx,
+            setTx,
+            highlightUndoneT,
+            highlightNewT,
+            canUndo,
+            notLast,
+            undoFollowing,
+            undoThis
+          )
+        )
+
+        datomTable.appendChild(
+          _txInstantRow(tx, txInstant, setTx)
+        )
+
+        txMetaDatoms.foreach { case (e, a, v, _) =>
+          datomTable.appendChild(
+            _txMetaDataRow(tx, e, a, v, setTx)
+          )
+        }
+
+        datoms.foreach { case (e, a, v, op) =>
+          val cellType        = viewCellTypes(a)
+          val vElementId      = s"undoTxs $countDown $t $a"
+          val showEntity      = e != ePrev
+          val attr1           = if (showEntity || a != aPrev) a else ""
+          val highlightEntity = { () => curEntity() = e }
+          val valueCell       = getValueCell(cellType, vElementId, v, true, 0, op)
+          val attrCell        = getAttrCell(attr1, cellType, vElementId, valueCell, true)
+          ePrev = e
+          aPrev = a
+          datomTable.appendChild(
+            _txDataRow(
+              tx, e, a, v, setTx,
+              showEntity, highlightEntity, attrCell, valueCell)
+          )
+        }
+
+        countDown -= 1
     }
 
     // Scroll to bottom

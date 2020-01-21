@@ -42,13 +42,11 @@ trait QueryApi extends BaseApi {
     db: String,
     noOfTxs: Int,
     enumAttrs: Seq[String]
-  ): Array[TxData] = ???
+  ): Either[String, Array[TxData]] = ???
 
   def undoTxs(
     db: String,
-    txs: Array[TxData],
-    firstT: Long,
-    lastT: Long,
+    ts: Seq[Long],
     enumAttrs: Seq[String]
   ): Either[String, Array[TxData]] = ???
 

@@ -118,7 +118,8 @@ abstract class UpdateClient[T](
         // Update all rows with this eid
         val eArray = qr.num(qr.arrayIndexes(eIndex))
         var i      = 0
-        while (i < eArray.length) {
+        val length = eArray.length
+        while (i < length) {
           eArray(i) match {
             case Some(`eid`) => updateArrays(i)
             case _           =>
@@ -127,8 +128,9 @@ abstract class UpdateClient[T](
         }
       }
     } else {
-      var i = 0
-      while (i < affectedIndexes.length) {
+      var i      = 0
+      val length = affectedIndexes.length
+      while (i < length) {
         updateArrays(affectedIndexes(i))
         i += 1
       }
@@ -208,7 +210,8 @@ abstract class UpdateClient[T](
       } else {
         val tableRows = row.parentNode.childNodes
         var rowIndex  = 0
-        while (rowIndex < tableRows.length) {
+        val length    = tableRows.length
+        while (rowIndex < length) {
           val curRow = tableRows.item(rowIndex)
           // Update all rows matching current eid
           if (curRow.childNodes.item(eIndex + 1).textContent == s"$eid") {

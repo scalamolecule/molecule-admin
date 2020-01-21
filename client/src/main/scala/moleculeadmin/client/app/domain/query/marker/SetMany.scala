@@ -2,7 +2,7 @@ package moleculeadmin.client.app.domain.query.marker
 
 import autowire._
 import boopickle.Default._
-import moleculeadmin.client.app.domain.query.QueryState._
+import moleculeadmin.client.app.domain.query.QueryState.{cachedFilterIndex, _}
 import moleculeadmin.client.app.element.AppElements
 import moleculeadmin.client.autowire.queryWire
 import org.scalajs.dom.html.TableSection
@@ -15,7 +15,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 object SetMany extends AppElements {
   type keepBooPickleImport_SetMany = PickleState
 
-  var i                     = 0
   var entityRow             = 0
   var cells: HTMLCollection = null
   var cell : Element        = null
@@ -41,8 +40,9 @@ object SetMany extends AppElements {
       val filteredEidArray: Array[Option[Double]] =
         if (cachedFilterIndex.nonEmpty) {
           val a2 = new Array[Option[Double]](cachedFilterIndex.length)
-          i = 0
-          while (i < cachedFilterIndex.length) {
+          var i = 0
+          val cachedFilterIndexLength = cachedFilterIndex.length
+          while (i < cachedFilterIndexLength) {
             a2(i) = eidArray(cachedFilterIndex(i))
             i += 1
           }
@@ -109,8 +109,9 @@ object SetMany extends AppElements {
           // Update column only if it contains eid
           entityIndexOpt.foreach { entityIndex =>
             val curMarkerIndex: Array[Boolean] = curMarkerIndexes(col)
-            i = 0
-            while (i < entityIndex.length) {
+            var i = 0
+            val entityIndexLength = entityIndex.length
+            while (i < entityIndexLength) {
               entityRow = entityIndex(i)
               curMarkerIndex(entityRow) = newState
               i += 1
@@ -125,8 +126,9 @@ object SetMany extends AppElements {
     eidCols.length match {
       case 1 => {
         // With only 1 eid column we can toggle table rows first
-        i = 0
-        while (i < rows.length) {
+        var i = 0
+        val rowsLength = rows.length
+        while (i < rowsLength) {
           cells = rows(i).children
           toggleIconCurCol()
           i += 1
@@ -139,8 +141,9 @@ object SetMany extends AppElements {
         val c2 = eidCols.filterNot(_ == tableCol).head
 
         // Update table rows
-        i = 0
-        while (i < rows.length) {
+        var i = 0
+        val rowsLength = rows.length
+        while (i < rowsLength) {
           cells = rows(i).children
           toggleIconCurCol()
           toggleIconOtherCol(c2)
@@ -151,8 +154,9 @@ object SetMany extends AppElements {
 
       case 3 => {
         val Seq(c2, c3) = eidCols.filterNot(_ == tableCol)
-        i = 0
-        while (i < rows.length) {
+        var i = 0
+        val rowsLength = rows.length
+        while (i < rowsLength) {
           cells = rows(i).children
           toggleIconCurCol()
           toggleIconOtherCol(c2)
@@ -164,8 +168,9 @@ object SetMany extends AppElements {
 
       case 4 => {
         val Seq(c2, c3, c4) = eidCols.filterNot(_ == tableCol)
-        i = 0
-        while (i < rows.length) {
+        var i = 0
+        val rowsLength = rows.length
+        while (i < rowsLength) {
           cells = rows(i).children
           toggleIconCurCol()
           toggleIconOtherCol(c2)
@@ -178,8 +183,9 @@ object SetMany extends AppElements {
 
       case 5 => {
         val Seq(c2, c3, c4, c5) = eidCols.filterNot(_ == tableCol)
-        i = 0
-        while (i < rows.length) {
+        var i = 0
+        val rowsLength = rows.length
+        while (i < rowsLength) {
           cells = rows(i).children
           toggleIconCurCol()
           toggleIconOtherCol(c2)
@@ -193,8 +199,9 @@ object SetMany extends AppElements {
 
       case 6 => {
         val Seq(c2, c3, c4, c5, c6) = eidCols.filterNot(_ == tableCol)
-        i = 0
-        while (i < rows.length) {
+        var i = 0
+        val rowsLength = rows.length
+        while (i < rowsLength) {
           cells = rows(i).children
           toggleIconCurCol()
           toggleIconOtherCol(c2)
@@ -209,8 +216,9 @@ object SetMany extends AppElements {
 
       case 7 => {
         val Seq(c2, c3, c4, c5, c6, c7) = eidCols.filterNot(_ == tableCol)
-        i = 0
-        while (i < rows.length) {
+        var i = 0
+        val rowsLength = rows.length
+        while (i < rowsLength) {
           cells = rows(i).children
           toggleIconCurCol()
           toggleIconOtherCol(c2)

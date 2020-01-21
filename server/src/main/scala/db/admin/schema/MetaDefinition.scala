@@ -5,7 +5,6 @@ import molecule.schema.definition._
 object MetaDefinition {
 
   object meta {
-
     trait Db {
       val name        = oneString.uniqueValue.doc("Database name")
       val isMolecular = oneBoolean.noHistory.doc("Marker for non-molecule db without definition file")
@@ -98,11 +97,12 @@ object MetaDefinition {
       val dbSettings = many[DbSettings].noHistory.isComponent.doc("Db specific settings")
     }
     trait DbSettings {
-      val db      = one[meta.Db].noHistory.doc("Database")
-      val stars   = manyLong.noHistory.doc("Starred entity ids for this db")
-      val flags   = manyLong.noHistory.doc("Flagged entity ids for this db")
-      val checks  = manyLong.noHistory.doc("Checked entity ids for this db")
-      val queries = many[Query].noHistory.isComponent.doc("Recent/saved/favorite queries for this db")
+      val db       = one[meta.Db].noHistory.doc("Database")
+      val stars    = manyLong.noHistory.doc("Starred entity ids for this db")
+      val flags    = manyLong.noHistory.doc("Flagged entity ids for this db")
+      val checks   = manyLong.noHistory.doc("Checked entity ids for this db")
+      val undoneTs = manyLong.noHistory.doc("Bit-encoded pairs of new-t and undone-t")
+      val queries  = many[Query].noHistory.isComponent.doc("Recent/saved/favorite queries for this db")
     }
     trait Query {
       val molecule    = oneString.noHistory.doc("Molecule of query to build model/view")

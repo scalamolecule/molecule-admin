@@ -179,7 +179,7 @@ class QueryBackend extends QueryApi with Base with DateStrLocal {
     db: String,
     chunks: Int,
     enumAttrs: Seq[String]
-  ): Array[TxData] = {
+  ): Either[String, Array[TxData]] = {
     val conn              = Conn(base + "/" + db)
     val datomicDb         = conn.db
     val firstT            = datomicDb.basisT() - chunks * 10
@@ -193,73 +193,82 @@ class QueryBackend extends QueryApi with Base with DateStrLocal {
     var v                 = ""
     var prevValue         = ""
     var datom: DatomTuple = null
-    txs.foreach { txMap =>
-      val t            = txMap.get(datomic.Log.T).asInstanceOf[Long]
-      val tx           = Peer.toTx(t).asInstanceOf[Long]
-      val txInstantStr = date2strLocal(datomicDb.entity(tx)
-        .get(":db/txInstant").asInstanceOf[Date])
-      val rawDatoms    = txMap.get(datomic.Log.DATA).asInstanceOf[jList[Datom]]
-      //      println(t)
-      //      rawDatoms.forEach(d => println(d))
-      //      println("------")
-      val datomCount   = rawDatoms.size()
-      val txMetaDatoms = new ListBuffer[DatomTuple]
-      val datoms       = new ListBuffer[DatomTuple]
-      safeTx = true
-      if (datomCount > 0) {
-        rawDatoms.forEach { d =>
-          if (safeTx) {
-            a = datomicDb.ident(d.a).toString
-            // Skip schema transaction
-            safeTx = a.nonEmpty && !a.startsWith(":db.install")
-            if (a != ":db/txInstant") {
-              e = d.e.asInstanceOf[Long]
-              v = formatValue(conn, a, d.v, enumAttrs)
-              if (
-                e == tx ||
-                  Try(prevValue.toLong).isSuccess && e == prevValue.toLong
-              ) eidInTx = e
-              datom = (e, a, v, d.added)
-              if (e == tx || e == eidInTx)
-                txMetaDatoms += datom
-              else
-                datoms += datom
-              prevValue = v
+    withTransactor {
+      try {
+        txs.foreach { txMap =>
+          val t            = txMap.get(datomic.Log.T).asInstanceOf[Long]
+          val tx           = Peer.toTx(t).asInstanceOf[Long]
+          val txInstantStr = date2strLocal(datomicDb.entity(tx)
+            .get(":db/txInstant").asInstanceOf[Date])
+          val rawDatoms    = txMap.get(datomic.Log.DATA).asInstanceOf[jList[Datom]]
+          //          println(t)
+          //          rawDatoms.forEach(d => println(d))
+          //          println("------")
+          val datomCount   = rawDatoms.size()
+          val txMetaDatoms = new ListBuffer[DatomTuple]
+          val datoms       = new ListBuffer[DatomTuple]
+          safeTx = true
+          if (datomCount > 0) {
+            rawDatoms.forEach { d =>
+              if (safeTx) {
+                a = datomicDb.ident(d.a).toString
+                // Skip schema transaction
+                safeTx = a.nonEmpty && !a.startsWith(":db.install")
+                if (a != ":db/txInstant") {
+                  e = d.e.asInstanceOf[Long]
+                  v = formatValue(conn, a, d.v, enumAttrs)
+                  if (
+                    e == tx ||
+                      Try(prevValue.toLong).isSuccess && e == prevValue.toLong
+                  ) eidInTx = e
+                  datom = (e, a, v, d.added)
+                  if (e == tx || e == eidInTx)
+                    txMetaDatoms += datom
+                  else
+                    datoms += datom
+                  prevValue = v
+                }
+              }
+            }
+            //            datoms foreach println
+            //            println("=========================")
+            if (safeTx) {
+              txData(txIndex) = (
+                t, tx, txInstantStr,
+                txMetaDatoms,
+                datoms.distinct.sortBy(t => (t._1, t._2, t._4, t._3))
+              )
+              txIndex += 1
             }
           }
         }
-        //        datoms foreach println
-        //        println("=========================")
-        if (safeTx) {
-          txData(txIndex) = (
-            t, tx, txInstantStr,
-            txMetaDatoms,
-            datoms.distinct.sortBy(t => (t._1, t._2, t._4, t._3))
-          )
-          txIndex += 1
-        }
+        // Return data transactions (without schema txs)
+        val txData1 = new Array[TxData](txIndex)
+        System.arraycopy(txData, 0, txData1, 0, txIndex)
+        Right(txData1)
+      } catch {
+        case t: Throwable => Left(t.getMessage)
       }
-    }
-    // Return data transactions (without schema txs)
-    val txData1 = new Array[TxData](txIndex)
-    System.arraycopy(txData, 0, txData1, 0, txIndex)
-    txData1
+    }(conn)
   }
 
   override def undoTxs(
     db: String,
-    txs0: Array[TxData],
-    firstT: Long,
-    lastT: Long,
+    ts: Seq[Long],
     enumAttrs: Seq[String]
   ): Either[String, Array[TxData]] = {
-    implicit val conn = Conn(base + "/" + db)
-    val datomicDb = conn.db
-    val txs       =
-    // Reverse transactions backwards
-      conn.datomicConn.log.txRange(firstT, lastT + 1).asScala.toSeq.reverse
-    val undoneTxs = new Array[TxData](txs.size)
+    val conn      = Conn(base + "/" + db)
+    val txMaps    =
+      if (ts.length == 1)
+        conn.datomicConn.log.txRange(ts.head, ts.head + 1).asScala.toList
+      else
+        conn.datomicConn.log.txRange(ts.head, null).asScala.toList
+          .filter(txMap =>
+            ts.contains(txMap.get(datomic.Log.T).asInstanceOf[Long]))
+          .reverse // Reverse transactions backwards
+    val newTxs    = new Array[TxData](txMaps.size)
     val datoms    = new ListBuffer[DatomTuple]
+    val undoneTs  = new ListBuffer[Long]
     var txIndex   = 0
     var e         = 0L
     var a         = ""
@@ -267,17 +276,17 @@ class QueryBackend extends QueryApi with Base with DateStrLocal {
     var prevValue = ""
     withTransactor {
       try {
-        txs.foreach { txMap =>
-          val t         = txMap.get(datomic.Log.T).asInstanceOf[Long]
-          val tx        = Peer.toTx(t).asInstanceOf[Long]
+        txMaps.foreach { txMap =>
+          val undoneT   = txMap.get(datomic.Log.T).asInstanceOf[Long]
+          val tx        = Peer.toTx(undoneT).asInstanceOf[Long]
           val rawDatoms = txMap.get(datomic.Log.DATA)
             .asInstanceOf[jList[Datom]].asScala.distinct
+
           datoms.clear()
-          val stmts        = rawDatoms.flatMap { d =>
+          val stmts                 = rawDatoms.flatMap { d =>
             e = d.e.asInstanceOf[Long]
-            a = datomicDb.ident(d.a).toString
+            a = conn.db.ident(d.a).toString
             v = formatValue(conn, a, d.v, enumAttrs)
-            //            println(s"e: $e  t: $t  tx: $tx  v: $v  prevV: $prevValue")
             val stmt: Option[Statement] =
               if (a == ":db/txInstant" ||
                 e == tx ||
@@ -295,22 +304,29 @@ class QueryBackend extends QueryApi with Base with DateStrLocal {
             prevValue = v
             stmt
           }
-          val sortedDatoms = datoms.sortBy(t => (t._1, t._2, t._4, t._3))
-          //          sortedDatoms foreach println
-          val txR          = conn.transact(Seq(stmts))
-          val txInstantStr = date2strLocal(txR.inst)
-          undoneTxs(txIndex) = (
-            txR.t, txR.tx, txInstantStr,
+          val txR                   = conn.transact(Seq(stmts))
+          val (newT, newTx, newTxI) = (txR.t, txR.tx, date2strLocal(txR.inst))
+          newTxs(txIndex) = (
+            newT, newTx, newTxI,
             ListBuffer.empty[DatomTuple],
-            sortedDatoms
+            datoms.sortBy(t => (t._1, t._2, t._4, t._3))
           )
+          // Bit-encode newT/undoneT
+          undoneTs += newT << 32 | undoneT
           txIndex += 1
         }
-        Right(txs0 ++ undoneTxs)
+
+        // Add newT/undoneT pairs to meta db
+        val metaConn     = Conn(base + "/meta")
+        val dbSettingsId = user_User.username_("admin")
+          .DbSettings.e.Db.name_(db).get(metaConn)
+        user_DbSettings(dbSettingsId).undoneTs.assert(undoneTs).update(metaConn)
+
+        Right(newTxs)
       } catch {
         case t: Throwable => Left(t.getMessage)
       }
-    }
+    }(conn)
   }
 
 
