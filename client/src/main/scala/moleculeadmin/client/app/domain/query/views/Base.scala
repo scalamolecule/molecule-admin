@@ -16,7 +16,7 @@ import scalatags.JsDom.all._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 
-abstract class Base(implicit val ctx: Ctx.Owner)
+class Base(implicit val ctx: Ctx.Owner)
   extends Callbacks with ViewElements with ModelOps with TreeOps {
   type keepBooPickleImport_Base = PickleState
 

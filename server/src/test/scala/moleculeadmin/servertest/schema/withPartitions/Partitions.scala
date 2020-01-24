@@ -1,7 +1,7 @@
 package moleculeadmin.servertest.schema.withPartitions
 
 import ammonite.ops._
-import db.admin.dsl.meta._
+import db.admin.dsl.moleculeAdmin._
 import db.migration.dsl.partition._
 import molecule.api.out10._
 import moleculeadmin.servertest.ResetDbs
@@ -40,7 +40,7 @@ object Partitions extends TestSuite with TreeSchema with Helpers {
 
 
       // meta schema
-      meta_Db.name_("Partition").Partitions.pos.name.get(metaConn).sortBy(_._1) ==> List(
+      meta_Db.name_("Partition").Partitions.pos.name.get(moleculeAdminConn).sortBy(_._1) ==> List(
         (1, "a"),
         (2, "b"),
         (3, "c"),
@@ -156,7 +156,7 @@ object Partitions extends TestSuite with TreeSchema with Helpers {
             |""".stripMargin
 
         // meta schema (saving meta partition for possible ns/attr additions)
-        meta_Db.name_("Partition").Partitions.pos.name.get(metaConn).sortBy(_._1) ==> List(
+        meta_Db.name_("Partition").Partitions.pos.name.get(moleculeAdminConn).sortBy(_._1) ==> List(
           (1, "a"),
           (2, "x"),
           (3, "b"),
@@ -226,7 +226,7 @@ object Partitions extends TestSuite with TreeSchema with Helpers {
             |}
             |""".stripMargin
 
-        meta_Db.name_("Partition").Partitions.pos.name.get(metaConn).sortBy(_._1) ==> List(
+        meta_Db.name_("Partition").Partitions.pos.name.get(moleculeAdminConn).sortBy(_._1) ==> List(
           (1, "x"),
           (2, "a"),
           (3, "b"),
@@ -315,7 +315,7 @@ object Partitions extends TestSuite with TreeSchema with Helpers {
             |}
             |""".stripMargin
 
-        meta_Db.name_("Partition").Partitions.pos.name.get(metaConn).sortBy(_._1) ==> List(
+        meta_Db.name_("Partition").Partitions.pos.name.get(moleculeAdminConn).sortBy(_._1) ==> List(
           (1, "a"),
           (2, "b"),
           (3, "c"),
@@ -421,7 +421,7 @@ object Partitions extends TestSuite with TreeSchema with Helpers {
             |}
             |""".stripMargin
 
-        meta_Db.name_("Partition").Partitions.pos.name.get(metaConn).sortBy(_._1) ==> List(
+        meta_Db.name_("Partition").Partitions.pos.name.get(moleculeAdminConn).sortBy(_._1) ==> List(
           (1, "a"),
           (2, "b"),
           (3, "c"),
@@ -543,7 +543,7 @@ object Partitions extends TestSuite with TreeSchema with Helpers {
               |}
               |""".stripMargin
 
-          meta_Db.name_("Partition").Partitions.pos.name.get(metaConn).sortBy(_._1) ==> List(
+          meta_Db.name_("Partition").Partitions.pos.name.get(moleculeAdminConn).sortBy(_._1) ==> List(
             (1, "b"),
             (2, "a"),
             (3, "c")
@@ -569,7 +569,7 @@ object Partitions extends TestSuite with TreeSchema with Helpers {
             ))
           )
 
-          meta_Db.name_("Partition").Partitions.pos.name.get(metaConn).sortBy(_._1) ==> List(
+          meta_Db.name_("Partition").Partitions.pos.name.get(moleculeAdminConn).sortBy(_._1) ==> List(
             (1, "b"),
             (2, "c"),
             (3, "a")
@@ -627,7 +627,7 @@ object Partitions extends TestSuite with TreeSchema with Helpers {
               |}
               |""".stripMargin
 
-          meta_Db.name_("Partition").Partitions.pos.name.get(metaConn).sortBy(_._1) ==> List(
+          meta_Db.name_("Partition").Partitions.pos.name.get(moleculeAdminConn).sortBy(_._1) ==> List(
             (1, "b"),
             (2, "a"),
             (3, "c")
@@ -653,7 +653,7 @@ object Partitions extends TestSuite with TreeSchema with Helpers {
             ))
           )
 
-          meta_Db.name_("Partition").Partitions.pos.name.get(metaConn).sortBy(_._1) ==> List(
+          meta_Db.name_("Partition").Partitions.pos.name.get(moleculeAdminConn).sortBy(_._1) ==> List(
             (1, "a"),
             (2, "c"),
             (3, "b")
@@ -711,7 +711,7 @@ object Partitions extends TestSuite with TreeSchema with Helpers {
               |}
               |""".stripMargin
 
-          meta_Db.name_("Partition").Partitions.pos.name.get(metaConn).sortBy(_._1) ==> List(
+          meta_Db.name_("Partition").Partitions.pos.name.get(moleculeAdminConn).sortBy(_._1) ==> List(
             (1, "c"),
             (2, "a"),
             (3, "b")
@@ -774,7 +774,7 @@ object Partitions extends TestSuite with TreeSchema with Helpers {
             |}
             |""".stripMargin
 
-        meta_Db.name_("Partition").Partitions.name_("a").descr.get(metaConn) ==> List("description")
+        meta_Db.name_("Partition").Partitions.name_("a").descr.get(moleculeAdminConn) ==> List("description")
 
         // Change description
         updatePartition(partitionMetaSchema, "Partition", "a", "a", Some("other description")) ==> Right(
@@ -826,7 +826,7 @@ object Partitions extends TestSuite with TreeSchema with Helpers {
             |}
             |""".stripMargin
 
-        meta_Db.name_("Partition").Partitions.name_("a").descr.get(metaConn) ==> List("other description")
+        meta_Db.name_("Partition").Partitions.name_("a").descr.get(moleculeAdminConn) ==> List("other description")
 
 
         // Remove description with None
@@ -876,7 +876,7 @@ object Partitions extends TestSuite with TreeSchema with Helpers {
             |}
             |""".stripMargin
 
-        meta_Db.name_("Partition").Partitions.name("a").descr$.get(metaConn) ==> List(("a", None))
+        meta_Db.name_("Partition").Partitions.name("a").descr$.get(moleculeAdminConn) ==> List(("a", None))
 
         // Applying empty text has same effect as applying None
         updatePartition(partitionMetaSchema, "Partition", "a", "a", Some("")) ==> Right(
@@ -925,7 +925,7 @@ object Partitions extends TestSuite with TreeSchema with Helpers {
             |}
             |""".stripMargin
 
-        meta_Db.name_("Partition").Partitions.name("a").descr$.get(metaConn) ==> List(("a", None))
+        meta_Db.name_("Partition").Partitions.name("a").descr$.get(moleculeAdminConn) ==> List(("a", None))
       }
 
 
@@ -949,7 +949,7 @@ object Partitions extends TestSuite with TreeSchema with Helpers {
             ))
           )
 
-          meta_Db.name_("Partition").Partitions.pos.name.get(metaConn).sortBy(_._1) ==> List(
+          meta_Db.name_("Partition").Partitions.pos.name.get(moleculeAdminConn).sortBy(_._1) ==> List(
             (1, "x"),
             (2, "b"),
             (3, "c")
@@ -1009,7 +1009,7 @@ object Partitions extends TestSuite with TreeSchema with Helpers {
               |}
               |""".stripMargin
 
-          meta_Db.name_("Partition").Partitions.pos.name.get(metaConn).sortBy(_._1) ==> List(
+          meta_Db.name_("Partition").Partitions.pos.name.get(moleculeAdminConn).sortBy(_._1) ==> List(
             (1, "a"),
             (2, "x"),
             (3, "c")
@@ -1043,7 +1043,7 @@ object Partitions extends TestSuite with TreeSchema with Helpers {
             ))
           )
 
-          meta_Db.name_("Partition").Partitions.pos.name.get(metaConn).sortBy(_._1) ==> List(
+          meta_Db.name_("Partition").Partitions.pos.name.get(moleculeAdminConn).sortBy(_._1) ==> List(
             (1, "a"),
             (2, "b"),
             (3, "x")
@@ -1107,7 +1107,7 @@ object Partitions extends TestSuite with TreeSchema with Helpers {
             |}
             |""".stripMargin
 
-        meta_Db.name_("Partition").Partitions.pos.name.get(metaConn).sortBy(_._1) ==> List(
+        meta_Db.name_("Partition").Partitions.pos.name.get(moleculeAdminConn).sortBy(_._1) ==> List(
           (1, "x"),
           (2, "a"),
           (3, "c")
@@ -1185,7 +1185,7 @@ object Partitions extends TestSuite with TreeSchema with Helpers {
             |}
             |""".stripMargin
 
-        meta_Db.name_("Partition").Partitions.name.get(metaConn) ==> List("a", "b")
+        meta_Db.name_("Partition").Partitions.name.get(moleculeAdminConn) ==> List("a", "b")
 
         getPartitions(partitionConn) ==> List("a", "b")
       }
@@ -1232,7 +1232,7 @@ object Partitions extends TestSuite with TreeSchema with Helpers {
             |}
             |""".stripMargin
 
-        meta_Db.name_("Partition").Partitions.name.get(metaConn) ==> List("b", "c")
+        meta_Db.name_("Partition").Partitions.name.get(moleculeAdminConn) ==> List("b", "c")
 
         getPartitions(partitionConn) ==> List("b", "c")
       }
@@ -1270,7 +1270,7 @@ object Partitions extends TestSuite with TreeSchema with Helpers {
             |}
             |""".stripMargin
 
-        meta_Db.name_("Partition").Partitions.name.get(metaConn) ==> List("a", "c")
+        meta_Db.name_("Partition").Partitions.name.get(moleculeAdminConn) ==> List("a", "c")
 
         getPartitions(partitionConn) ==> List("a", "c")
       }
@@ -1291,7 +1291,7 @@ object Partitions extends TestSuite with TreeSchema with Helpers {
         // Successfully rolled back (partition `b` still exists)
 
         // meta
-        meta_Db.name_("Partition").Partitions.pos.name.get(metaConn).sortBy(_._1) ==> List(
+        meta_Db.name_("Partition").Partitions.pos.name.get(moleculeAdminConn).sortBy(_._1) ==> List(
           (1, "a"),
           (2, "b"),
           (3, "c"),
@@ -1345,7 +1345,7 @@ object Partitions extends TestSuite with TreeSchema with Helpers {
             |}
             |""".stripMargin
 
-        meta_Db.name_("Partition").Partitions.name.get(metaConn) ==> List("a", "c")
+        meta_Db.name_("Partition").Partitions.name.get(moleculeAdminConn) ==> List("a", "c")
 
         // "deleted" attributes are actually "parked" with a `-` prefix to the partition/namespace name
         // and filtered out when querying for current attributes

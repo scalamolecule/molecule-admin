@@ -164,9 +164,9 @@ case class UpdateCardOne[T](
           case Right((t, tx, txInstant)) =>
             updateClient(t, tx, txInstant, cell, row, eid, newVopt)
             if (nonEmpty)
-              println(s"Successfully updated `$attrFull` value from `$oldStr` to `$newStr`")
+              println(s"$attrFull: `$oldStr` ==> `$newStr`")
             else
-              println(s"Successfully retracted `$attrFull` value from `$oldStr` to `$oldStr`")
+              println(s"$attrFull: retracted `$oldStr`")
 
           case Left(err) =>
             editCellId = ""
@@ -174,7 +174,7 @@ case class UpdateCardOne[T](
             if (nonEmpty)
               window.alert(s"Error updating `$attrFull` value from `$oldStr` to `$newStr`:\n$err")
             else
-              window.alert(s"Error retracting `$attrFull` value from `$oldStr` to `$oldStr`:\n$err")
+              window.alert(s"Error retracting `$attrFull` value `$oldStr`:\n$err")
             cell.focus()
         }
       }

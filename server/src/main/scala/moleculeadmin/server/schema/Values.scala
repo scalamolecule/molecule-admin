@@ -1,6 +1,6 @@
 package moleculeadmin.server.schema
 
-import db.admin.dsl.meta._
+import db.admin.dsl.moleculeAdmin._
 import molecule.api.out15._
 import molecule.facade.Conn
 import moleculeadmin.server.Base
@@ -14,7 +14,7 @@ object Values extends SchemaBase with Base {
 
     // Process counts in the background in a separate thread
     Future {
-      implicit val metaConn = Conn(base + "/meta")
+      implicit val moleculeAdminConn = Conn(base + "/MoleculeAdmin")
       val dbConn = Conn(base + "/" + db)
       val max    = 25
 
@@ -86,7 +86,7 @@ object Values extends SchemaBase with Base {
   }
 
   def updateAttrCountsAndValues(dbConn: Conn, part: String, ns: String, attrE: Long, attr: String, tpe: String, enums: Option[Set[String]], refNs: Option[String],
-                                descrAttr: Option[String], max: Int = 25)(implicit metaConn: Conn): Unit = {
+                                descrAttr: Option[String], max: Int = 25)(implicit moleculeAdminConn: Conn): Unit = {
 
     val fullAttr    = getFullAttr(part, ns, attr)
     val entityCount = getEntityCount(dbConn, fullAttr)

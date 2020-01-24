@@ -18,7 +18,7 @@ import scalatags.JsDom
 import scalatags.JsDom.all._
 
 
-case class DataTableHead(tableBody: TableSection)(implicit val ctx: Ctx.Owner)
+case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
   extends RxBindings with ColOps with ModelOps
     with HeadElements with KeyEvents with FilterFactory
     with AppElements {

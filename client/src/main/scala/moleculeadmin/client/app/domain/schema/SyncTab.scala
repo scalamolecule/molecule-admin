@@ -324,10 +324,10 @@ case class SyncTab(db: String)(implicit val ctx: Ctx.Owner)
                   fetching() = true
 
                   // Use fresh schemas
-                  schemaWire().getSchemas(db).call().foreach { case (liveSchema0, defSchema0, metaSchema0, _) =>
+                  schemaWire().getSchemas(db).call().foreach { case (liveSchema0, defSchema0, moleculeAdminSchema0, _) =>
                     liveSchema() = liveSchema0
                     defSchema() = defSchema0
-                    metaSchema() = metaSchema0
+                    metaSchema() = moleculeAdminSchema0
                     syncing() = true
                     fetching() = false
                   }

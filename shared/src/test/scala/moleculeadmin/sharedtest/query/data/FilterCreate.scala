@@ -58,11 +58,11 @@ object FilterCreate extends TestSuite with FilterFactory {
       number("xq@#%") ==> NotMatchOrWrongExpr
 
       // expr tokens trimmed
-      number(" 1 ") ==> List(1)
-      number(" 1 \n \n 2 , 3 ") ==> List(1, 2, 3)
+      number(" 1 ") ==> List(Some(1))
+      number(" 1 \n \n 2 , 3 ") ==> List(Some(1), Some(2), Some(3))
 
       // no space between minus sign and number
-      number("-1") ==> List(-1)
+      number("-1") ==> List(Some(-1))
       number("- 1") ==> NotMatchOrWrongExpr
     }
 
@@ -74,86 +74,86 @@ object FilterCreate extends TestSuite with FilterFactory {
       number("xq@#%") ==> NotMatchOrWrongExpr
 
       // expr tokens trimmed
-      number(" 1 ") ==> List(1)
-      number(" 1 \n \n 2 , 3 ") ==> List(1, 2, 3)
+      number(" 1 ") ==> List(Some(1))
+      number(" 1 \n \n 2 , 3 ") ==> List(Some(1), Some(2), Some(3))
 
       // comma-separated and line shift have same OR semantics
-      number("1, 3") ==> List(1, 3)
-      number("1\n3") ==> List(1, 3)
+      number("1, 3") ==> List(Some(1), Some(3))
+      number("1\n3") ==> List(Some(1), Some(3))
 
       // comparison
-      number(">2") ==> List(3, 10)
-      number("> 2") ==> List(3, 10)
-      number(">  2") ==> List(3, 10)
-      number(">-2") ==> List(-1, 0, 1, 2, 3, 10)
-      number("> -2") ==> List(-1, 0, 1, 2, 3, 10)
+      number(">2") ==> List(Some(3), Some(10))
+      number("> 2") ==> List(Some(3), Some(10))
+      number(">  2") ==> List(Some(3), Some(10))
+      number(">-2") ==> List(Some(-1), Some(0), Some(1), Some(2), Some(3), Some(10))
+      number("> -2") ==> List(Some(-1), Some(0), Some(1), Some(2), Some(3), Some(10))
       number("> - 2") ==> NotMatchOrWrongExpr
 
-      number("<2") ==> List(-10, -3, -2, -1, -0, 1)
-      number("<-2") ==> List(-10, -3)
+      number("<2") ==> List(Some(-10), Some(-3), Some(-2), Some(-1), Some(-0), Some(1))
+      number("<-2") ==> List(Some(-10), Some(-3))
 
-      number(">=2") ==> List(2, 3, 10)
-      number(">=-2") ==> List(-2, -1, 0, 1, 2, 3, 10)
+      number(">=2") ==> List(Some(2), Some(3), Some(10))
+      number(">=-2") ==> List(Some(-2), Some(-1), Some(0), Some(1), Some(2), Some(3), Some(10))
 
-      number("<=2") ==> List(-10, -3, -2, -1, 0, 1, 2)
-      number("<= -2") ==> List(-10, -3, -2)
+      number("<=2") ==> List(Some(-10), Some(-3), Some(-2), Some(-1), Some(0), Some(1), Some(2))
+      number("<= -2") ==> List(Some(-10), Some(-3), Some(-2))
 
       // range
-      number("1-3") ==> List(1, 2, 3)
-      number("1  -  3") ==> List(1, 2, 3)
+      number("1-3") ==> List(Some(1), Some(2), Some(3))
+      number("1  -  3") ==> List(Some(1), Some(2), Some(3))
 
-      number("-1-1") ==> List(-1, 0, 1)
-      number("-1- 1") ==> List(-1, 0, 1)
-      number("-1 -1") ==> List(-1, 0, 1)
-      number("-1 - 1") ==> List(-1, 0, 1)
+      number("-1-1") ==> List(Some(-1), Some(0), Some(1))
+      number("-1- 1") ==> List(Some(-1), Some(0), Some(1))
+      number("-1 -1") ==> List(Some(-1), Some(0), Some(1))
+      number("-1 - 1") ==> List(Some(-1), Some(0), Some(1))
 
-      number("-3--1") ==> List(-3, -2, -1)
-      number("-3 - -1") ==> List(-3, -2, -1)
+      number("-3--1") ==> List(Some(-3), Some(-2), Some(-1))
+      number("-3 - -1") ==> List(Some(-3), Some(-2), Some(-1))
     }
 
 
     test("Float, Double") {
 
       // comparison
-      decimal(">2") ==> List(2.1, 3.1, 10.1)
-      decimal(">2.") ==> List(2.1, 3.1, 10.1)
-      decimal(">2.0") ==> List(2.1, 3.1, 10.1)
-      decimal(">2.1") ==> List(3.1, 10.1)
-      decimal("> 2.1") ==> List(3.1, 10.1)
-      decimal(">  2.1") ==> List(3.1, 10.1)
-      decimal(">-2.1") ==> List(-1.1, 0, 1.1, 2.1, 3.1, 10.1)
-      decimal("> -2.1") ==> List(-1.1, 0, 1.1, 2.1, 3.1, 10.1)
+      decimal(">2") ==> List(Some(2.1), Some(3.1), Some(10.1))
+      decimal(">2.") ==> List(Some(2.1), Some(3.1), Some(10.1))
+      decimal(">2.0") ==> List(Some(2.1), Some(3.1), Some(10.1))
+      decimal(">2.1") ==> List(Some(3.1), Some(10.1))
+      decimal("> 2.1") ==> List(Some(3.1), Some(10.1))
+      decimal(">  2.1") ==> List(Some(3.1), Some(10.1))
+      decimal(">-2.1") ==> List(Some(-1.1), Some(0), Some(1.1), Some(2.1), Some(3.1), Some(10.1))
+      decimal("> -2.1") ==> List(Some(-1.1), Some(0), Some(1.1), Some(2.1), Some(3.1), Some(10.1))
       decimal("> - 2.1") ==> NotMatchOrWrongExpr
 
-      decimal("<2") ==> List(-10.1, -3.1, -2.1, -1.1, 0, 1.1)
-      decimal("<2.1") ==> List(-10.1, -3.1, -2.1, -1.1, 0, 1.1)
-      decimal("<2.2") ==> List(-10.1, -3.1, -2.1, -1.1, 0, 1.1, 2.1)
-      decimal("<-2") ==> List(-10.1, -3.1, -2.1)
-      decimal("<-2.1") ==> List(-10.1, -3.1)
+      decimal("<2") ==> List(Some(-10.1), Some(-3.1), Some(-2.1), Some(-1.1), Some(0), Some(1.1))
+      decimal("<2.1") ==> List(Some(-10.1), Some(-3.1), Some(-2.1), Some(-1.1), Some(0), Some(1.1))
+      decimal("<2.2") ==> List(Some(-10.1), Some(-3.1), Some(-2.1), Some(-1.1), Some(0), Some(1.1), Some(2.1))
+      decimal("<-2") ==> List(Some(-10.1), Some(-3.1), Some(-2.1))
+      decimal("<-2.1") ==> List(Some(-10.1), Some(-3.1))
 
-      decimal(">=2") ==> List(2.1, 3.1, 10.1)
-      decimal(">=2.1") ==> List(2.1, 3.1, 10.1)
-      decimal(">=-2") ==> List(-1.1, 0, 1.1, 2.1, 3.1, 10.1)
-      decimal(">=-2.1") ==> List(-2.1, -1.1, 0, 1.1, 2.1, 3.1, 10.1)
+      decimal(">=2") ==> List(Some(2.1), Some(3.1), Some(10.1))
+      decimal(">=2.1") ==> List(Some(2.1), Some(3.1), Some(10.1))
+      decimal(">=-2") ==> List(Some(-1.1), Some(0), Some(1.1), Some(2.1), Some(3.1), Some(10.1))
+      decimal(">=-2.1") ==> List(Some(-2.1), Some(-1.1), Some(0), Some(1.1), Some(2.1), Some(3.1), Some(10.1))
 
-      decimal("<=2") ==> List(-10.1, -3.1, -2.1, -1.1, 0, 1.1)
-      decimal("<=2.1") ==> List(-10.1, -3.1, -2.1, -1.1, 0, 1.1, 2.1)
-      decimal("<= -2") ==> List(-10.1, -3.1, -2.1)
-      decimal("<= -2.1") ==> List(-10.1, -3.1, -2.1)
-      decimal("<= -2.2") ==> List(-10.1, -3.1)
+      decimal("<=2") ==> List(Some(-10.1), Some(-3.1), Some(-2.1), Some(-1.1), Some(0), Some(1.1))
+      decimal("<=2.1") ==> List(Some(-10.1), Some(-3.1), Some(-2.1), Some(-1.1), Some(0), Some(1.1), Some(2.1))
+      decimal("<= -2") ==> List(Some(-10.1), Some(-3.1), Some(-2.1))
+      decimal("<= -2.1") ==> List(Some(-10.1), Some(-3.1), Some(-2.1))
+      decimal("<= -2.2") ==> List(Some(-10.1), Some(-3.1))
 
 
       // range
-      decimal("1.1-3.1") ==> List(1.1, 2.1, 3.1)
-      decimal("1.1  -  3.1") ==> List(1.1, 2.1, 3.1)
+      decimal("1.1-3.1") ==> List(Some(1.1), Some(2.1), Some(3.1))
+      decimal("1.1  -  3.1") ==> List(Some(1.1), Some(2.1), Some(3.1))
 
-      decimal("-1.1-1.1") ==> List(-1.1, 0, 1.1)
-      decimal("-1.1- 1.1") ==> List(-1.1, 0, 1.1)
-      decimal("-1.1 -1.1") ==> List(-1.1, 0, 1.1)
-      decimal("-1.1 - 1.1") ==> List(-1.1, 0, 1.1)
+      decimal("-1.1-1.1") ==> List(Some(-1.1), Some(0), Some(1.1))
+      decimal("-1.1- 1.1") ==> List(Some(-1.1), Some(0), Some(1.1))
+      decimal("-1.1 -1.1") ==> List(Some(-1.1), Some(0), Some(1.1))
+      decimal("-1.1 - 1.1") ==> List(Some(-1.1), Some(0), Some(1.1))
 
-      decimal("-3.1--1.1") ==> List(-3.1, -2.1, -1.1)
-      decimal("-3.1 - -1.1") ==> List(-3.1, -2.1, -1.1)
+      decimal("-3.1--1.1") ==> List(Some(-3.1), Some(-2.1), Some(-1.1))
+      decimal("-3.1 - -1.1") ==> List(Some(-3.1), Some(-2.1), Some(-1.1))
     }
 
 

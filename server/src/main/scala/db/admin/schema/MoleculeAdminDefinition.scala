@@ -2,7 +2,7 @@ package db.admin.schema
 import molecule.schema.definition._
 
 @InOut(0, 22)
-object MetaDefinition {
+object MoleculeAdminDefinition {
 
   object meta {
     trait Db {
@@ -97,12 +97,23 @@ object MetaDefinition {
       val dbSettings = many[DbSettings].noHistory.isComponent.doc("Db specific settings")
     }
     trait DbSettings {
-      val db       = one[meta.Db].noHistory.doc("Database")
-      val stars    = manyLong.noHistory.doc("Starred entity ids for this db")
-      val flags    = manyLong.noHistory.doc("Flagged entity ids for this db")
-      val checks   = manyLong.noHistory.doc("Checked entity ids for this db")
-      val undoneTs = manyLong.noHistory.doc("Bit-encoded pairs of new-t and undone-t")
-      val queries  = many[Query].noHistory.isComponent.doc("Recent/saved/favorite queries for this db")
+      val db         = one[meta.Db].noHistory.doc("Database")
+      val stars      = manyLong.noHistory.doc("Starred entity ids for this db")
+      val flags      = manyLong.noHistory.doc("Flagged entity ids for this db")
+      val checks     = manyLong.noHistory.doc("Checked entity ids for this db")
+      val undoneTs   = manyLong.noHistory.doc("Last n bit-encoded pairs of new/undone transaction t of undoings by this user. For tx rollbacks. Non-intrusive alternative to real tx meta provisioning")
+      val groupEdits = many[GroupEdit].noHistory.doc("Last n edits of this user. For edit rollbacks. Non-intrusive alternative to real tx meta provisioning")
+      val queries    = many[Query].noHistory.isComponent.doc("Recent/saved/favorite queries for this db")
+    }
+    trait GroupEdit {
+      val undoes   = oneLong.noHistory.doc("Entity id of optional group edit undone by this group edit")
+      val undoneBy = oneLong.noHistory.doc("Entity id of optional group edit undoing this group edit")
+      val t1       = oneLong.noHistory.doc("First transaction t of this group edit")
+      val t2       = oneLong.noHistory.doc("Last transaction t of this group edit (can be same as t1 if single tx)")
+      val eids     = manyLong.noHistory.doc("Affected entity ids")
+      val inserts  = oneInt.noHistory.doc("Number of entities inserted")
+      val updates  = oneInt.noHistory.doc("Number of entities updated")
+      val deletes  = oneInt.noHistory.doc("Number of entities deleted")
     }
     trait Query {
       val molecule    = oneString.noHistory.doc("Molecule of query to build model/view")

@@ -2,8 +2,8 @@ package moleculeadmin.servertest
 
 import ammonite.ops.{home, write}
 import datomic.Peer
-import db.admin.dsl.meta.{user_DbSettings, user_User}
-import db.admin.schema.MetaSchema
+import db.admin.dsl.moleculeAdmin._
+import db.admin.schema.MoleculeAdminSchema
 import db.core.dsl.coreTest._
 import db.core.dsl.tree._
 import db.core.schema.{CoreTestSchema, CoreTestSchema2, TreeSchema}
@@ -34,9 +34,9 @@ object ResetDbs extends TestSuite with ExampleData with Settings {
 
 
   val tests = Tests {
-    //    test("Reset all") {
-    //      resetDbs()
-    //    }
+    //        test("Reset all") {
+    //          resetDbs()
+    //        }
 
     //        test("Reset all and poplulate") {
     //          resetDbs()
@@ -53,37 +53,42 @@ object ResetDbs extends TestSuite with ExampleData with Settings {
     test("Reset CoreTest") {
       implicit val conn = recreateDbFrom(CoreTestSchema, "localhost:4334/CoreTest", protocol)
 
-      import datomic.Util
-      conn.datomicConn.transact(Util.list(
-        Util.list(":db/add", Peer.tempid(":db.part/user"), ":Ns/int", 1.asInstanceOf[Object]),
-      ).asInstanceOf[java.util.List[AnyRef]]).get
+      Ns.int(1).save
+      val tx2 = Ns.int(2).save
+      val tx3 = Ns.int(3).save
+      Ns.int(4).save
 
-      conn.datomicConn.transact(Util.list(
-        Util.list(":db/add", Peer.tempid(":db.part/user"), ":Ns/int", 2.asInstanceOf[Object]),
-      ).asInstanceOf[java.util.List[AnyRef]]).get
+      // group edit
+      val (e2, t2, e3, t3) = (tx2.eid, tx2.t, tx3.eid, tx3.t)
+      val tx5              = Ns(e2).int(12).update
+      val tx6              = Ns(e3).int(13).update
+      val undoneTs         = Seq(
+        tx6.t << 32 | t3,
+        tx5.t << 32 | t2,
+      )
 
-      conn.datomicConn.transact(Util.list(
-        Util.list(":db/add", Peer.tempid(":db.part/user"), ":Ns/int", 3.asInstanceOf[Object]),
-      ).asInstanceOf[java.util.List[AnyRef]]).get
+      val moleculeAdminConn = Conn(base + "/MoleculeAdmin")
 
-      val metaConn     = Conn(base + "/meta")
       val dbSettingsId = user_User.username_("admin")
-        .DbSettings.e.Db.name_("CoreTest").get(metaConn)
-      user_DbSettings(dbSettingsId).undoneTs().update(metaConn)
+        .DbSettings.e.Db.name_("CoreTest").get(moleculeAdminConn)
+      val groupEditId  = user_GroupEdit.t1(t2).t2(t3).save(moleculeAdminConn).eid
+      user_DbSettings(dbSettingsId)
+        .undoneTs(undoneTs)
+        .groupEdits(groupEditId).update(moleculeAdminConn)
 
-      (new QueryBackend).getLastTxs("CoreTest", 5, Nil)
+      //      (new QueryBackend).getLastTxs("CoreTest", 5, Nil)
     }
   }
 
   def resetDbs(dbs0: Seq[String] = Nil): Unit = {
     val debug = true
 
-    val metaConn = if (dbs0.isEmpty) {
-      if (debug) println("Recreating...")
-      recreateDbFrom(MetaSchema, "localhost:4334/meta", "free")
+    if (dbs0.isEmpty) {
+      if (debug) println("MoleculeAdmin")
+      recreateDbFrom(MoleculeAdminSchema, "localhost:4334/MoleculeAdmin", "free")
     } else {
       if (debug) println("Connecting...")
-      Conn("datomic:free://localhost:4334/meta")
+      Conn("datomic:free://localhost:4334/MoleculeAdmin")
     }
 
     val dbs = if (dbs0.isEmpty) List(
@@ -100,8 +105,13 @@ object ResetDbs extends TestSuite with ExampleData with Settings {
         if (debug) println("- CoreTest")
         write.over(coreDefFilePath, coreDefFile)
         DefFile("CoreTest", Some(coreDefFilePath.toString)).saveToMetaDb
-        //        recreateDbFrom(CoreTestSchema, "localhost:4334/CoreTest", protocol)
-        recreateDbFrom(CoreTestSchema2, "localhost:4334/CoreTest", protocol)
+        recreateDbFrom(CoreTestSchema, "localhost:4334/CoreTest", protocol)
+
+      case "CoreTest2" =>
+        if (debug) println("- CoreTest")
+        write.over(coreDefFilePath, coreDefFile)
+        DefFile("CoreTest", Some(coreDefFilePath.toString)).saveToMetaDb
+        recreateDbFrom(CoreTestSchema2, "localhost:4334/CoreTest2", protocol)
 
       case "Partition" =>
         if (debug) println("- Partition")

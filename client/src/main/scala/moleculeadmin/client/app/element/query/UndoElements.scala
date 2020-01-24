@@ -1,13 +1,12 @@
 package moleculeadmin.client.app.element.query
 
-import moleculeadmin.client.app.domain.query.QueryState.{curEntity, curT, curTx, curTxInstant, new2undone, undone2new}
+import moleculeadmin.client.app.domain.query.QueryState.{curEntity, curTx, new2undone, undone2new}
 import moleculeadmin.client.app.element.AppElements
-import moleculeadmin.client.app.element.query.datatable.HeadElements
+import moleculeadmin.client.rxstuff.RxBindings
 import org.scalajs.dom.html._
 import rx.{Ctx, Rx}
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
-import moleculeadmin.client.rxstuff.RxBindings
 
 
 trait UndoElements extends AppElements with RxBindings {
@@ -53,7 +52,8 @@ trait UndoElements extends AppElements with RxBindings {
     highlightNewT: () => Unit,
     canUndo: Boolean,
     notLast: Boolean,
-    undoFollowing: () => Unit,
+    undoAllNext: () => Unit,
+    undoCleanNext: () => Unit,
     undoThis: () => Unit
   )(implicit ctx: Ctx.Owner): TableRow =
     tr(
@@ -78,18 +78,12 @@ trait UndoElements extends AppElements with RxBindings {
         if (canUndo) {
           span(
             if (notLast) {
-              a(
-                href := "#",
-                s"Undo this and following txs",
-                onclick := undoFollowing
+              span(
+                a(href := "#", s"Undo next", onclick := undoAllNext),
+                a(href := "#", s"Undo next clean", onclick := undoCleanNext)
               )
             } else (),
-            a(
-              href := "#",
-              marginLeft := 15,
-              "Undo this tx",
-              onclick := undoThis
-            )
+            a(href := "#", "Undo this", onclick := undoThis)
           )
         } else {
           span()

@@ -1,7 +1,7 @@
 package moleculeadmin.server.utils
 import java.io.File
 import ammonite.ops._
-import db.admin.dsl.meta._
+import db.admin.dsl.moleculeAdmin._
 import molecule.api.out10._
 import molecule.facade.Conn
 import moleculeadmin.shared.api.BaseApi
@@ -13,7 +13,7 @@ import scala.io.Source
 
 case class DefFile(db: String, path: Option[String] = None, schemaDefFile: Option[File] = None) extends BaseApi with HelpersAdmin {
 
-  implicit val conn = Conn(base + "/meta")
+  implicit val conn = Conn(base + "/MoleculeAdmin")
 
   def parse(defFile: File): Definition = DefinitionParser(defFile.getName, Source.fromFile(defFile).getLines().toList).parse
 
@@ -338,7 +338,7 @@ case class DefFile(db: String, path: Option[String] = None, schemaDefFile: Optio
       case Left(msg)      =>
         Left(msg)
       case Right(defFile) =>
-        implicit val conn = Conn(base + "/meta")
+        implicit val conn = Conn(base + "/MoleculeAdmin")
         meta_Db.name_(db).defFilePath.pkg.inputArity.outputArity.get match {
           case Seq((path1, pkg, inputArity, outputArity)) =>
             val code =

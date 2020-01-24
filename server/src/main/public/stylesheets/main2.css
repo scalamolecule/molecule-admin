@@ -358,7 +358,7 @@ table.tableTx ul {
 
 table.undoTxs {
     display: block;
-    max-height: 1000px;
+    max-height: 700px;
     overflow-y: scroll;
     font-size: 11px;
     padding-top: 5px;
@@ -398,6 +398,9 @@ table.undoTxs td.header:nth-child(2) {
 }
 table.undoTxs td.header.chosen {
     background-color: #173eff2e;
+}
+table.undoTxs td.header a {
+    margin-left: 15px;
 }
 table.undoTxs td.header.chosen a:hover {
     text-decoration: underline;

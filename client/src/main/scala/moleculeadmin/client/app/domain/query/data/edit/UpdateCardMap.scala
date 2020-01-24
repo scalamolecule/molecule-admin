@@ -185,7 +185,7 @@ case class UpdateCardMap[T](
         queryWire().updateStr(db, attrFull, "String", "", data).call().map {
           case Right((t, tx, txInstant)) =>
             updateClient(t, tx, txInstant, cell, row, eid, newVopt)
-            println(s"Successfully updated $attrFull: $retractsAsserts")
+            println(s"Updated $attrFull: $retractsAsserts")
 
           case Left(err) =>
             editCellId = ""

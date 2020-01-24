@@ -1,6 +1,5 @@
 package moleculeadmin.client.app.element.query.datatable
 import molecule.util.DateHandling
-import moleculeadmin.client.app.domain.query.QueryState.editCellId
 import moleculeadmin.client.app.element.AppElements
 import moleculeadmin.client.rxstuff.RxBindings
 import org.scalajs.dom.html.{Element, TableCell, TableRow}
@@ -9,7 +8,6 @@ import rx.{Ctx, Rx}
 import scalatags.JsDom
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
-import org.scalajs.dom.{MouseEvent, document, window}
 
 
 trait BodyElements extends AppElements with DateHandling with RxBindings {

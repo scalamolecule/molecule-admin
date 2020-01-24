@@ -2,8 +2,8 @@ package moleculeadmin.server
 
 import java.io.File
 import datomic.Peer
-import db.admin.dsl.meta._
-import db.admin.schema.MetaSchema
+import db.admin.dsl.moleculeAdmin._
+import db.admin.schema.MoleculeAdminSchema
 import molecule.api.out10._
 import molecule.facade.Conn
 import moleculeadmin.shared.api.DbsApi
@@ -50,7 +50,7 @@ class Dbs extends DbsApi {
 
 
   def dbs(): Dbs = {
-    implicit val conn = metaConn
+    implicit val conn = moleculeAdminConn
     meta_Db.name.isMolecular$.defFilePath$.get.sortBy(_._1)
   }
 
@@ -58,27 +58,27 @@ class Dbs extends DbsApi {
     meta_Db.name.isMolecular$.defFilePath$.get.sortBy(_._1)
   }
 
-  def metaConn = Conn(base + "/meta")
+  def moleculeAdminConn = Conn(base + "/MoleculeAdmin")
 
 
   def dbList(): Either[List[String], List[(String, Option[Boolean], Option[String])]] = try {
 
-//    recreateDbFrom(MetaSchema, "localhost:4334/meta", "free")
+//    recreateDbFrom(MoleculeAdminSchema, "localhost:4334/MoleculeAdmin", "free")
 
 
     // 2. Prepare sync - get connection
     implicit val conn = try {
-      metaConn
+      moleculeAdminConn
     } catch { // 2a
       case e: RuntimeException if e.toString.contains(s"Could not find meta in catalog") =>
         // Create meta database if absent
-        recreateDbFrom(MetaSchema, "localhost:4334/meta", "free")
+        recreateDbFrom(MoleculeAdminSchema, "localhost:4334/MoleculeAdmin", "free")
     }
 
     // 2. Sync meta/live dbs
 
     // Live database names
-    val liveDbs = Peer.getDatabaseNames(s"$base/*").asScala.toList.filterNot(_ == "meta")
+    val liveDbs = Peer.getDatabaseNames(s"$base/*").asScala.toList.filterNot(_ == "MoleculeAdmin")
 
     if (liveDbs.isEmpty)
       throw new RuntimeException("No live databases found") // 2b
@@ -106,13 +106,13 @@ class Dbs extends DbsApi {
   // shared api ...............................................................
 
   def ignore(db: String): Dbs = {
-    implicit val conn = metaConn
+    implicit val conn = moleculeAdminConn
     val dbId = meta_Db.e.name_(db).get.head
     meta_Db(dbId).isMolecular(false).defFilePath().partitions().update
     dbs_()
   }
   def reset(db: String): Dbs = {
-    implicit val conn = metaConn
+    implicit val conn = moleculeAdminConn
     val dbId = meta_Db.e.name_(db).get.head
     meta_Db(dbId).isMolecular().defFilePath().partitions().update
     dbs_()

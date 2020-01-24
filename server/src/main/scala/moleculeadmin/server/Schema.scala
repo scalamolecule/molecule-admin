@@ -1,6 +1,6 @@
 package moleculeadmin.server
 
-import db.admin.dsl.meta._
+import db.admin.dsl.moleculeAdmin._
 import molecule.api.out15._
 import molecule.facade.Conn
 import moleculeadmin.shared.api.SchemaApi
@@ -13,8 +13,7 @@ import moleculeadmin.server.utils.DefFile
 class Schema extends SchemaApi
   with SchemaBase
   with SchemaOps
-  with Base
-{
+  with Base {
 
   override def getLiveSchema(db: String): FlatSchema = {
     implicit val conn = Conn(base + "/" + db)
@@ -38,7 +37,7 @@ class Schema extends SchemaApi
   override def updateSchemaCounts(db: String): Unit = Values.updateSchemaCounts(db)
 
   override def updateDescrAttr(db: String, part: String, ns: String, attr: String, descrAttr: Option[String]): FlatSchema = {
-    implicit val conn = Conn(base + "/meta")
+    implicit val conn = Conn(base + "/MoleculeAdmin")
     println(s"updateDescrAttr: ${getFullAttr(part, ns, attr)}   $descrAttr")
     val attrId: Long = meta_Db.name_(db).Partitions.name_(part).Namespaces.name_(ns).Attrs.e.name_(attr).get.head
     // Set describing attribute and retract topValues
@@ -66,95 +65,104 @@ class Schema extends SchemaApi
   }
 
 
-  override def createPartition(schema: MetaSchema,
-                               db: String,
-                               part: String,
-                               descr: Option[String],
-                               pos0: Int
-                              ): Either[String, MetaSchema] =
+  override def createPartition(
+    schema: MetaSchema,
+    db: String,
+    part: String,
+    descr: Option[String],
+    pos0: Int
+  ): Either[String, MetaSchema] =
     Partition.create(schema, db, part, descr, pos0)
 
-  override def updatePartition(schema0: MetaSchema,
-                               db: String,
-                               curPart: String,
-                               newPart: String,
-                               descr: Option[String],
-                               pos0: Int
-                              ): Either[String, MetaSchema] =
+  override def updatePartition(
+    schema0: MetaSchema,
+    db: String,
+    curPart: String,
+    newPart: String,
+    descr: Option[String],
+    pos0: Int
+  ): Either[String, MetaSchema] =
     Partition.update(schema0, db, curPart, newPart, descr, pos0)
 
-  override def deletePartition(schema: MetaSchema,
-                               db: String,
-                               part: String
-                              ): Either[String, MetaSchema] =
+  override def deletePartition(
+    schema: MetaSchema,
+    db: String,
+    part: String
+  ): Either[String, MetaSchema] =
     Partition.delete(schema, db, part)
 
 
-  override def createNamespace(schema: MetaSchema,
-                               db: String,
-                               part: String,
-                               ns: String,
-                               descr: Option[String],
-                               pos0: Int
-                              ): Either[String, MetaSchema] =
+  override def createNamespace(
+    schema: MetaSchema,
+    db: String,
+    part: String,
+    ns: String,
+    descr: Option[String],
+    pos0: Int
+  ): Either[String, MetaSchema] =
     Namespace.create(schema, db, part, ns, descr, pos0)
 
-  override def updateNamespace(schema0: MetaSchema,
-                               db: String,
-                               part: String,
-                               curtNs: String,
-                               newNs: String,
-                               descr: Option[String],
-                               pos0: Int
-                              ): Either[String, MetaSchema] =
+  override def updateNamespace(
+    schema0: MetaSchema,
+    db: String,
+    part: String,
+    curtNs: String,
+    newNs: String,
+    descr: Option[String],
+    pos0: Int
+  ): Either[String, MetaSchema] =
     Namespace.update(schema0, db, part, curtNs, newNs, descr, pos0)
 
-  override def deleteNamespace(schema: MetaSchema,
-                               db: String,
-                               part: String,
-                               ns: String
-                              ): Either[String, MetaSchema] =
+  override def deleteNamespace(
+    schema: MetaSchema,
+    db: String,
+    part: String,
+    ns: String
+  ): Either[String, MetaSchema] =
     Namespace.delete(schema, db, part, ns)
 
 
-  override def createAttribute(schema: MetaSchema,
-                               db: String,
-                               part: String,
-                               ns: String,
-                               attr: String,
-                               card: Int,
-                               tpe: String,
-                               enums: Seq[String],
-                               optRefNs: Option[String],
-                               options: Seq[String],
-                               doc: Option[String],
-                               pos0: Int
-                              ): Either[String, MetaSchema] =
+  override def createAttribute(
+    schema: MetaSchema,
+    db: String,
+    part: String,
+    ns: String,
+    attr: String,
+    card: Int,
+    tpe: String,
+    enums: Seq[String],
+    optRefNs: Option[String],
+    options: Seq[String],
+    doc: Option[String],
+    pos0: Int
+  ): Either[String, MetaSchema] =
     Attribute.create(schema, db, part, ns, attr, card, tpe, enums, optRefNs, options, doc, pos0)
 
-  override def updateAttribute(schema: MetaSchema,
-                               db: String,
-                               part: String,
-                               ns: String,
-                               curAttr: String,
-                               newAttr: String,
-                               card: Int,
-                               tpe: String,
-                               enums: Seq[String],
-                               optRefNs: Option[String],
-                               options: Seq[String],
-                               doc: Option[String],
-                               pos0: Int,
-                               attrGroup: Option[String]
-                              ): Either[String, MetaSchema] =
+  override def updateAttribute(
+    schema: MetaSchema,
+    db: String,
+    part: String,
+    ns: String,
+    curAttr: String,
+    newAttr: String,
+    card: Int,
+    tpe: String,
+    enums: Seq[String],
+    optRefNs: Option[String],
+    options: Seq[String],
+    doc: Option[String],
+    pos0: Int,
+    attrGroup: Option[String]
+  ): Either[String, MetaSchema] =
     Attribute.update(schema, db, part, ns, curAttr, newAttr, card, tpe, enums, optRefNs, options, doc, pos0, attrGroup)
 
-  override def deleteAttribute(schema: MetaSchema,
-                               db: String,
-                               part: String,
-                               ns: String,
-                               attr: String
-                              ): Either[String, MetaSchema] =
+  override def deleteAttribute(
+    schema: MetaSchema,
+    db: String,
+    part: String,
+    ns: String,
+    attr: String
+  ): Either[String, MetaSchema] =
     Attribute.delete(schema, db, part, ns, attr)
 
 
