@@ -51,7 +51,6 @@ trait SchemaOps extends QueryApi with BaseQuery {
   }
 
 
-
   def mkViewCellTypes(nsMap: Map[String, Ns]): Map[String, String] = {
     val attrs: Map[String, String] = for {
       (nsFull, nsDef) <- nsMap

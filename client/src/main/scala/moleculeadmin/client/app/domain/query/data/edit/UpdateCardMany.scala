@@ -173,7 +173,7 @@ case class UpdateCardMany[T](
         save.map {
           case Right((t, tx, txInstant)) =>
             updateClient(t, tx, txInstant, cell, row, eid, newVopt)
-            println(s"Successfully updated $attrFull: $retractsAsserts")
+            println(s"Updated $attrFull: $retractsAsserts")
 
           case Left(err) =>
             editCellId = ""

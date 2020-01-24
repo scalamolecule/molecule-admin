@@ -1,5 +1,5 @@
 package moleculeadmin.server
-import db.admin.dsl.meta._
+import db.admin.dsl.moleculeAdmin._
 import molecule.api.Entity
 import molecule.api.out20._
 import molecule.facade.Conn
@@ -12,7 +12,7 @@ import moleculeadmin.shared.util.HelpersAdmin
 trait Base extends BaseApi with HelpersAdmin {
 
   override def dbNames(): Seq[String] = {
-    implicit val conn = Conn(base + "/meta")
+    implicit val conn = Conn(base + "/MoleculeAdmin")
     meta_Db.name.isMolecular_(true).get.sorted
   }
 
@@ -24,7 +24,7 @@ trait Base extends BaseApi with HelpersAdmin {
       Set[Long],
       Seq[QueryDTO]
     ) = {
-    implicit val conn = Conn(base + "/meta")
+    implicit val conn = Conn(base + "/MoleculeAdmin")
 
     // Use "admin" for now. Todo: users
     val (userId, settingsOpt) = user_User.e.username_("admin").settings$.get match {
@@ -85,7 +85,7 @@ trait Base extends BaseApi with HelpersAdmin {
     (dbNames(), getMetaSchema(db), settings(db))
 
   override def getMetaSchema(db: String): MetaSchema = {
-    implicit val conn = Conn(base + "/meta")
+    implicit val conn = Conn(base + "/MoleculeAdmin")
 
     val dbE: Long = {
       val dbEntitites = meta_Db.e.name_(db).get
@@ -185,7 +185,7 @@ trait Base extends BaseApi with HelpersAdmin {
 
 
   override def getFlatMetaSchema(db: String): FlatSchema = {
-    implicit val conn = Conn(base + "/meta")
+    implicit val conn = Conn(base + "/MoleculeAdmin")
     meta_Db.name_(db)
       .Partitions.pos.name.descr$
       .Namespaces.pos.name.nameFull.descr$

@@ -4,7 +4,7 @@ import java.util
 import ammonite.ops._
 import datomic.Util
 import datomic.Util.list
-import db.admin.dsl.meta._
+import db.admin.dsl.moleculeAdmin._
 import db.core.dsl.coreTest.{Ns => Nsx}
 import molecule.api.out10._
 import moleculeadmin.servertest.ResetDbs
@@ -123,7 +123,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
             |""".stripMargin
 
         // meta schema (saving meta partition for possible ns/attr additions)
-        meta_Db.name_("Partition").Partitions.name_("a").Namespaces.name_("Aa").Attrs.name.get(metaConn).sorted ==> List("number")
+        meta_Db.name_("Partition").Partitions.name_("a").Namespaces.name_("Aa").Attrs.name.get(moleculeAdminConn).sorted ==> List("number")
 
         // live namespaces having defined attributes
         Schema.ns_("Aa").attr.get(partitionConn).sorted ==> List("number")
@@ -181,7 +181,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
             |}
             |""".stripMargin
 
-        meta_Db.name_("Partition").Partitions.name_("b").Namespaces.name_("Bb").Attrs.name.get(metaConn).sorted ==> List("bb1", "bb2", "text")
+        meta_Db.name_("Partition").Partitions.name_("b").Namespaces.name_("Bb").Attrs.name.get(moleculeAdminConn).sorted ==> List("bb1", "bb2", "text")
 
         Schema.ns_("Bb").attr.get(partitionConn).sorted ==> List("bb1", "bb2", "text")
 
@@ -242,7 +242,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
             |}
             |""".stripMargin
 
-        meta_Db.name_("Partition").Partitions.name_("b").Namespaces.name_("Bc").Attrs.name.get(metaConn).sorted ==> List("bc1", "ref")
+        meta_Db.name_("Partition").Partitions.name_("b").Namespaces.name_("Bc").Attrs.name.get(moleculeAdminConn).sorted ==> List("bc1", "ref")
 
         Schema.ns_("Bc").attr.get(partitionConn).sorted ==> List("bc1", "ref")
 
@@ -315,7 +315,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
             |}
             |""".stripMargin
 
-        meta_Db.name_("Partition").Partitions.name_("a").Namespaces.name_("Aa").Attrs.name.get(metaConn).sorted ==> List("ref")
+        meta_Db.name_("Partition").Partitions.name_("a").Namespaces.name_("Aa").Attrs.name.get(moleculeAdminConn).sorted ==> List("ref")
 
         Schema.ns_("Aa").attr.get(partitionConn).sorted ==> List("ref")
 
@@ -853,7 +853,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
           read ! coreDefFilePath ==> coreDefFile
 
           // meta
-          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ns").Attrs.name_("int").pos.card.tpe.get(metaConn) ==> List((2, 1, "Int"))
+          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ns").Attrs.name_("int").pos.card.tpe.get(moleculeAdminConn) ==> List((2, 1, "Int"))
 
           // live schema
           Schema.attr("int").card.tpe.get(coreConn) ==> List(("int", "one", "long"))
@@ -879,7 +879,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
           read ! coreDefFilePath ==> coreDefFile
 
           // meta
-          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ns").Attrs.name_("ints").pos.card.tpe.get(metaConn) ==> List((17, 2, "Int"))
+          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ns").Attrs.name_("ints").pos.card.tpe.get(moleculeAdminConn) ==> List((17, 2, "Int"))
 
           // live schema
           Schema.attr("ints").card.tpe.get(coreConn) ==> List(("ints", "many", "long"))
@@ -938,7 +938,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
           read ! partitionDefFilePath ==> updatedDefFile
 
           // meta
-          meta_Db.name_("Partition").Partitions.name_("b").Namespaces.name_("Bb").Attrs.name_("bb1").card.get(metaConn).sorted ==> List(2)
+          meta_Db.name_("Partition").Partitions.name_("b").Namespaces.name_("Bb").Attrs.name_("bb1").card.get(moleculeAdminConn).sorted ==> List(2)
 
           // live
           Schema.a_(":b_Bb/bb1").card.get(partitionConn) ==> List("many")
@@ -967,7 +967,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
           read ! partitionDefFilePath ==> updatedDefFile
 
           // meta
-          meta_Db.name_("Partition").Partitions.name_("b").Namespaces.name_("Bb").Attrs.name_("bb1").pos.card.tpe.get(metaConn) ==> List((1, 2, "Int"))
+          meta_Db.name_("Partition").Partitions.name_("b").Namespaces.name_("Bb").Attrs.name_("bb1").pos.card.tpe.get(moleculeAdminConn) ==> List((1, 2, "Int"))
 
           // live schema
           Schema.attr("bb1").card.tpe.get(partitionConn) ==> List(("bb1", "many", "long"))
@@ -1000,7 +1000,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
           read ! partitionDefFilePath ==> partitionDefFile
 
           // meta
-          meta_Db.name_("Partition").Partitions.name_("b").Namespaces.name_("Bb").Attrs.name_("bb1").card.get(metaConn).sorted ==> List(1)
+          meta_Db.name_("Partition").Partitions.name_("b").Namespaces.name_("Bb").Attrs.name_("bb1").card.get(moleculeAdminConn).sorted ==> List(1)
 
           // live
           Schema.a_(":b_Bb/bb1").card.get(partitionConn) ==> List("one")
@@ -1012,7 +1012,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
           import ps._
 
           // meta
-          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ns").Attrs.name_("strMap").card.get(metaConn).sorted ==> List(3)
+          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ns").Attrs.name_("strMap").card.get(moleculeAdminConn).sorted ==> List(3)
 
           // live - map cardinality is internally just cardinality `many`
           Schema.a_(":Ns/strMap").card.get(coreConn) ==> List("many")
@@ -1045,7 +1045,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
           read ! coreDefFilePath ==> coreDefFile
 
           // meta
-          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ns").Attrs.name_("strMap").pos.card.tpe.get(metaConn) ==> List((31, 3, "String"))
+          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ns").Attrs.name_("strMap").pos.card.tpe.get(moleculeAdminConn) ==> List((31, 3, "String"))
 
           // live schema
           Schema.attr("strMap").card.tpe.get(coreConn) ==> List(("strMap", "many", "string"))
@@ -1139,7 +1139,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
           )
 
           // meta
-          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ns").Attrs.name_("strMap").card.get(metaConn).sorted ==> List(1)
+          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ns").Attrs.name_("strMap").card.get(moleculeAdminConn).sorted ==> List(1)
 
           // live
           Schema.a_(":Ns/strMap").card.get(coreConn) ==> List("one")
@@ -1171,7 +1171,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
           read ! coreDefFilePath ==> coreDefFile
 
           // meta
-          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ns").Attrs.name_("intMap").pos.card.tpe.get(metaConn) ==> List((32, 3, "Int"))
+          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ns").Attrs.name_("intMap").pos.card.tpe.get(moleculeAdminConn) ==> List((32, 3, "Int"))
 
           // live schema
           Schema.attr("intMap").card.tpe.get(coreConn) ==> List(("intMap", "many", "string"))
@@ -1183,7 +1183,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
           import ps._
 
           // meta
-          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ns").Attrs.name_("strMap").card.get(metaConn).sorted ==> List(3)
+          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ns").Attrs.name_("strMap").card.get(moleculeAdminConn).sorted ==> List(3)
 
           // live - map cardinality is internally just cardinality `many`
           Schema.a_(":Ns/strMap").card.get(coreConn) ==> List("many")
@@ -1271,7 +1271,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
           )
 
           // meta
-          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ns").Attrs.name_("strMap").card.get(metaConn).sorted ==> List(2)
+          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ns").Attrs.name_("strMap").card.get(moleculeAdminConn).sorted ==> List(2)
 
           // live
           Schema.a_(":Ns/strMap").card.get(coreConn) ==> List("many")
@@ -1301,7 +1301,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
           read ! coreDefFilePath ==> coreDefFile
 
           // meta
-          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ns").Attrs.name_("intMap").pos.card.tpe.get(metaConn) ==> List((32, 3, "Int"))
+          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ns").Attrs.name_("intMap").pos.card.tpe.get(moleculeAdminConn) ==> List((32, 3, "Int"))
 
           // live schema
           Schema.attr("intMap").card.tpe.get(coreConn) ==> List(("intMap", "many", "string"))
@@ -1326,7 +1326,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
           read ! coreDefFilePath ==> coreDefFile
 
           // meta
-          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ns").Attrs.name_("enum").pos.card.tpe.enums.get(metaConn) ==> List(
+          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ns").Attrs.name_("enum").pos.card.tpe.enums.get(moleculeAdminConn) ==> List(
             (12, 1, "String", Set("enum4", "enum6", "enum1", "enum3", "enum5", "enum0", "enum2", "enum7", "enum9", "enum8"))
           )
 
@@ -1351,7 +1351,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
           import ps._
 
           // meta
-          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ns").Attrs.name_("enum").enums.get(metaConn).head.toList.sorted ==> List(
+          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ns").Attrs.name_("enum").enums.get(moleculeAdminConn).head.toList.sorted ==> List(
             "enum0", "enum1", "enum2", "enum3", "enum4", "enum5", "enum6", "enum7", "enum8", "enum9"
           )
 
@@ -1391,7 +1391,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
           read ! coreDefFilePath ==> coreDefFile
 
           // meta
-          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ns").Attrs.name_("enum").pos.card.tpe.enums.get(metaConn) ==> List(
+          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ns").Attrs.name_("enum").pos.card.tpe.enums.get(moleculeAdminConn) ==> List(
             (12, 1, "String", Set("enum4", "enum6", "enum1", "enum3", "enum5", "enum0", "enum2", "enum7", "enum9", "enum8"))
           )
 
@@ -1493,7 +1493,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
           )
 
           // meta
-          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ns").Attrs.name_("enum").enums.get(metaConn) ==> List(Set("enum1", "man", "woman", "enum2", "enum0"))
+          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ns").Attrs.name_("enum").enums.get(moleculeAdminConn) ==> List(Set("enum1", "man", "woman", "enum2", "enum0"))
 
           // live
           Schema.a_(":Ns/enum").enum.get(coreConn) ==> List("woman", "enum2", "man", "enum1", "enum0")
@@ -1516,7 +1516,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
           import ps._
 
           // meta
-          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ns").Attrs.name_("enums").enums.get(metaConn).head.toList.sorted ==> List(
+          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ns").Attrs.name_("enums").enums.get(moleculeAdminConn).head.toList.sorted ==> List(
             "enum0", "enum1", "enum2", "enum3", "enum4", "enum5", "enum6", "enum7", "enum8", "enum9"
           )
 
@@ -1556,7 +1556,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
           read ! coreDefFilePath ==> coreDefFile
 
           // meta
-          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ns").Attrs.name_("enums").pos.card.tpe.enums.get(metaConn) ==> List(
+          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ns").Attrs.name_("enums").pos.card.tpe.enums.get(moleculeAdminConn) ==> List(
             (27, 2, "String", Set("enum1", "enum4", "enum9", "enum3", "enum8", "enum6", "enum2", "enum7", "enum0", "enum5"))
           )
 
@@ -1658,7 +1658,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
           )
 
           // meta
-          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ns").Attrs.name_("enums").enums.get(metaConn) ==> List(Set("enum1", "man", "woman", "enum2", "enum0"))
+          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ns").Attrs.name_("enums").enums.get(moleculeAdminConn) ==> List(Set("enum1", "man", "woman", "enum2", "enum0"))
 
           // live
           Schema.a_(":Ns/enums").enum.get(coreConn) ==> List("woman", "enum2", "man", "enum1", "enum0")
@@ -1698,7 +1698,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
           read ! coreDefFilePath ==> coreDefFile
 
           // meta
-          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ns").Attrs.name_("ref1").pos.card.tpe.get(metaConn) ==> List((14, 1, "ref"))
+          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ns").Attrs.name_("ref1").pos.card.tpe.get(moleculeAdminConn) ==> List((14, 1, "ref"))
 
           // live schema
           Schema.attr("ref1").card.tpe.get(coreConn) ==> List(("ref1", "one", "ref"))
@@ -1775,7 +1775,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
               |}
               |""".stripMargin
 
-          meta_Db.name_("Partition1").Partitions.name_("b").Namespaces.name_("Bb").Attrs.name.get(metaConn).sorted ==> List("bb1", "bb2", "bb3", "bb4", "refAttr")
+          meta_Db.name_("Partition1").Partitions.name_("b").Namespaces.name_("Bb").Attrs.name.get(moleculeAdminConn).sorted ==> List("bb1", "bb2", "bb3", "bb4", "refAttr")
 
           Schema.ns_("Bb").attr.get(partition1Conn).sorted ==> List("bb1", "bb2", "bb3", "bb4", "refAttr")
 
@@ -1871,7 +1871,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
               |}
               |""".stripMargin
 
-          meta_Db.name_("Partition1").Partitions.name_("b").Namespaces.name_("Bb").Attrs.name.get(metaConn).sorted ==> List("bb1", "bb2", "bb3", "bb4", "refAttr")
+          meta_Db.name_("Partition1").Partitions.name_("b").Namespaces.name_("Bb").Attrs.name.get(moleculeAdminConn).sorted ==> List("bb1", "bb2", "bb3", "bb4", "refAttr")
 
           Schema.ns_("Bb").attr.get(partition1Conn).sorted ==> List("bb1", "bb2", "bb3", "bb4", "refAttr")
 
@@ -1987,7 +1987,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
           read ! coreDefFilePath ==> coreDefFile
 
           // meta
-          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ns").Attrs.name_("int").pos.card.tpe.options$.get(metaConn) ==> List((2, 1, "Int", Some(Set("indexed"))))
+          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ns").Attrs.name_("int").pos.card.tpe.options$.get(moleculeAdminConn) ==> List((2, 1, "Int", Some(Set("indexed"))))
 
           // live schema
           Schema.attr("int").card.tpe.index$.unique$.fulltext$.isComponent$.noHistory$.get(coreConn) ==> List(
@@ -2010,7 +2010,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
           read ! coreDefFilePath ==> coreDefFile
 
           // meta
-          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ns").Attrs.name_("int").pos.card.tpe.options$.get(metaConn) ==> List((2, 1, "Int", Some(Set("indexed"))))
+          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ns").Attrs.name_("int").pos.card.tpe.options$.get(moleculeAdminConn) ==> List((2, 1, "Int", Some(Set("indexed"))))
 
           // live schema
           Schema.attr("int").card.tpe.index$.unique$.fulltext$.isComponent$.noHistory$.get(coreConn) ==> List(
@@ -2033,7 +2033,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
           read ! coreDefFilePath ==> coreDefFile
 
           // meta
-          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ns").Attrs.name_("int").pos.card.tpe.options$.get(metaConn) ==> List((2, 1, "Int", Some(Set("indexed"))))
+          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ns").Attrs.name_("int").pos.card.tpe.options$.get(moleculeAdminConn) ==> List((2, 1, "Int", Some(Set("indexed"))))
 
           // live schema
           Schema.attr("int").card.tpe.index$.unique$.fulltext$.isComponent$.noHistory$.get(coreConn) ==> List(
@@ -2094,7 +2094,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
               |""".stripMargin
 
 
-          meta_Db.name_("Partition").Partitions.name_("b").Namespaces.name_("Bb").Attrs.name_("bb1").options.get(metaConn) ==> List(Set("noHistory"))
+          meta_Db.name_("Partition").Partitions.name_("b").Namespaces.name_("Bb").Attrs.name_("bb1").options.get(moleculeAdminConn) ==> List(Set("noHistory"))
 
           Schema.attr_("bb1").noHistory.get(partitionConn) ==> List(true)
 
@@ -2135,7 +2135,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
           read ! partitionDefFilePath ==> partitionDefFile
 
           // meta
-          meta_Db.name_("Partition").Partitions.name_("b").Namespaces.name_("Bb").Attrs.name_("bb1").pos.card.tpe.options$.get(metaConn) ==> List((1, 1, "Int", Some(Set("indexed"))))
+          meta_Db.name_("Partition").Partitions.name_("b").Namespaces.name_("Bb").Attrs.name_("bb1").pos.card.tpe.options$.get(moleculeAdminConn) ==> List((1, 1, "Int", Some(Set("indexed"))))
 
           // live schema
           Schema.attr("bb1").card.tpe.isComponent$.get(partitionConn) ==> List(("bb1", "one", "long", None))
@@ -2197,7 +2197,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
               |""".stripMargin
 
 
-          meta_Db.name_("Partition").Partitions.name_("b").Namespaces.name_("Bb").Attrs.name_("refAttr").options.get(metaConn) ==> List(Set("isComponent"))
+          meta_Db.name_("Partition").Partitions.name_("b").Namespaces.name_("Bb").Attrs.name_("refAttr").options.get(moleculeAdminConn) ==> List(Set("isComponent"))
 
           Schema.attr_("refAttr").isComponent.get(partitionConn) ==> List(true)
         }
@@ -2272,7 +2272,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
               |""".stripMargin
 
 
-          meta_Db.name_("Partition").Partitions.name_("b").Namespaces.name_("Bb").Attrs.name.options.get(metaConn) ==> List(
+          meta_Db.name_("Partition").Partitions.name_("b").Namespaces.name_("Bb").Attrs.name.options.get(moleculeAdminConn) ==> List(
             ("bb1", Set("uniqueValue")),
             ("bb2", Set("uniqueIdentity"))
           )
@@ -2303,7 +2303,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
           read ! coreDefFilePath ==> coreDefFile
 
           // meta
-          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ref1").Attrs.name_("str1").pos.card.tpe.options$.get(metaConn) ==> List((1, 1, "String", Some(Set("indexed"))))
+          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ref1").Attrs.name_("str1").pos.card.tpe.options$.get(moleculeAdminConn) ==> List((1, 1, "String", Some(Set("indexed"))))
 
           // live schema
           Schema.attr("str1").card.tpe.fulltext$.get(coreConn) ==> List(("str1", "one", "string", None))
@@ -2324,7 +2324,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
           read ! coreDefFilePath ==> coreDefFile
 
           // meta
-          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ns").Attrs.name_("str").pos.card.tpe.options$.get(metaConn) ==> List((1, 1, "String", Some(Set("indexed", "fulltext"))))
+          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ns").Attrs.name_("str").pos.card.tpe.options$.get(moleculeAdminConn) ==> List((1, 1, "String", Some(Set("indexed", "fulltext"))))
 
           // live schema
           Schema.attr("str").card.tpe.fulltext$.get(coreConn) ==> List(("str", "one", "string", Some(true)))
@@ -2392,7 +2392,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
               |""".stripMargin
 
 
-          meta_Db.name_("Partition").Partitions.name_("b").Namespaces.name_("Bb").Attrs.name_("ref").refNs.options.get(metaConn) ==> List(
+          meta_Db.name_("Partition").Partitions.name_("b").Namespaces.name_("Bb").Attrs.name_("ref").refNs.options.get(moleculeAdminConn) ==> List(
             ("b_Bc", Set("noHistory", "uniqueValue"))
           )
 
@@ -2454,7 +2454,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
               |""".stripMargin
 
 
-          meta_Db.name_("Partition").Partitions.name_("b").Namespaces.name_("Bb").Attrs.name_("ref").options.get(metaConn) ==> List(Set("isComponent", "uniqueIdentity", "noHistory"))
+          meta_Db.name_("Partition").Partitions.name_("b").Namespaces.name_("Bb").Attrs.name_("ref").options.get(moleculeAdminConn) ==> List(Set("isComponent", "uniqueIdentity", "noHistory"))
 
           Schema.attr_("ref").isComponent.noHistory.unique.get(partitionConn) ==> List((true, true, "identity"))
         }
@@ -2516,7 +2516,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
               |""".stripMargin
 
 
-          meta_Db.name_("Partition").Partitions.name_("b").Namespaces.name_("Bb").Attrs.name_("bb1").doc.get(metaConn) ==> List("doc text")
+          meta_Db.name_("Partition").Partitions.name_("b").Namespaces.name_("Bb").Attrs.name_("bb1").doc.get(moleculeAdminConn) ==> List("doc text")
 
           Schema.attr_("bb1").doc.get(partitionConn) ==> List("doc text")
 
@@ -2538,7 +2538,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
 
           read ! partitionDefFilePath ==> partitionDefFile
 
-          meta_Db.name_("Partition").Partitions.name_("b").Namespaces.name_("Bb").Attrs.name("bb1").doc$.get(metaConn) ==> List(("bb1", None))
+          meta_Db.name_("Partition").Partitions.name_("b").Namespaces.name_("Bb").Attrs.name("bb1").doc$.get(moleculeAdminConn) ==> List(("bb1", None))
 
           Schema.attr("bb1").doc$.get(partitionConn) ==> List(("bb1", None))
         }
@@ -2609,7 +2609,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
         read ! partitionDefFilePath ==> partitionDefFile
 
         // meta
-        meta_Db.name_("Partition").Partitions.name_("b").Namespaces.name_("Bb").Attrs.name_("bb1").pos.card.tpe.get(metaConn) ==> List((1, 1, "Int"))
+        meta_Db.name_("Partition").Partitions.name_("b").Namespaces.name_("Bb").Attrs.name_("bb1").pos.card.tpe.get(moleculeAdminConn) ==> List((1, 1, "Int"))
 
         // live schema
         Schema.attr("bb1").card.tpe.get(partitionConn) ==> List(("bb1", "one", "long"))

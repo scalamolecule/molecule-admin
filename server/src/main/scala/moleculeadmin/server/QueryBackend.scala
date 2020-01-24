@@ -6,7 +6,7 @@ import java.net.URI
 import java.text.SimpleDateFormat
 import java.util.{Date, UUID, Collection => jCollection, List => jList}
 import datomic.{Datom, Peer, Util}
-import db.admin.dsl.meta._
+import db.admin.dsl.moleculeAdmin._
 import db.core.dsl.coreTest.Ns
 import molecule.api.Entity
 import molecule.api.out10._
@@ -182,7 +182,7 @@ class QueryBackend extends QueryApi with Base with DateStrLocal {
   ): Either[String, Array[TxData]] = {
     val conn              = Conn(base + "/" + db)
     val datomicDb         = conn.db
-    val firstT            = datomicDb.basisT() - chunks * 10
+    val firstT            = datomicDb.basisT() - chunks * 100
     val txs               = conn.datomicConn.log.txRange(firstT, null).asScala
     val txData            = new Array[TxData](txs.size)
     var txIndex           = 0
@@ -265,7 +265,7 @@ class QueryBackend extends QueryApi with Base with DateStrLocal {
         conn.datomicConn.log.txRange(ts.head, null).asScala.toList
           .filter(txMap =>
             ts.contains(txMap.get(datomic.Log.T).asInstanceOf[Long]))
-          .reverse // Reverse transactions backwards
+          .reverse // Undo transactions backwards
     val newTxs    = new Array[TxData](txMaps.size)
     val datoms    = new ListBuffer[DatomTuple]
     val undoneTs  = new ListBuffer[Long]
@@ -317,10 +317,10 @@ class QueryBackend extends QueryApi with Base with DateStrLocal {
         }
 
         // Add newT/undoneT pairs to meta db
-        val metaConn     = Conn(base + "/meta")
+        val moleculeAdminConn     = Conn(base + "/MoleculeAdmin")
         val dbSettingsId = user_User.username_("admin")
-          .DbSettings.e.Db.name_(db).get(metaConn)
-        user_DbSettings(dbSettingsId).undoneTs.assert(undoneTs).update(metaConn)
+          .DbSettings.e.Db.name_(db).get(moleculeAdminConn)
+        user_DbSettings(dbSettingsId).undoneTs.assert(undoneTs).update(moleculeAdminConn)
 
         Right(newTxs)
       } catch {
@@ -381,7 +381,7 @@ class QueryBackend extends QueryApi with Base with DateStrLocal {
 
 
   override def upsertQuery(db: String, query: QueryDTO): Either[String, String] = {
-    implicit val conn = Conn(base + "/meta")
+    implicit val conn = Conn(base + "/MoleculeAdmin")
     withTransactor {
       try {
         // Use admin for now
@@ -443,7 +443,7 @@ class QueryBackend extends QueryApi with Base with DateStrLocal {
   }
 
   override def updateQuery(db: String, query: QueryDTO): Either[String, String] = {
-    implicit val conn = Conn(base + "/meta")
+    implicit val conn = Conn(base + "/MoleculeAdmin")
     withTransactor {
       try {
         // Use admin for now
@@ -498,7 +498,7 @@ class QueryBackend extends QueryApi with Base with DateStrLocal {
   }
 
   override def retractQuery(db: String, query: QueryDTO): Either[String, String] = {
-    implicit val conn = Conn(base + "/meta")
+    implicit val conn = Conn(base + "/MoleculeAdmin")
     val molecule1 = query.molecule
     withTransactor {
       try {
@@ -526,7 +526,7 @@ class QueryBackend extends QueryApi with Base with DateStrLocal {
     eid: Long,
     isOn: Boolean
   ): Either[String, Long] = {
-    implicit val conn = Conn(base + "/meta")
+    implicit val conn = Conn(base + "/MoleculeAdmin")
     withTransactor {
       try {
         val dbSettingsId = dbSettingsIdOpt.getOrElse {
@@ -568,7 +568,7 @@ class QueryBackend extends QueryApi with Base with DateStrLocal {
     eids: Set[Long],
     newState: Boolean
   ): Either[String, Long] = {
-    implicit val conn = Conn(base + "/meta")
+    implicit val conn = Conn(base + "/MoleculeAdmin")
     withTransactor {
       try {
         val dbSettingsId = dbSettingsIdOpt.getOrElse {
@@ -608,7 +608,7 @@ class QueryBackend extends QueryApi with Base with DateStrLocal {
     dbSettingsIdOpt: Option[Long],
     tpe: String,
   ): Either[String, Long] = {
-    implicit val conn = Conn(base + "/meta")
+    implicit val conn = Conn(base + "/MoleculeAdmin")
     withTransactor {
       try {
         val dbSettingsId = dbSettingsIdOpt.getOrElse {
@@ -637,7 +637,7 @@ class QueryBackend extends QueryApi with Base with DateStrLocal {
   }
 
   override def saveSettings(pairs: Seq[(String, String)]): Either[String, String] = {
-    implicit val conn = Conn(base + "/meta")
+    implicit val conn = Conn(base + "/MoleculeAdmin")
     withTransactor {
       try {
         // Use admin for now

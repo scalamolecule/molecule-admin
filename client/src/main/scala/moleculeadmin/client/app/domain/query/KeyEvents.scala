@@ -47,8 +47,12 @@ trait KeyEvents
             case "?" => toggleShortcutsMenu()
             case _   => ()
           }
-        } else
-          paging(e, ctrl, alt, cmd)
+        } else {
+          e.key match {
+            case "z" if cmd => undoLastClean(1)
+            case _          => paging(e, ctrl, alt, cmd)
+          }
+        }
 
       } else if (document.activeElement.isInstanceOf[TableCell]) {
         e.key match {
@@ -67,6 +71,7 @@ trait KeyEvents
           case "Enter" if shift    => multilineSoftNewLine(e)
           case "Enter" if ctrl     => multilineAddItem(e)
           case "Enter"             => saveEdit(e)
+          case "z" if cmd          => undoLastClean(1)
           case _                   => ()
         }
       }

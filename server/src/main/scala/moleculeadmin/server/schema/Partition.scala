@@ -3,7 +3,7 @@ package moleculeadmin.server.schema
 import java.util
 import java.util.{List => jList, Map => jMap}
 import datomic.{Peer, Util}
-import db.admin.dsl.meta._
+import db.admin.dsl.moleculeAdmin._
 import molecule.api.out15._
 import molecule.facade.Conn
 import moleculeadmin.server.Base
@@ -24,7 +24,7 @@ object Partition extends SchemaBase  with Base{
     } else if (!part.matches("[a-z][a-zA-Z0-9]*")) {
       Left("Partition name should match `[a-z][a-zA-Z0-9]*`.")
     } else {
-      implicit val metaConn = Conn(base + "/meta")
+      implicit val moleculeAdminConn = Conn(base + "/MoleculeAdmin")
       withTransactor {
         meta_Db.e.name_(db).get match {
           case Seq(dbE) => {
@@ -110,7 +110,7 @@ object Partition extends SchemaBase  with Base{
     } else if (!newPart.matches("[a-z][a-zA-Z0-9]*")) {
       Left("Partition name should match `[a-z][a-zA-Z0-9]*`.")
     } else {
-      implicit val metaConn = Conn(base + "/meta")
+      implicit val moleculeAdminConn = Conn(base + "/MoleculeAdmin")
       withTransactor {
         meta_Db.e.name_(db).get.size match {
           case 1 => meta_Db.name_(db).Partitions.e.pos.name_(curPart).descr$.namespaces$.get match {
@@ -230,7 +230,7 @@ object Partition extends SchemaBase  with Base{
                               val newRefNs: String = newPart + "_" + curFullRefNs.split("_")(1)
 
                               // update meta
-                              val attrE: Long = getAttrE(metaConn, db, part, ns, attr)
+                              val attrE: Long = getAttrE(moleculeAdminConn, db, part, ns, attr)
                               // Save original meta refNs for rollback
                               rollbackRefNss += attrE -> curFullRefNs
 
@@ -306,7 +306,7 @@ object Partition extends SchemaBase  with Base{
     } else if (part.isEmpty) {
       Left("Empty partition name.")
     } else {
-      implicit val metaConn = Conn(base + "/meta")
+      implicit val moleculeAdminConn = Conn(base + "/MoleculeAdmin")
       withTransactor {
         meta_Db.name(db).get.size match {
           case 1 => meta_Db.name_(db).Partitions.e.pos.name_(part).descr$.entityCount$.namespaces$.molecules$.get match {

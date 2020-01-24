@@ -4,7 +4,7 @@ import java.net.URI
 import java.util
 import java.util.{UUID, List => jList, Map => jMap}
 import datomic.{Peer, Util}
-import db.admin.dsl.meta._
+import db.admin.dsl.moleculeAdmin._
 import molecule.api.out15._
 import molecule.facade.Conn
 import moleculeadmin.server.Base
@@ -13,11 +13,11 @@ import moleculeadmin.server.utils.DefFile
 import scala.collection.JavaConverters._
 
 
-object Attribute extends SchemaBase  with Base {
+object Attribute extends SchemaBase with Base {
 
 
   def create(schema: MetaSchema, db: String, part: String, nsOnly: String, attr: String, card: Int, tpe: String, enums: Seq[String] = Nil,
-             optRefNs: Option[String] = None, options: Seq[String] = Nil, doc: Option[String] = None, pos0: Int = 0): Either[String, MetaSchema] = {
+    optRefNs: Option[String] = None, options: Seq[String] = Nil, doc: Option[String] = None, pos0: Int = 0): Either[String, MetaSchema] = {
     if (db.isEmpty) {
       Left(s"Empty db name.")
     } else if (part.isEmpty) {
@@ -33,7 +33,7 @@ object Attribute extends SchemaBase  with Base {
     } else if (reservedAttrNames.contains(attr)) {
       Left("Reserved attribute names:\n" + reservedAttrNames.mkString("\n"))
     } else {
-      implicit val metaConn = Conn(base + "/meta")
+      implicit val moleculeAdminConn = Conn(base + "/MoleculeAdmin")
       withTransactor {
         meta_Db.e.name_(db).get.size match {
           case 1 => meta_Db.name_(db).Partitions.e.name_(part).get.size match {
@@ -89,7 +89,7 @@ object Attribute extends SchemaBase  with Base {
                             }
                           }
                           ns1.copy(attrs = updatedAttrs)
-                        case otherNamespace        => otherNamespace
+                        case otherNamespace            => otherNamespace
                       }
                       p.copy(nss = updatedNss)
                     case otherPartition      => otherPartition
@@ -142,7 +142,7 @@ object Attribute extends SchemaBase  with Base {
 
 
   def update(schema0: MetaSchema, db: String, part: String, nsOnly: String, curAttr: String, newAttr: String, card: Int, tpe: String, enums: Seq[String],
-             optRefNs: Option[String], options: Seq[String], doc: Option[String], pos0: Int, attrGroup: Option[String]): Either[String, MetaSchema] = {
+    optRefNs: Option[String], options: Seq[String], doc: Option[String], pos0: Int, attrGroup: Option[String]): Either[String, MetaSchema] = {
     if (db.isEmpty) {
       Left(s"Empty db name.")
     } else if (part.isEmpty) {
@@ -166,7 +166,7 @@ object Attribute extends SchemaBase  with Base {
     } else if (!schema0.parts.find(_.name == part).get.nss.find(_.name == nsOnly).get.attrs.exists(_.name == curAttr)) {
       Left(s"Couldn't find attribute `$curAttr` in namespace `$nsOnly` in partition `$part` in client schema.")
     } else {
-      implicit val metaConn = Conn(base + "/meta")
+      implicit val moleculeAdminConn = Conn(base + "/MoleculeAdmin")
       withTransactor {
         meta_Db.e.name_(db).get.size match {
           case 1 => meta_Db.name_(db).Partitions.e.name_(part).get.size match {
@@ -208,7 +208,7 @@ object Attribute extends SchemaBase  with Base {
                   } else try {
 
                     // Modifying attribute definition for each change
-                    def getUpdatedAttrDef(sch: MetaSchema) = sch.parts.find(_.name == part) match {
+                    def getUpdatedAttrDef(sch: MetaSchema): Attr = sch.parts.find(_.name == part) match {
                       case Some(partition) => partition.nss.find(_.name == nsOnly) match {
                         case Some(namespace) => namespace.attrs.find(_.name == curAttr) match {
                           case Some(attribute) => attribute
@@ -285,6 +285,8 @@ object Attribute extends SchemaBase  with Base {
 
                     if (curCard != card) {
 
+
+
                       def stripKeys(): Unit = {
                         // strip keys from all values (!)
                         val stripKey: AnyRef => Any = tpe match {
@@ -294,7 +296,6 @@ object Attribute extends SchemaBase  with Base {
                           case "Boolean"        => v: AnyRef => v.toString.split("@", 2)(1).toBoolean
                           case "Long"           => v: AnyRef => v.toString.split("@", 2)(1).toLong
                           case "Double"         => v: AnyRef => v.toString.split("@", 2)(1).toDouble
-//                          case "java.util.Date" => v: AnyRef => datomicStr2date(v.toString.split("@", 2)(1))
                           case "java.util.Date" => v: AnyRef => str2date(v.toString.split("@", 2)(1))
                           case "java.util.UUID" => v: AnyRef => UUID.fromString(v.toString.split("@", 2)(1))
                           case "java.net.URI"   => v: AnyRef => new URI(v.toString.split("@", 2)(1))
@@ -696,8 +697,11 @@ object Attribute extends SchemaBase  with Base {
                     // Roll-back ==================================================================================
                     case error: Throwable => try {
 
+
                       // Restore order of meta attributes
-                      metaAttrs.foreach { case (e, pos1, _) => meta_Attribute(e).pos(pos1).update }
+                      metaAttrs.foreach { case (e, pos1, _) =>
+                        meta_Attribute(e).pos(pos1).update
+                      }
 
                       // Restore meta attribute data
                       meta_Attribute(attrE).pos(curPos).name(curAttr).card(curCard).tpe(curTpe).enums$(curEnums).refNs$(curRefNs).options$(curOptions0).doc$(curDoc).update
@@ -729,8 +733,10 @@ object Attribute extends SchemaBase  with Base {
 
                       Left("Successfully rolled back from error: " + error.getMessage)
                     } catch {
-                      case rollbackError: Throwable => Left("Unsuccessfully tried to roll back from error! " +
-                        "Please check meta db that might be in an invalid state. Unexpected rollback error: " + rollbackError.getMessage)
+                      case rollbackError: Throwable =>
+                        Left("Unsuccessfully tried to roll back from error! Please check MoleculeAdmin db that might be in an invalid state. " +
+                          "\nOriginal error: " + error.getMessage +
+                          "\nUnexpected rollback error: " + rollbackError.getMessage)
                     }
                   }
                 }
@@ -765,7 +771,7 @@ object Attribute extends SchemaBase  with Base {
     } else if (attr.isEmpty) {
       Left(s"Empty attribute name.")
     } else {
-      implicit val metaConn = Conn(base + "/meta")
+      implicit val moleculeAdminConn = Conn(base + "/MoleculeAdmin")
       withTransactor {
         meta_Db.e.name_(db).get.size match {
           case 1 => meta_Db.name_(db).Partitions.e.name_(part).get.size match {

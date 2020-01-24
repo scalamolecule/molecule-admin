@@ -3,7 +3,7 @@ package moleculeadmin.server.schema
 import java.util
 import java.util.{List => jList, Map => jMap}
 import datomic.Util
-import db.admin.dsl.meta._
+import db.admin.dsl.moleculeAdmin._
 import molecule.api.out15._
 import molecule.facade.Conn
 import moleculeadmin.server.Base
@@ -25,7 +25,7 @@ object Namespace extends SchemaBase with Base {
     } else if (!nsOnly.matches("[A-Z][a-zA-Z0-9]*")) {
       Left("Attribute name should match `[A-Z][a-zA-Z0-9]*`.")
     } else {
-      implicit val metaConn = Conn(base + "/meta")
+      implicit val moleculeAdminConn = Conn(base + "/MoleculeAdmin")
       withTransactor {
         meta_Db.e.name_(db).get.size match {
           case 1 => meta_Db.name_(db).Partitions.e.name_(part).get match {
@@ -109,7 +109,7 @@ object Namespace extends SchemaBase with Base {
     } else if (!newNs.matches("[A-Z][a-zA-Z0-9]*")) {
       Left("Attribute name should match `[A-Z][a-zA-Z0-9]*`.")
     } else {
-      implicit val metaConn = Conn(base + "/meta")
+      implicit val moleculeAdminConn = Conn(base + "/MoleculeAdmin")
       withTransactor {
         meta_Db.e.name_(db).get.size match {
           case 1 => meta_Db.name_(db).Partitions.name(part).get.size match {
@@ -235,7 +235,7 @@ object Namespace extends SchemaBase with Base {
                               case refAttr@Attr(_, attr, _, _, _, Some(`curNsFull`), _, _, _, _, _, _, _) =>
 
                                 // update meta
-                                val attrE: Long = getAttrE(metaConn, db, part1, ns, attr)
+                                val attrE: Long = getAttrE(moleculeAdminConn, db, part1, ns, attr)
                                 // Save original meta refNs for rollback
                                 rollbackRefNss += attrE -> curNsFull
 
@@ -320,7 +320,7 @@ object Namespace extends SchemaBase with Base {
     } else if (nsOnly.isEmpty) {
       Left(s"Empty namespace name.")
     } else {
-      implicit val conn = Conn(base + "/meta")
+      implicit val conn = Conn(base + "/MoleculeAdmin")
       withTransactor {
         meta_Db.e.name_(db).get.size match {
           case 1 => meta_Db.name_(db).Partitions.name(part).get.size match {

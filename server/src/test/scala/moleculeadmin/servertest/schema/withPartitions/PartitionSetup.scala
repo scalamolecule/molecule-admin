@@ -262,14 +262,14 @@ trait Settings {
 
 class PartitionSetup extends Schema with Settings {
   ResetDbs.resetDbs(Seq("CoreTest", "Partition"))
-  val metaConn      = Conn("datomic:free://localhost:4334/meta")
-  val coreConn      = Conn("datomic:free://localhost:4334/CoreTest")
-  val partitionConn = Conn("datomic:free://localhost:4334/Partition")
+  val moleculeAdminConn = Conn("datomic:free://localhost:4334/MoleculeAdmin")
+  val coreConn          = Conn("datomic:free://localhost:4334/CoreTest")
+  val partitionConn     = Conn("datomic:free://localhost:4334/Partition")
 }
 
 class PartitionSetup1 extends Schema with Settings {
   ResetDbs.resetDbs(Seq("CoreTest", "Partition1"))
-  val metaConn       = Conn("datomic:free://localhost:4334/meta")
-  val coreConn       = Conn("datomic:free://localhost:4334/CoreTest")
-  val partition1Conn = Conn("datomic:free://localhost:4334/Partition1")
+  val moleculeAdminConn = Conn("datomic:free://localhost:4334/MoleculeAdmin")
+  val coreConn          = Conn("datomic:free://localhost:4334/CoreTest")
+  val partition1Conn    = Conn("datomic:free://localhost:4334/Partition1")
 }

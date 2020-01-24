@@ -27,13 +27,13 @@ object SchemaClient extends RxBindings with SubMenuElements {
 
   @JSExport
   def load(db: String): Unit = schemaWire().getSchemas2(db).call().foreach {
-    case (dbs, flatAttrs, metaSchema) =>
+    case (dbs, flatAttrs, moleculeAdminSchema) =>
       document.body.appendChild(TopMenu(dbs, db, "schema", subMenu).render)
       document.body.appendChild(
         _containerFluid2(
           _row(
             tabContent(
-              tabPane(1, true)(DefineTab(db, metaSchema).render2),
+              tabPane(1, true)(DefineTab(db, moleculeAdminSchema).render2),
               tabPane(2)(ValueTab(db, flatAttrs).render2),
               tabPane(3)(SyncTab(db).render)
             )
