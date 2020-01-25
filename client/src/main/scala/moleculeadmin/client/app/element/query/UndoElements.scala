@@ -47,19 +47,24 @@ trait UndoElements extends AppElements with RxBindings {
   def _headerRow(
     t: Long,
     tx: Long,
+    isTop: Boolean,
+    isUndone: Boolean,
+    canUndo: Boolean,
+    notLast: Boolean,
+
     setTx: () => Unit,
     highlightUndoneT: () => Unit,
     highlightNewT: () => Unit,
-    canUndo: Boolean,
-    notLast: Boolean,
     undoAllNext: () => Unit,
     undoCleanNext: () => Unit,
     undoThis: () => Unit
-  )(implicit ctx: Ctx.Owner): TableRow =
+  )(implicit ctx: Ctx.Owner): TableRow = {
+    val undone = if(isUndone) " undone" else ""
+    val clazz = if (isTop) "header topLine" else "header"
     tr(
+      cls := Rx(if (tx == curTx()) clazz + " chosen" else clazz + undone),
       onmouseover := setTx,
       td(
-        cls := Rx(if (tx == curTx()) "header chosen" else "header"),
         if (new2undone.contains(t))
           span(s(new2undone(t)), onmouseover := highlightUndoneT, br)
         else
@@ -72,7 +77,6 @@ trait UndoElements extends AppElements with RxBindings {
       ),
       td(
         colspan := 2,
-        cls := Rx(if (tx == curTx()) "header chosen" else "header"),
         textAlign.right,
         verticalAlign.bottom,
         if (canUndo) {
@@ -90,20 +94,23 @@ trait UndoElements extends AppElements with RxBindings {
         }
       )
     ).render
-
+  }
 
   def _txInstantRow(
     tx: Long,
     txInstant: String,
+    isUndone: Boolean,
     setTx: () => Unit
-  )(implicit ctx: Ctx.Owner): TableRow =
+  )(implicit ctx: Ctx.Owner): TableRow = {
+    val undone = if(isUndone) " undone" else ""
     tr(
-      cls := Rx(if (tx == curTx()) "txMetaData chosen" else "txMetaData"),
+      cls := Rx(if (tx == curTx()) "txMetaData chosen" else "txMetaData" + undone),
       onmouseover := setTx,
       td(tx),
       td(":db/txInstant"),
       td(txInstant),
     ).render
+  }
 
 
   def _txMetaDataRow(
@@ -111,30 +118,33 @@ trait UndoElements extends AppElements with RxBindings {
     e: Long,
     a: String,
     v: String,
+    isUndone: Boolean,
     setTx: () => Unit
-  )(implicit ctx: Ctx.Owner): TableRow =
+  )(implicit ctx: Ctx.Owner): TableRow = {
+    val undone = if(isUndone) " undone" else ""
     tr(
-      cls := Rx(if (tx == curTx()) "txMetaData chosen" else "txMetaData"),
+      cls := Rx(if (tx == curTx()) "txMetaData chosen" else "txMetaData" + undone),
       onmouseover := setTx,
       td(e),
       td(a),
       td(v),
     ).render
+  }
 
 
   def _txDataRow(
     tx: Long,
     e: Long,
-    a: String,
-    v: String,
+    isUndone: Boolean,
     setTx: () => Unit,
     showEntity: Boolean,
     highlightEntity: () => Unit,
     attrCell: TypedTag[TableCell],
     valueCell: TypedTag[TableCell]
-  )(implicit ctx: Ctx.Owner): TableRow =
+  )(implicit ctx: Ctx.Owner): TableRow = {
+    val undone = if(isUndone) " undone" else ""
     tr(
-      cls := Rx(if (tx == curTx()) "chosen" else ""),
+      cls := Rx(if (tx == curTx()) "chosen" else undone),
       onmouseover := setTx,
       if (showEntity)
         td(
@@ -147,4 +157,5 @@ trait UndoElements extends AppElements with RxBindings {
       attrCell,
       valueCell
     ).render
+  }
 }

@@ -358,23 +358,43 @@ table.tableTx ul {
 
 table.undoTxs {
     display: block;
-    max-height: 700px;
+    max-height: 800px;
     overflow-y: scroll;
     font-size: 11px;
     padding-top: 5px;
     padding-bottom: 5px;
 }
-table.undoTxs tr.txMetaData {
-    color: #aaa;
-}
-table.undoTxs tr.txMetaData.chosen {
-    color: #888;
-    background-color: #173eff2e;
-}
-
 table.undoTxs tr.chosen {
     background-color: #173eff2e;
 }
+
+table.undoTxs tr.undone {
+    background-color: #eee;
+}
+
+table.undoTxs tr.header td {
+    padding: 3px 5px 0px 5px;
+    color: #a54ffa;
+}
+table.undoTxs tr.header.topLine td {
+    border-top-style: solid;
+    border-top-width: 1px;
+    border-top-color: #6c6c6c;
+}
+table.undoTxs tr.header td:nth-child(2) {
+    Xpadding-right: 15px;
+}
+table.undoTxs tr.header a {
+    padding-right: 12px;
+}
+table.undoTxs tr.header.chosen a:hover {
+    text-decoration: underline;
+}
+
+table.undoTxs tr.txMetaData {
+    color: #888;
+}
+
 
 table.undoTxs td {
     padding: 0px 5px 0px 5px;
@@ -384,26 +404,6 @@ table.undoTxs td {
 table.undoTxs td:nth-child(3) {
     padding: 0px 15px 0px 5px;
     max-width: 250px;
-}
-
-table.undoTxs td.header {
-    padding: 3px 5px 0px 5px;
-    border-top-style: solid;
-    border-top-width: 1px;
-    border-top-color: grey;
-    color: #a54ffa;
-}
-table.undoTxs td.header:nth-child(2) {
-    padding-right: 15px;
-}
-table.undoTxs td.header.chosen {
-    background-color: #173eff2e;
-}
-table.undoTxs td.header a {
-    margin-left: 15px;
-}
-table.undoTxs td.header.chosen a:hover {
-    text-decoration: underline;
 }
 
 table.undoTxs td.eid {
@@ -419,6 +419,9 @@ table.undoTxs td.eid.chosen {
 }
 table.undoTxs td.retracted {
     background-color: #ffcbcb;
+}
+table.undoTxs td.selectedAttr {
+    font-weight: bold;
 }
 table.undoTxs td.num {
     color: #49a523;

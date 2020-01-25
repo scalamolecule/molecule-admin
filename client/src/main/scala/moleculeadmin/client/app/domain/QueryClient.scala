@@ -33,7 +33,7 @@ object QueryClient
     case (
       dbs,
       metaSchema,
-      (settings, stars, flags, checks, undoneTs, queries)
+      (settings, stars, flags, checks, undoneTs, groupEdits0, queries)
       ) =>
 
       // Uncomment to test dynamic ScalaFiddle compilation
@@ -63,14 +63,30 @@ object QueryClient
           case (k, "true") if k.startsWith("view") => k
         }.toSeq
 
+        // Decode undo/group edit coordinates
+        var newT    = 0L
         var undoneT = 0L
-        var newT = 0L
         undoneTs.foreach { pair =>
-          undoneT = pair & 0xFFFFFFF
           newT = pair >> 32
-          undone2new = undone2new + (undoneT -> newT)
-          new2undone = new2undone + (newT -> undoneT)
+          undoneT = pair & 0xFFFFFFF
+          new2undone += newT -> undoneT
+          undone2new += undoneT -> newT
         }
+        var firstT  = 0L
+        var lastT   = 0L
+        var undoing = false
+        groupEdits0.toList.sorted.foreach { triple =>
+          firstT = triple >> 32
+          lastT = (triple & 0xFFFFFFF) >> 1
+          undoing = (triple & 1) == 1L
+          groupEdits += firstT -> lastT
+        }
+
+
+//        println("new2undone " + new2undone)
+//        println("undone2new " + undone2new)
+//        println("groupEdits0 " + groupEdits0)
+//        println("groupEdits  " + groupEdits)
 
         savedQueries = queries
         curStars = stars
