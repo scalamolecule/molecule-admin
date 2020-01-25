@@ -113,8 +113,11 @@ object QueryState {
   var curChecks = Set.empty[Long]
 
   // Undo pairs
-  var undone2new = Map.empty[Long, Long]
-  var new2undone = Map.empty[Long, Long]
+  val undone2new = mutable.Map.empty[Long, Long]
+  val new2undone = mutable.Map.empty[Long, Long]
+
+  // Ordered group edit first/last t coordinates
+  val groupEdits = new ListBuffer[(Long, Long)]
 
   // Transactions
   val curTxD       = Var((0L, 0L, ""))

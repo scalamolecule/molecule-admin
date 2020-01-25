@@ -80,8 +80,8 @@ trait Undoing extends UndoElements with QueryApi {
         // Update local undone t pair caches
         ts.reverse.zip(newTxs).foreach {
           case (oldT, newTx) =>
-            undone2new = undone2new + (oldT -> newTx._1)
-            new2undone = new2undone + (newTx._1 -> oldT)
+            undone2new += oldT -> newTx._1
+            new2undone += newTx._1 -> oldT
 
             // Show old/new t's
             println(s"  $oldT -> ${newTx._1}")
@@ -132,6 +132,7 @@ trait Undoing extends UndoElements with QueryApi {
       t2txInstant = t2txInstant + (tx._1 -> tx._3)
     }
 
+
     // Fill datomTable
     val datomTable1 =
       if (datomTable == null)
@@ -148,10 +149,60 @@ trait Undoing extends UndoElements with QueryApi {
       })
     )
 
+    var curGroupEdits      = groupEdits.filter(_._1 >= txs.head._1)
+    var hasGroupEdits      = curGroupEdits.nonEmpty
+    var firstT             = 0L
+    var lastT              = 0L
+    var isFirstOfGroupEdit = false
+    var isGroupEdit        = false
+    var isLastOfGroup      = false
+    var isUndone           = false
+    def setNextGroupEdit() =
+      curGroupEdits.headOption.fold {
+        firstT = 0L
+        lastT = 0L
+        hasGroupEdits = false
+      } { pair =>
+        firstT = pair._1
+        lastT = pair._2
+        // prepare next
+        curGroupEdits = curGroupEdits.tail
+        isLastOfGroup = true
+      }
+
+    setNextGroupEdit()
+
     txs.foreach {
       case (t, tx, txInstant, txMetaDatoms, datoms) =>
-        ePrev = 0L
-        aPrev = ""
+        println(s"--- $t")
+        isUndone = undone2new.contains(t)
+
+        if (hasGroupEdits) {
+          if (t == firstT) {
+            println("first")
+            isFirstOfGroupEdit = true
+            isGroupEdit = true
+            isLastOfGroup = false
+
+          } else if (!isLastOfGroup && isGroupEdit && t < lastT) {
+            println("...")
+            isFirstOfGroupEdit = false
+
+          } else if (isGroupEdit && t == lastT) {
+            println("last")
+            setNextGroupEdit()
+
+          } else {
+            println("not")
+            isFirstOfGroupEdit = false
+            isGroupEdit = false
+          }
+        } else {
+          println("hasGroupEdits not")
+          isFirstOfGroupEdit = false
+          isGroupEdit = false
+        }
+
         val setTx = { () =>
           if (cleanMouseover) {
             curT() = t
@@ -178,20 +229,25 @@ trait Undoing extends UndoElements with QueryApi {
             t2txInstant.get(newT).fold(())(curTxInstant() = _)
           }
         }
-        val canUndo          = !(datoms.isEmpty || undone2new.contains(t))
-        val notLast          = countDown > 1
-        val undoAllNext      = { () => undoTxs(txs, allNext(t)) }
-        val undoCleanNext    = { () => undoTxs(txs, cleanNext(t)) }
-        val undoThis         = { () => undoTxs(txs, Seq(t)) }
+
+        val isTop         = isFirstOfGroupEdit || !isGroupEdit
+        val canUndo       = !(datoms.isEmpty || isUndone)
+        val notLast       = countDown > 1
+        val undoAllNext   = { () => undoTxs(txs, allNext(t)) }
+        val undoCleanNext = { () => undoTxs(txs, cleanNext(t)) }
+        val undoThis      = { () => undoTxs(txs, Seq(t)) }
 
         datomTable1.appendChild(
           _headerRow(
             t, tx,
+            isTop,
+            isUndone,
+            canUndo,
+            notLast,
+
             setTx,
             highlightUndoneT,
             highlightNewT,
-            canUndo,
-            notLast,
             undoAllNext,
             undoCleanNext,
             undoThis
@@ -199,15 +255,17 @@ trait Undoing extends UndoElements with QueryApi {
         )
 
         datomTable1.appendChild(
-          _txInstantRow(tx, txInstant, setTx)
+          _txInstantRow(tx, txInstant, isUndone, setTx)
         )
 
         txMetaDatoms.foreach { case (e, a, v, _) =>
           datomTable1.appendChild(
-            _txMetaDataRow(tx, e, a, v, setTx)
+            _txMetaDataRow(tx, e, a, v, isUndone, setTx)
           )
         }
 
+        ePrev = 0L
+        aPrev = ""
         datoms.foreach { case (e, a, v, op) =>
           val cellType        = viewCellTypes(a)
           val vElementId      = s"undoTxs $countDown $t $a"
@@ -221,7 +279,7 @@ trait Undoing extends UndoElements with QueryApi {
           aPrev = a
           datomTable1.appendChild(
             _txDataRow(
-              tx, e, a, v, setTx,
+              tx, e, isUndone, setTx,
               showEntity, highlightEntity, attrCell, valueCell)
           )
         }
