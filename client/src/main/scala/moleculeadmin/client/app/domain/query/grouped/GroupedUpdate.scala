@@ -168,12 +168,10 @@ abstract class GroupedUpdate[T](col: Col)(implicit ctx: Ctx.Owner)
               case Right((t, tx, txInstant)) =>
                 // Update client tx cells and arrays
                 GroupedUpdateClient(
-                  qr, valueArray,
-                  arrayIndex, colIndex,
-                  nsAlias, nsFull, attr, attrType, enums
+                  qr, valueArray, nsAlias, nsFull, attr, attrType, enums
                 ).updateClient(
                   t, tx, txInstant,
-                  tableRows, newVopt, oldVopt, valueColIndex,
+                  tableRows, newVopt, valueColIndex,
                   affectedRows, affectedIndexes
                 )
 

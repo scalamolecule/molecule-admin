@@ -23,11 +23,7 @@ case class UpdateCardMany[T](
   editArray: Array[Option[T]],
   baseClass: String,
   colType: String,
-
-  arrayIndex: Int,
-  colIndex: Int,
   rowIndex: Int,
-
   related: Int,
   nsAlias: String,
   nsFull: String,
@@ -39,8 +35,7 @@ case class UpdateCardMany[T](
 )(implicit ctx: Ctx.Owner)
   extends UpdateClient[T](
     cols, qr, origArray, editArray, baseClass,
-    arrayIndex, colIndex, rowIndex,
-    related, nsAlias, nsFull, attr, enums
+    rowIndex, related, nsAlias, nsFull, attr, enums
   ) {
 
   type keepBooPickleImport_UpdateCardMany = PickleState
@@ -163,16 +158,16 @@ case class UpdateCardMany[T](
         redrawCell()
 
         // update db
-        val save = if (colType == "listDouble") {
+        val update = if (colType == "listDouble") {
           val data = Seq((eid, retracts.map(_.toDouble), asserts.map(_.toDouble)))
           queryWire().updateNum(db, attrFull, attrType, data).call()
         } else {
           val data = Seq((eid, retracts, asserts))
           queryWire().updateStr(db, attrFull, attrType, enumPrefix, data).call()
         }
-        save.map {
+        update.foreach {
           case Right((t, tx, txInstant)) =>
-            updateClient(t, tx, txInstant, cell, row, eid, newVopt)
+            updateClient(t, tx, txInstant, row, eid, newVopt)
             println(s"Updated $attrFull: $retractsAsserts")
 
           case Left(err) =>

@@ -11,10 +11,6 @@ import moleculeadmin.client.app.domain.query.QueryState._
 case class GroupedUpdateClient[T](
   qr: QueryResult,
   valueArray: Array[Option[T]],
-
-  arrayIndex: Int,
-  colIndex: Int,
-
   nsAlias: String,
   nsFull: String,
   attrName: String,
@@ -22,8 +18,7 @@ case class GroupedUpdateClient[T](
   enums: Seq[String],
 )(implicit ctx: Ctx.Owner) extends UpdateClient[T](
   columns.now, qr, Array.empty[Option[T]], valueArray, "",
-  arrayIndex, colIndex, -1,
-  -1, nsAlias, nsFull, attrName, enums
+  -1, -1, nsAlias, nsFull, attrName, enums
 ) {
 
   // Not used by GroupedData
@@ -40,17 +35,14 @@ case class GroupedUpdateClient[T](
     t: Long, tx: Long, txInstant: String,
     tableRows: NodeList,
     newVopt: Option[T],
-    oldVopt: Option[T],
     valueColIndex: Int,
     affectedRows: List[Int],
     affectedIndexes: Array[Int]
   ): Unit = updateClient(
     t, tx, txInstant,
-    td().render,
     tableRows.item(0).asInstanceOf[TableRow],
     0L,
     newVopt,
-    oldVopt,
     valueColIndex,
     affectedRows,
     affectedIndexes

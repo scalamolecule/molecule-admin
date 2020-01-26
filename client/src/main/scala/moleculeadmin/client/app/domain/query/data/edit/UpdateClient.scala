@@ -13,11 +13,7 @@ abstract class UpdateClient[T](
   origArray: Array[Option[T]],
   editArray: Array[Option[T]],
   baseClass: String,
-
-  arrayIndex: Int,
-  colIndex: Int,
   rowIndex: Int,
-
   related: Int,
   nsAlias: String,
   nsFull: String,
@@ -48,11 +44,9 @@ abstract class UpdateClient[T](
 
   def updateClient(
     t: Long, tx: Long, txInstant: String,
-    cell: TableCell,
     row: TableRow,
     eid: Long,
     newVopt: Option[T],
-    oldVopt: Option[T] = None,
     valueColIndex: Int = -1,
     affectedRows: List[Int] = Nil,
     affectedIndexes: Array[Int] = Array.empty[Int]

@@ -22,11 +22,8 @@ case class UpdateCardOne[T](
   editArray: Array[Option[T]],
   baseClass: String,
   colType: String,
-
-  arrayIndex: Int,
   colIndex: Int,
   rowIndex: Int,
-
   related: Int,
   nsAlias: String,
   nsFull: String,
@@ -37,8 +34,7 @@ case class UpdateCardOne[T](
 )(implicit ctx: Ctx.Owner)
   extends UpdateClient[T](
     cols, qr, origArray, editArray, baseClass,
-    arrayIndex, colIndex, rowIndex,
-    related, nsAlias, nsFull, attrName, enums
+    rowIndex, related, nsAlias, nsFull, attrName, enums
   ) {
 
   type keepBooPickleImport_UpdateCardOne = PickleState
@@ -147,7 +143,7 @@ case class UpdateCardOne[T](
         }
 
         // update db
-        val save = if (colType == "double") {
+        val update = if (colType == "double") {
           val data = if (nonEmpty)
             Seq((eid, Nil, Seq(value.toDouble)))
           else
@@ -160,9 +156,9 @@ case class UpdateCardOne[T](
             Seq((eid, Seq(value), Nil))
           queryWire().updateStr(db, attrFull, attrType, enumPrefix, data).call()
         }
-        save.map {
+        update.foreach {
           case Right((t, tx, txInstant)) =>
-            updateClient(t, tx, txInstant, cell, row, eid, newVopt)
+            updateClient(t, tx, txInstant, row, eid, newVopt)
             if (nonEmpty)
               println(s"$attrFull: `$oldStr` ==> `$newStr`")
             else

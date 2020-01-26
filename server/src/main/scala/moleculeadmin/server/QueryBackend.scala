@@ -178,7 +178,7 @@ class QueryBackend extends QueryApi with Base with DateStrLocal {
     prevFirstT: Long,
     groupEdits: ListBuffer[(Long, Long)]
   ): Long = {
-    val numberOfTxs = 8
+    val numberOfTxs = 100
     val testT       = prevFirstT - numberOfTxs
     if (groupEdits.isEmpty) {
       testT
@@ -768,12 +768,14 @@ class QueryBackend extends QueryApi with Base with DateStrLocal {
     rowValues: Seq[Seq[String]]
   ): Either[String, Long] = {
     // Model without initial entity id
-    val elements = new Molecule2Model(molecule, nsMap).getModel.right.get.tail
+    val elements = new Molecule2Model(molecule, nsMap).getModel.right.get.collect {
+      case a: Atom => a
+    }
     //    println(rowValues)
     //    elements foreach println
     implicit val conn = Conn(base + "/" + db)
-    var i      = 0
-    val data   = elements.collect {
+    var i              = 0
+    val data: Seq[Any] = elements.collect {
       case Atom(_, _, tpe, card, _, _, _, _) =>
         val cast = getCaster(tpe, "")
         val vs   = rowValues(i)
@@ -792,6 +794,7 @@ class QueryBackend extends QueryApi with Base with DateStrLocal {
           }
         }
     }
+
     val stmtss = Model2Transaction(conn, Model(elements)).insertStmts(Seq(data))
     //    println(data)
     //    stmtss.head foreach println
