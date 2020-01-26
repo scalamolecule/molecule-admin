@@ -21,7 +21,7 @@ trait Base extends BaseApi with HelpersAdmin {
       Set[Long],
       Set[Long],
       Set[Long],
-      Set[Long],
+//      Set[Long],
       Set[Long],
       Seq[QueryDTO]
     ) = {
@@ -44,21 +44,20 @@ trait Base extends BaseApi with HelpersAdmin {
     }
 
     user_DbSettings(dbSettingsId)
-      .db.stars$.flags$.checks$.undoneTs$.groupEdits$
+      .db.stars$.flags$.checks$.undoneTs$
       .Queries.*?(
       user_Query.molecule.part.ns.isFavorite.showGrouped.groupedCols$
         .ColSettings.*?(
         user_ColSetting.colIndex.sortDir.sortPos
       )
     ).get.head match {
-      case (_, stars$, flags$, checks$, undoneTs$, groupEdits$, queryList) =>
+      case (_, stars$, flags$, checks$, undoneTs$, queryList) =>
         (
           settingsOpt.getOrElse(Map.empty[String, String]),
           stars$.getOrElse(Set.empty[Long]),
           flags$.getOrElse(Set.empty[Long]),
           checks$.getOrElse(Set.empty[Long]),
           undoneTs$.getOrElse(Set.empty[Long]),
-          groupEdits$.getOrElse(Set.empty[Long]),
           queryList.sortBy(_._1).map {
             case (molecule1, part, ns, isFavorite, showGrouped, groupedCols$, colSettings) =>
               QueryDTO(
@@ -83,7 +82,7 @@ trait Base extends BaseApi with HelpersAdmin {
           Set[Long],
           Set[Long],
           Set[Long],
-          Set[Long],
+//          Set[Long],
           Set[Long],
           Seq[QueryDTO]
         )

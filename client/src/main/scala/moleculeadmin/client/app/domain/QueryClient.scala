@@ -30,11 +30,7 @@ object QueryClient
 
   @JSExport
   def load(db0: String): Unit = queryWire().loadMetaData(db0).call().map {
-    case (
-      dbs,
-      metaSchema,
-      (settings, stars, flags, checks, undoneTs, groupEdits0, queries)
-      ) =>
+    case (dbs, metaSchema, (settings, stars, flags, checks, undoneTs, queries)) =>
 
       // Uncomment to test dynamic ScalaFiddle compilation
       // import moleculeadmin.client.app.domain.query.data.groupedit.compileTest.TestScalaFiddle
@@ -63,7 +59,7 @@ object QueryClient
           case (k, "true") if k.startsWith("view") => k
         }.toSeq
 
-        // Decode undo/group edit coordinates
+        // Decode undone/undoing transaction t pairs
         var newT    = 0L
         var undoneT = 0L
         undoneTs.foreach { pair =>
@@ -72,21 +68,6 @@ object QueryClient
           new2undone += newT -> undoneT
           undone2new += undoneT -> newT
         }
-        var firstT  = 0L
-        var lastT   = 0L
-        var undoing = false
-        groupEdits0.toList.sorted.foreach { triple =>
-          firstT = triple >> 32
-          lastT = (triple & 0xFFFFFFF) >> 1
-          undoing = (triple & 1) == 1L
-          groupEdits += firstT -> lastT
-        }
-
-
-//        println("new2undone " + new2undone)
-//        println("undone2new " + undone2new)
-//        println("groupEdits0 " + groupEdits0)
-//        println("groupEdits  " + groupEdits)
 
         savedQueries = queries
         curStars = stars

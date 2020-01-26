@@ -21,7 +21,7 @@ case class RenderUndo()(implicit ctx: Ctx.Owner) extends Undoing {
     showUndo()
     if (showUndo.now) {
       queryWire().getLastTxs(
-        db, curFirstT, groupEdits, enumAttrs
+        db, curFirstT, enumAttrs
       ).call().foreach {
         case Right(txs) =>
           // caching txs to be accessible by cmd-z undoing shortcut too

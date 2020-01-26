@@ -35,8 +35,8 @@ a {
 }
 a:hover {
     color: #00A0D6;
-    /*text-decoration: none;*/
-    text-decoration: underline;
+    text-decoration: none;
+    /*text-decoration: underline;*/
 }
 
 a.discrete {
@@ -373,16 +373,11 @@ table.undoTxs tr.undone {
 }
 
 table.undoTxs tr.header td {
-    padding: 3px 5px 0px 5px;
-    color: #a54ffa;
-}
-table.undoTxs tr.header.topLine td {
     border-top-style: solid;
     border-top-width: 1px;
-    border-top-color: #6c6c6c;
-}
-table.undoTxs tr.header td:nth-child(2) {
-    Xpadding-right: 15px;
+    border-top-color: #bbb;
+    padding: 3px 5px 0px 5px;
+    color: #a54ffa;
 }
 table.undoTxs tr.header a {
     padding-right: 12px;

@@ -48,7 +48,7 @@ object Card1 extends TestScalaFiddle {
         }
 
         val scalaCode: String = ScalaCode(col, rhs).get
-        //        println(scalaCode)
+                println(scalaCode)
 
         ScalaFiddle[js.UndefOr[String]](scalaCode).lambda2.foreach { lambda =>
           def process[T](input: T): (Option[String], String) = {

@@ -111,55 +111,9 @@ trait Undoing extends UndoElements with QueryApi {
       })
     )
 
-    var curGroupEdits      = groupEdits.filter(_._1 >= curLastTxs.head._1)
-    var hasGroupEdits      = curGroupEdits.nonEmpty
-    var firstT             = 0L
-    var lastT              = 0L
-    var isFirstOfGroupEdit = false
-    var isGroupEdit        = false
-    var isLastOfGroup      = false
-    var isUndone           = false
-    def setNextGroupEdit() =
-      curGroupEdits.headOption.fold {
-        firstT = 0L
-        lastT = 0L
-        hasGroupEdits = false
-      } { pair =>
-        firstT = pair._1
-        lastT = pair._2
-        // prepare next
-        curGroupEdits = curGroupEdits.tail
-        isLastOfGroup = true
-      }
-
-    setNextGroupEdit()
-
     curLastTxs.foreach {
       case (t, tx, txInstant, txMetaDatoms, datoms) =>
-        isUndone = undone2new.contains(t)
-
-        if (hasGroupEdits) {
-          if (t == firstT) {
-            isFirstOfGroupEdit = true
-            isGroupEdit = true
-            isLastOfGroup = false
-
-          } else if (!isLastOfGroup && isGroupEdit && t < lastT) {
-            isFirstOfGroupEdit = false
-
-          } else if (isGroupEdit && t == lastT) {
-            setNextGroupEdit()
-
-          } else {
-            isFirstOfGroupEdit = false
-            isGroupEdit = false
-          }
-        } else {
-          isFirstOfGroupEdit = false
-          isGroupEdit = false
-        }
-
-        val setTx = { () =>
+        val setTx            = { () =>
           if (cleanMouseover) {
             curT() = t
             curTx() = tx
@@ -168,7 +122,6 @@ trait Undoing extends UndoElements with QueryApi {
             cleanMouseover = true
           }
         }
-
         val highlightUndoneT = { () =>
           new2undone.get(t).fold(()) { undoneT =>
             cleanMouseover = false
@@ -186,7 +139,7 @@ trait Undoing extends UndoElements with QueryApi {
           }
         }
 
-        val isTop         = isFirstOfGroupEdit || !isGroupEdit
+        val isUndone      = undone2new.contains(t)
         val canUndo       = !(datoms.isEmpty || isUndone)
         val notLast       = countDown > 1
         val undoAllNext   = { () => undoTxs(allNext(t)) }
@@ -196,11 +149,9 @@ trait Undoing extends UndoElements with QueryApi {
         datomTable1.appendChild(
           _headerRow(
             t, tx,
-            isTop,
             isUndone,
             canUndo,
             notLast,
-
             setTx,
             highlightUndoneT,
             highlightNewT,
