@@ -77,18 +77,15 @@ abstract class Cell(
       val isNum  : Boolean   = Seq("Int", "Long", "ref", "datom", "Float", "Double").contains(attrType)
       val updater            = card match {
         case 1 => UpdateCardOne(
-          cols, qr, origArray, editArray, baseClass, colType,
-          arrayIndex, colIndex, rowIndex,
+          cols, qr, origArray, editArray, baseClass, colType, colIndex, rowIndex,
           related, nsAlias, nsFull, attr, attrType, enums, expr
         )
         case 2 => UpdateCardMany(
-          cols, qr, origArray, editArray, baseClass, colType,
-          arrayIndex, colIndex, rowIndex,
+          cols, qr, origArray, editArray, baseClass, colType, rowIndex,
           related, nsAlias, nsFull, attr, attrType, enums, cellType, expr
         )
         case 3 => UpdateCardMap(
-          cols, qr, origArray, editArray, baseClass,
-          arrayIndex, colIndex, rowIndex,
+          cols, qr, origArray, editArray, baseClass, rowIndex,
           related, nsAlias, nsFull, attr, attrType, enums, expr
         )
       }

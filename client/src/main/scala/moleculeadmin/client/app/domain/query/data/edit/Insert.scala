@@ -15,6 +15,15 @@ trait Insert extends BaseKeyEvents with BodyElements with TypeValidation {
   protected var keepInserting = false
   protected var error         = false
 
+  protected def editableCols: Seq[Col] = {
+    columns.now.flatMap {
+      case col if col.attr == "e"        => None
+      case Col(_, _, _, _, _, _, _, _, _, _, _,
+      "t" | "tx" | "txInstant", _, _, _) => None
+      case col                           => Some(col)
+    }
+  }
+
   protected def extract(col: Col, cell: TableCell): Seq[String] = {
     val (attr, attrType, card, enums, mandatory) =
       (col.attr, col.attrType, col.card, col.enums, !col.opt)
@@ -42,7 +51,7 @@ trait Insert extends BaseKeyEvents with BodyElements with TypeValidation {
         if (v.nonEmpty) {
           Seq(validate(v))
         } else if (mandatory) {
-          err(s"Mandatory `$attr` value can't be empty")
+          err(s"Mandatory `$attr` card-one value can't be empty")
         } else {
           Nil
         }
@@ -77,7 +86,7 @@ trait Insert extends BaseKeyEvents with BodyElements with TypeValidation {
         if (vs.nonEmpty) {
           vs.distinct.map(validate)
         } else if (mandatory) {
-          err(s"Mandatory `$attr` value can't be empty")
+          err(s"Mandatory `$attr` card-many value can't be empty")
         } else {
           Nil
         }
@@ -130,7 +139,7 @@ trait Insert extends BaseKeyEvents with BodyElements with TypeValidation {
               k + "__~~__" + validate(v)
           }
         } else if (mandatory) {
-          err(s"Mandatory `$attr` value can't be empty")
+          err(s"Mandatory `$attr` map value can't be empty")
         } else {
           Nil
         }
@@ -138,8 +147,9 @@ trait Insert extends BaseKeyEvents with BodyElements with TypeValidation {
   }
 
   def valuePairs(rowValues: Seq[Seq[String]]): Seq[String] = {
-    val maxLength = columns.now.map(c => (c.nsFull + c.attr).length).max
-    columns.now.tail.zipWithIndex.map {
+    val cols = editableCols
+    val maxLength = cols.map(c => (c.nsFull + c.attr).length).max
+    cols.zipWithIndex.map {
       case (col, i) =>
         val attr   = s"${col.nsFull}/${col.attr}"
         val indent = " " * (maxLength - attr.length + 1)

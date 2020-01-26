@@ -5,6 +5,7 @@ import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.domain.query.data.edit.{Insert, RetractEid}
 import moleculeadmin.client.app.domain.query.marker.ToggleOne
 import moleculeadmin.client.autowire.queryWire
+import moleculeadmin.shared.ast.query.Col
 import moleculeadmin.shared.ops.query.BaseQuery
 import moleculeadmin.shared.styles.Color
 import org.scalajs.dom.html.{TableCell, TableSection}
@@ -41,7 +42,7 @@ trait Inserting extends Insert with BaseQuery with Editing {
     val row       = document.activeElement.parentNode
     val tableBody = row.parentNode.asInstanceOf[TableSection]
     val cells     = row.childNodes
-    val rowValues = columns.now.tail.map { col =>
+    val rowValues = editableCols.map { col =>
       extract(col, cells.item(col.colIndex + 1).asInstanceOf[TableCell])
     }
     if (rowValues.forall(_.isEmpty)) {
@@ -105,40 +106,44 @@ trait Inserting extends Insert with BaseQuery with Editing {
 
   def prepareEmptyInsertRow(): Unit = {
     val tableBody = document.getElementById("tableBody").asInstanceOf[TableSection]
-    val newCells  = columns.now.tail.map { col =>
-      val newCell = td(
-        contenteditable := true,
-        onblur := { () =>
-          if (error) {
-            // Correct invalid input
-            error = false
-          } else if (keepInserting) {
-            // Next blur should be an abort unless tabbing
-            keepInserting = false
-          } else {
-            keepInserting = false
-            insertMode = false
-            modelElements.recalc()
-          }
-        },
-      )
-      col.card match {
-        case 1 =>
-          if (isNumber(col.attrType))
-            newCell(textAlign.right)
-          else
-            newCell
+    val newCells  = columns.now.tail.map {
+      case Col(_, _, _, _, _, _, _, _, _, _, _,
+      "t" | "tx" | "txInstant", _, _, _) => td()
 
-        case card =>
-          if (col.attrType == "String")
-            newCell(attr("card") := card, cls := "items", ul(li()))
-          else if (isNumber(col.attrType))
-            newCell(attr("card") := card,
-              if (card == 2) cls := "num" else ()
-            )
-          else
-            newCell(attr("card") := card)
-      }
+      case col =>
+        val newCell = td(
+          contenteditable := true,
+          onblur := { () =>
+            if (error) {
+              // Correct invalid input
+              error = false
+            } else if (keepInserting) {
+              // Next blur should be an abort unless tabbing
+              keepInserting = false
+            } else {
+              keepInserting = false
+              insertMode = false
+              modelElements.recalc()
+            }
+          },
+        )
+        col.card match {
+          case 1 =>
+            if (isNumber(col.attrType))
+              newCell(textAlign.right)
+            else
+              newCell
+
+          case card =>
+            if (col.attrType == "String")
+              newCell(attr("card") := card, cls := "items", ul(li()))
+            else if (isNumber(col.attrType))
+              newCell(attr("card") := card,
+                if (card == 2) cls := "num" else ()
+              )
+            else
+              newCell(attr("card") := card)
+        }
     }
 
     val newRow = tr(
