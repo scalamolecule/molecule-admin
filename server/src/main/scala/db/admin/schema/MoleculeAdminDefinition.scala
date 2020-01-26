@@ -102,7 +102,6 @@ object MoleculeAdminDefinition {
       val flags      = manyLong.noHistory.doc("Flagged entity ids for this db")
       val checks     = manyLong.noHistory.doc("Checked entity ids for this db")
       val undoneTs   = manyLong.noHistory.doc("Bit-encoded pairs of new/undone transaction t. For tx rollbacks. Non-intrusive alternative to real tx meta provisioning")
-      val groupEdits = manyLong.noHistory.doc("Bit-encoded triples of first/last transaction t and 'isUndoing' flag. For group edit rollbacks. Non-intrusive alternative to real tx meta provisioning")
       val queries    = many[Query].noHistory.isComponent.doc("Recent/saved/favorite queries for this db")
     }
     trait Query {

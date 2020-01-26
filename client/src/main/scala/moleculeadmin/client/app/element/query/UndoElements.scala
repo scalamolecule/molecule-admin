@@ -47,11 +47,9 @@ trait UndoElements extends AppElements with RxBindings {
   def _headerRow(
     t: Long,
     tx: Long,
-    isTop: Boolean,
     isUndone: Boolean,
     canUndo: Boolean,
     notLast: Boolean,
-
     setTx: () => Unit,
     highlightUndoneT: () => Unit,
     highlightNewT: () => Unit,
@@ -60,9 +58,8 @@ trait UndoElements extends AppElements with RxBindings {
     undoThis: () => Unit
   )(implicit ctx: Ctx.Owner): TableRow = {
     val undone = if(isUndone) " undone" else ""
-    val clazz = if (isTop) "header topLine" else "header"
     tr(
-      cls := Rx(if (tx == curTx()) clazz + " chosen" else clazz + undone),
+      cls := Rx(if (tx == curTx()) "header  chosen" else "header" + undone),
       onmouseover := setTx,
       td(
         if (new2undone.contains(t))

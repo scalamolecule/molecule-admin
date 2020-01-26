@@ -16,7 +16,7 @@ trait BaseApi {
         Set[Long],
         Set[Long],
         Set[Long],
-        Set[Long],
+//        Set[Long],
         Set[Long],
         Seq[QueryDTO]
         )) = ???

@@ -21,10 +21,8 @@ import scala.concurrent.Future
 import scalatags.JsDom.all._
 
 case class GroupSave(col: Col)(implicit val ctx: Ctx.Owner)
-  extends RxBindings with ColOps with BodyElements
-//    with KeyEvents
-  with Paging
-{
+  extends RxBindings with ColOps with BodyElements with Paging {
+
   type keepBooPickleImport_GroupSave = PickleState
 
   val Col(colIndex, _, nsAlias, nsFull, attr, attrType, colType,

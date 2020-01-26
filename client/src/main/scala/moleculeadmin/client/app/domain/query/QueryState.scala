@@ -117,7 +117,6 @@ object QueryState extends QueryApi {
   var curLastTxs = Array.empty[TxData]
   val undone2new = mutable.Map.empty[Long, Long]
   val new2undone = mutable.Map.empty[Long, Long]
-  val groupEdits = new ListBuffer[(Long, Long)]
 
   // Transactions
   val curTxD       = Var((0L, 0L, ""))
