@@ -40,7 +40,8 @@ trait QueryApi extends BaseApi {
 
   def getLastTxs(
     db: String,
-    noOfTxs: Int,
+    prevFirstT: Long,
+    groupEdits: ListBuffer[(Long, Long)],
     enumAttrs: Seq[String]
   ): Either[String, Array[TxData]] = ???
 

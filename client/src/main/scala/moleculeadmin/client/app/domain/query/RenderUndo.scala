@@ -20,10 +20,18 @@ case class RenderUndo()(implicit ctx: Ctx.Owner) extends Undoing {
   def dynRender: Rx.Dynamic[TypedTag[Element]] = Rx {
     showUndo()
     if (showUndo.now) {
-      println(s"Loading $chunks chunks of latest txs")
-      queryWire().getLastTxs(db, chunks, enumAttrs).call().foreach {
-        case Right(txs) => setUndoRows(txs)
-        case Left(err)  => setUndoRows(Array.empty[TxData], err)
+      queryWire().getLastTxs(
+        db, curFirstT, groupEdits, enumAttrs
+      ).call().foreach {
+        case Right(txs) =>
+          // caching txs to be accessible by cmd-z undoing shortcut too
+          curLastTxs = txs
+          curFirstT = txs.headOption.fold(0L)(_._1) // could be empty db
+          populateUndoRows()
+        case Left(err)  =>
+          curLastTxs = Array.empty[TxData]
+          curFirstT = 0L
+          populateUndoRows(err)
       }
       container
     }

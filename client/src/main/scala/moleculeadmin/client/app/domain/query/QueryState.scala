@@ -1,16 +1,17 @@
 package moleculeadmin.client.app.domain.query
-import moleculeadmin.shared.ast.query.{Col, QueryDTO, Filter, QueryCache}
+import moleculeadmin.shared.ast.query.{Col, Filter, QueryCache, QueryDTO}
 import moleculeadmin.shared.ast.schema.Ns
 import moleculeadmin.shared.ast.tree.Tree
 import molecule.ast.model.Element
 import moleculeadmin.client.app.domain.query.data.RowBuilder
+import moleculeadmin.shared.api.QueryApi
 import rx.Var
 import scalatags.JsDom.all.s
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 
-object QueryState {
+object QueryState extends QueryApi {
 
   var db = ""
 
@@ -112,11 +113,10 @@ object QueryState {
   var curFlags  = Set.empty[Long]
   var curChecks = Set.empty[Long]
 
-  // Undo pairs
+  // Undo coordinates
+  var curLastTxs = Array.empty[TxData]
   val undone2new = mutable.Map.empty[Long, Long]
   val new2undone = mutable.Map.empty[Long, Long]
-
-  // Ordered group edit first/last t coordinates
   val groupEdits = new ListBuffer[(Long, Long)]
 
   // Transactions
