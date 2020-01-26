@@ -174,25 +174,56 @@ class QueryBackend extends QueryApi with Base with DateStrLocal {
     rows.sortBy(t => (t._1, t._2, t._4, t._3))
   }
 
+  private def getFirstT(
+    prevFirstT: Long,
+    groupEdits: ListBuffer[(Long, Long)]
+  ): Long = {
+    val numberOfTxs = 8
+    val testT       = prevFirstT - numberOfTxs
+    if (groupEdits.isEmpty) {
+      testT
+    } else {
+      var i         = groupEdits.length - 1
+      var firstLast = (0L, 0L)
+      var firstT    = testT
+      // Test if testT is in a group edit (testing last group edits first)
+      while (i > -1) {
+        firstLast = groupEdits(i)
+        if (firstLast._1 <= testT) {
+          if (testT <= firstLast._2) {
+            // Use firstT of group edit
+            firstT = firstLast._1
+          }
+          // No need to search further
+          i = -1
+        }
+        i -= 1
+      }
+      firstT
+    }
+  }
 
   override def getLastTxs(
     db: String,
-    chunks: Int,
+    prevFirstT0: Long,
+    groupEdits: ListBuffer[(Long, Long)],
     enumAttrs: Seq[String]
   ): Either[String, Array[TxData]] = {
-    val conn              = Conn(base + "/" + db)
-    val datomicDb         = conn.db
-    val firstT            = datomicDb.basisT() - chunks * 100
-    val txs               = conn.datomicConn.log.txRange(firstT, null).asScala
-    val txData            = new Array[TxData](txs.size)
-    var txIndex           = 0
-    var safeTx            = true
-    var e                 = 0L
-    var eidInTx           = 0L
-    var a                 = ""
-    var v                 = ""
-    var prevValue         = ""
-    var datom: DatomTuple = null
+    val conn       = Conn(base + "/" + db)
+    val datomicDb  = conn.db
+    val prevFirstT = if (prevFirstT0 == 0L) datomicDb.basisT() else prevFirstT0
+    val firstT     = getFirstT(prevFirstT, groupEdits)
+    val txs        = conn.datomicConn.log.txRange(firstT, null).asScala
+    val txData     = new Array[TxData](txs.size)
+    var txIndex    = 0
+    var safeTx     = true
+    var e          = 0L
+    var eidInTx    = 0L
+    var a          = ""
+    var v          = ""
+    var prevValue  = ""
+    var datom      = null: DatomTuple
+
     withTransactor {
       try {
         txs.foreach { txMap =>
@@ -317,8 +348,8 @@ class QueryBackend extends QueryApi with Base with DateStrLocal {
         }
 
         // Add newT/undoneT pairs to meta db
-        val moleculeAdminConn     = Conn(base + "/MoleculeAdmin")
-        val dbSettingsId = user_User.username_("admin")
+        val moleculeAdminConn = Conn(base + "/MoleculeAdmin")
+        val dbSettingsId      = user_User.username_("admin")
           .DbSettings.e.Db.name_(db).get(moleculeAdminConn)
         user_DbSettings(dbSettingsId).undoneTs.assert(undoneTs).update(moleculeAdminConn)
 

@@ -21,61 +21,32 @@ trait Undoing extends UndoElements with QueryApi {
   type keepBooPickleImport_Undoing = PickleState
 
   // Local cache (reset on each refresh)
-  var chunks         = 1
+  var curFirstT      = 0L
   var t2tx           = Map.empty[Long, Long]
   var t2txInstant    = Map.empty[Long, String]
   var cleanMouseover = true
-  var zed            = Seq.empty[Long]
 
   def toggleUndo()(implicit ctx: Ctx.Owner): Unit = {
     showUndo() = !showUndo.now
   }
 
-  def undoLastClean(chunks: Int)(implicit ctx: Ctx.Owner): Unit = {
-    println("undoLastClean")
-
-    // Avoid infinite recursion
-    if (chunks == 4)
-      throw new RuntimeException(
-        "Can't search for more than 3 chunks of tx data")
-
-    queryWire().getLastTxs(db, chunks, enumAttrs).call().foreach {
-      case Right(txs) =>
-
-        println(undone2new)
-        println(new2undone)
-
-        txs.reverse.find(tx =>
-          tx._5.nonEmpty && // has datoms to undo
-            !undone2new.contains(tx._1) && // not already undone
-            !zed.contains(tx._1)
-        ).fold(
-          // Recursively retry with one more chunk
-          undoLastClean(chunks + 1)
-        ) { cleanTx =>
-
-          println("--- " + cleanTx._1)
-          txs.foreach(tx => println(tx._1))
-
-          undoTxs(txs, Seq(cleanTx._1))
-
-          // avoid cmd-z the same txs (within a session - resets on refresh)
-          zed = zed :+ cleanTx._1
-        }
-
-      case Left(err) =>
-        throw new RuntimeException("Error undoing last tx: " + err)
+  def undoLastClean(implicit ctx: Ctx.Owner): Unit = {
+    curLastTxs.reverse.find(tx =>
+      tx._5.nonEmpty && // has datoms to undo
+        !undone2new.contains(tx._1) && // not already undone
+        !new2undone.contains(tx._1) // not an undoing tx
+    ).fold {
+      window.alert("No clean txs to undo - please load more to undo further back.")
+    } { cleanTx =>
+      undoTxs(Seq(cleanTx._1))
     }
   }
 
-  def undoTxs(
-    txs: Array[TxData],
-    ts: Seq[Long]
-  )(implicit ctx: Ctx.Owner): Unit = {
+  def undoTxs(ts: Seq[Long])(implicit ctx: Ctx.Owner): Unit = {
     queryWire().undoTxs(db, ts, enumAttrs).call().foreach {
       case Right(newTxs) =>
         // Log
-        println(s"Undid ${ts.length} txs:")
+        println(s"Undid ${newTxs.length} txs:")
 
         // Update local undone t pair caches
         ts.reverse.zip(newTxs).foreach {
@@ -87,24 +58,17 @@ trait Undoing extends UndoElements with QueryApi {
             println(s"  $oldT -> ${newTx._1}")
         }
 
-        if (showUndo.now) {
-          // Render undo
-          setUndoRows(txs ++ newTxs)
-        }
+        curLastTxs = curLastTxs ++ newTxs
 
-        // Update dataTable
+        // Update dataTable + undo txs
         modelElements.recalc()
       case Left(err)     => window.alert(err)
     }
   }
 
-
-  def setUndoRows(
-    txs: Array[TxData],
-    err: String = ""
-  )(implicit ctx: Ctx.Owner): Unit = {
+  def populateUndoRows(err: String = "")(implicit ctx: Ctx.Owner): Unit = {
     def allNext(t: Long): Seq[Long] =
-      txs.collect {
+      curLastTxs.collect {
         case tx
           if tx._1 >= t && // including/after this tx
             tx._5.nonEmpty && // has datoms to undo
@@ -113,7 +77,7 @@ trait Undoing extends UndoElements with QueryApi {
       }.sorted
 
     def cleanNext(t: Long): Seq[Long] =
-      txs.collect {
+      curLastTxs.collect {
         case tx
           if tx._1 >= t && // including/after this tx
             tx._5.nonEmpty && // has datoms to undo
@@ -122,16 +86,15 @@ trait Undoing extends UndoElements with QueryApi {
         => tx._1
       }.sorted
 
-    var countDown = txs.length
+    var countDown = curLastTxs.length
     var ePrev     = 0L
     var aPrev     = ""
 
     // Map t to tx/txInstant
-    txs.foreach { tx =>
+    curLastTxs.foreach { tx =>
       t2tx = t2tx + (tx._1 -> tx._2)
       t2txInstant = t2txInstant + (tx._1 -> tx._3)
     }
-
 
     // Fill datomTable
     val datomTable1 =
@@ -144,12 +107,11 @@ trait Undoing extends UndoElements with QueryApi {
     datomTable1.appendChild(
       _loadMoreRow(err, { () =>
         println("load more...")
-        chunks += 1
         showUndo.recalc()
       })
     )
 
-    var curGroupEdits      = groupEdits.filter(_._1 >= txs.head._1)
+    var curGroupEdits      = groupEdits.filter(_._1 >= curLastTxs.head._1)
     var hasGroupEdits      = curGroupEdits.nonEmpty
     var firstT             = 0L
     var lastT              = 0L
@@ -172,33 +134,27 @@ trait Undoing extends UndoElements with QueryApi {
 
     setNextGroupEdit()
 
-    txs.foreach {
+    curLastTxs.foreach {
       case (t, tx, txInstant, txMetaDatoms, datoms) =>
-        println(s"--- $t")
         isUndone = undone2new.contains(t)
 
         if (hasGroupEdits) {
           if (t == firstT) {
-            println("first")
             isFirstOfGroupEdit = true
             isGroupEdit = true
             isLastOfGroup = false
 
           } else if (!isLastOfGroup && isGroupEdit && t < lastT) {
-            println("...")
             isFirstOfGroupEdit = false
 
           } else if (isGroupEdit && t == lastT) {
-            println("last")
             setNextGroupEdit()
 
           } else {
-            println("not")
             isFirstOfGroupEdit = false
             isGroupEdit = false
           }
         } else {
-          println("hasGroupEdits not")
           isFirstOfGroupEdit = false
           isGroupEdit = false
         }
@@ -233,9 +189,9 @@ trait Undoing extends UndoElements with QueryApi {
         val isTop         = isFirstOfGroupEdit || !isGroupEdit
         val canUndo       = !(datoms.isEmpty || isUndone)
         val notLast       = countDown > 1
-        val undoAllNext   = { () => undoTxs(txs, allNext(t)) }
-        val undoCleanNext = { () => undoTxs(txs, cleanNext(t)) }
-        val undoThis      = { () => undoTxs(txs, Seq(t)) }
+        val undoAllNext   = { () => undoTxs(allNext(t)) }
+        val undoCleanNext = { () => undoTxs(cleanNext(t)) }
+        val undoThis      = { () => undoTxs(Seq(t)) }
 
         datomTable1.appendChild(
           _headerRow(

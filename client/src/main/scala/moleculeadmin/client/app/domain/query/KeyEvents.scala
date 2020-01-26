@@ -49,7 +49,7 @@ trait KeyEvents
           }
         } else {
           e.key match {
-            case "z" if cmd => undoLastClean(1)
+            case "z" if cmd => undoLastClean
             case _          => paging(e, ctrl, alt, cmd)
           }
         }
@@ -71,7 +71,7 @@ trait KeyEvents
           case "Enter" if shift    => multilineSoftNewLine(e)
           case "Enter" if ctrl     => multilineAddItem(e)
           case "Enter"             => saveEdit(e)
-          case "z" if cmd          => undoLastClean(1)
+          case "z" if cmd          => undoLastClean
           case _                   => ()
         }
       }
