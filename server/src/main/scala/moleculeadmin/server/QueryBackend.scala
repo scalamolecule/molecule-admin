@@ -10,7 +10,7 @@ import db.admin.dsl.moleculeAdmin._
 import db.core.dsl.coreTest.Ns
 import molecule.api.Entity
 import molecule.api.out10._
-import molecule.ast.model.{Atom, Model, NoValue}
+import molecule.ast.model.{Atom, Bond, Model, NoValue}
 import molecule.ast.transactionModel.{Add, Retract, RetractEntity, Statement}
 import molecule.facade.{Conn, TxReport}
 import molecule.transform.Model2Transaction
@@ -180,68 +180,135 @@ class QueryBackend extends QueryApi with Base with DateStrLocal {
     prevFirstT0: Long,
     enumAttrs: Seq[String]
   ): Either[String, Array[TxData]] = {
-    val conn       = Conn(base + "/" + db)
-    val datomicDb  = conn.db
-    val prevFirstT = if (prevFirstT0 == 0L) datomicDb.basisT() else prevFirstT0
-    val firstT     = prevFirstT - 100
-    val txs        = conn.datomicConn.log.txRange(firstT, null).asScala
-    val txData     = new Array[TxData](txs.size)
-    var txIndex    = 0
-    var safeTx     = true
-    var e          = 0L
-    var eidInTx    = 0L
-    var a          = ""
-    var v          = ""
-    var prevValue  = ""
-    var datom      = null: DatomTuple
+    val conn         = Conn(base + "/" + db)
+    val datomicDb    = conn.db
+    val prevFirstT   = if (prevFirstT0 == 0L) datomicDb.basisT() else prevFirstT0
+    val firstT       = if (prevFirstT > 1100) prevFirstT0 - 1000 else 1001
+    //    val firstT       = 1001
+    val txs          = conn.datomicConn.log.txRange(firstT, null).asScala
+    val txData       = new Array[TxData](txs.size)
+    var txIndex      = 0
+    var metaE        = 0L
+    var t            = 0L
+    var tx           = 0L
+    var txInstantStr = ""
+    var e            = 0L
+    var a            = ""
+    var v            = ""
+    var eStrs        = new ListBuffer[String]
+    var metaRefDatom = null: DatomTuple
+    var refDatom     = null: DatomTuple
+    var metaRefE     = 0L
+    var refE         = 0L
 
     withTransactor {
       try {
         txs.foreach { txMap =>
-          val t            = txMap.get(datomic.Log.T).asInstanceOf[Long]
-          val tx           = Peer.toTx(t).asInstanceOf[Long]
-          val txInstantStr = date2strLocal(datomicDb.entity(tx)
-            .get(":db/txInstant").asInstanceOf[Date])
-          val rawDatoms    = txMap.get(datomic.Log.DATA).asInstanceOf[jList[Datom]]
+          eStrs.clear()
+          metaRefE = 0L
+          refE = 0L
+          metaRefDatom = null: DatomTuple
+          refDatom = null: DatomTuple
+
+          t = txMap.get(datomic.Log.T).asInstanceOf[Long]
+          val datoms0: Seq[DatomTuple] =
+            txMap.get(datomic.Log.DATA)
+              .asInstanceOf[jList[Datom]].asScala
+              .toList.flatMap { d =>
+              e = d.e.asInstanceOf[Long]
+              a = datomicDb.ident(d.a).toString
+              v = formatValue(conn, a, d.v, enumAttrs)
+              //              println(s"$e   $a   $v")
+              if (t == 1000) {
+                None
+              } else if (a == ":db/txInstant") {
+                tx = e
+                txInstantStr = v
+                eStrs += tx.toString
+                metaE = tx
+                // Skip txInstant datom to isolate remaining tx meta data
+                None
+              } else if (a.startsWith(":db.") || a.startsWith(":db/")) {
+                None
+              } else {
+                eStrs += e.toString
+                Some((e, a, v, d.added))
+              }
+            }.sortBy(d => (d._1, d._2, d._4, d._3))
+
           //          println(t)
-          //          rawDatoms.forEach(d => println(d))
+          //          datoms0 foreach println
           //          println("------")
-          val datomCount   = rawDatoms.size()
+
+          val datomCount   = datoms0.length
           val txMetaDatoms = new ListBuffer[DatomTuple]
           val datoms       = new ListBuffer[DatomTuple]
-          safeTx = true
+
           if (datomCount > 0) {
-            rawDatoms.forEach { d =>
-              if (safeTx) {
-                a = datomicDb.ident(d.a).toString
-                // Skip schema transaction
-                safeTx = a.nonEmpty && !a.startsWith(":db.install")
-                if (a != ":db/txInstant") {
-                  e = d.e.asInstanceOf[Long]
-                  v = formatValue(conn, a, d.v, enumAttrs)
-                  if (
-                    e == tx ||
-                      Try(prevValue.toLong).isSuccess && e == prevValue.toLong
-                  ) eidInTx = e
-                  datom = (e, a, v, d.added)
-                  if (e == tx || e == eidInTx)
-                    txMetaDatoms += datom
-                  else
-                    datoms += datom
-                  prevValue = v
-                }
-              }
+            datoms0.foreach {
+
+              // Meta datoms
+
+              case datom@(e, _, v, _) if e == metaE && eStrs.contains(v) =>
+                metaRefDatom = datom
+                metaRefE = v.toLong
+
+              case datom@(e, _, v, _) if e == metaRefE && eStrs.contains(v) =>
+                if (metaRefDatom != null)
+                  txMetaDatoms += metaRefDatom
+                metaRefDatom = datom
+                metaE = e
+                metaRefE = v.toLong
+
+              case datom@(e, _, _, _) if e == metaRefE =>
+                txMetaDatoms += metaRefDatom
+                txMetaDatoms += datom
+                metaRefE = 0L
+                metaE = e
+
+              case datom@(e, _, _, _) if e == metaE =>
+                txMetaDatoms += datom
+
+
+              // Datoms
+
+              case datom@(_, _, v, _) if eStrs.contains(v) =>
+                refDatom = datom
+                refE = v.toLong
+
+              case datom@(e, _, v, _) if e == refE && eStrs.contains(v) =>
+                if (refDatom != null)
+                  datoms += refDatom
+                refDatom = datom
+                refE = v.toLong
+
+              case datom@(e, _, _, _) if e == refE =>
+                datoms += refDatom
+                datoms += datom
+                refE = 0L
+
+              case datom =>
+                datoms += datom
             }
+
+            //            txMetaDatoms foreach println
+            //            println("---")
             //            datoms foreach println
             //            println("=========================")
-            if (safeTx) {
-              txData(txIndex) = (
-                t, tx, txInstantStr,
-                txMetaDatoms,
-                datoms.distinct.sortBy(t => (t._1, t._2, t._4, t._3))
-              )
-              txIndex += 1
-            }
+
+            //            // Check split
+            //            if ((txMetaDatoms ++ datoms).sortBy(d => (d._1, d._2, d._4, d._3)) !=
+            //              datoms0.sortBy(d => (d._1, d._2, d._4, d._3)))
+            //              throw new RuntimeException(
+            //                "Unexpected divergence between datoms0 and txMetaDatoms/datoms in QueryBackend.getLastTxs:" +
+            //                  "\ndatoms0:\n  " + datoms0.mkString(",\n  ") +
+            //                  "\n-------------" +
+            //                  "\ntxMetaDatoms:\n  " + txMetaDatoms.mkString(",\n  ") +
+            //                  "\ndatoms:\n  " + datoms.mkString(",\n  ")
+            //              )
+
+            txData(txIndex) = (t, tx, txInstantStr, txMetaDatoms, datoms)
+            txIndex += 1
           }
         }
         // Return data transactions (without schema txs)
@@ -741,6 +808,7 @@ class QueryBackend extends QueryApi with Base with DateStrLocal {
     // Model without initial entity id
     val elements = new Molecule2Model(molecule, nsMap).getModel.right.get.collect {
       case a: Atom => a
+      case b: Bond => b
     }
     //    println(rowValues)
     //    elements foreach println
@@ -767,11 +835,12 @@ class QueryBackend extends QueryApi with Base with DateStrLocal {
     }
 
     val stmtss = Model2Transaction(conn, Model(elements)).insertStmts(Seq(data))
-    //    println(data)
-    //    stmtss.head foreach println
+    println(data)
+    stmtss.head foreach println
     withTransactor {
       try {
         Right(conn.transact(stmtss).eid)
+        //        Left("going again...")
       } catch {
         case t: Throwable => Left(t.getMessage)
       }

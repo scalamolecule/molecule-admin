@@ -6,7 +6,7 @@ import db.admin.dsl.moleculeAdmin._
 import db.admin.schema.MoleculeAdminSchema
 import db.core.dsl.coreTest._
 import db.core.dsl.tree._
-import db.core.schema.{CoreTestSchema, CoreTestSchema2, TreeSchema}
+import db.core.schema.{CoreTestSchema, TreeSchema}
 import db.integration.MBrainzSchemaLowerToUpper1
 import db.migration.dsl.partition.b_Bb
 import db.migration.schema.{Partition1Schema, PartitionSchema}
@@ -53,40 +53,27 @@ object ResetDbs extends TestSuite with ExampleData with Settings {
     test("Reset CoreTest") {
       implicit val conn = recreateDbFrom(CoreTestSchema, "localhost:4334/CoreTest", protocol)
 
-      Ns.int(1).save
-      val tx2 = Ns.int(2).save
-      val tx3 = Ns.int(3).save
-      val tx4 = Ns.int(4).save
-      Ns.int(5).save
+      Ns.long(1).save
+      Ns.long(2).Tx(Ns.str("A")).save
+      Ns.long(3).Tx(Ns.str("A").Ref1.str1("B")).save
+      Ns.long(4).Tx(Ns.str("A").Ref1.str1("B").Ref2.str2("C")).save
+      Ns.long(5).Ref1.int1(6).Tx(Ns.str("A").int(11).Ref1.str1("B").int1(22).Ref2.strs2("C").int2(33)).save
 
-      // group edit
-      val (e2, t2, e3, t3, e4, t4) = (tx2.eid, tx2.t, tx3.eid, tx3.t, tx4.eid, tx4.t)
 
-      val tx6          = Ns(e4).int(40).update
-      val tx7          = Ns(e3).int(30).update
-      val tx8          = Ns(e2).int(20).update
-      val (t6, t7, t8) = (tx6.t, tx7.t, tx8.t)
 
-      Ns.int(6).save
-
-      val undoneTs = Seq(
-        t6 << 32 | t4,
-        t7 << 32 | t3,
-        t8 << 32 | t2,
-      )
-
-      // Group edit coordinates encoded
-      val ge1 = t2 << 32 | t4 << 1 | 0
-      val ge2 = t6 << 32 | t8 << 1 | 1 // is undoing ge1
-
-      val adminConn = Conn(base + "/MoleculeAdmin")
-
-      val dbSettingsId = user_User.username_("admin")
-        .DbSettings.e.Db.name_("CoreTest").get(adminConn)
-
-      user_DbSettings(dbSettingsId)
-        .undoneTs(undoneTs)
-        .groupEdits(ge1, ge2).update(adminConn)
+      //      val undoneTs = Seq(
+      //        t6 << 32 | t4,
+      //        t7 << 32 | t3,
+      //        t8 << 32 | t2,
+      //      )
+      //
+      //      val adminConn = Conn(base + "/MoleculeAdmin")
+      //
+      //      val dbSettingsId = user_User.username_("admin")
+      //        .DbSettings.e.Db.name_("CoreTest").get(adminConn)
+      //
+      //      user_DbSettings(dbSettingsId)
+      //        .undoneTs().update(adminConn)
 
       //      (new QueryBackend).getLastTxs("CoreTest", 5, Nil)
     }
@@ -118,12 +105,6 @@ object ResetDbs extends TestSuite with ExampleData with Settings {
         write.over(coreDefFilePath, coreDefFile)
         DefFile("CoreTest", Some(coreDefFilePath.toString)).saveToMetaDb
         recreateDbFrom(CoreTestSchema, "localhost:4334/CoreTest", protocol)
-
-      case "CoreTest2" =>
-        if (debug) println("- CoreTest")
-        write.over(coreDefFilePath, coreDefFile)
-        DefFile("CoreTest", Some(coreDefFilePath.toString)).saveToMetaDb
-        recreateDbFrom(CoreTestSchema2, "localhost:4334/CoreTest2", protocol)
 
       case "Partition" =>
         if (debug) println("- Partition")
