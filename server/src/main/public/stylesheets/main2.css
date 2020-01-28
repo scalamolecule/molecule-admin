@@ -378,6 +378,7 @@ table.undoTxs tr.header td {
     border-top-color: #bbb;
     padding: 3px 5px 0px 5px;
     color: #a54ffa;
+    font-weight: normal;
 }
 table.undoTxs tr.header a {
     padding-right: 12px;
@@ -388,6 +389,9 @@ table.undoTxs tr.header.chosen a:hover {
 
 table.undoTxs tr.txMetaData {
     color: #888;
+}
+table.undoTxs tr.txMetaData td {
+    font-weight: normal;
 }
 
 
@@ -415,7 +419,10 @@ table.undoTxs td.eid.chosen {
 table.undoTxs td.retracted {
     background-color: #ffcbcb;
 }
-table.undoTxs td.selectedAttr {
+table.undoTxs td:nth-child(2) {
+    font-weight: bold;
+}
+table.undoTxs td.selectedAttrX {
     font-weight: bold;
 }
 table.undoTxs td.num {

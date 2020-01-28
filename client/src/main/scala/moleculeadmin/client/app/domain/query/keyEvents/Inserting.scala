@@ -107,6 +107,7 @@ trait Inserting extends Insert with BaseQuery with Editing {
   def prepareEmptyInsertRow(): Unit = {
     val tableBody = document.getElementById("tableBody").asInstanceOf[TableSection]
     val newCells  = columns.now.tail.map {
+      case col if col.attr == "e"        => td()
       case Col(_, _, _, _, _, _, _, _, _, _, _,
       "t" | "tx" | "txInstant", _, _, _) => td()
 

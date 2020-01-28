@@ -10,62 +10,37 @@ import moleculeadmin.shared.util.HelpersAdmin
 import org.specs2.mutable._
 import scala.languageFeature.implicitConversions._
 import ammonite.ops._
+import db.core.schema.CoreTestSchema
+import molecule.ast.model.NoValue
+import molecule.ast.transactionModel.Add
+import moleculeadmin.server.QueryBackend
+import moleculeadmin.server.utils.DateStrLocal
+import moleculeadmin.servertest.ResetDbs.protocol
+import scala.collection.mutable.ListBuffer
+import utest._
 
 
-object Adhoc extends Specification
+object Adhoc extends TestSuite
   with HelpersAdmin
   with ExampleData
   //  with TreeSchema
-  with mBrainzSchema {
+  with mBrainzSchema
+  with DateStrLocal {
 
   val base = "datomic:free://localhost:4334"
 
 
-  "Adhoc" >> {
+  val tests = Tests {
 
-    //    implicit val conn = Conn(base + "/MoleculeAdmin")
-    //    implicit val conn = Conn(base + "/mbrainz-1968-1973")
-    implicit val conn = Conn(base + "/CoreTest")
+    test("Adhoc") {
 
+      implicit val conn = recreateDbFrom(CoreTestSchema, "localhost:4334/CoreTest", protocol)
+      //    implicit val conn = Conn(base + "/MoleculeAdmin")
+      //    implicit val conn = Conn(base + "/mbrainz-1968-1973")
+      //        implicit val conn = Conn(base + "/CoreTest")
 
-    //    Ns.int(222).Tx(Ns.str("meta info")).save
-    //    Ns.int(333).Tx(Ns.str("meta with ref").Ref1.int1(444)).save
-
-    val all = (1 to 1000000).toList
-
-    val t = new Timer
-    println(all.contains(987654))
-    t.log(1)
-
-
-
-
-
-    ok
-  }
-
-  "One -> map not allowed" >> {
-    val ps = new PartitionSetup
-    import ps._
-
-    // card one to map cardinality not allowed
-    updateAttribute(coreMetaSchema, "CoreTest", "db.part/user", "Ns", "int", "int", 3, "Int") === Left(
-      "Successfully rolled back from error: " +
-        "Couldn't change to map cardinality since keys are unknown. Please create a new map attribute and populate with keyed data."
-    )
-
-    // Successfully rolled back (attribute `int` unchanged)
-
-    // client
-    getMetaSchema("CoreTest") === coreMetaSchema
-
-    // def file
-    read ! coreDefFilePath === coreDefFile
-
-    // meta
-    meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ns").Attrs.name_("int").pos.card.tpe.get(moleculeAdminConn) === List((2, 1, "Int"))
-
-    // live schema
-    Schema.attr("int").card.tpe.get(coreConn) === List(("int", "one", "long"))
+      Ns.int(1).save
+      Ns.int.get ==> List(1)
+    }
   }
 }
