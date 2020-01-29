@@ -148,9 +148,9 @@ trait ColOps extends HelpersAdmin {
         attrCount(cleanAttr) = count
     }
 
-        attrCount foreach println
-        println("--------")
-        attrIndex.toList.sortBy(_._1) foreach println
+    //    attrCount foreach println
+    //    println("--------")
+    //    attrIndex.toList.sortBy(_._1) foreach println
 
     def postfixed(col: Col): String = {
       if (hasGroupEdit) {

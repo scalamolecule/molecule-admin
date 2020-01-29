@@ -20,7 +20,7 @@ lazy val server = (project in file("server"))
   .dependsOn(sharedJvm)
   .enablePlugins(PlayScala)
   .disablePlugins(PlayLayoutPlugin)
-//  .enablePlugins(MoleculePlugin).settings(moleculeSchemas := Seq("db/admin", "db/core", "db/integration", "db/migration"))
+  .enablePlugins(MoleculePlugin).settings(moleculeSchemas := Seq("db/admin", "db/core", "db/integration", "db/migration"))
 
 
 lazy val shared = crossProject(JSPlatform, JVMPlatform)
