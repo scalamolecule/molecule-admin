@@ -38,7 +38,7 @@ trait HeadElements extends ColOps with AppElements with RxBindings {
 
   private def attrMenu(
     attribute: String,
-    card: Int,
+    postfix: String,
     expr: String,
     edit: MouseEvent => Unit,
     save: MouseEvent => Unit,
@@ -83,6 +83,7 @@ trait HeadElements extends ColOps with AppElements with RxBindings {
         width := "100%",
         padding := "1px 6px 2px 6px",
         attribute,
+        if (postfix.isEmpty) () else _pf(postfix),
         if (expr.nonEmpty) span(cls := "expr", expr) else (),
         div(
           cls := "dropdown-menu",
@@ -98,9 +99,11 @@ trait HeadElements extends ColOps with AppElements with RxBindings {
     )
   }
 
+  def _pf(postfix: String): Frag = span(postfix, cls := "postfix")
+
   def _attrHeaderSortable(
     attribute: String,
-    card: Int,
+    postfix: String,
     expr: String,
     sortDir: String,
     sortPos: Int,
@@ -115,35 +118,36 @@ trait HeadElements extends ColOps with AppElements with RxBindings {
     val headerCell = {
       if (expr == "orig") {
         td(
-          attribute
+          attribute,
+          if (postfix.isEmpty) () else _pf(postfix)
         )
       } else if (expr == "edit") {
         td(
           padding := 0,
-          attrMenu(attribute, card, expr, edit, save, cancel, retract),
+          attrMenu(attribute, postfix, expr, edit, save, cancel, retract),
           onchange := { () => processing() = "" }
         )
       } else if (nonMenuExprs.contains(expr)) {
         // non-editable aggr/tx
         td(
           attribute,
+          if (postfix.isEmpty) () else _pf(postfix),
           span(cls := "expr", expr),
         )
       } else if (attribute == "e") {
         td(
           padding := 0,
-          attrMenu(attribute, card, expr, edit, save, cancel, retract
-            , markers
-          )
+          attrMenu(attribute, postfix, expr, edit, save, cancel, retract, markers)
         )
       } else if (editable) {
         td(
           padding := 0,
-          attrMenu(attribute, card, expr, edit, save, cancel, retract)
+          attrMenu(attribute, postfix, expr, edit, save, cancel, retract)
         )
       } else {
         td(
           attribute,
+          if (postfix.isEmpty) () else _pf(postfix),
           span(cls := "expr", expr),
           cursor.pointer,
           onclick := { () =>
@@ -176,7 +180,7 @@ trait HeadElements extends ColOps with AppElements with RxBindings {
 
   def _attrHeader(
     attribute: String,
-    card: Int,
+    postfix: String,
     expr: String,
     editable: Boolean,
     edit: MouseEvent => Unit,
@@ -190,10 +194,11 @@ trait HeadElements extends ColOps with AppElements with RxBindings {
         paddingLeft := 6,
         paddingRight := 6,
         attribute,
+        if (postfix.isEmpty) () else _pf(postfix),
         noEdit
       )
     } else {
-      th(attrMenu(attribute, card, expr, edit, save, cancel, retract))
+      th(attrMenu(attribute, postfix, expr, edit, save, cancel, retract))
     }
   }
 

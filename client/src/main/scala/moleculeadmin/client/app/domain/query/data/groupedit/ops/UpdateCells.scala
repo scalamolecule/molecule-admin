@@ -9,19 +9,20 @@ import scala.collection.immutable.Map
 
 // Update visible cell values and mark edge color
 
-case class UpdateCells(colIndex: Int,
-                       attrType: String,
-                       card: Int,
-                       tableRows: NodeList) extends DateHandling {
+case class UpdateCells(
+  colIndex: Int,
+  attrType: String,
+  card: Int,
+  tableRows: NodeList
+) extends DateHandling {
 
   def cardOne[ColType](cellBaseClass: String,
-                       colValueToNode: ColType => Node
-                      ): (Int, Option[ColType], Option[ColType]) => Unit = {
+    colValueToNode: ColType => Node
+  ): (Int, Option[ColType], Option[ColType]) => Unit = {
     var cells   : NodeList  = null
     var editCell: TableCell = null
     val editColIndex        = colIndex + 1
-
-    val formatValue = attrType match {
+    val formatValue         = attrType match {
       case "Date" => (optV: Option[ColType]) =>
         optV.fold(Option.empty[ColType])(v =>
           Some(truncateDateStr(v.toString).asInstanceOf[ColType])
@@ -29,8 +30,8 @@ case class UpdateCells(colIndex: Int,
       case _      => (optV: Option[ColType]) => optV
     }
     (tableRowIndex: Int,
-     oldVopt0: Option[ColType],
-     newVopt: Option[ColType]
+      oldVopt0: Option[ColType],
+      newVopt: Option[ColType]
     ) => {
       val oldVopt = formatValue(oldVopt0)
       cells = tableRows.item(tableRowIndex).childNodes
@@ -60,8 +61,8 @@ case class UpdateCells(colIndex: Int,
 
 
   def cardMany[ColType](cellBaseClass: String,
-                        colValueToItems: ColType => Seq[TypedTag[LI]]
-                       ): (Int, Option[ColType], Option[ColType]) => Unit = {
+    colValueToItems: ColType => Seq[TypedTag[LI]]
+  ): (Int, Option[ColType], Option[ColType]) => Unit = {
     var cells       : NodeList  = null
     var editCell    : TableCell = null
     val editColIndex: Int       = colIndex + 1
@@ -83,8 +84,8 @@ case class UpdateCells(colIndex: Int,
     }
 
     (tableRowIndex: Int,
-     oldVsOpt: Option[ColType],
-     newVsOpt: Option[ColType]
+      oldVsOpt: Option[ColType],
+      newVsOpt: Option[ColType]
     ) => {
       val oldVs = formatValue(oldVsOpt)
       val newVs = formatValue(newVsOpt)

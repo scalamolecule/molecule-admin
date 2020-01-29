@@ -12,14 +12,13 @@ case class ColType2TransferTypeLambdas(qr: QueryResult) extends HelpersAdmin {
   def get: Seq[Int => Any] = {
     columns.now.collect {
       case col if col.attrExpr != "edit" =>
-        getLambda(col.colType, col.colIndex, col.attrType, col.attr.last == '$')
+        getLambda(col.colType, col.colIndex, col.attr.last == '$')
     }
   }
 
   private def getLambda(
     colType: String,
     colIndex: Int,
-    attrType: String,
     opt: Boolean
   ): Int => Any = colType match {
     case "string" =>
@@ -28,6 +27,7 @@ case class ColType2TransferTypeLambdas(qr: QueryResult) extends HelpersAdmin {
         (j: Int) => array(j).orUndefined
       else
         (j: Int) => array(j).get
+
 
     case "double" =>
       val array = qr.num(arrayIndexes(colIndex))

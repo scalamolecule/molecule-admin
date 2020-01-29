@@ -1,15 +1,17 @@
 package moleculeadmin.client.app.domain.query.data.groupedit.compileTest
 
 import java.time.LocalDateTime
+import moleculeadmin.client.app.domain.query.QueryState.columns
 import moleculeadmin.client.app.domain.query.data.groupedit.ops.ScalaCode
 import moleculeadmin.client.scalafiddle.ScalaFiddle
 import moleculeadmin.shared.ast.query.Col
+import moleculeadmin.shared.ops.query.ColOps
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js
 import scala.scalajs.js.JSConverters._
 
 
-object Card1 extends TestScalaFiddle {
+object Card1 extends TestScalaFiddle with ColOps {
 
   case class Compiler(
     col: Col,
@@ -18,6 +20,8 @@ object Card1 extends TestScalaFiddle {
     val mandatory = !optional
     val attrOpt   = if (optional) attr else attr + "$"
     def rhsIsOpt(rhs: String): Boolean = rhs.contains(attrOpt)
+    val attrResolver = ResolveAttrs(columns.now)
+
 
     testData.foreach {
       case (None, _, _) if mandatory =>
@@ -36,7 +40,8 @@ object Card1 extends TestScalaFiddle {
             case optRhs if rhsIsOpt(optRhs)      => optRhs
             case optRhs if transferValue.isEmpty => optRhs
             case someRhs                         =>
-              val attrClean  = attr.init
+//              val attrClean  = attr.init
+              val attrClean  = attrResolver.postfixed(col)
               val cleanSpace = " " * (attrClean.length + 1)
               s"""$attr match {
                  |  case Some($attrClean) => $someRhs

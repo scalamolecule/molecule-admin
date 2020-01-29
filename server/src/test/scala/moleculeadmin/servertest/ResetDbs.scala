@@ -45,37 +45,9 @@ object ResetDbs extends TestSuite with ExampleData with Settings {
     //          //      populateTree(Conn("datomic:free://localhost:4334/Tree"))
     //        }
 
-    //    test("Reset CoreTest") {
-    //      resetDbs(Seq("CoreTest"))
-    //      populateCoreTest(Conn("datomic:free://localhost:4334/CoreTest"))
-    //    }
-
     test("Reset CoreTest") {
-      implicit val conn = recreateDbFrom(CoreTestSchema, "localhost:4334/CoreTest", protocol)
-
-      Ns.long(1).save
-      Ns.long(2).Tx(Ns.str("A")).save
-      Ns.long(3).Tx(Ns.str("A").Ref1.str1("B")).save
-      Ns.long(4).Tx(Ns.str("A").Ref1.str1("B").Ref2.str2("C")).save
-      Ns.long(5).Ref1.int1(6).Tx(Ns.str("A").int(11).Ref1.str1("B").int1(22).Ref2.strs2("C").int2(33)).save
-
-
-
-      //      val undoneTs = Seq(
-      //        t6 << 32 | t4,
-      //        t7 << 32 | t3,
-      //        t8 << 32 | t2,
-      //      )
-      //
-      //      val adminConn = Conn(base + "/MoleculeAdmin")
-      //
-      //      val dbSettingsId = user_User.username_("admin")
-      //        .DbSettings.e.Db.name_("CoreTest").get(adminConn)
-      //
-      //      user_DbSettings(dbSettingsId)
-      //        .undoneTs().update(adminConn)
-
-      //      (new QueryBackend).getLastTxs("CoreTest", 5, Nil)
+      resetDbs(Seq("CoreTest"))
+      populateCoreTest(Conn("datomic:free://localhost:4334/CoreTest"))
     }
   }
 

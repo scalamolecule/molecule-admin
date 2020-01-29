@@ -59,7 +59,7 @@ object QueryClient
           case (k, "true") if k.startsWith("view") => k
         }.toSeq
 
-        // Decode undone/undoing transaction t pairs
+        // Bit-decode newT/undoneT pairs
         var newT    = 0L
         var undoneT = 0L
         undoneTs.foreach { pair =>

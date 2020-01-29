@@ -1,6 +1,8 @@
 package moleculeadmin.client.app.domain.query.data.groupedit.ops
 import moleculeadmin.client.app.domain.query.QueryState.columns
 import moleculeadmin.shared.ast.query.Col
+import moleculeadmin.shared.ops.query.ColOps
+import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 
@@ -16,7 +18,7 @@ case class ScalaCode(col: Col, rhs0: String)
   }
   def pad(attr: String): String = attr + " " * (maxAttrLength - attr.length)
 
-  // Build scala code elements for scalafiddle compilation
+  // Build scala code elements for ScalaFiddle compilation
   val transferTypes0  = new ListBuffer[String]
   val transferParams0 = new ListBuffer[String]
   val conversions0    = new ListBuffer[String]
@@ -24,16 +26,12 @@ case class ScalaCode(col: Col, rhs0: String)
   val processParams0  = new ListBuffer[String]
 
   columns.now.collect {
-    case Col(_, _, nsAlias1, nsFull1, attr0, tpe, _, card, opt, _, _, attrExpr, _, _, _)
+    case col@Col(_, _, _, _, _, tpe, _, card, opt, _, _, attrExpr, _, _, _)
       if attrExpr != "edit" =>
 
-      val attr1 = if (card > 1) clean(attr0) else attr0
-      val attr  = if (nsAlias1 == nsAlias && nsFull1 == nsFull)
-        attr1 else nsAlias + "_" + attr1
-
+      val attr                          = attrResolver.postfixed(col)
       val (processType, paramConverter) = getTypeMappings(attr, tpe, card)
-
-      val transferType = card match {
+      val transferType                  = card match {
         case 1 if opt => "js.UndefOr[String]"
         case 1        => "String"
         case 2        => "js.Array[String]"
@@ -52,6 +50,7 @@ case class ScalaCode(col: Col, rhs0: String)
   val conversions   : String = conversions0.mkString(",\n          ")
   val processTypes  : String = processTypes0.mkString(", ")
   val processParams : String = processParams0.mkString(", ")
+  val n = transferTypes0.length
 
   val imports: String =
     """import scalajs.js
@@ -91,8 +90,8 @@ case class ScalaCode(col: Col, rhs0: String)
        |object ScalaFiddle {
        |  $implicits
        |  @JSExport
-       |  val lambda: ($transferTypes) => js.Tuple2[js.UndefOr[String], String] = {
-       |    ($transferParams) =>
+       |  val lambda: js.Tuple$n[$transferTypes] => js.Tuple2[js.UndefOr[String], String] = {
+       |    case js.Tuple$n($transferParams) =>
        |      try {
        |        val result: Option[$processType] = process(
        |          $conversions
@@ -142,8 +141,8 @@ case class ScalaCode(col: Col, rhs0: String)
        |object ScalaFiddle {
        |  $implicits
        |  @JSExport
-       |  val lambda: ($transferTypes) => js.Tuple2[js.Array[String], String] = {
-       |    ($transferParams) =>
+       |  val lambda: js.Tuple$n[$transferTypes] => js.Tuple2[js.Array[String], String] = {
+       |    case js.Tuple$n($transferParams) =>
        |      try {
        |        val result: Iterable[$processType] = process(
        |          $conversions
@@ -195,8 +194,8 @@ case class ScalaCode(col: Col, rhs0: String)
        |object ScalaFiddle {
        |  $implicits
        |  @JSExport
-       |  val lambda: ($transferTypes) => js.Tuple2[js.Dictionary[String], String] = {
-       |    ($transferParams) =>
+       |  val lambda: js.Tuple$n[$transferTypes] => js.Tuple2[js.Dictionary[String], String] = {
+       |    case js.Tuple$n($transferParams) =>
        |      try {
        |        val result: Map[String, $processType] = process(
        |          $conversions

@@ -5,6 +5,7 @@ import molecule.transform.Model2Query.coalesce
 import moleculeadmin.shared.ast.query.{Col, QueryResult}
 import moleculeadmin.shared.ast.schema.{Attr, Ns}
 import moleculeadmin.shared.util.HelpersAdmin
+import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 
@@ -124,6 +125,45 @@ trait ColOps extends HelpersAdmin {
 
       // Previous cols
       case (_, colIndex) => colIndex
+    }
+  }
+
+  case class ResolveAttrs(cols: Seq[Col]) {
+    var hasGroupEdit = false
+    val attrCount    = mutable.Map.empty[String, Int]
+    val attrIndex    = mutable.Map.empty[Int, Int]
+
+    cols.collect {
+      case col if col.attrExpr != "edit" =>
+        val cleanAttr = if (col.card > 1) clean(col.attr) else col.attr
+        val count     = attrCount.getOrElse(cleanAttr, 0)
+        attrIndex += col.colIndex -> (count + 1)
+        attrCount(cleanAttr) = count + 1
+
+      case col if col.attrExpr == "edit" =>
+        hasGroupEdit = true
+        val cleanAttr = if (col.card > 1) clean(col.attr) else col.attr
+        val count     = attrCount.getOrElse(cleanAttr, 0)
+        attrIndex += col.colIndex -> count
+        attrCount(cleanAttr) = count
+    }
+
+        attrCount foreach println
+        println("--------")
+        attrIndex.toList.sortBy(_._1) foreach println
+
+    def postfixed(col: Col): String = {
+      if (hasGroupEdit) {
+        val cleanAttr = if (col.card > 1) clean(col.attr) else col.attr
+        cleanAttr + (if (attrCount(cleanAttr) == 1) "" else attrIndex(col.colIndex))
+      } else col.attr
+    }
+
+    def postfix(col: Col): String = {
+      if (hasGroupEdit) {
+        val cleanAttr = if (col.card > 1) clean(col.attr) else col.attr
+        if (attrCount(cleanAttr) == 1) "" else s"${attrIndex(col.colIndex)}"
+      } else ""
     }
   }
 
