@@ -16,6 +16,8 @@ import molecule.ast.transactionModel.Add
 import moleculeadmin.server.QueryBackend
 import moleculeadmin.server.utils.DateStrLocal
 import moleculeadmin.servertest.ResetDbs.protocol
+import moleculeadmin.shared.ast.query.Col
+import moleculeadmin.shared.ops.query.ColOps
 import scala.collection.mutable.ListBuffer
 import utest._
 
@@ -25,7 +27,8 @@ object Adhoc extends TestSuite
   with ExampleData
   //  with TreeSchema
   with mBrainzSchema
-  with DateStrLocal {
+  with DateStrLocal
+  with ColOps {
 
   val base = "datomic:free://localhost:4334"
 
@@ -34,13 +37,11 @@ object Adhoc extends TestSuite
 
     test("Adhoc") {
 
-      implicit val conn = recreateDbFrom(CoreTestSchema, "localhost:4334/CoreTest", protocol)
+//      implicit val conn = recreateDbFrom(CoreTestSchema, "localhost:4334/CoreTest", protocol)
       //    implicit val conn = Conn(base + "/MoleculeAdmin")
       //    implicit val conn = Conn(base + "/mbrainz-1968-1973")
       //        implicit val conn = Conn(base + "/CoreTest")
 
-      Ns.int(1).save
-      Ns.int.get ==> List(1)
     }
   }
 }

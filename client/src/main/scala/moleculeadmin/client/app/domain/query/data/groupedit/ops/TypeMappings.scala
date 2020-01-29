@@ -6,10 +6,8 @@ trait TypeMappings extends HelpersAdmin {
 
   def getTypeMappings(attr: String, tpe: String, card: Int)
   : (String, String) = {
-    val cleanAttr = clean(attr)
-    val opt       = attr.last == '$'
     card match {
-      case 1 if opt =>
+      case 1 if attr.last == '$' =>
         // Need to assign new Option to satisfy JS compiler
         tpe match {
           case "Int"                               => (
@@ -48,49 +46,65 @@ trait TypeMappings extends HelpersAdmin {
 
       case 1 =>
         tpe match {
-          case "Int"                               => ("Int", s"$attr.toInt")
-          case "Long" | "datom" | "ref" | "BigInt" => ("BigInt", s"BigInt($attr)")
-          case "Float" | "Double" | "BigDecimal"   => ("BigDecimal", s"BigDecimal($attr)")
-          case "String"                            => ("String", s"$attr")
-          case "Boolean"                           => ("Boolean", s"$attr.toBoolean")
-          case "Date"                              => ("LocalDateTime", s"str2ldt($attr)")
-          case "UUID"                              => ("UUID", s"UUID.fromString($attr)")
-          case "URI"                               => ("URI", s"new URI($attr)")
+          case "Int"                               =>
+            ("Int", s"$attr.toInt")
+            
+          case "Long" | "datom" | "ref" | "BigInt" =>
+            ("BigInt", s"BigInt($attr)")
+
+          case "Float" | "Double" | "BigDecimal"   =>
+            ("BigDecimal", s"BigDecimal($attr)")
+
+          case "String"                            =>
+            ("String", s"$attr")
+
+          case "Boolean"                           =>
+            ("Boolean", s"$attr.toBoolean")
+
+          case "Date"                              =>
+            ("LocalDateTime", s"str2ldt($attr)")
+
+          case "UUID"                              =>
+            ("UUID", s"UUID.fromString($attr)")
+
+          case "URI"                               =>
+            ("URI", s"new URI($attr)")
+
         }
 
       case 2 =>
         tpe match {
           case "Int"                               => (
             s"List[Int]",
-            s"$cleanAttr.toList.map(_.toInt)"
+            s"$attr.toList.map(_.toInt)"
           )
           case "Long" | "datom" | "ref" | "BigInt" => (
             "List[BigInt]",
-            s"$cleanAttr.toList.map(BigInt(_))"
+            s"$attr.toList.map(BigInt(_))"
           )
           case "Float" | "Double" | "BigDecimal"   => (
             "List[BigDecimal]",
-            s"$cleanAttr.toList.map(BigDecimal(_))"
+            s"$attr.toList.map(BigDecimal(_))"
           )
           case "String"                            => (
             s"List[String]",
-            s"$cleanAttr.toList"
+            s"$attr.toList"
           )
           case "Date"                              => (
             "List[LocalDateTime]",
-            s"$cleanAttr.toList.map(str2ldt(_))"
+            s"$attr.toList.map(str2ldt(_))"
           )
           case "Boolean"                           => (
             s"List[Boolean]",
-            s"$cleanAttr.toList.map(_.toBoolean)"
+            s"$attr.toList.map(_.toBoolean)"
           )
           case "UUID"                              => (
             s"List[UUID]",
-            s"$cleanAttr.toList.map(UUID.fromString(_))"
+            s"$attr.toList.map(UUID.fromString(_))"
           )
           case "URI"                               => (
             s"List[URI]",
-            s"$cleanAttr.toList.map(new URI(_))"
+            s"$attr.toList.map(new URI(_))"
           )
         }
 

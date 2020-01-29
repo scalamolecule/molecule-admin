@@ -35,6 +35,12 @@
     color: #f09600;
     white-space: nowrap;
 }
+.tableData thead th span.postfix {
+    padding-left: 1px;
+    font-weight: normal;
+    font-style: italic;
+    color: #888;
+}
 /*.tableData thead tr:nth-child(2) th:hover {
     background: #e9e9e9;
 }*/

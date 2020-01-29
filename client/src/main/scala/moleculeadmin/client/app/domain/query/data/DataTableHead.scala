@@ -24,11 +24,15 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
     with AppElements {
 
 
-  def attrSortCell(col: Col): JsDom.TypedTag[TableHeaderCell] = {
+  def attrSortCell(
+    col: Col,
+    attrResolver: ResolveAttrs
+  ): JsDom.TypedTag[TableHeaderCell] = {
     //      println("attrSortCell...")
     val Col(colIndex, _, nsAlias, nsFull, attr, _, colType, card, _, _,
     aggrType, expr, sortDir, sortPos, _) = col
 
+    val postfix  = attrResolver.postfix(col)
     val sortable = card == 1 || singleAggrTypes.contains(aggrType)
     val sort     = { e: MouseEvent =>
       if (columns.now.size == 5 &&
@@ -84,13 +88,13 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
 
     if (sortable) {
       _attrHeaderSortable(
-        attr, card, expr, sortDir, sortPos, sort, editable,
+        attr, postfix, expr, sortDir, sortPos, sort, editable,
         edit, save, cancel, retract,
         markers
       )
     } else {
       _attrHeader(
-        attr, card, expr, editable,
+        attr, postfix, expr, editable,
         edit, save, cancel, retract)
     }
   }
@@ -121,12 +125,15 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
   }
 
 
-  def attrFilterCell(col: Col): JsDom.TypedTag[TableHeaderCell] = {
-    val Col(colIndex, _, _, _, attr, _,
+  def attrFilterCell(
+    col: Col,
+    attrResolver: ResolveAttrs
+  ): JsDom.TypedTag[TableHeaderCell] = {
+    val Col(colIndex, _, _, _, _, _,
     colType, card, opt, _, _, attrExpr, _, _, _) = col
 
-    val filterId  = "filter-" + colIndex
-    val cleanAttr = clean(attr)
+    val filterId = "filter-" + colIndex
+    val attr     = attrResolver.postfixed(col)
 
     def editCell(): JsDom.TypedTag[TableHeaderCell] = {
       def s(i: Int) = "\u00a0" * i
@@ -137,9 +144,9 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
              |${s(2)}case None${s(3)} => None
              |}""".stripMargin
         case 1        => s"Some($attr)"
-        case 2        => s"$cleanAttr.map(v => v)"
+        case 2        => s"$attr.map(v => v)"
         case 3        =>
-          s"""$cleanAttr.map {
+          s"""$attr.map {
              |${s(2)}case (k, v) => (k, v)
              |}""".stripMargin
       }
@@ -190,14 +197,15 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
     //    println("---- head ----")
 
     // re-calculate column attr headers on change
-    val cols        = columns()
-    val colCount    = cols.size
-    var nss         = Seq.empty[(String, Int)]
-    val sortCells   = new Array[JsDom.TypedTag[TableHeaderCell]](colCount)
-    val filterCells = new Array[JsDom.TypedTag[TableHeaderCell]](colCount)
-    var colIndex    = 0
-    var col: Col    = null
-    var ns : String = ""
+    val cols         = columns()
+    val colCount     = cols.size
+    val attrResolver = ResolveAttrs(columns.now)
+    var nss          = Seq.empty[(String, Int)]
+    val sortCells    = new Array[JsDom.TypedTag[TableHeaderCell]](colCount)
+    val filterCells  = new Array[JsDom.TypedTag[TableHeaderCell]](colCount)
+    var colIndex     = 0
+    var col: Col     = null
+    var ns : String  = ""
     while (colIndex < colCount) {
       // Add namespace or expand colspan if ns is same as for the previous attribute
       col = cols(colIndex)
@@ -210,8 +218,8 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
         case _                      =>
           nss = nss :+ (ns -> 1)
       }
-      sortCells(colIndex) = attrSortCell(col)
-      filterCells(colIndex) = attrFilterCell(col)
+      sortCells(colIndex) = attrSortCell(col, attrResolver)
+      filterCells(colIndex) = attrFilterCell(col, attrResolver)
       colIndex += 1
     }
     val toggleCell = _openCloseQueryBuilder(
