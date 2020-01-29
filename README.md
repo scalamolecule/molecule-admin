@@ -1,10 +1,8 @@
 # Molecule Admin
 
-## Work in progress..!
-
 ScalaJS client app to administrate your Datomic/molecule database schema, data queries and updates etc.
 
-Start Datomic transactor from Datomic distribution directory in separate process, something like
+Start the Datomic transactor from the Datomic distribution directory in separate process, something like
 
 ```
 > cd <datomic-distribution-dir>
@@ -14,7 +12,7 @@ Start Datomic transactor from Datomic distribution directory in separate process
 Download MoleculeAdmin
 
 ```
-> git clone https://github.com/scalamolecule/molecule-admin.git
+> git clone https://github.com/scalamolecule/molecule-admin.git // if not already downloaded
 > cd molecule-admin
 ```
 

@@ -9,7 +9,7 @@ object Settings {
   private val common: Seq[Def.Setting[_]] = Seq(
     name := "molecule-admin",
     organization := "org.scalamolecule",
-    version := "0.6-SNAPSHOT",
+    version := "0.7",
     scalaVersion := "2.12.10",
     scalacOptions := Seq(
       "-deprecation",
