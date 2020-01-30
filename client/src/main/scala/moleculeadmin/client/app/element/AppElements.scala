@@ -216,8 +216,7 @@ trait AppElements extends Bootstrap {
 
   def _reloadMenuAim(): Unit = {
     val scriptWrapper = document.getElementById("scriptWrapper")
-    //    val url = "public/javascripts/jquery.menu-aim.options.js"
-    val url           = "/versionedAssets/javascripts/jquery.menu-aim.options.js"
+    val url           = "/assets/javascripts/jquery.menu-aim.options.js"
     scriptWrapper.innerHTML = ""
     scriptWrapper.appendChild(
       script(
