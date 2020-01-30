@@ -23,9 +23,9 @@ object Settings {
   val client: Seq[Def.Setting[_]] = common ++ Seq(
     name := "client",
     libraryDependencies ++= Seq(
-      "org.scala-js" %%% "scalajs-dom" % "0.9.7",
+      "org.scala-js" %%% "scalajs-dom" % "0.9.8",
       "com.lihaoyi" %%% "scalarx" % "0.4.0",
-      "io.github.cquiroz" %%% "scala-java-time" % "2.0.0-RC3",
+      "io.github.cquiroz" %%% "scala-java-time" % "2.0.0-RC3"
     )
   )
 
@@ -40,9 +40,9 @@ object Settings {
     libraryDependencies ++= Seq(
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
       "org.scalamolecule" %% "molecule" % "0.21.1",
-      "com.lihaoyi" %% "ammonite-ops" % "1.6.2",
+      "com.lihaoyi" %% "ammonite-ops" % "2.0.4",
       "com.datomic" % "datomic-free" % "0.9.5697",
-      "org.webjars" %% "webjars-play" % "2.7.0",
+//      "org.webjars" %% "webjars-play" % "2.8.0",
       "org.webjars" % "jquery" % "3.3.1",
       "org.webjars.npm" % "popper.js" % "1.14.7",
       "org.webjars" % "bootstrap" % "4.3.1",
@@ -54,15 +54,15 @@ object Settings {
       specs2 % Test,
       guice
     ).map(_.exclude("org.slf4j", "slf4j-nop")),
-    PlayKeys.devSettings := Seq("play.server.http.port" -> "9001"),
+    PlayKeys.devSettings := Seq("play.server.http.port" -> "9001")
   )
 
   val shared: Seq[Def.Setting[_]] = common ++ Seq(
     libraryDependencies ++= Seq(
-      "com.lihaoyi" %%% "scalatags" % "0.7.0",
+      "com.lihaoyi" %%% "scalatags" % "0.8.4",
       "com.lihaoyi" %%% "autowire" % "0.2.6",
-      "com.lihaoyi" %%% "utest" % "0.7.1",
-      "io.suzaku" %%% "boopickle" % "1.3.0",
+      "com.lihaoyi" %%% "utest" % "0.7.3",
+      "io.suzaku" %%% "boopickle" % "1.3.1",
       ("org.scalamolecule" %%% "molecule" % "0.21.1")
         .exclude("com.datomic", "datomic-free")
     ),

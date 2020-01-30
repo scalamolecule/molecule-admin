@@ -26,7 +26,7 @@ case class Breadcrumb(db: String, part: String, ns: String, attr: String)
           ),
           td(
             h5(
-              img(src := "/versionedAssets/icon/64/png/016-business-3.png", height := 16, width := 23, opacity := "0.55", marginBottom := 3, paddingRight := 7),
+              img(src := "/assets/icon/64/png/016-business-3.png", height := 16, width := 23, opacity := "0.55", marginBottom := 3, paddingRight := 7),
               a(href := "#", part)
             ),
             onclick := { () =>
@@ -38,7 +38,7 @@ case class Breadcrumb(db: String, part: String, ns: String, attr: String)
           ),
           td(
             h5(
-              img(src := "/versionedAssets/icon/64/png/034-black-3.png", height := 16, width := 25, opacity := "0.6", marginBottom := 2, paddingRight := 9),
+              img(src := "/assets/icon/64/png/034-black-3.png", height := 16, width := 25, opacity := "0.6", marginBottom := 2, paddingRight := 9),
               a(href := "#", ns)
               //                  a(href := "#", ns.capitalize)
             ),
@@ -67,7 +67,7 @@ case class Breadcrumb(db: String, part: String, ns: String, attr: String)
           ),
           td(
             h5(
-              img(src := "/versionedAssets/icon/64/png/016-business-3.png", height := 16, width := 23, opacity := "0.55", marginBottom := 3, paddingRight := 7),
+              img(src := "/assets/icon/64/png/016-business-3.png", height := 16, width := 23, opacity := "0.55", marginBottom := 3, paddingRight := 7),
               a(href := "#", part)
             ),
             onclick := { () =>
@@ -79,7 +79,7 @@ case class Breadcrumb(db: String, part: String, ns: String, attr: String)
           ),
           td(
             h5(
-              img(src := "/versionedAssets/icon/64/png/034-black-3.png", height := 16, width := 25, opacity := "0.6", marginBottom := 2, paddingRight := 9),
+              img(src := "/assets/icon/64/png/034-black-3.png", height := 16, width := 25, opacity := "0.6", marginBottom := 2, paddingRight := 9),
               ns
               //                  ns.capitalize
             )
@@ -98,7 +98,7 @@ case class Breadcrumb(db: String, part: String, ns: String, attr: String)
             }
           ),
           td(
-            h5(img(src := "/versionedAssets/icon/64/png/016-business-3.png", height := 16, width := 23, opacity := "0.55", marginBottom := 3, paddingRight := 7), part)
+            h5(img(src := "/assets/icon/64/png/016-business-3.png", height := 16, width := 23, opacity := "0.55", marginBottom := 3, paddingRight := 7), part)
           )
         )
       else

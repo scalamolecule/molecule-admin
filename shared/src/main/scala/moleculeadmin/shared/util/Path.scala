@@ -2,9 +2,7 @@ package moleculeadmin.shared.util
 
 object Path {
 
-  val base = if (false) "public/" else "/versionedAssets/"
-
-  def images(img: String) = base + "images/" + img
+  def images(img: String): String = "/assets/images/" + img
 
   //  val gitIdLength = 12
   //  val searchResultBatchSize = 100
