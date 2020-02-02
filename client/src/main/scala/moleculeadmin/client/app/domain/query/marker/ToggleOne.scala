@@ -50,7 +50,7 @@ case class ToggleOne(tableBody: TableSection, tpe: String) extends AppElements {
       case Left(err)            => window.alert(err)
       case Right(dbSettingsId1) =>
         dbSettingsIdOpt = Some(dbSettingsId1)
-      //        println(s"Entity id $eid $marked")
+        println(s"Entity id $eid $marked")
     }
 
     def toggleIcon(tableCol: Int): Unit = {
@@ -70,7 +70,7 @@ case class ToggleOne(tableBody: TableSection, tpe: String) extends AppElements {
         entityIndexOpt.foreach { entityIndex =>
           val markerIndex: Array[Boolean] = curMarkerIndexes(tableCol)
 
-          var i = 0
+          var i                 = 0
           val entityIndexLength = entityIndex.length
           while (i < entityIndexLength) {
             entityRow = entityIndex(i)
@@ -83,8 +83,8 @@ case class ToggleOne(tableBody: TableSection, tpe: String) extends AppElements {
 
     eidCols.length match {
       case 1 => {
-        val c1 = eidCols.head
-        var i = 0
+        val c1         = eidCols.head
+        var i          = 0
         val rowsLength = rows.length
         while (i < rowsLength) {
           cells = rows(i).children
@@ -96,8 +96,8 @@ case class ToggleOne(tableBody: TableSection, tpe: String) extends AppElements {
 
       case 2 => {
         val Seq(c1, c2) = eidCols
-        var i = 0
-        val rowsLength = rows.length
+        var i           = 0
+        val rowsLength  = rows.length
         while (i < rowsLength) {
           cells = rows(i).children
           toggleIcon(c1)
@@ -109,8 +109,8 @@ case class ToggleOne(tableBody: TableSection, tpe: String) extends AppElements {
 
       case 3 => {
         val Seq(c1, c2, c3) = eidCols
-        var i = 0
-        val rowsLength = rows.length
+        var i               = 0
+        val rowsLength      = rows.length
         while (i < rowsLength) {
           cells = rows(i).children
           toggleIcon(c1)
@@ -123,8 +123,8 @@ case class ToggleOne(tableBody: TableSection, tpe: String) extends AppElements {
 
       case 4 => {
         val Seq(c1, c2, c3, c4) = eidCols
-        var i = 0
-        val rowsLength = rows.length
+        var i                   = 0
+        val rowsLength          = rows.length
         while (i < rowsLength) {
           cells = rows(i).children
           toggleIcon(c1)
@@ -138,8 +138,8 @@ case class ToggleOne(tableBody: TableSection, tpe: String) extends AppElements {
 
       case 5 => {
         val Seq(c1, c2, c3, c4, c5) = eidCols
-        var i = 0
-        val rowsLength = rows.length
+        var i                       = 0
+        val rowsLength              = rows.length
         while (i < rowsLength) {
           cells = rows(i).children
           toggleIcon(c1)
@@ -154,8 +154,8 @@ case class ToggleOne(tableBody: TableSection, tpe: String) extends AppElements {
 
       case 6 => {
         val Seq(c1, c2, c3, c4, c5, c6) = eidCols
-        var i = 0
-        val rowsLength = rows.length
+        var i                           = 0
+        val rowsLength                  = rows.length
         while (i < rowsLength) {
           cells = rows(i).children
           toggleIcon(c1)
@@ -171,8 +171,8 @@ case class ToggleOne(tableBody: TableSection, tpe: String) extends AppElements {
 
       case 7 => {
         val Seq(c1, c2, c3, c4, c5, c6, c7) = eidCols
-        var i = 0
-        val rowsLength = rows.length
+        var i                               = 0
+        val rowsLength                      = rows.length
         while (i < rowsLength) {
           cells = rows(i).children
           toggleIcon(c1)

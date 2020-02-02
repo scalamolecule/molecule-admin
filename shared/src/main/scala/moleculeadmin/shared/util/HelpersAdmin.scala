@@ -54,19 +54,19 @@ trait HelpersAdmin extends Helpers with SpecialNames {
   }
 
 
-  class Timer {
+  case class Timer(txt: String = "time") {
     val time0 = System.currentTimeMillis
     var time1 = time0
     //    println("timer start ---------------------------------")
 
     def log(n: Int): Unit = {
       val time2 = System.currentTimeMillis - time1
-      println(s"time $n: " + "%10d".format(time2))
+      println(s"$txt $n: " + "%10d".format(time2))
       time1 = System.currentTimeMillis()
     }
-    def total: String = (System.currentTimeMillis - time0).toString
-      .reverse.grouped(3).mkString(" ").reverse + " ms"
-
+    def total: Unit = println(
+      s"$txt total: ${thousands(System.currentTimeMillis - time0)} ms"
+    )
   }
 
   def prettyMillisDelta(millisDelta: Long): String = {

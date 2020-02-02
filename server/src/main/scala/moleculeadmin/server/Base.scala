@@ -21,7 +21,6 @@ trait Base extends BaseApi with HelpersAdmin {
       Set[Long],
       Set[Long],
       Set[Long],
-//      Set[Long],
       Set[Long],
       Seq[QueryDTO]
     ) = {
@@ -82,7 +81,6 @@ trait Base extends BaseApi with HelpersAdmin {
           Set[Long],
           Set[Long],
           Set[Long],
-//          Set[Long],
           Set[Long],
           Seq[QueryDTO]
         )

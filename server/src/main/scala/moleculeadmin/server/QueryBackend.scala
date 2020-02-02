@@ -74,28 +74,31 @@ class QueryBackend extends QueryApi with Base with DateStrLocal {
     else
       conn.db +: rules.get +: inputs(l ++ ll ++ lll)
 
+    val t         = Timer("Query")
     val t0        = System.currentTimeMillis
     val allRows   = Peer.q(datalogQuery, allInputs: _*)
     val queryTime = System.currentTimeMillis - t0
-    //    t.log(1, "Query")
+    t.log(1)
 
     val rowCountAll = allRows.size
     val rowCount    = if (maxRows == -1 || rowCountAll < maxRows) rowCountAll else maxRows
 
     println("--------------------")
     println(datalogQuery)
-    println("rowCountAll: " + rowCountAll)
+    println("rowCountAll: " + rowCountAll +
+      " (query time, all rows: " + thousands(queryTime) + " ms)")
     println("maxRows    : " + (if (maxRows == -1) "all" else maxRows))
     println("rowCount   : " + rowCount)
     //    println("cols       : " + cols)
     allRows.asScala.take(10) foreach println
+    t.log(2)
 
     if (rowCount == 0)
       Left(Nil)
     else {
       val queryResult = Rows2QueryResult(
         allRows, rowCountAll, rowCount, cols, queryTime).get
-      //      t.log(2, "To QueryResult")
+      t.log(3)
       Right(queryResult)
     }
   } catch {
@@ -638,6 +641,7 @@ class QueryBackend extends QueryApi with Base with DateStrLocal {
     newState: Boolean
   ): Either[String, Long] = {
     implicit val conn = Conn(base + "/MoleculeAdmin")
+
     withTransactor {
       try {
         val dbSettingsId = dbSettingsIdOpt.getOrElse {
@@ -654,13 +658,38 @@ class QueryBackend extends QueryApi with Base with DateStrLocal {
         }
         if (newState) {
           tpe match {
-            case "star"  => user_DbSettings(dbSettingsId).stars.assert(eids).update
+            case "star" =>
+              val t = Timer("star")
+
+              //              var count = 0
+              //              eids.sliding(1000, 1000).foreach { eidsChunk =>
+              //                count += eidsChunk.size
+              //                //                println("starred: " + count)
+              //                t.log(count)
+              //                user_DbSettings(dbSettingsId).stars.assert(eidsChunk).update
+              //              }
+              //              println(t.total)
+              user_DbSettings(dbSettingsId).stars.assert(eids).update
+              t.total
+
             case "flag"  => user_DbSettings(dbSettingsId).flags.assert(eids).update
             case "check" => user_DbSettings(dbSettingsId).checks.assert(eids).update
           }
         } else {
           tpe match {
-            case "star"  => user_DbSettings(dbSettingsId).stars.retract(eids).update
+            case "star"  =>
+              val t = Timer("unstar")
+
+              //              var count = 0
+              //              eids.sliding(1000, 1000).foreach { eidsChunk =>
+              //                count += eidsChunk.size
+              //                //                println("unstarred: " + count)
+              //                t.log(count)
+              //                user_DbSettings(dbSettingsId).stars.retract(eidsChunk).update
+              //              }
+              //              println(t.total)
+              user_DbSettings(dbSettingsId).stars.retract(eids).update
+              t.total
             case "flag"  => user_DbSettings(dbSettingsId).flags.retract(eids).update
             case "check" => user_DbSettings(dbSettingsId).checks.retract(eids).update
           }
@@ -678,6 +707,7 @@ class QueryBackend extends QueryApi with Base with DateStrLocal {
     tpe: String,
   ): Either[String, Long] = {
     implicit val conn = Conn(base + "/MoleculeAdmin")
+
     withTransactor {
       try {
         val dbSettingsId = dbSettingsIdOpt.getOrElse {
@@ -694,7 +724,11 @@ class QueryBackend extends QueryApi with Base with DateStrLocal {
         }
 
         tpe match {
-          case "star"  => user_DbSettings(dbSettingsId).stars().update
+          case "star" =>
+            val t = Timer("unstar all")
+            user_DbSettings(dbSettingsId).stars().update
+            t.total
+
           case "flag"  => user_DbSettings(dbSettingsId).flags().update
           case "check" => user_DbSettings(dbSettingsId).checks().update
         }

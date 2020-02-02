@@ -4,7 +4,7 @@ import moleculeadmin.client.app.element.AppElements
 import moleculeadmin.client.rxstuff.RxBindings
 import moleculeadmin.shared.ops.query.ColOps
 import moleculeadmin.shared.styles.Color
-import org.scalajs.dom.html.{Element, Span, TableHeaderCell, UList}
+import org.scalajs.dom.html.{Element, Span, TableCell, TableHeaderCell, UList}
 import org.scalajs.dom.{MouseEvent, window}
 import rx.{Ctx, Rx}
 import scalatags.JsDom.TypedTag
@@ -21,6 +21,12 @@ trait HeadElements extends ColOps with AppElements with RxBindings {
   )
 
   def _rowNumberCell: TypedTag[TableHeaderCell] = th(
+    "n",
+    verticalAlign.middle,
+    textAlign.center
+  )
+
+  def _rowNumberCell2: TypedTag[TableCell] = td(
     "n",
     verticalAlign.middle,
     textAlign.center
