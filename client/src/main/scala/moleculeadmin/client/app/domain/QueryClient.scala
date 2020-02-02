@@ -25,16 +25,12 @@ object QueryClient
 
   type keepBooPickleImport_QueryClient = PickleState
 
-  val t = Timer("QueryClient")
-
   // Single Rx context to be passed around wherever needed
   implicit val ctx: Ctx.Owner = rx.Ctx.Owner.safe()
 
   @JSExport
   def load(db0: String): Unit = queryWire().loadMetaData(db0).call().map {
     case (dbs, metaSchema, (settings, stars, flags, checks, undoneTs, queries)) =>
-
-      t.log(1)
 
       // Uncomment to test dynamic ScalaFiddle compilation
       // import moleculeadmin.client.app.domain.query.data.groupedit.compileTest.TestScalaFiddle
@@ -43,13 +39,8 @@ object QueryClient
       // Base settings
       db = db0
       nsMap = mkNsMap(metaSchema)
-      t.log(2)
       viewCellTypes = mkViewCellTypes(nsMap)
-      t.log(3)
       enumAttrs = mkEnumAttrs(nsMap)
-      t.log(4)
-
-
 
       //      settings.toList.sortBy(_._1) foreach println
       //      println("---------")
@@ -78,16 +69,10 @@ object QueryClient
         }
 
         savedQueries = queries
-
-        println("stars no: " + stars.size)
-
         curStars = stars
         curFlags = flags
         curChecks = checks
       }
-
-      t.log(5)
-
 
       // Render page
       document.body.appendChild(
@@ -95,7 +80,6 @@ object QueryClient
       )
       // make saved queries available via key command
       registerKeyEvents
-      t.log(6)
       document.body.appendChild {
         _containerFluid2(
           _row(
@@ -108,7 +92,5 @@ object QueryClient
         ).render
       }
       _reloadMenuAim()
-      t.log(7)
-      t.total
   }
 }

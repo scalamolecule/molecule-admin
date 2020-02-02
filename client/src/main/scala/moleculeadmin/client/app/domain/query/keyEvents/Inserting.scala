@@ -3,7 +3,7 @@ import autowire._
 import boopickle.Default._
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.domain.query.data.edit.{Insert, RetractEid}
-import moleculeadmin.client.app.domain.query.marker.ToggleOne
+import moleculeadmin.client.app.domain.query.marker.Toggle
 import moleculeadmin.client.autowire.queryWire
 import moleculeadmin.shared.ast.query.Col
 import moleculeadmin.shared.ops.query.BaseQuery
@@ -63,9 +63,10 @@ trait Inserting extends Insert with BaseQuery with Editing {
         eidCell.appendChild(i(cls := mark.starOff).render)
         eidCell.appendChild(i(cls := mark.flagOff).render)
         eidCell.appendChild(i(cls := mark.checkOff).render)
-        ToggleOne(tableBody, "star").toggle(eid, false)
+        Toggle(tableBody, "star", false, eid = eid)
 
-        // Show inserted data
+
+      // Show inserted data
         println(s"Inserted entity $eid:\n  " +
           valuePairs(rowValues).mkString("\n  "))
 

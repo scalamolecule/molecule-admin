@@ -1,10 +1,8 @@
 package moleculeadmin.server
 
-import java.{lang, util}
 import java.lang.{Long => jLong}
 import java.net.URI
-import java.text.SimpleDateFormat
-import java.util.{Date, UUID, Collection => jCollection, List => jList}
+import java.util.{Date, UUID, List => jList}
 import datomic.{Datom, Peer, Util}
 import db.admin.dsl.moleculeAdmin._
 import db.core.dsl.coreTest.Ns
@@ -14,9 +12,7 @@ import molecule.ast.model.{Atom, Bond, Model, NoValue}
 import molecule.ast.transactionModel.{Add, Retract, RetractEntity, Statement}
 import molecule.facade.{Conn, TxReport}
 import molecule.transform.Model2Transaction
-import moleculeadmin.server.query.Rows2QueryResult
-import moleculeadmin.server.utils.DateStrLocal
-import moleculeadmin.shared.api.QueryApi
+import moleculeadmin.server.query.{ToggleBackend, Rows2QueryResult}
 import moleculeadmin.shared.ast.query.{Col, QueryDTO, QueryResult}
 import moleculeadmin.shared.ops.transform.Molecule2Model
 import scala.collection.JavaConverters._
@@ -24,7 +20,7 @@ import scala.collection.mutable.ListBuffer
 import scala.util.Try
 
 
-class QueryBackend extends QueryApi with Base with DateStrLocal {
+class QueryBackend extends ToggleBackend {
 
   // Todo: this works but seems like a hack that would be nice to avoid although the impact of
   // a few input variables is negible.
@@ -439,17 +435,17 @@ class QueryBackend extends QueryApi with Base with DateStrLocal {
     (row.get(0).asInstanceOf[Long], row.get(1).asInstanceOf[Long])
   }
 
-  def withTransactor[T](
-    body: => Either[String, T]
-  )(implicit conn: Conn): Either[String, T] = try {
-    // Check if transactor responds by sending a Future back
-    conn.datomicConn.sync()
-    // Execute body of work
-    body
-  } catch {
-    case _: Throwable => Left(
-      "Datomic Transactor unavailable. Please restart it and try the operation again.")
-  }
+//  def withTransactor[T](
+//    body: => Either[String, T]
+//  )(implicit conn: Conn): Either[String, T] = try {
+//    // Check if transactor responds by sending a Future back
+//    conn.datomicConn.sync()
+//    // Execute body of work
+//    body
+//  } catch {
+//    case _: Throwable => Left(
+//      "Datomic Transactor unavailable. Please restart it and try the operation again.")
+//  }
 
 
   override def upsertQuery(db: String, query: QueryDTO): Either[String, String] = {
@@ -591,153 +587,6 @@ class QueryBackend extends QueryApi with Base with DateStrLocal {
     }
   }
 
-  override def toggleMarker(
-    db: String,
-    dbSettingsIdOpt: Option[Long],
-    tpe: String,
-    eid: Long,
-    isOn: Boolean
-  ): Either[String, Long] = {
-    implicit val conn = Conn(base + "/MoleculeAdmin")
-    withTransactor {
-      try {
-        val dbSettingsId = dbSettingsIdOpt.getOrElse {
-          val userId = user_User.e.username_("admin").get match {
-            case List(eid) => eid
-            case Nil       => user_User.username("admin").save.eid
-          }
-          user_User(userId).DbSettings.e.Db.name_(db).get match {
-            case List(dbSettingsId) => dbSettingsId
-            case Nil                =>
-              val dbId = meta_Db.e.name_(db).get.head
-              user_DbSettings.db(dbId).save.eid
-          }
-        }
-        if (isOn) {
-          tpe match {
-            case "star"  => user_DbSettings(dbSettingsId).stars.retract(eid).update
-            case "flag"  => user_DbSettings(dbSettingsId).flags.retract(eid).update
-            case "check" => user_DbSettings(dbSettingsId).checks.retract(eid).update
-          }
-        } else {
-          tpe match {
-            case "star"  => user_DbSettings(dbSettingsId).stars.assert(eid).update
-            case "flag"  => user_DbSettings(dbSettingsId).flags.assert(eid).update
-            case "check" => user_DbSettings(dbSettingsId).checks.assert(eid).update
-          }
-        }
-        Right(dbSettingsId)
-      } catch {
-        case t: Throwable => Left(t.getMessage)
-      }
-    }
-  }
-
-  override def setMarkers(
-    db: String,
-    dbSettingsIdOpt: Option[Long],
-    tpe: String,
-    eids: Set[Long],
-    newState: Boolean
-  ): Either[String, Long] = {
-    implicit val conn = Conn(base + "/MoleculeAdmin")
-
-    withTransactor {
-      try {
-        val dbSettingsId = dbSettingsIdOpt.getOrElse {
-          val userId = user_User.e.username_("admin").get match {
-            case List(eid) => eid
-            case Nil       => user_User.username("admin").save.eid
-          }
-          user_User(userId).DbSettings.e.Db.name_(db).get match {
-            case List(dbSettingsId) => dbSettingsId
-            case Nil                =>
-              val dbId = meta_Db.e.name_(db).get.head
-              user_DbSettings.db(dbId).save.eid
-          }
-        }
-        if (newState) {
-          tpe match {
-            case "star" =>
-              val t = Timer("star")
-
-              //              var count = 0
-              //              eids.sliding(1000, 1000).foreach { eidsChunk =>
-              //                count += eidsChunk.size
-              //                //                println("starred: " + count)
-              //                t.log(count)
-              //                user_DbSettings(dbSettingsId).stars.assert(eidsChunk).update
-              //              }
-              //              println(t.total)
-              user_DbSettings(dbSettingsId).stars.assert(eids).update
-              t.total
-
-            case "flag"  => user_DbSettings(dbSettingsId).flags.assert(eids).update
-            case "check" => user_DbSettings(dbSettingsId).checks.assert(eids).update
-          }
-        } else {
-          tpe match {
-            case "star"  =>
-              val t = Timer("unstar")
-
-              //              var count = 0
-              //              eids.sliding(1000, 1000).foreach { eidsChunk =>
-              //                count += eidsChunk.size
-              //                //                println("unstarred: " + count)
-              //                t.log(count)
-              //                user_DbSettings(dbSettingsId).stars.retract(eidsChunk).update
-              //              }
-              //              println(t.total)
-              user_DbSettings(dbSettingsId).stars.retract(eids).update
-              t.total
-            case "flag"  => user_DbSettings(dbSettingsId).flags.retract(eids).update
-            case "check" => user_DbSettings(dbSettingsId).checks.retract(eids).update
-          }
-        }
-        Right(dbSettingsId)
-      } catch {
-        case t: Throwable => Left(t.getMessage)
-      }
-    }
-  }
-
-  override def unmarkAll(
-    db: String,
-    dbSettingsIdOpt: Option[Long],
-    tpe: String,
-  ): Either[String, Long] = {
-    implicit val conn = Conn(base + "/MoleculeAdmin")
-
-    withTransactor {
-      try {
-        val dbSettingsId = dbSettingsIdOpt.getOrElse {
-          val userId = user_User.e.username_("admin").get match {
-            case List(eid) => eid
-            case Nil       => user_User.username("admin").save.eid
-          }
-          user_User(userId).DbSettings.e.Db.name_(db).get match {
-            case List(dbSettingsId) => dbSettingsId
-            case Nil                =>
-              val dbId = meta_Db.e.name_(db).get.head
-              user_DbSettings.db(dbId).save.eid
-          }
-        }
-
-        tpe match {
-          case "star" =>
-            val t = Timer("unstar all")
-            user_DbSettings(dbSettingsId).stars().update
-            t.total
-
-          case "flag"  => user_DbSettings(dbSettingsId).flags().update
-          case "check" => user_DbSettings(dbSettingsId).checks().update
-        }
-        Right(dbSettingsId)
-      } catch {
-        case t: Throwable => Left(t.getMessage)
-      }
-    }
-  }
 
   override def saveSettings(pairs: Seq[(String, String)]): Either[String, String] = {
     implicit val conn = Conn(base + "/MoleculeAdmin")
