@@ -62,26 +62,12 @@ trait QueryApi extends BaseApi {
   def updateQuery(db: String, query: QueryDTO): Either[String, String] = ???
   def retractQuery(db: String, query: QueryDTO): Either[String, String] = ???
 
-  def toggleMarker(
+  def saveToggle(
     db: String,
     dbSettingsIdOpt: Option[Long],
-    tpe: String,
-    eid: Long,
-    isOn: Boolean
-  ): Either[String, Long] = ???
-
-  def setMarkers(
-    db: String,
-    dbSettingsIdOpt: Option[Long],
-    tpe: String,
+    markerType: String,
     eids: Set[Long],
     newState: Boolean
-  ): Either[String, Long] = ???
-
-  def unmarkAll(
-    db: String,
-    dbSettingsIdOpt: Option[Long],
-    tpe: String,
   ): Either[String, Long] = ???
 
   def saveSettings(pairs: Seq[(String, String)]): Either[String, String] = ???

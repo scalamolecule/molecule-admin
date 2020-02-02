@@ -1,19 +1,17 @@
 package moleculeadmin.client.app.domain.query.data
 
 import moleculeadmin.client.app.domain.query.QueryState._
-import moleculeadmin.client.app.domain.query.data.edit._
-import moleculeadmin.client.app.domain.query.marker.ToggleOne
+import moleculeadmin.client.app.domain.query.data.edit.{RetractEid, _}
+import moleculeadmin.client.app.domain.query.marker.Toggle
 import moleculeadmin.client.app.element.query.datatable.BodyElements
 import moleculeadmin.shared.ast.query.{QueryResult, _}
 import moleculeadmin.shared.ops.query.ColOps
 import org.scalajs.dom.document
 import org.scalajs.dom.html.{TableCell, TableRow, TableSection}
-import org.scalajs.dom.raw.NodeList
 import rx.Ctx
 import scalatags.JsDom
 import scalatags.JsDom.all._
 import scala.collection.mutable
-import moleculeadmin.client.app.domain.query.data.edit.RetractEid
 
 
 abstract class Cell(
@@ -233,10 +231,6 @@ abstract class Cell(
             curFlagIndexes(tableCol) = flagIndex
             curCheckIndexes(tableCol) = checkIndex
 
-            val star  = ToggleOne(tableBody, "star")
-            val flag  = ToggleOne(tableBody, "flag")
-            val check = ToggleOne(tableBody, "check")
-
             (rowIndex: Int) =>
               // Set entity id for updates of subsequent attribute values
               e = editArray(rowIndex).fold(0L)(_.toLong)
@@ -249,9 +243,9 @@ abstract class Cell(
                 if (flagIndex(rowIndex)) mark.flagOn else mark.flagOff,
                 if (checkIndex(rowIndex)) mark.checkOn else mark.checkOff,
                 () => RetractEid(eid),
-                () => star.toggle(eid, starIndex(rowIndex)),
-                () => flag.toggle(eid, flagIndex(rowIndex)),
-                () => check.toggle(eid, checkIndex(rowIndex)),
+                () => Toggle(tableBody, "star", curStars.contains(eid), eid = eid),
+                () => Toggle(tableBody, "flag", curFlags.contains(eid), eid = eid),
+                () => Toggle(tableBody, "check", curChecks.contains(eid), eid = eid),
               )
 
 

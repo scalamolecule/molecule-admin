@@ -3,7 +3,7 @@ package moleculeadmin.client.app.domain.query.data
 import moleculeadmin.client.app.domain.query.KeyEvents
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.domain.query.data.groupedit.{GroupEdit, GroupSave}
-import moleculeadmin.client.app.domain.query.marker.{SetMany, UnmarkAll}
+import moleculeadmin.client.app.domain.query.marker.{Toggle, ToggleOffAll}
 import moleculeadmin.client.app.element.AppElements
 import moleculeadmin.client.app.element.query.datatable.HeadElements
 import moleculeadmin.client.rxstuff.RxBindings
@@ -72,17 +72,17 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
       modelElements() = toggleEdit(modelElements.now, colIndex, nsFull, attr)
     }
 
-    val markers: Seq[MouseEvent => Unit] = if (attr == "e") {
+    val togglers: Seq[MouseEvent => Unit] = if (attr == "e") {
       Seq(
-        { _: MouseEvent => SetMany(tableBody, colIndex, "star", true) },
-        { _: MouseEvent => SetMany(tableBody, colIndex, "flag", true) },
-        { _: MouseEvent => SetMany(tableBody, colIndex, "check", true) },
-        { _: MouseEvent => SetMany(tableBody, colIndex, "star", false) },
-        { _: MouseEvent => SetMany(tableBody, colIndex, "flag", false) },
-        { _: MouseEvent => SetMany(tableBody, colIndex, "check", false) },
-        { _: MouseEvent => UnmarkAll(tableBody, colIndex, "star") },
-        { _: MouseEvent => UnmarkAll(tableBody, colIndex, "flag") },
-        { _: MouseEvent => UnmarkAll(tableBody, colIndex, "check") },
+        { _: MouseEvent => Toggle(tableBody, "star", false, colIndex) },
+        { _: MouseEvent => Toggle(tableBody, "flag", false, colIndex) },
+        { _: MouseEvent => Toggle(tableBody, "check", false, colIndex) },
+        { _: MouseEvent => Toggle(tableBody, "star", true, colIndex) },
+        { _: MouseEvent => Toggle(tableBody, "flag", true, colIndex) },
+        { _: MouseEvent => Toggle(tableBody, "check", true, colIndex) },
+        { _: MouseEvent => ToggleOffAll(tableBody, "star") },
+        { _: MouseEvent => ToggleOffAll(tableBody, "flag") },
+        { _: MouseEvent => ToggleOffAll(tableBody, "check") },
       )
     } else Nil
 
@@ -90,7 +90,7 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
       _attrHeaderSortable(
         attr, postfix, expr, sortDir, sortPos, sort, editable,
         edit, save, cancel, retract,
-        markers
+        togglers
       )
     } else {
       _attrHeader(
