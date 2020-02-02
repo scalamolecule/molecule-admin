@@ -5,9 +5,7 @@ import sbtcrossproject.CrossType
 lazy val client = (project in file("client"))
   .settings(Settings.client)
   .dependsOn(sharedJs)
-  .enablePlugins(
-        ScalaJSPlugin,
-    ScalaJSWeb, TzdbPlugin)
+  .enablePlugins(ScalaJSWeb, TzdbPlugin)
 
 
 lazy val server = (project in file("server"))
@@ -15,7 +13,7 @@ lazy val server = (project in file("server"))
     Settings.server,
     scalaJSProjects := Seq(client),
     pipelineStages in Assets := Seq(scalaJSPipeline),
-//    pipelineStages := Seq(rjs, digest, gzip),
+    pipelineStages := Seq(rjs, digest, gzip),
     // triggers scalaJSPipeline when using compile or continuous compilation
     compile in Compile := ((compile in Compile) dependsOn scalaJSPipeline).value,
   )

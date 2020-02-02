@@ -7,15 +7,17 @@ import javax.inject._
 import moleculeadmin.server.Schema
 import moleculeadmin.server.page.SchemaPage
 import moleculeadmin.shared.api.SchemaApi
-import org.webjars.play.WebJarsUtil
+import play.api.mvc.{Action, AnyContent}
 import scala.concurrent.ExecutionContext
 
 
 @Singleton
-class SchemaController @Inject()(api: Schema)(implicit webJarsUtil: WebJarsUtil, ec: ExecutionContext) extends ByteRouter {
+class SchemaController @Inject()(api: Schema)
+  (implicit ec: ExecutionContext) extends ByteRouter {
+
   val router = AutoWireByteServer.route[SchemaApi](api)
   type keepBooPickleImport_SchemaController = PickleState
 
   // Actions
-  def schema(db: String) = Action(Ok(SchemaPage(db)))
+  def schema(db: String): Action[AnyContent] = Action(Ok(SchemaPage(db)))
 }

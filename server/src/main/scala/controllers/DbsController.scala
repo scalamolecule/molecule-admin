@@ -7,16 +7,17 @@ import javax.inject._
 import moleculeadmin.server.Dbs
 import moleculeadmin.server.page.DbsPage
 import moleculeadmin.shared.api.DbsApi
-import org.webjars.play.WebJarsUtil
+import play.api.mvc.{Action, AnyContent}
 import scala.concurrent.ExecutionContext
 
 
 @Singleton
-class DbsController @Inject()(api: Dbs)(implicit webJarsUtil: WebJarsUtil, ec: ExecutionContext) extends ByteRouter {
+class DbsController @Inject()(api: Dbs)
+  (implicit ec: ExecutionContext) extends ByteRouter {
+
   val router = AutoWireByteServer.route[DbsApi](api)
   type keepBooPickleImport_DbsController = PickleState
 
   // Actions
-//  def index = Action(Ok(DbsPage(api.content)))
-  def index = Action(Ok(DbsPage()))
+  def index: Action[AnyContent] = Action(Ok(DbsPage()))
 }

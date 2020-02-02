@@ -7,15 +7,17 @@ import javax.inject._
 import moleculeadmin.server.QueryBackend
 import moleculeadmin.server.page.QueryPage
 import moleculeadmin.shared.api.QueryApi
-import org.webjars.play.WebJarsUtil
+import play.api.mvc.{Action, AnyContent}
 import scala.concurrent.ExecutionContext
 
 
 @Singleton
-class QueryController @Inject()(api: QueryBackend)(implicit webJarsUtil: WebJarsUtil, ec: ExecutionContext) extends ByteRouter {
+class QueryController @Inject()(api: QueryBackend)
+  (implicit ec: ExecutionContext) extends ByteRouter {
+
   val router = AutoWireByteServer.route[QueryApi](api)
   type keepBooPickleImport_QueryController = PickleState
 
   // Actions
-  def query(db: String) = Action(Ok(QueryPage(db)))
+  def query(db: String): Action[AnyContent] = Action(Ok(QueryPage(db)))
 }
