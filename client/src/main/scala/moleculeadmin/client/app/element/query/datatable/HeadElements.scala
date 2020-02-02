@@ -50,21 +50,21 @@ trait HeadElements extends ColOps with AppElements with RxBindings {
     save: MouseEvent => Unit,
     cancel: MouseEvent => Unit,
     retract: MouseEvent => Unit,
-    markers: Seq[MouseEvent => Unit] = Nil,
+    togglers: Seq[MouseEvent => Unit] = Nil,
   ): TypedTag[UList] = {
     val items = if (attribute == "e") {
       Seq(
-        a(href := "#", cls := "dropdown-item", "Star", onclick := markers.head),
-        a(href := "#", cls := "dropdown-item", "Flag", onclick := markers(1)),
-        a(href := "#", cls := "dropdown-item", "Check", onclick := markers(2)),
+        a(href := "#", cls := "dropdown-item", "Star", onclick := togglers.head),
+        a(href := "#", cls := "dropdown-item", "Flag", onclick := togglers(1)),
+        a(href := "#", cls := "dropdown-item", "Check", onclick := togglers(2)),
         div(cls := "dropdown-divider", margin := "3px 0"),
-        a(href := "#", cls := "dropdown-item", "Unstar", onclick := markers(3)),
-        a(href := "#", cls := "dropdown-item", "Unflag", onclick := markers(4)),
-        a(href := "#", cls := "dropdown-item", "Uncheck", onclick := markers(5)),
+        a(href := "#", cls := "dropdown-item", "Unstar", onclick := togglers(3)),
+        a(href := "#", cls := "dropdown-item", "Unflag", onclick := togglers(4)),
+        a(href := "#", cls := "dropdown-item", "Uncheck", onclick := togglers(5)),
         div(cls := "dropdown-divider", margin := "3px 0"),
-        a(href := "#", cls := "dropdown-item", "Unstar all", onclick := markers(6)),
-        a(href := "#", cls := "dropdown-item", "Unflag all", onclick := markers(7)),
-        a(href := "#", cls := "dropdown-item", "Uncheck all", onclick := markers(8)),
+        a(href := "#", cls := "dropdown-item", "Unstar all", onclick := togglers(6)),
+        a(href := "#", cls := "dropdown-item", "Unflag all", onclick := togglers(7)),
+        a(href := "#", cls := "dropdown-item", "Uncheck all", onclick := togglers(8)),
       )
     } else if (expr == "edit") {
       Seq(
@@ -119,7 +119,7 @@ trait HeadElements extends ColOps with AppElements with RxBindings {
     save: MouseEvent => Unit,
     cancel: MouseEvent => Unit,
     retract: MouseEvent => Unit,
-    markers: Seq[MouseEvent => Unit] = Nil,
+    togglers: Seq[MouseEvent => Unit] = Nil,
   ): TypedTag[TableHeaderCell] = {
     val headerCell = {
       if (expr == "orig") {
@@ -143,7 +143,7 @@ trait HeadElements extends ColOps with AppElements with RxBindings {
       } else if (attribute == "e") {
         td(
           padding := 0,
-          attrMenu(attribute, postfix, expr, edit, save, cancel, retract, markers)
+          attrMenu(attribute, postfix, expr, edit, save, cancel, retract, togglers)
         )
       } else if (editable) {
         td(
