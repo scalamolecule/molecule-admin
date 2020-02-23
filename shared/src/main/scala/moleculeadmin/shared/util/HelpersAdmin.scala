@@ -11,6 +11,8 @@ trait HelpersAdmin extends Helpers with SpecialNames {
 
   def firstLow(str: Any): String = str.toString.head.toLower + str.toString.tail
 
+  def mandatory(attr: String): Boolean = attr.last != '_' && attr.last != '$'
+
   implicit class capitalized2lower(cap: String) {
     def low: String = if (cap.nonEmpty) firstLow(cap) else ""
   }

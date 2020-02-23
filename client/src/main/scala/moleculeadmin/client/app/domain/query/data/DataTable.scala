@@ -14,7 +14,7 @@ import moleculeadmin.shared.ast.query.Filter
 import moleculeadmin.shared.ops.query.ModelOps
 import org.scalajs.dom.document
 import org.scalajs.dom.html.TableSection
-import org.scalajs.dom.raw.HTMLElement
+import org.scalajs.dom.raw.{HTMLElement, Node}
 import rx.{Ctx, Rx}
 import scalatags.JsDom
 import scalatags.JsDom.all._
@@ -41,6 +41,14 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
     )
   )
 
+  def resetTableBodyFoot(msg: String): Node = {
+    tableBody.innerHTML = ""
+    tableFoot.innerHTML = ""
+    tableFoot.appendChild(
+      tr(td(colspan := columns.now.size + 1, msg)).render
+    )
+  }
+
   def fetchAndPopulate(
     tableBody: TableSection,
     tableFoot: TableSection
@@ -53,12 +61,13 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
     val (l, ll, lll) = encodeInputs(query)
     groupableCols = getGroupableCols(columns.now)
 
+    resetTableBodyFoot("Fetching data...")
+
     // Fetch data from db asynchronously
     queryWire()
       .query(db, datalogQuery, rules, l, ll, lll, maxRows.now, columns.now)
       .call().foreach {
       case Right(queryResult) =>
-        //        println("QUERY")
         rowCountAll = queryResult.rowCountAll
         rowCount = queryResult.rowCount
 
@@ -83,12 +92,7 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
 
 
       case Left(Nil) =>
-        //        println("Empty result")
-        tableBody.innerHTML = ""
-        tableFoot.innerHTML = ""
-        tableFoot.appendChild(
-          tr(td(colspan := columns.now.size + 1, "Empty result set...")).render
-        )
+        resetTableBodyFoot("Empty result set...")
         rowCountAll = 0
         renderSubMenu.recalc()
 
@@ -111,8 +115,6 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
   }
 
   def dynRender: Rx.Dynamic[JsDom.TypedTag[HTMLElement]] = Rx {
-    //    println("---- table")
-
     // Var's not to trigger this Rx
     // (`modelElements` and `maxRows` are the main triggers)
     columns.kill()
@@ -142,7 +144,10 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
           )
         }
 
-        case elements if nsHasOnlyDummyAttr(elements) => {
+        case (a: Atom) :: Nil if !mandatory(a.attr) =>
+          _rowCol1("Please select at least one mandatory attribute")
+
+        case elements if hasIncompleteBranches(elements) => {
           tree() = mkTree(mkModelTree(elements))
           columns() = getCols(elements)
           _rowCol1(
@@ -150,12 +155,7 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
           )
         }
 
-        case Atom(_, attr, _, _, _, _, _, _) :: Nil
-          if attr.last == '_' || attr.last == '$' =>
-          _rowCol1("Please select at least one mandatory attribute")
-
         case elements =>
-          //          println("----------- new model ----------")
           val elements1 = VerifyRawModel(elements)
           tree() = mkTree(mkModelTree(elements1))
           curMolecule() = model2molecule(elements1)
