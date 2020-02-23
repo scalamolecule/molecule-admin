@@ -194,7 +194,7 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
 
 
   def populate(tableHead: TableSection): Rx.Dynamic[Node] = Rx {
-    println("---- head ----")
+    //    println("---- head ----")
 
     // re-calculate column attr headers on change
     val cols           = columns()
@@ -223,9 +223,6 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
       filterCells(colIndex) = attrFilterCell(col, attrResolver)
       colIndex += 1
     }
-
-    nss foreach println
-
     val toggleCell = _openCloseQueryBuilder(
       querySelection() == "", () => toggleQueryBuilder)
     val nsCells    = nss.map { case (nsAlias, _, i) => th(colspan := i, nsAlias) }
