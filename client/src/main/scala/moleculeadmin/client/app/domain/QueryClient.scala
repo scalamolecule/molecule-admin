@@ -1,4 +1,5 @@
 package moleculeadmin.client.app.domain
+
 import autowire._
 import boopickle.Default._
 import moleculeadmin.client.app.domain.common.TopMenu
@@ -38,7 +39,9 @@ object QueryClient
 
       // Base settings
       db = db0
-      nsMap = mkNsMap(metaSchema)
+      val dbMetaInfo = mkNsMap(metaSchema)
+      nsMap = dbMetaInfo._1
+      valuesCounted = dbMetaInfo._2
       viewCellTypes = mkViewCellTypes(nsMap)
       enumAttrs = mkEnumAttrs(nsMap)
 
@@ -51,8 +54,13 @@ object QueryClient
       Rx {
         maxRows() = settings.getOrElse("maxRows", "-1").toInt
         limit() = settings.getOrElse("limit", "20").toInt
-        querySelection() = settings.getOrElse("querySelection", "a")
-        queryBaseSelection = settings.getOrElse("queryBaseSelection", "a")
+        if (valuesCounted) {
+          querySelection() = settings.getOrElse("querySelection", "a")
+          queryBaseSelection = settings.getOrElse("queryBaseSelection", "a")
+        } else {
+          querySelection() = "a"
+          queryBaseSelection = "a"
+        }
         showViews = settings.getOrElse("showViews", "false").toBoolean
 
         curViews() = settings.collect {

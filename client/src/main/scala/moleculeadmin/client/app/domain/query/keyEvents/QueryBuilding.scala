@@ -2,17 +2,29 @@ package moleculeadmin.client.app.domain.query.keyEvents
 
 import moleculeadmin.client.app.domain.query.Callbacks
 import moleculeadmin.client.app.domain.query.QueryState._
+import org.scalajs.dom.window
 import rx.{Ctx, Rx}
+import scalatags.JsDom.all.{br, s}
 
 
 trait QueryBuilding {
-
 
   def queryBuilderOpen: Boolean = querySelection.now.nonEmpty
 
   def saveSelection(implicit ctx: Ctx.Owner): Unit = {
     (new Callbacks).saveSetting("querySelection" -> querySelection.now)
     (new Callbacks).saveSetting("queryBaseSelection" -> queryBaseSelection)
+  }
+
+  def withValuesCounted(action: => Unit): Unit = {
+    if (valuesCounted) {
+      action
+    } else {
+      window.alert(
+        s"To narrow the attribute selection, please generate " +
+          s"a fresh value count in 'Schema' -> 'Value' -> 'Update value counts'"
+      )
+    }
   }
 
   def queryBuilder(key: String)(implicit ctx: Ctx.Owner): Unit = {
@@ -26,15 +38,18 @@ trait QueryBuilding {
 
       // Todo: we use 'v' for Views - this is hackish...
       // Attributes with values
-      case "w" if querySelection.now != "v" =>
+      case "w" if querySelection.now != "v" => withValuesCounted {
         queryBaseSelection = "v"
         querySelection() = "v"
+      }
 
       // Attributes without rel attributes
-      case "r" if querySelection.now != "r" =>
+      case "r" if querySelection.now != "r" => withValuesCounted {
         queryBaseSelection = "r"
         querySelection() = "r"
-      case _                                => ()
+      }
+
+      case _ => ()
     }
     saveSelection
   }
@@ -46,8 +61,8 @@ trait QueryBuilding {
       } else {
         queryBaseSelection match {
           case "a" => querySelection() = "a"
-          case "v" => querySelection() = "v"
-          case "r" => querySelection() = "r"
+          case "v" => withValuesCounted(querySelection() = "v")
+          case "r" => withValuesCounted(querySelection() = "r")
         }
       }
     } else {
@@ -61,8 +76,8 @@ trait QueryBuilding {
       queryMinimized = false
       queryBaseSelection match {
         case "a" => querySelection() = "a"
-        case "v" => querySelection() = "v"
-        case "r" => querySelection() = "r"
+        case "v" => withValuesCounted(querySelection() = "v")
+        case "r" => withValuesCounted(querySelection() = "r")
       }
     } else {
       queryMinimized = true
@@ -78,17 +93,19 @@ trait QueryBuilding {
     saveSelection
   }
 
-  def toggleAttrSelectionR(implicit ctx: Ctx.Owner): Rx.Dynamic[Unit] = Rx {
-    queryBaseSelection = "r"
-    querySelection() = "r"
-    saveSelection
-  }
-
   def toggleAttrSelectionV(implicit ctx: Ctx.Owner): Rx.Dynamic[Unit] = Rx {
-    queryBaseSelection = "v"
-    querySelection() = "v"
-    saveSelection
+    withValuesCounted {
+      queryBaseSelection = "v"
+      querySelection() = "v"
+      saveSelection
+    }
   }
 
-
+  def toggleAttrSelectionR(implicit ctx: Ctx.Owner): Rx.Dynamic[Unit] = Rx {
+    withValuesCounted {
+      queryBaseSelection = "r"
+      querySelection() = "r"
+      saveSelection
+    }
+  }
 }

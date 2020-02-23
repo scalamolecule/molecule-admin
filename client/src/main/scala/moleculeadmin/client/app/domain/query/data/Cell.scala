@@ -72,7 +72,8 @@ abstract class Cell(
     ): () => Unit = {
       val cellId : String    = idBase(colIndex)(rowIndex)
       val oldVOpt: Option[T] = editArray(rowIndex)
-      val isNum  : Boolean   = Seq("Int", "Long", "ref", "datom", "Float", "Double").contains(attrType)
+      val isNum  : Boolean   = Seq(
+        "Int", "Long", "ref", "datom", "Float", "Double").contains(attrType)
       val updater            = card match {
         case 1 => UpdateCardOne(
           cols, qr, origArray, editArray, baseClass, colType, colIndex, rowIndex,
@@ -238,7 +239,19 @@ abstract class Cell(
               _tdOneEid(
                 eid,
                 curEntity,
-                () => curEntity() = eid,
+                () => {
+                  if (!curEntityLocked)
+                    curEntity() = eid
+                },
+                () => {
+                  if (curEntityLocked) {
+                    if (eid == curEntity.now)
+                      curEntityLocked = false
+                    curEntity() = eid
+                  } else {
+                    curEntityLocked = true
+                  }
+                },
                 if (starIndex(rowIndex)) mark.starOn else mark.starOff,
                 if (flagIndex(rowIndex)) mark.flagOn else mark.flagOff,
                 if (checkIndex(rowIndex)) mark.checkOn else mark.checkOff,
