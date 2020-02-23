@@ -194,37 +194,41 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
 
 
   def populate(tableHead: TableSection): Rx.Dynamic[Node] = Rx {
-    //    println("---- head ----")
+    println("---- head ----")
 
     // re-calculate column attr headers on change
-    val cols         = columns()
-    val colCount     = cols.size
-    val attrResolver = ResolveAttrs(columns.now)
-    var nss          = Seq.empty[(String, Int)]
-    val sortCells    = new Array[JsDom.TypedTag[TableHeaderCell]](colCount)
-    val filterCells  = new Array[JsDom.TypedTag[TableHeaderCell]](colCount)
-    var colIndex     = 0
-    var col: Col     = null
-    var ns : String  = ""
+    val cols           = columns()
+    val colCount       = cols.size
+    val attrResolver   = ResolveAttrs(columns.now)
+    var nss            = Seq.empty[(String, String, Int)]
+    val sortCells      = new Array[JsDom.TypedTag[TableHeaderCell]](colCount)
+    val filterCells    = new Array[JsDom.TypedTag[TableHeaderCell]](colCount)
+    var colIndex       = 0
+    var col   : Col    = null
+    var prevNs: String = ""
     while (colIndex < colCount) {
       // Add namespace or expand colspan if ns is same as for the previous attribute
       col = cols(colIndex)
-      ns = col.nsAlias
+      prevNs = col.nsFull
       nss match {
-        case Nil                    =>
-          nss = Seq(ns -> 1)
-        case _ if nss.last._1 == ns =>
-          nss = nss.init :+ (nss.last._1 -> (nss.last._2 + 1))
-        case _                      =>
-          nss = nss :+ (ns -> 1)
+        case Nil                        =>
+          nss = Seq((col.nsAlias, prevNs, 1))
+        case _ if prevNs == nss.last._2 =>
+          nss = nss.init :+ (nss.last._1, col.nsFull, nss.last._3 + 1)
+        case _                          =>
+          nss = nss :+ (col.nsAlias, col.nsFull, 1)
       }
+
       sortCells(colIndex) = attrSortCell(col, attrResolver)
       filterCells(colIndex) = attrFilterCell(col, attrResolver)
       colIndex += 1
     }
+
+    nss foreach println
+
     val toggleCell = _openCloseQueryBuilder(
       querySelection() == "", () => toggleQueryBuilder)
-    val nsCells    = nss.map { case (ns, i) => th(colspan := i, ns) }
+    val nsCells    = nss.map { case (nsAlias, _, i) => th(colspan := i, nsAlias) }
     tableHead.innerHTML = ""
     tableHead.appendChild(tr(toggleCell +: nsCells).render)
     tableHead.appendChild(tr(_rowNumberCell +: sortCells).render)
