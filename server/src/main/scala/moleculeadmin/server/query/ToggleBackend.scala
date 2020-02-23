@@ -7,8 +7,11 @@ import molecule.facade.{Conn, TxReport}
 
 trait ToggleBackend extends QueryBase {
 
-  private def save[A, B](action: String, eids: Set[Long], update: Set[Long] => TxReport)
-    (implicit conn: Conn): Unit = {
+  private def save[A, B](
+    action: String,
+    eids: collection.Set[Long],
+    update: collection.Set[Long] => TxReport
+  )(implicit conn: Conn): Unit = {
     val t = Timer(action)
     if (eids.size > 10000) {
       println(s"$action ${eids.size} entities ...")
@@ -29,7 +32,7 @@ trait ToggleBackend extends QueryBase {
     db: String,
     dbSettingsIdOpt: Option[Long],
     markerType: String,
-    eids: Set[Long],
+    eids: collection.Set[Long],
     currentlyOn: Boolean
   ): Either[String, Long] = {
     implicit val conn = Conn(base + "/MoleculeAdmin")
@@ -50,24 +53,24 @@ trait ToggleBackend extends QueryBase {
         }
         if (currentlyOn) {
           markerType match {
-            case "star" => save("Unstar", eids, (eids: Set[Long]) =>
+            case "star" => save("Unstar", eids, (eids: collection.Set[Long]) =>
               user_DbSettings(dbSettingsId).stars.retract(eids).update)
 
-            case "flag" => save("Unflag", eids, (eids: Set[Long]) =>
+            case "flag" => save("Unflag", eids, (eids: collection.Set[Long]) =>
               user_DbSettings(dbSettingsId).flags.retract(eids).update)
 
-            case "check" => save("Uncheck", eids, (eids: Set[Long]) =>
+            case "check" => save("Uncheck", eids, (eids: collection.Set[Long]) =>
               user_DbSettings(dbSettingsId).checks.retract(eids).update)
           }
         } else {
           markerType match {
-            case "star" => save("Star", eids, (eids: Set[Long]) =>
+            case "star" => save("Star", eids, (eids: collection.Set[Long]) =>
               user_DbSettings(dbSettingsId).stars.assert(eids).update)
 
-            case "flag" => save("Flag", eids, (eids: Set[Long]) =>
+            case "flag" => save("Flag", eids, (eids: collection.Set[Long]) =>
               user_DbSettings(dbSettingsId).flags.assert(eids).update)
 
-            case "check" => save("Check", eids, (eids: Set[Long]) =>
+            case "check" => save("Check", eids, (eids: collection.Set[Long]) =>
               user_DbSettings(dbSettingsId).checks.assert(eids).update)
           }
         }

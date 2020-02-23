@@ -1,4 +1,5 @@
 package moleculeadmin.servertest
+
 import ammonite.ops.read
 import db.admin.dsl.moleculeAdmin.{meta_Db, user_ColSetting}
 import db.core.dsl.coreTest._
@@ -18,15 +19,19 @@ import moleculeadmin.server.utils.DateStrLocal
 import moleculeadmin.servertest.ResetDbs.protocol
 import moleculeadmin.shared.ast.query.Col
 import moleculeadmin.shared.ops.query.ColOps
+import moleculeadmin.shared.ops.transform.Molecule2Model
 import scala.collection.mutable.ListBuffer
 import utest._
+import scala.collection.immutable
+import scala.util.Random
 
 
 object Adhoc extends TestSuite
   with HelpersAdmin
   with ExampleData
   //  with TreeSchema
-  with mBrainzSchema
+  //  with mBrainzSchema
+  with CoreSchema
   with DateStrLocal
   with ColOps {
 
@@ -37,10 +42,13 @@ object Adhoc extends TestSuite
 
     test("Adhoc") {
 
-//      implicit val conn = recreateDbFrom(CoreTestSchema, "localhost:4334/CoreTest", protocol)
+      //      implicit val conn = recreateDbFrom(CoreTestSchema, "localhost:4334/CoreTest", protocol)
       //    implicit val conn = Conn(base + "/MoleculeAdmin")
       //    implicit val conn = Conn(base + "/mbrainz-1968-1973")
-      //        implicit val conn = Conn(base + "/CoreTest")
+      implicit val conn = Conn(base + "/CoreTest")
+
+
+
 
     }
   }

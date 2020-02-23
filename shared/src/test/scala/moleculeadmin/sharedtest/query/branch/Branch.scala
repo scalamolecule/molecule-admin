@@ -223,9 +223,10 @@ object Branch extends TestSuite with TreeSchema with TreeOps with query.BaseQuer
         ),
         List(
           Atom("Bbb", "attrB", "String", 1, VarValue, None, List(), List()),
-          ReBond("Aaa")
+          ReBond("Aaa"),
         ),
         List(
+//          ReBond("Aaa"),
           Bond("Aaa", "ac", "Ccc", 1, List()),
           Atom("Ccc", "Dummy to keep ns open", "", 1, NoValue, None, List(), List())
         )
@@ -277,9 +278,10 @@ object Branch extends TestSuite with TreeSchema with TreeOps with query.BaseQuer
         ),
         List(
           Atom("Bbb", "attrB", "String", 1, VarValue, None, List(), List()),
-          ReBond("Aaa")
+          ReBond("Aaa"),
         ),
         List(
+//          ReBond("Aaa"),
           Bond("Aaa", "ac", "Ccc", 1, List()),
           Atom("Ccc", "attrC", "String", 1, VarValue, None, List(), List())
         )
@@ -331,6 +333,7 @@ object Branch extends TestSuite with TreeSchema with TreeOps with query.BaseQuer
           ReBond("Aaa"),
         ),
         List(
+//          ReBond("Aaa"),
           Bond("Aaa", "ac", "Ccc", 1, List()),
           Atom("Ccc", "attrC", "String", 1, VarValue, None, List(), List()),
         )
@@ -406,9 +409,11 @@ object Branch extends TestSuite with TreeSchema with TreeOps with query.BaseQuer
           Bond("Bbb", "bd", "Ddd", 1, List()),
           Atom("Ddd", "attrD", "String", 1, VarValue, None, List(), List()),
           ReBond("Bbb"),
-          ReBond("Aaa")
+          ReBond("Aaa"),
         ),
         List(
+//          ReBond("Bbb"),
+//          ReBond("Aaa"),
           Bond("Aaa", "ac", "Ccc", 1, List()),
           Atom("Ccc", "attrC", "String", 1, VarValue, None, List(), List()),
           Bond("Ccc", "ca", "Aaa", 1, List()),
@@ -440,9 +445,11 @@ object Branch extends TestSuite with TreeSchema with TreeOps with query.BaseQuer
           Bond("Aaa", "ad", "Ddd", 1, List()),
           Atom("Ddd", "attrD", "String", 1, VarValue, None, List(), List()),
           ReBond("Aaa"),
-          ReBond("Bbb")
+          ReBond("Bbb"),
         ),
         List(
+//          ReBond("Aaa"),
+//          ReBond("Bbb"),
           Bond("Bbb", "bd", "Ddd", 1, List()),
           Atom("Ddd", "attrD", "String", 1, VarValue, None, List(), List()),
           ReBond("Bbb"),
@@ -478,8 +485,10 @@ object Branch extends TestSuite with TreeSchema with TreeOps with query.BaseQuer
         List(
           Atom("Ddd", "attrD", "String", 1, VarValue, None, List(), List()),
           ReBond("Aaa"),
+//          ReBond("Bbb"),
         ),
         List(
+//          ReBond("Aaa"),
           ReBond("Bbb"),
           Bond("Bbb", "bd", "Ddd", 1, List()),
           Atom("Ddd", "attrD", "String", 1, VarValue, None, List(), List()),
@@ -520,8 +529,10 @@ object Branch extends TestSuite with TreeSchema with TreeOps with query.BaseQuer
         List(
           Atom("Ddd", "attrD", "String", 1, VarValue, None, List(), List()),
           ReBond("Bbb"),
+//          ReBond("Aaa"),
         ),
         List(
+//          ReBond("Bbb"),
           ReBond("Aaa"),
           Bond("Aaa", "ac", "Ccc", 1, List()),
           Atom("Ccc", "attrC", "String", 1, VarValue, None, List(), List()),
@@ -573,6 +584,9 @@ object Branch extends TestSuite with TreeSchema with TreeOps with query.BaseQuer
           ReBond("Aaa"),
         ),
         List(
+//          ReBond("Bbb"),
+//          ReBond("Ccc"),
+//          ReBond("Aaa"),
           Bond("Aaa", "ad", "Ddd", 1, List()),
           Atom("Ddd", "attrD", "String", 1, VarValue, None, List(), List()),
           Bond("Ddd", "db", "Bbb", 1, List()),
@@ -604,6 +618,7 @@ object Branch extends TestSuite with TreeSchema with TreeOps with query.BaseQuer
           ReBond("Ccc"),
         ),
         List(
+//          ReBond("Ccc"),
           Bond("Ccc", "cb", "Bbb", 1, List()),
           Atom("Bbb", "attrB", "String", 1, VarValue, None, List(), List()),
           Bond("Bbb", "ba", "Aaa", 1, List()),
@@ -646,8 +661,11 @@ object Branch extends TestSuite with TreeSchema with TreeOps with query.BaseQuer
           Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List()),
           ReBond("Bbb"),
           ReBond("Ccc"),
+//          ReBond("Aaa"),
         ),
         List(
+//          ReBond("Bbb"),
+//          ReBond("Ccc"),
           ReBond("Aaa"),
           Bond("Aaa", "ad", "Ddd", 1, List()),
           Atom("Ddd", "attrD", "String", 1, VarValue, None, List(), List()),

@@ -94,6 +94,7 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
 
 
       case Left(msgs) =>
+        val datalogQuery = molecule.transform.Query2String(query).multiLine()
         val dataTableContainer = document.getElementById("dataTableContainer")
         dataTableContainer.innerHTML = ""
         dataTableContainer.appendChild(

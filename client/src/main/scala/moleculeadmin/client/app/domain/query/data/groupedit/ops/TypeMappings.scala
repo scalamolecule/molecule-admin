@@ -7,7 +7,7 @@ trait TypeMappings extends HelpersAdmin {
   def getTypeMappings(attr: String, tpe: String, card: Int)
   : (String, String) = {
     card match {
-      case 1 if attr.last == '$' =>
+      case 1 if attr.contains("$") =>
         // Need to assign new Option to satisfy JS compiler
         tpe match {
           case "Int"                               => (

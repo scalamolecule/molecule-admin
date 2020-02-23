@@ -70,11 +70,11 @@ class QueryBackend extends ToggleBackend {
     else
       conn.db +: rules.get +: inputs(l ++ ll ++ lll)
 
-    val t         = Timer("Query")
+    //    val t         = Timer("Query")
     val t0        = System.currentTimeMillis
     val allRows   = Peer.q(datalogQuery, allInputs: _*)
     val queryTime = System.currentTimeMillis - t0
-    t.log(1)
+    //    t.log(1)
 
     val rowCountAll = allRows.size
     val rowCount    = if (maxRows == -1 || rowCountAll < maxRows) rowCountAll else maxRows
@@ -87,14 +87,14 @@ class QueryBackend extends ToggleBackend {
     println("rowCount   : " + rowCount)
     //    println("cols       : " + cols)
     allRows.asScala.take(10) foreach println
-    t.log(2)
+    //    t.log(2)
 
     if (rowCount == 0)
       Left(Nil)
     else {
       val queryResult = Rows2QueryResult(
         allRows, rowCountAll, rowCount, cols, queryTime).get
-      t.log(3)
+      //      t.log(3)
       Right(queryResult)
     }
   } catch {
@@ -182,8 +182,13 @@ class QueryBackend extends ToggleBackend {
     val conn         = Conn(base + "/" + db)
     val datomicDb    = conn.db
     val prevFirstT   = if (prevFirstT0 == 0L) datomicDb.basisT() else prevFirstT0
-    val firstT       = if (prevFirstT > 1100) prevFirstT0 - 1000 else 1001
+    val firstT       = if (prevFirstT > 1100) prevFirstT - 100 else 1001
     //    val firstT       = 1001
+
+    println("prevFirstT0 " + prevFirstT0)
+    println("basisT " + datomicDb.basisT())
+    println("firstT " + firstT)
+
     val txs          = conn.datomicConn.log.txRange(firstT, null).asScala
     val txData       = new Array[TxData](txs.size)
     var txIndex      = 0
@@ -435,17 +440,17 @@ class QueryBackend extends ToggleBackend {
     (row.get(0).asInstanceOf[Long], row.get(1).asInstanceOf[Long])
   }
 
-//  def withTransactor[T](
-//    body: => Either[String, T]
-//  )(implicit conn: Conn): Either[String, T] = try {
-//    // Check if transactor responds by sending a Future back
-//    conn.datomicConn.sync()
-//    // Execute body of work
-//    body
-//  } catch {
-//    case _: Throwable => Left(
-//      "Datomic Transactor unavailable. Please restart it and try the operation again.")
-//  }
+  //  def withTransactor[T](
+  //    body: => Either[String, T]
+  //  )(implicit conn: Conn): Either[String, T] = try {
+  //    // Check if transactor responds by sending a Future back
+  //    conn.datomicConn.sync()
+  //    // Execute body of work
+  //    body
+  //  } catch {
+  //    case _: Throwable => Left(
+  //      "Datomic Transactor unavailable. Please restart it and try the operation again.")
+  //  }
 
 
   override def upsertQuery(db: String, query: QueryDTO): Either[String, String] = {
@@ -651,10 +656,15 @@ class QueryBackend extends ToggleBackend {
         retracts.map(v => Retract(eid, attrFull, cast(v), NoValue)) ++
           asserts.map(v => Add(eid, attrFull, cast(v), NoValue))
     }
+    println("------------- SAVE STMTSS ---------------")
+    stmtss foreach println
+
     withTransactor {
       try {
         val txR: TxReport = conn.transact(stmtss)
         Right((txR.t, txR.tx, date2strLocal(txR.inst)))
+
+//        Right(1L, 2L, "test")
       } catch {
         case t: Throwable => Left(t.getMessage)
       }

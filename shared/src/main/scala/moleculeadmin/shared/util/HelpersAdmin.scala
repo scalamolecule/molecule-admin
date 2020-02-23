@@ -21,7 +21,7 @@ trait HelpersAdmin extends Helpers with SpecialNames {
 
   def str2ldt(str: String): LocalDateTime = {
     val ms0 = str2date(str).getTime
-    val ms = ms0 - daylight(ms0)
+    val ms  = ms0 - daylight(ms0)
     LocalDateTime.ofInstant(Instant.ofEpochMilli(ms), localZoneOffset)
   }
 
@@ -54,17 +54,17 @@ trait HelpersAdmin extends Helpers with SpecialNames {
   }
 
 
-  case class Timer(txt: String = "time") {
+  case class Timer(txt: String = "time", on: Boolean = true) {
     val time0 = System.currentTimeMillis
     var time1 = time0
     //    println("timer start ---------------------------------")
 
     def log(n: Int): Unit = {
       val time2 = System.currentTimeMillis - time1
-      println(s"$txt $n: " + "%10d".format(time2))
+      if (on) println(s"$txt $n: " + "%10d".format(time2))
       time1 = System.currentTimeMillis()
     }
-    def total: Unit = println(
+    def total: Unit = if (on) println(
       s"$txt total: ${thousands(System.currentTimeMillis - time0)} ms"
     )
   }

@@ -15,7 +15,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 case class ToggleOffAll(tableBody: TableSection, tpe: String) extends AppElements {
   type keepBooPickleImport_UnmarkAll = PickleState
 
-
   val (curMarkerIndexes, offCls, iconIndex, eids, count, toggling, toggled) =
     tpe match {
       case "star" =>
@@ -43,7 +42,7 @@ case class ToggleOffAll(tableBody: TableSection, tpe: String) extends AppElement
   else if (count < 100000)
     print(s"$toggling $count entities in database - can take a few seconds ...")
   else
-    print(s"$toggling $count entities in database - can take more than 5 seconds ...")
+  print(s"$toggling $count entities in database - can take more than 5 seconds ...")
 
 
   // Toggle off specific marker icon in all entity columns
@@ -71,7 +70,7 @@ case class ToggleOffAll(tableBody: TableSection, tpe: String) extends AppElement
   }
 
   // Save asynchronously in meta db
-  queryWire().saveToggle(db, dbSettingsIdOpt, tpe, eids, false).call()
+  queryWire().saveToggle(db, dbSettingsIdOpt, tpe, eids, true).call()
     .foreach {
       case Right(dbSettingsId1) =>
         dbSettingsIdOpt = Some(dbSettingsId1)

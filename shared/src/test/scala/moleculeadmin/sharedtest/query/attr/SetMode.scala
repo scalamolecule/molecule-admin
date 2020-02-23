@@ -183,8 +183,8 @@ object SetMode extends TestSuite with TreeSchema with ModeOps {
 
         test("str") {
           test("[e]") {
-            setEid(str, "man", str ++ e)
-            setEid(str, "tac", str ++ e_)
+            setEid(str, "man", e ++ str)
+            setEid(str, "tac", e_ ++ str)
             setEid(str, "non", str)
           }
 
@@ -199,8 +199,8 @@ object SetMode extends TestSuite with TreeSchema with ModeOps {
 
         test("str_") {
           test("[e]") {
-            setEid(str_, "man", str_ ++ e)
-            setEid(str_, "tac", str_ ++ e_)
+            setEid(str_, "man", e ++ str_)
+            setEid(str_, "tac", e_ ++ str_ )
             setEid(str_, "non", str_)
           }
 
@@ -215,8 +215,8 @@ object SetMode extends TestSuite with TreeSchema with ModeOps {
 
         test("str$") {
           test("[e]") {
-            setEid(str$, "man", str$ ++ e)
-            setEid(str$, "tac", str$ ++ e_)
+            setEid(str$, "man", e ++ str$)
+            setEid(str$, "tac", e_ ++ str$)
             setEid(str$, "non", str$)
           }
 
@@ -231,8 +231,8 @@ object SetMode extends TestSuite with TreeSchema with ModeOps {
 
         test("strNil") {
           test("e") {
-            setEid(strNil, "man", strNil ++ e)
-            setEid(strNil, "tac", strNil ++ e_)
+            setEid(strNil, "man", e ++ strNil)
+            setEid(strNil, "tac", e_ ++ strNil)
             setEid(strNil, "non", strNil)
           }
 
@@ -359,12 +359,12 @@ object SetMode extends TestSuite with TreeSchema with ModeOps {
 
       test("[attr].bond.dummy") {
         test("e") {
-          setEid(int ++ ref1 ++ dum1, "man", int ++ e ++ ref1 ++ dum1)
-          setEid(int ++ ref1 ++ dum1, "tac", int ++ e_ ++ ref1 ++ dum1)
+          setEid(int ++ ref1 ++ dum1, "man", e ++ int ++ ref1 ++ dum1)
+          setEid(int ++ ref1 ++ dum1, "tac", e_ ++ int ++ ref1 ++ dum1)
           setEid(int ++ ref1 ++ dum1, "non", int ++ ref1 ++ dum1)
 
-          setEid(intEqCoTx ++ ref1 ++ dum1, "man", intEqCoTx ++ e ++ ref1 ++ dum1)
-          setEid(intEqCoTx ++ ref1 ++ dum1, "tac", intEqCoTx ++ e_ ++ ref1 ++ dum1)
+          setEid(intEqCoTx ++ ref1 ++ dum1, "man", e ++ intEqCoTx ++ ref1 ++ dum1)
+          setEid(intEqCoTx ++ ref1 ++ dum1, "tac", e_ ++ intEqCoTx ++ ref1 ++ dum1)
           setEid(intEqCoTx ++ ref1 ++ dum1, "non", intEqCoTx ++ ref1 ++ dum1)
         }
 
@@ -511,14 +511,14 @@ object SetMode extends TestSuite with TreeSchema with ModeOps {
 
       test("bond.attr1.[attr2]") {
         test("e") {
-          setEid1(ref1 ++ str1 ++ e1, "man", ref1 ++ str1 ++ e1)
-          setEid1(ref1 ++ str1 ++ e1, "tac", ref1 ++ str1 ++ e1_)
+          setEid1(ref1 ++ str1 ++ e1, "man", ref1 ++ e1 ++ str1)
+          setEid1(ref1 ++ str1 ++ e1, "tac", ref1 ++ e1_ ++ str1)
           setEid1(ref1 ++ str1 ++ e1, "non", ref1 ++ str1)
         }
 
         test("e_") {
-          setEid1(ref1 ++ str1 ++ e1_, "man", ref1 ++ str1 ++ e1)
-          setEid1(ref1 ++ str1 ++ e1_, "tac", ref1 ++ str1 ++ e1_)
+          setEid1(ref1 ++ str1 ++ e1_, "man", ref1 ++ e1 ++ str1)
+          setEid1(ref1 ++ str1 ++ e1_, "tac", ref1 ++ e1_ ++ str1)
           setEid1(ref1 ++ str1 ++ e1_, "non", ref1 ++ str1)
         }
 
@@ -733,12 +733,12 @@ object SetMode extends TestSuite with TreeSchema with ModeOps {
         Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List())
       )
       val man = List(
-        Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List()),
         Generic("Aaa", "e", "datom", EntValue),
+        Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List()),
       )
       val tac = List(
-        Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List()),
         Generic("Aaa", "e_", "datom", EntValue),
+        Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List()),
       )
 
       setMode(non, List("" -> "Aaa"), "e", "mandatory") ==> man
@@ -929,7 +929,6 @@ object SetMode extends TestSuite with TreeSchema with ModeOps {
         ReBond("Aaa"),
         Bond("Aaa", "ac", "Ccc", 1, List()),
         Atom("Ccc", "attrC", "String", 1, VarValue, None, List(), List())
-
       )
       val man = List(
         Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List()),
@@ -1004,7 +1003,6 @@ object SetMode extends TestSuite with TreeSchema with ModeOps {
         ReBond("Aaa"),
         Bond("Aaa", "ac", "Ccc", 1, List()),
         Atom("Ccc", "attrC", "String", 1, VarValue, None, List(), List())
-
       )
       val man = List(
         Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List()),
@@ -1037,7 +1035,64 @@ object SetMode extends TestSuite with TreeSchema with ModeOps {
     }
 
 
-    test("Rebond paths") {
+    test("Rebond/none") {
+      val m1 = List(
+        Atom("Release", "name", "String", 1, VarValue, None, Seq(), Seq()),
+        Bond("Release", "country", "Country", 1, Seq()),
+        Generic("Country", "e", "datom", EntValue),
+        Atom("Country", "name", "String", 1, VarValue, None, Seq(), Seq()),
+        ReBond("Release"),
+        Bond("Release", "labels", "Label", 2, Seq()),
+        Atom("Label", "name", "String", 1, VarValue, None, Seq(), Seq()),
+        Bond("Label", "country", "Country", 1, Seq()),
+        Generic("Country", "e", "datom", EntValue),
+        Atom("Country", "name", "String", 1, VarValue, None, Seq(), Seq()))
+
+      val m2 = List(
+        Atom("Release", "name", "String", 1, VarValue, None, Seq(), Seq()),
+        Bond("Release", "country", "Country", 1, Seq()),
+        //      Generic("Country", "e", "datom", EntValue),
+        Atom("Country", "name", "String", 1, VarValue, None, Seq(), Seq()),
+        ReBond("Release"),
+        Bond("Release", "labels", "Label", 2, Seq()),
+        Atom("Label", "name", "String", 1, VarValue, None, Seq(), Seq()),
+        Bond("Label", "country", "Country", 1, Seq()),
+        Generic("Country", "e", "datom", EntValue),
+        Atom("Country", "name", "String", 1, VarValue, None, Seq(), Seq()))
+
+      setMode(m1, List(("", "Release"), ("country", "Country")), "e", "none") ==> m2
+
+      val m3 = List(
+        Atom("Release", "name", "String", 1, VarValue, None, Seq(), Seq()),
+        Bond("Release", "country", "Country", 1, Seq()),
+        Generic("Country", "e", "datom", EntValue),
+        Atom("Country", "name", "String", 1, VarValue, None, Seq(), Seq()),
+        ReBond("Release"),
+        Bond("Release", "labels", "Label", 2, Seq()),
+        //      Atom("Label", "name", "String", 1, VarValue, None, Seq(), Seq()),
+        Bond("Label", "country", "Country", 1, Seq()),
+        Generic("Country", "e", "datom", EntValue),
+        Atom("Country", "name", "String", 1, VarValue, None, Seq(), Seq()))
+
+      setMode(m1, List(("", "Release"), ("labels", "Label")), "name", "none") ==> m3
+
+      val m4 = List(
+        Atom("Release", "name", "String", 1, VarValue, None, Seq(), Seq()),
+        Bond("Release", "country", "Country", 1, Seq()),
+        Generic("Country", "e", "datom", EntValue),
+        Atom("Country", "name", "String", 1, VarValue, None, Seq(), Seq()),
+        ReBond("Release"),
+        Bond("Release", "labels", "Label", 2, Seq()),
+        Atom("Label", "name", "String", 1, VarValue, None, Seq(), Seq()),
+        Bond("Label", "country", "Country", 1, Seq()),
+        //      Generic("Country", "e", "datom", EntValue),
+        Atom("Country", "name", "String", 1, VarValue, None, Seq(), Seq()))
+
+      setMode(m1, List(("", "Release"), ("labels", "Label"), ("country", "Country")), "e", "none") ==> m4
+    }
+
+
+    test("Rebond/mandatory") {
       val m1 = List(
         Atom("Release", "name", "String", 1, VarValue, None, Seq(), Seq()),
         Bond("Release", "country", "Country", 1, Seq()),

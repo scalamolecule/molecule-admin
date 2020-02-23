@@ -394,10 +394,6 @@ case class AttrOptions(
       onclick := { () =>
         modelElements() = toggleMode(modelElements.now, path, attr)
       },
-      //      onmouseover := { () =>
-      //        // Todo: why not re-selected on re-entrance?
-      //        inputValue.select()
-      //      }
     ),
     _menu("settings")(
       id := id_("settings"),
@@ -405,7 +401,6 @@ case class AttrOptions(
         onsubmit := { () => false },
         onchange := { () =>
           if (validInput) {
-            // println("updating...")
             update()
             keepSettingsOpen
           }

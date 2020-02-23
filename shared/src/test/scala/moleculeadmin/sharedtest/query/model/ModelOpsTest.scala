@@ -66,5 +66,4 @@ object ModelOpsTest extends TestSuite with ModelOps {
 
     toggleEdit(m4, 2, "Ns", "int") ==> m5
   }
-
 }

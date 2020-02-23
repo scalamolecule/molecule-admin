@@ -262,6 +262,7 @@ class Molecule2Model(molecule0: String, nsMap: Map[String, Ns])
         case "e" | "e_" => fn match {
           case "apply" => expr.trim match {
             case r"([1-9][0-9]*)${number}L?" => elements += Generic(curNsFull, attr, "datom", Eq(Seq(number.toInt)))
+            case r"(count)"                  => elements += Generic(curNsFull, attr, "datom", Fn("count"))
             case _                           => throw new IllegalArgumentException(
               s"Unrecognized expression value `$expr` for entity id attribute `$attr` in molecule: $molecule0")
           }
@@ -332,7 +333,7 @@ class Molecule2Model(molecule0: String, nsMap: Map[String, Ns])
 
   def resolveApply(attr: String, tpe: String, card: Int, expr: String, enumPrefix: Option[String]): Unit = {
     expr.trim match {
-      case "None" | "Nil" =>
+      case "None" | "Nil" | "not" =>
         elements += Atom(curNsFull, attr, tpe, card, Fn("not"), enumPrefix)
 
       case "countDistinct" =>

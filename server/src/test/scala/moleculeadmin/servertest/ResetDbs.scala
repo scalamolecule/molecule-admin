@@ -30,7 +30,7 @@ import utest._
 
 object ResetDbs extends TestSuite with ExampleData with Settings {
   val protocol = "free"
-  val base     = "datomic:free://localhost:4334"
+  val base = "datomic:free://localhost:4334"
 
 
   val tests = Tests {
@@ -38,12 +38,12 @@ object ResetDbs extends TestSuite with ExampleData with Settings {
     //      resetDbs()
     //    }
 
-    //        test("Reset all and poplulate") {
-    //          resetDbs()
-    ////                populateCoreTest(Conn("datomic:free://localhost:4334/CoreTest"))
-    //          //      populatePartition(Conn("datomic:free://localhost:4334/Partition"))
-    //          //      populateTree(Conn("datomic:free://localhost:4334/Tree"))
-    //        }
+//    test("Reset all and poplulate") {
+//      //              resetDbs()
+//      populateCoreTest(Conn("datomic:free://localhost:4334/CoreTest"))
+//      populatePartition(Conn("datomic:free://localhost:4334/Partition"))
+//      populateTree(Conn("datomic:free://localhost:4334/Tree"))
+//    }
 
     test("Reset CoreTest") {
       resetDbs(Seq("CoreTest"))
@@ -155,8 +155,13 @@ object ResetDbs extends TestSuite with ExampleData with Settings {
     Ns.int(4).Refs1.int1(14).Refs2.int2(24).save
 
 
-    val List(r1, r2, r3) = Ref1.int1.insert(21, 22, 23).eids
-    val r4               = Ref1.int1(21).save.eid
+    val List(r1, r2, r3) = Ref1.int1.str1 insert List(
+      (21, "aa"),
+      (22, "bb"),
+      (23, "cc"),
+    ) eids
+
+    val r4 = Ref1.int1(21).save.eid
     Ns.int(41).refs1(r1).save
     Ns.int(42).refs1(r1).save
     Ns.int(43).refs1(r1).save

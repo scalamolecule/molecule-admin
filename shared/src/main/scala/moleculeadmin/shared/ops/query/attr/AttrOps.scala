@@ -1,10 +1,10 @@
 package moleculeadmin.shared.ops.query.attr
 
 import molecule.ast.model._
-import moleculeadmin.shared.ops.query.DebugBranches
+import moleculeadmin.shared.ops.query.{BaseQuery, DebugBranches}
 
 
-trait AttrOps extends DebugBranches {
+trait AttrOps extends BaseQuery with DebugBranches {
 
   def upsertAttr(model: Seq[Element],
                  path0: Seq[(String, String)],
