@@ -108,44 +108,4 @@ trait BaseQuery extends HelpersAdmin with DebugBranches {
     }
     (prev, cur, sub)
   }
-
-  def isolateAttrOLD(
-    branch: Seq[Element],
-    nsFull: String,
-    attr: String
-  ): (Seq[Element], Seq[Element], Seq[Element]) = {
-    val (_, prev, cur, sub) = branch.foldLeft(
-      0, // processed
-      Seq.empty[Element],
-      Seq.empty[Element],
-      Seq.empty[Element]
-    ) {
-      case ((0, _, _, _), Atom(_, `dummy`, _, _, _, _, _, _)) =>
-        (2, Nil, Nil, Nil)
-
-      case ((0, prev, cur, sub), g@Generic(`nsFull`, "e" | "e_", _, _))
-        if clean(attr) == "e" =>
-        (2, prev, cur :+ g, sub)
-
-      case ((0 | 1, prev, cur, sub), a@Atom(`nsFull`, attr1, _, _, _, _, _, _))
-        if clean(attr1) == attr =>
-        (1, prev, cur :+ a, sub)
-
-      case ((0, prev, _, _), b@Bond(`nsFull`, _, _, _, _)) =>
-        (2, prev, Nil, Seq(b))
-
-      case ((1, prev, cur, sub), g@Generic(`nsFull`, "e" | "e_", _, _)) =>
-        (2, prev, cur, sub :+ g)
-
-      case ((1, prev, cur, sub), g@Generic(`nsFull`, _, _, _)) =>
-        (1, prev, cur :+ g, sub)
-
-      case ((0, prev, cur, sub), e) =>
-        (0, prev :+ e, cur, sub)
-
-      case ((1 | 2, prev, cur, sub), e) =>
-        (2, prev, cur, sub :+ e)
-    }
-    (prev, cur, sub)
-  }
 }

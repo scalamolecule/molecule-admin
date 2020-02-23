@@ -13,13 +13,23 @@ trait QueryBuilding {
   def queryBuilder(key: String)(implicit ctx: Ctx.Owner): Unit =
     key match {
       case "m" if modelElements.now.nonEmpty => toggleMinimize
-      case "a" if querySelection.now != "a"  =>
-        queryBaseSelection = "a"; querySelection() = "a"
-      //            case "v" if builderSelection.now != "v" =>
-      //              builderBaseSelection = "v"; builderSelection() = "v"
-      //            case "r" if builderSelection.now != "r" =>
-      //              builderBaseSelection = "r"; builderSelection() = "r"
-      case _ => ()
+
+      // All attributes
+      case "a" if querySelection.now != "a" =>
+        queryBaseSelection = "a"
+        querySelection() = "a"
+
+      // Todo: we use 'v' for Views - this is hackish...
+      // Attributes with values
+      case "w" if querySelection.now != "v" =>
+        queryBaseSelection = "v"
+        querySelection() = "v"
+
+      // Attributes without rel attributes
+      case "r" if querySelection.now != "r" =>
+        queryBaseSelection = "r"
+        querySelection() = "r"
+      case _                                => ()
     }
 
   def toggleQueryBuilder(implicit ctx: Ctx.Owner): Rx.Dynamic[Unit] = Rx {
@@ -55,14 +65,20 @@ trait QueryBuilding {
   )
 
 
-  def toggleAttrSelectionA(implicit ctx: Ctx.Owner): Rx.Dynamic[Unit] =
-    Rx {queryBaseSelection = "a"; querySelection() = "a"}
+  def toggleAttrSelectionA(implicit ctx: Ctx.Owner): Rx.Dynamic[Unit] = Rx {
+    queryBaseSelection = "a"
+    querySelection() = "a"
+  }
 
-  def toggleAttrSelectionR(implicit ctx: Ctx.Owner): Rx.Dynamic[Unit] =
-    Rx {queryBaseSelection = "r"; querySelection() = "r"}
+  def toggleAttrSelectionR(implicit ctx: Ctx.Owner): Rx.Dynamic[Unit] = Rx {
+    queryBaseSelection = "r"
+    querySelection() = "r"
+  }
 
-  def toggleAttrSelectionV(implicit ctx: Ctx.Owner): Rx.Dynamic[Unit] =
-    Rx {queryBaseSelection = "v"; querySelection() = "v"}
+  def toggleAttrSelectionV(implicit ctx: Ctx.Owner): Rx.Dynamic[Unit] = Rx {
+    queryBaseSelection = "v"
+    querySelection() = "v"
+  }
 
 
 }

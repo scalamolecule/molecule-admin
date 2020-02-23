@@ -4,24 +4,20 @@ import molecule.ast.model._
 import moleculeadmin.shared.util.HelpersAdmin
 
 
-trait ModelOps extends HelpersAdmin {
+trait ModelOps extends BaseQuery with HelpersAdmin {
 
   def emptyNamespaces(elements: Seq[Element]): Seq[String] = elements.collect {
     case Atom(nsFull, `dummy`, _, _, _, _, _, _) => nsFull
   }
 
-  def nsHasOnlyDummyAttr(elements: Seq[Element]): Boolean = elements.size match {
-    case 0 => throw new RuntimeException("Unexpected empty model.")
-    case 1 => elements.last match {
-      case Generic(_, "e" | "e_", _, _) => true
-      case _                            => false
-    }
-    case _ => elements.last match {
-      case Generic(nsFull, "e" | "e_", _, _) => elements.init.last match {
-        case Atom(`nsFull`, _, _, _, _, _, _, _) => false // Real attribute in same namespace
-        case _                                   => true // Bond, other generic
-      }
-      case _                                 => false
+
+  def hasIncompleteBranches(elements: Seq[Element]): Boolean = {
+    elements.foldLeft(true) {
+      case (_, _: Bond)                      => false
+      case (res, _: Generic)                 => res
+      case (res, _: ReBond)                  => res
+      case (_, a: Atom) if mandatory(a.attr) => false
+      case (res, _)                          => res
     }
   }
 
@@ -41,7 +37,7 @@ trait ModelOps extends HelpersAdmin {
       // Toggle on
       case ((0, `colIndex`, es), a@Atom(`nsFull`, `attr`, _, _, _, enumPrefix, _, keys))
         if (!keys.contains("orig")) =>
-        val value = if(enumPrefix.isEmpty) VarValue else EnumVal
+        val value = if (enumPrefix.isEmpty) VarValue else EnumVal
         (1, 100, es :+
           a.copy(keys = "orig" +: a.keys) :+
           a.copy(value = value, keys = Seq("edit")))
