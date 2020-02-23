@@ -1,4 +1,5 @@
 package moleculeadmin.client.app.domain.query.views
+
 import autowire._
 import boopickle.Default._
 import moleculeadmin.client.app.domain.query.Callbacks
@@ -53,7 +54,11 @@ class Base(implicit val ctx: Ctx.Owner)
                   ): TypedTag[TableCell] = cellType match {
     case "str" => td(
       if (asserted) () else cls := "retracted",
-      _str2frags(v))
+      if (v.startsWith("http"))
+        a(href := s"$v", target := "_blank", rel := "noopener noreferrer", v)
+      else
+        _str2frags(v)
+    )
 
     case "num" => td(
       cls := (if (asserted) "num" else "num retracted"),
@@ -89,7 +94,15 @@ class Base(implicit val ctx: Ctx.Owner)
       if (asserted) () else cls := "retracted",
       //          if (txs && level == 0) _str2frags(v) else
       expandingList(
-        v.split("__~~__").toSeq.sorted.map(s => li(_str2frags(s))), true))
+        v.split("__~~__").toSeq.sorted.map { s =>
+          if (v.startsWith("http"))
+            li(a(href := s"$v", target := "_blank", rel := "noopener noreferrer", v))
+          else
+            li(_str2frags(s))
+        },
+        true
+      )
+    )
 
     case "numSet" => td(
       cls := (if (asserted) "num" else "num retracted"),
@@ -151,9 +164,12 @@ class Base(implicit val ctx: Ctx.Owner)
           if (asserted) () else cls := "retracted",
           table(cls := "mapPairs",
             cellType match {
-              case "dateMap" => mapRow(k, td(truncateDateStr(v1)))
-              case "strMap"  => mapRow(k, td(_str2frags(v1)))
-              case _         => mapRow(k, td(v1))
+              case "dateMap"                         => mapRow(k, td(truncateDateStr(v1)))
+              case "strMap" if v1.startsWith("http") => mapRow(k, td(
+                a(href := s"$v", target := "_blank", rel := "noopener noreferrer", v1)
+              ))
+              case "strMap"                          => mapRow(k, td(_str2frags(v1)))
+              case _                                 => mapRow(k, td(v1))
             }
           )
         )

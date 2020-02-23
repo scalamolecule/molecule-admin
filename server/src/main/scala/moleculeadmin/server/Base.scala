@@ -1,4 +1,5 @@
 package moleculeadmin.server
+
 import db.admin.dsl.moleculeAdmin._
 import molecule.api.Entity
 import molecule.api.out20._
@@ -84,8 +85,7 @@ trait Base extends BaseApi with HelpersAdmin {
           Set[Long],
           Seq[QueryDTO]
         )
-    ) =
-    (dbNames(), getMetaSchema(db), settings(db))
+    ) = (dbNames(), getMetaSchema(db), settings(db))
 
   override def getMetaSchema(db: String): MetaSchema = {
     implicit val conn = Conn(base + "/MoleculeAdmin")

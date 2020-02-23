@@ -38,6 +38,7 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     eid: Long,
     curEntity: rx.Var[Long],
     mouseover: () => Unit,
+    click: () => Unit,
     starCls: String,
     flagCls: String,
     checkCls: String,
@@ -54,6 +55,7 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
       i(cls := flagCls, onclick := flagToggle),
       i(cls := checkCls, onclick := checkToggle),
       onmouseover := mouseover,
+      onclick := click
     )
   }
   def _tdOneRef(

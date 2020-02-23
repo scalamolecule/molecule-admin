@@ -39,15 +39,21 @@ trait SchemaOps extends QueryApi with BaseQuery {
   }
 
 
-  def mkNsMap(metaSchema: MetaSchema): Map[String, Ns] = {
+  def mkNsMap(metaSchema: MetaSchema): (Map[String, Ns], Boolean) = {
+    var counted           = false
     val initialEntityAttr = Attr(0, "e", 1, "datom", None, None, None, None, None, None, None, None, Nil)
     val nsMap             = (for {
       Part(_, _, _, _, nss) <- metaSchema.parts
       Ns(i, ns, nsFull, nsDescr, nsCount, attrs) <- nss
-    } yield nsFull -> Ns(i, ns, nsFull, nsDescr, nsCount, initialEntityAttr +: attrs)).toMap
+    } yield {
+      if (!counted) {
+        counted = attrs.exists(_.entityCount$.isDefined)
+      }
+      nsFull -> Ns(i, ns, nsFull, nsDescr, nsCount, initialEntityAttr +: attrs)
+    }).toMap
 
     //    nsMap.map { case (ns, nsDef) => s""""$ns" -> $nsDef,""" } foreach println
-    nsMap
+    (nsMap, counted)
   }
 
 
@@ -99,6 +105,4 @@ trait SchemaOps extends QueryApi with BaseQuery {
         refNs, options.getOrElse(Nil).toSeq, doc, aGr, count, valCount, descrAttr, topValues)
     }
   }
-
-
 }

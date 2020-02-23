@@ -25,8 +25,8 @@ case class SubMenuShortCuts()(implicit val ctx: Ctx.Owner)
       _shortCutsTable("Query attribute selections", 14,
         _circle("m", span(span("M", textDecoration.underline), "inimize query to selected attributes"), { () => toggleMinimize }),
         _circle("a", span("Show ", span("A", textDecoration.underline), "ll attributes"), { () => toggleAttrSelectionA }),
-        _circle("r", "Show attributes without ref attributes", { () => toggleAttrSelectionR }),
-        _circle("w", "Show only attributes with values", { () => toggleAttrSelectionV })
+        _circle("w", span("Show only attributes ", span("W", textDecoration.underline), "ith values"), { () => toggleAttrSelectionV }),
+        _circle("r", span("Show attributes without ", span("R", textDecoration.underline), "ef attributes"), { () => toggleAttrSelectionR }),
       ),
 
       _shortCutsTable("Data scrolling", 2,
