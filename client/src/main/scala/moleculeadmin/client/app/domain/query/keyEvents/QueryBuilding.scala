@@ -10,7 +10,12 @@ trait QueryBuilding {
 
   def queryBuilderOpen: Boolean = querySelection.now.nonEmpty
 
-  def queryBuilder(key: String)(implicit ctx: Ctx.Owner): Unit =
+  def saveSelection(implicit ctx: Ctx.Owner): Unit = {
+    (new Callbacks).saveSetting("querySelection" -> querySelection.now)
+    (new Callbacks).saveSetting("queryBaseSelection" -> queryBaseSelection)
+  }
+
+  def queryBuilder(key: String)(implicit ctx: Ctx.Owner): Unit = {
     key match {
       case "m" if modelElements.now.nonEmpty => toggleMinimize
 
@@ -31,6 +36,8 @@ trait QueryBuilding {
         querySelection() = "r"
       case _                                => ()
     }
+    saveSelection
+  }
 
   def toggleQueryBuilder(implicit ctx: Ctx.Owner): Rx.Dynamic[Unit] = Rx {
     if (querySelection.now == "") {
@@ -46,11 +53,10 @@ trait QueryBuilding {
     } else {
       querySelection() = ""
     }
-
-    (new Callbacks).saveSetting("querySelection" -> querySelection.now)
+    saveSelection
   }
 
-  def toggleMinimize(implicit ctx: Ctx.Owner): Rx.Dynamic[Unit] = Rx(
+  def toggleMinimize(implicit ctx: Ctx.Owner): Rx.Dynamic[Unit] = Rx {
     if (querySelection.now == "m") {
       queryMinimized = false
       queryBaseSelection match {
@@ -62,22 +68,26 @@ trait QueryBuilding {
       queryMinimized = true
       querySelection() = "m"
     }
-  )
+    saveSelection
+  }
 
 
   def toggleAttrSelectionA(implicit ctx: Ctx.Owner): Rx.Dynamic[Unit] = Rx {
     queryBaseSelection = "a"
     querySelection() = "a"
+    saveSelection
   }
 
   def toggleAttrSelectionR(implicit ctx: Ctx.Owner): Rx.Dynamic[Unit] = Rx {
     queryBaseSelection = "r"
     querySelection() = "r"
+    saveSelection
   }
 
   def toggleAttrSelectionV(implicit ctx: Ctx.Owner): Rx.Dynamic[Unit] = Rx {
     queryBaseSelection = "v"
     querySelection() = "v"
+    saveSelection
   }
 
 

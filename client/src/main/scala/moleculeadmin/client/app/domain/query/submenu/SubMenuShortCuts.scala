@@ -1,4 +1,5 @@
 package moleculeadmin.client.app.domain.query.submenu
+
 import moleculeadmin.client.app.domain.query.KeyEvents
 import moleculeadmin.client.app.element.query.SubMenuElements
 import org.scalajs.dom.document
@@ -17,15 +18,15 @@ case class SubMenuShortCuts()(implicit val ctx: Ctx.Owner)
       _shortCutsTable("Keyboard shortcuts", 14,
         _square("?", "Toggle this shortcuts info", { () => hideShortcuts }),
         _square("q", span("Toggle ", span("Q", textDecoration.underline), "ueries Builder"), { () => toggleQueryBuilder }),
-        _square("l", span(span("L", textDecoration.underline), "ist favorite queries"), { () => toggleQueryListMenu }),
-        _square("v", span("Toggle ", span("V", textDecoration.underline), "iews"), { () => toggleViewsMenu }),
+        _square("l", span(span("L", textDecoration.underline), "ist favorite queries"), { () => toggleQueryListMenu() }),
+        _square("v", span("Toggle ", span("V", textDecoration.underline), "iews"), { () => toggleViewsMenu() }),
       ),
 
       _shortCutsTable("Query attribute selections", 14,
         _circle("m", span(span("M", textDecoration.underline), "inimize query to selected attributes"), { () => toggleMinimize }),
         _circle("a", span("Show ", span("A", textDecoration.underline), "ll attributes"), { () => toggleAttrSelectionA }),
-        //        _circle("r", "Show attributes without ref attributes", { () => toggleAttrSelectionR }),
-        //        _circle("v", "Show only attributes with values", { () => toggleAttrSelectionV })
+        _circle("r", "Show attributes without ref attributes", { () => toggleAttrSelectionR }),
+        _circle("w", "Show only attributes with values", { () => toggleAttrSelectionV })
       ),
 
       _shortCutsTable("Data scrolling", 2,
@@ -41,7 +42,7 @@ case class SubMenuShortCuts()(implicit val ctx: Ctx.Owner)
 
 
   def hideShortcuts: SetTimeoutHandle = {
-    val el = document.getElementById("submenu-shortcuts")
+    val el    = document.getElementById("submenu-shortcuts")
     val style = el.getAttribute("style")
     if (style.endsWith("display:block;")) {
       // make sure element is really turned off
