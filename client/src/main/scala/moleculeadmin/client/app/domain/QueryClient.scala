@@ -52,6 +52,7 @@ object QueryClient
         maxRows() = settings.getOrElse("maxRows", "-1").toInt
         limit() = settings.getOrElse("limit", "20").toInt
         querySelection() = settings.getOrElse("querySelection", "a")
+        queryBaseSelection = settings.getOrElse("queryBaseSelection", "a")
         showViews = settings.getOrElse("showViews", "false").toBoolean
 
         curViews() = settings.collect {
