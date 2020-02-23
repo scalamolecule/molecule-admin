@@ -1,15 +1,12 @@
 package moleculeadmin.shared.ops.query.builder
 
-import java.io
-import moleculeadmin.shared.api.QueryApi
+import molecule.ast.model._
 import moleculeadmin.shared.ast.schema.{Attr, Ns}
 import moleculeadmin.shared.ast.tree.Tree
-import molecule.ast.model._
-import moleculeadmin.shared.ops.query.BaseQuery
+import moleculeadmin.shared.ops.query.{BaseQuery, DebugBranches}
 
 
-trait TreeOps extends QueryApi with BaseQuery {
-
+trait TreeOps extends BaseQuery with DebugBranches {
 
   private def refs(ns: String)
                   (implicit nsMap: Map[String, Ns]): Seq[(String, Ns)] = for {
@@ -37,13 +34,17 @@ trait TreeOps extends QueryApi with BaseQuery {
           (path, tree)
 
         case ((prevPath, prevTree@Tree(_, Nil, _, _, _, _)), b: Bond) =>
-          val tree = prevTree.copy(
+          val tree  = prevTree.copy(
             path = if (prevPath.isEmpty) Seq("" -> b.nsFull) else prevPath,
             attrs = nsMap(b.nsFull).attrs,
             refs = refs(b.nsFull),
             selRefs = prevTree.selRefs :+ b.refAttr
           )
-          (if (prevPath.isEmpty) Seq("" -> b.nsFull, b.refAttr -> b.refNs) else prevPath :+ b.refAttr -> b.refNs, tree)
+          val path1 = if (prevPath.isEmpty)
+            Seq("" -> b.nsFull, b.refAttr -> b.refNs)
+          else
+            prevPath :+ b.refAttr -> b.refNs
+          (path1, tree)
 
         case ((prevPath, prevTree), a: GenericAtom) =>
           val tree = prevTree.copy(
@@ -61,7 +62,8 @@ trait TreeOps extends QueryApi with BaseQuery {
           (prevPath.init, prevTree)
 
         case ((prevPath, prevTree), branchElements: Seq[_]) =>
-          val (path, newBranch) = traverse(prevPath, Tree(prevPath, Nil, Nil, Nil, Nil, Nil), branchElements)
+          val emptyTree         = Tree(prevPath, Nil, Nil, Nil, Nil, Nil)
+          val (path, newBranch) = traverse(prevPath, emptyTree, branchElements)
           val tree              = prevTree.copy(
             branches = prevTree.branches :+ newBranch
           )
@@ -88,10 +90,18 @@ trait TreeOps extends QueryApi with BaseQuery {
                        curDepth: Int = 0): Seq[Any] = elements match {
       case Nil => Seq(e)
       case _   => elements.last match {
-        case _: List[_] if targetDepth == curDepth => elements ++ nest2(e)
-        case l: List[_]                            => elements.init :+ insertElement2(l, e, targetDepth, curDepth + 1)
-        case _: Bond                               => elements :+ Seq(e)
-        case _: Element                            => elements ++ nest2(e)
+        case _: List[_] if targetDepth == curDepth =>
+          elements ++ nest2(e)
+
+        case l: List[_] =>
+          elements.init :+ insertElement2(l, e, targetDepth, curDepth + 1)
+
+        case _: Bond =>
+          elements :+ Seq(e)
+
+        case _: Element =>
+          elements ++ nest2(e)
+
       }
     }
     elements.foldLeft(0, Seq.empty[Any]) {
@@ -104,16 +114,18 @@ trait TreeOps extends QueryApi with BaseQuery {
   }
 
 
-  def addNs(model: Seq[Element],
-            path0: Seq[(String, String)],
-            refAttr: String,
-            refNs0: String,
-            attrName: String = "")(implicit nsMap: Map[String, Ns]): Seq[Element] = {
+  def addNs(
+    model: Seq[Element],
+    path0: Seq[(String, String)],
+    refAttr: String,
+    refNs0: String,
+    attrName: String = ""
+  )(implicit nsMap: Map[String, Ns]): Seq[Element] = {
 
-    //        println(path0)
-    //        println(refAttr)
-    //        println(refNs0)
-    //        println(attrName)
+    //    println(path0)
+    //    println(refAttr)
+    //    println(refNs0)
+    //    println(attrName)
 
     val refNs = refNs0
     val ns0   = path0.last._2
@@ -121,15 +133,21 @@ trait TreeOps extends QueryApi with BaseQuery {
     val refAttrClean = clean(refAttr)
 
     val bond = nsMap(ns0).attrs.collectFirst {
-      case Attr(_, `refAttr`, card, _, _, _, _, _, _, _, _, _, _) => Bond(ns0, refAttr, refNs, card)
+      case Attr(_, `refAttr`, card, _, _, _, _, _, _, _, _, _, _) =>
+        Bond(ns0, refAttr, refNs, card)
     }.get // In our closed eco-system we can expect the refAttr to be present
 
     val attr = if (attrName.isEmpty)
       Atom(refNs, dummy, "", 1, NoValue, None, List(), List())
     else nsMap(refNs).attrs.collectFirst {
-      case Attr(_, `attrName`, _, "datom", _, _, _, _, _, _, _, _, _)       => Generic(refNs, attrName, "datom", EntValue)
-      case Attr(_, `attrName`, card, tpe1, Some(_), _, _, _, _, _, _, _, _) => Atom(refNs, attrName, tpe1, card, EnumVal, Some(s":$refNs.$attrName/"))
-      case Attr(_, `attrName`, card, tpe1, _, _, _, _, _, _, _, _, _)       => Atom(refNs, attrName, tpe1, card, VarValue)
+      case Attr(_, `attrName`, _, "datom", _, _, _, _, _, _, _, _, _) =>
+        Generic(refNs, attrName, "datom", EntValue)
+
+      case Attr(_, `attrName`, card, tpe1, Some(_), _, _, _, _, _, _, _, _) =>
+        Atom(refNs, attrName, tpe1, card, EnumVal, Some(s":$refNs.$attrName/"))
+
+      case Attr(_, `attrName`, card, tpe1, _, _, _, _, _, _, _, _, _) =>
+        Atom(refNs, attrName, tpe1, card, VarValue)
     }.get
 
     def rebonds(path: Seq[(String, String)]): Seq[ReBond] = {
@@ -145,11 +163,14 @@ trait TreeOps extends QueryApi with BaseQuery {
     val (before, branch0, after) = isolateBranch(model, path0)
     val last                     = branch0.size - 1
 
-    val branch1 = branch0.zipWithIndex.foldLeft(0, Seq.empty[Element], Seq.empty[(String, String)]) {
+    val branch1 = branch0.zipWithIndex.foldLeft(
+      0, Seq.empty[Element], Seq.empty[(String, String)]
+    ) {
       case ((0, Nil, _), (Atom(_, `dummy`, _, _, _, _, _, _), `last`)) =>
         (1, Seq(bond, attr), path0)
 
-      case ((0, Nil, _), (Atom(_, refAttr1, _, _, _, _, _, _), `last`)) if clean(refAttr1) == refAttrClean =>
+      case ((0, Nil, _), (Atom(_, refAttr1, _, _, _, _, _, _), `last`))
+        if clean(refAttr1) == refAttrClean =>
         val meta = Generic(refNs, "e", "datom", EntValue)
         attr match {
           case `meta` => (1, Seq(bond, attr), Nil)
@@ -169,23 +190,29 @@ trait TreeOps extends QueryApi with BaseQuery {
         (0, Seq(b), path0 :+ b.refAttr -> b.refNs)
 
       case ((0, acc, path), (r: ReBond, _)) if path0 == path =>
-        (1, (acc :+ bond :+ attr) ++ (rebonds(path :+ refAttr -> refNs) :+ r), path :+ refAttr -> refNs)
+        (1, (acc :+ bond :+ attr) ++ (rebonds(path :+ refAttr -> refNs) :+ r),
+          path :+ refAttr -> refNs)
       case ((done, acc, path), (b: Bond, _))                 =>
         (done, acc :+ b, path :+ b.refAttr -> b.refNs)
       case ((done, acc, path), (r: ReBond, _))               =>
         (done, acc :+ r, path.init)
 
-      case ((done, acc, path), (Atom(_, refAttr1, _, _, _, _, _, _), `last`)) if clean(refAttr1) == refAttrClean =>
-        (1, acc ++ (rebonds(path) :+ bond :+ Generic(refNs, "e", "datom", EntValue) :+ attr), Nil)
+      case ((done, acc, path), (Atom(_, refAttr1, _, _, _, _, _, _), `last`))
+        if clean(refAttr1) == refAttrClean =>
+        val generic = Generic(refNs, "e", "datom", EntValue)
+        (1, acc ++ (rebonds(path) :+ bond :+ generic :+ attr), Nil)
 
       case ((done, acc, path), (lastAttr, `last`)) if acc.exists {
-        case Atom(_, refAttr1, _, _, _, _, _, _) if clean(refAttr1) == refAttrClean => true
-        case other                                                                  => false
+        case Atom(_, refAttr1, _, _, _, _, _, _)
+          if clean(refAttr1) == refAttrClean => true
+        case other                           => false
       } =>
         val previousWithoutRefAttr = acc.filterNot {
-          case Atom(_, refAttr1, _, _, _, _, _, _) if clean(refAttr1) == refAttrClean => true
+          case Atom(_, refAttr1, _, _, _, _, _, _)
+            if clean(refAttr1) == refAttrClean => true
         }
-        val newElements            = rebonds(path) :+ bond :+ Generic(refNs, "e", "datom", EntValue) :+ attr
+        val generic                = Generic(refNs, "e", "datom", EntValue)
+        val newElements            = rebonds(path) :+ bond :+ generic :+ attr
         (1, (previousWithoutRefAttr :+ lastAttr) ++ newElements, Nil)
 
       case ((done, acc, path), (lastAttr, `last`)) =>
@@ -195,7 +222,7 @@ trait TreeOps extends QueryApi with BaseQuery {
         (done, acc :+ e, path)
     }._2
 
-    //        debugBeforeAfter(before, branch1, after)
+    //    debugBeforeAfter(before, branch1, after)
 
     before ++ metaFirst(branch1) ++ after
   }
@@ -210,12 +237,13 @@ trait TreeOps extends QueryApi with BaseQuery {
   def removeBranch(model: Seq[Element], path0: Seq[(String, String)]): Seq[Element] = {
     val (before, _, after) = isolateBranch(model, path0)
     val ns                 = path0.init.last._2
+    val dummyAtom          = Atom(ns, dummy, "", 1, NoValue)
     val before1            = before match {
-      case Seq(_: Bond) => Seq(Atom(ns, dummy, "", 1, NoValue))
+      case Seq(_: Bond) => Seq(dummyAtom)
       case _            => before.foldRight(0, Seq.empty[Element]) {
         case (a: GenericAtom, (0, acc))             => (1, a +: acc)
         case (Bond(`ns`, _, _, _, _), (0, acc))     => (1, acc)
-        case (b@Bond(_, _, `ns`, _, _), (1, acc))   => (2, b +: Atom(ns, dummy, "", 1, NoValue) +: acc)
+        case (b@Bond(_, _, `ns`, _, _), (1, acc))   => (2, b +: dummyAtom +: acc)
         case (_: ReBond, (1, acc)) if after.isEmpty => (1, acc)
         case (r@ReBond(`ns`), (1, acc))             => (2, r +: acc)
         case (e, (1, acc))                          => (2, e +: acc)
@@ -237,7 +265,8 @@ trait TreeOps extends QueryApi with BaseQuery {
         //        println("m")
         val selAttrNames = selAttrs.map(_.attr)
         val attrs        = attrs0.collect {
-          case a@Attr(_, attr, _, _, _, _, _, _, _, _, _, _, _) if selAttrNames.exists(_.startsWith(attr)) => a
+          case a@Attr(_, attr, _, _, _, _, _, _, _, _, _, _, _)
+            if selAttrNames.exists(_.startsWith(attr)) => a
         }
         (attrs, Nil)
       case "v"   =>
@@ -248,20 +277,23 @@ trait TreeOps extends QueryApi with BaseQuery {
           r =>
             val (refAttr, refNs) = r
             val refNsAttrs       = refNs.attrs
-            val refAttrs         = refNsAttrs.head +: refNsAttrs.tail.filter(_.entityCount$.nonEmpty)
+            val refAttrs         = refNsAttrs.head +:
+              refNsAttrs.tail.filter(_.entityCount$.nonEmpty)
             val refNs1           = refNs.copy(attrs = refAttrs)
             (refAttr, attrCardinalities(refAttr), refNs1)
         }
         (attrs, refs)
       case "r"   =>
         //        println("r")
-        val attrs     = attrs0.head +: attrs0.tail.filter(a => a.entityCount$.isDefined && a.tpe != "ref")
+        val attrs     = attrs0.head +:
+          attrs0.tail.filter(a => a.entityCount$.isDefined && a.tpe != "ref")
         val attrNames = attrs0.filter(a => a.entityCount$.isDefined).map(_.name)
         val refs      = refs0.filter(r => attrNames.contains(r._1)).map {
           r =>
             val (refAttr, refNs) = r
             val refNsAttrs       = refNs.attrs
-            val refAttrs         = refNsAttrs.head +: refNsAttrs.tail.filter(a => a.entityCount$.nonEmpty && a.tpe != "ref")
+            val refAttrs         = refNsAttrs.head +:
+              refNsAttrs.tail.filter(a => a.entityCount$.nonEmpty && a.tpe != "ref")
             val refNs1           = refNs.copy(attrs = refAttrs)
             (refAttr, attrCardinalities(refAttr), refNs1)
         }
@@ -285,12 +317,27 @@ trait TreeOps extends QueryApi with BaseQuery {
                     selAttr: String,
                     refNs: Option[String]): (String, String, Value) = {
     val (attr1, cls, attrValue) = selAttrs.collectFirst {
-      case Generic(_, `selAttr`, _, value)                                                           => (selAttr, "attr-mandatory", value)
-      case Atom(_, `selAttr`, _, _, value, _, _, _)                                                  => (selAttr, "attr-mandatory", value)
-      case Generic(_, "e_", _, value) if selAttr == "e"                                              => ("e_", "attr-tacit", value)
-      case Atom(_, attr, _, _, Fn("not", None), _, _, _) if attr.last == '_' && attr.init == selAttr => (attr, "attr-nil", Fn("not", None))
-      case Atom(_, attr, _, _, value, _, _, _) if attr.last == '_' && attr.init == selAttr           => (attr, "attr-tacit", value)
-      case Atom(_, attr, _, _, value, _, _, _) if attr.last == '$' && attr.init == selAttr           => (attr, "attr-optional", value)
+      case Generic(_, `selAttr`, _, value) =>
+        (selAttr, "attr-mandatory", value)
+
+      case Atom(_, `selAttr`, _, _, value, _, _, _) =>
+        (selAttr, "attr-mandatory", value)
+
+      case Generic(_, "e_", _, value) if selAttr == "e" =>
+        ("e_", "attr-tacit", value)
+
+      case Atom(_, attr, _, _, Fn("not", None), _, _, _)
+        if attr.last == '_' && attr.init == selAttr =>
+        (attr, "attr-nil", Fn("not", None))
+
+      case Atom(_, attr, _, _, value, _, _, _)
+        if attr.last == '_' && attr.init == selAttr =>
+        (attr, "attr-tacit", value)
+
+      case Atom(_, attr, _, _, value, _, _, _)
+        if attr.last == '$' && attr.init == selAttr =>
+        (attr, "attr-optional", value)
+
     }.getOrElse((selAttr, "attr-none", VarValue))
 
     //    selAttrs foreach println

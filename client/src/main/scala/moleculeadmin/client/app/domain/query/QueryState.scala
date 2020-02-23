@@ -1,4 +1,5 @@
 package moleculeadmin.client.app.domain.query
+
 import moleculeadmin.shared.ast.query.{Col, Filter, QueryCache, QueryDTO}
 import moleculeadmin.shared.ast.schema.Ns
 import moleculeadmin.shared.ast.tree.Tree

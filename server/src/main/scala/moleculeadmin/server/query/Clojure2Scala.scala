@@ -2,7 +2,7 @@ package moleculeadmin.server.query
 
 import java.lang.{Double => jDouble, Long => jLong}
 import java.util.{Date, List => jList, Map => jMap}
-import clojure.lang.{Keyword, LazySeq, PersistentHashSet, PersistentVector}
+import clojure.lang.{Keyword, LazySeq, PersistentHashMap, PersistentHashSet, PersistentVector}
 import molecule.util.DateHandling
 import moleculeadmin.server.utils.DateStrLocal
 import moleculeadmin.shared.ast.query.Col
@@ -409,7 +409,7 @@ class Clojure2Scala(rowCount: Int)
             val it   = vs.asInstanceOf[jMap[String, PersistentVector]].values.iterator.next.iterator
             val list = ListBuffer.empty[Double]
             while (it.hasNext)
-              list += it.next.asInstanceOf[jMap[_, _]].values.iterator.next.asInstanceOf[jLong].toDouble
+              list += it.next.asInstanceOf[jMap[_, _]].get(Keyword.intern("db", "id")).asInstanceOf[jLong].toDouble
             Some(list.toList)
         }
 

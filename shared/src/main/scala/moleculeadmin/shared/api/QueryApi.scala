@@ -41,7 +41,6 @@ trait QueryApi extends BaseApi {
   def getLastTxs(
     db: String,
     prevFirstT: Long,
-//    groupEdits: ListBuffer[(Long, Long)],
     enumAttrs: Seq[String]
   ): Either[String, Array[TxData]] = ???
 
@@ -66,7 +65,7 @@ trait QueryApi extends BaseApi {
     db: String,
     dbSettingsIdOpt: Option[Long],
     markerType: String,
-    eids: Set[Long],
+    eids: collection.Set[Long],
     newState: Boolean
   ): Either[String, Long] = ???
 

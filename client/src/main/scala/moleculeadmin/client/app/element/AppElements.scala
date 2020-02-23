@@ -160,9 +160,9 @@ trait AppElements extends Bootstrap {
   }
 
   val noEdit = onclick := { () =>
-    window.alert(
-      "Namespace must have an entity id `e` column first to allow editing."
-    )
+//    window.alert(
+//      "Namespace must have an entity id `e` column first to allow editing."
+//    )
   }
 
   val noAggrEdit = onclick := { () =>

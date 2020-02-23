@@ -8,7 +8,21 @@ import moleculeadmin.shared.ops.query.BaseQuery
 
 trait ModeOps extends QueryApi with BaseQuery {
 
-  def toggleMode(model: Seq[Element], path: Seq[(String, String)], selAttr: String)(implicit nsMap: Map[String, Ns]): Seq[Element] = {
+  def shiftRebonds(
+    branch: Seq[Element],
+    after: Seq[Element]
+  ): (Seq[Element], Seq[Element]) = {
+    branch.last match {
+      case rb: ReBond => shiftRebonds(branch.init, rb +: after)
+      case _          => (branch, after)
+    }
+  }
+
+  def toggleMode(
+    model: Seq[Element],
+    path: Seq[(String, String)],
+    selAttr: String
+  )(implicit nsMap: Map[String, Ns]): Seq[Element] = {
     val ns                      = path.last._2
     val (before, branch, after) = isolateBranch(model, path)
     val (prev, cur, sub)        = isolateAttr(branch, ns, selAttr)
@@ -61,10 +75,20 @@ trait ModeOps extends QueryApi with BaseQuery {
         }
       }
     }
-
-    val result = prev ++ cur2 ++ sub
+    val (prev1, prev2)     = if (prev.nonEmpty) shiftRebonds(prev, Nil) else (prev, Nil)
+    val result             = if (selAttr == "e") {
+      // Entity id always first in branch
+      cur2 ++ prev1 ++ prev2 ++ sub
+    } else {
+      prev1 ++ cur2 ++ prev2 ++ sub
+    }
+    //    println("---------------------")
+    //    println("prev1: List(" + prev1.mkString("\n          ") + ")")
+    //    println("CUR 2: List(" + cur2.mkString("\n          ") + ")")
+    //    println("prev2: List(" + prev2.mkString("\n          ") + ")")
     //    println("---------------------")
     //    println("RES: List(" + (before ++ result ++ after).mkString("\n          ") + ")")
+
     before ++ result ++ after
   }
 
@@ -81,9 +105,9 @@ trait ModeOps extends QueryApi with BaseQuery {
     val dummyAtom               = Atom(ns, "Dummy to keep ns open", "", 1, NoValue)
     val single                  =
       prev.isEmpty && sub.isEmpty && after.isEmpty ||
-        sub.nonEmpty && sub.head.isInstanceOf[ReBond]
+        (prev.isEmpty && sub.nonEmpty && sub.head.isInstanceOf[ReBond])
 
-    //    println("=========================================================")
+    //    println("========================================================= " + single)
     //    println(selAttr + "   " + mode)
     //    println("path: " + path)
     //    println("---------------------")
@@ -126,17 +150,27 @@ trait ModeOps extends QueryApi with BaseQuery {
       }
     }
 
-    val result = prev ++ cur2 ++ sub
+    val (prev1, prev2) = if (prev.nonEmpty) shiftRebonds(prev, Nil) else (prev, Nil)
+    val result         = if (selAttr == "e") {
+      // Entity id always first in branch
+      cur2 ++ prev1 ++ prev2 ++ sub
+    } else {
+      prev1 ++ cur2 ++ prev2 ++ sub
+    }
 
     //    println("---------------------")
+    //    println("prev1: List(" + prev1.mkString("\n          ") + ")")
+    //    println("prev2: List(" + prev2.mkString("\n          ") + ")")
     //    println("CUR 2: List(" + cur2.mkString("\n          ") + ")")
     //    println("---------------------")
     //    println("RES: List(" + (before ++ result ++ after).mkString("\n          ") + ")")
+
     before ++ result ++ after
   }
 
 
-  private def newAttr1(ns: String, attr: String, nsMap: Map[String, Ns], ext: String = ""): GenericAtom = nsMap(ns).attrs.collectFirst {
+  private def newAttr1(ns: String, attr: String, nsMap: Map[String, Ns],
+                       ext: String = ""): GenericAtom = nsMap(ns).attrs.collectFirst {
     case Attr(_, `attr`, _, "datom", _, _, _, _, _, _, _, _, _)                      => Generic(ns, "e" + ext, "datom", EntValue)
     case Attr(_, `attr`, card, tpe, Some(_), _, _, _, _, _, _, _, _) if ext == "nil" => Atom(ns, attr + "_", tpe, card, Fn("not", None), Some(s":$ns.$attr/"))
     case Attr(_, `attr`, card, tpe, Some(_), _, _, _, _, _, _, _, _)                 => Atom(ns, attr + ext, tpe, card, EnumVal, Some(s":$ns.$attr/"))
@@ -145,7 +179,8 @@ trait ModeOps extends QueryApi with BaseQuery {
   }.get
 
 
-  private def newAttr2(ns: String, attr: String, nsMap: Map[String, Ns], mode: String, single: Boolean): Seq[GenericAtom] = mode match {
+  private def newAttr2(ns: String, attr: String, nsMap: Map[String, Ns], mode: String,
+                       single: Boolean): Seq[GenericAtom] = mode match {
     case "mandatory" if attr == "e" => Seq(Generic(ns, "e", "datom", EntValue))
     case "tacit" if attr == "e"     => Seq(Generic(ns, "e_", "datom", EntValue))
     case "mandatory"                => nsMap(ns).attrs.collectFirst {

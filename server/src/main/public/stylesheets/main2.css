@@ -199,6 +199,7 @@ table.tableRowLink th {
 }
 table.tableRowLink td {
     padding: 0px 5px 0px 5px;
+    vertical-align: top;
 }
 
 

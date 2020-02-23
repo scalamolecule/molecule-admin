@@ -102,82 +102,82 @@ object ToggleMode extends TestSuite with TreeSchema with ModeOps {
       }
 
       test("mandatory") {
-        toggleNs(int, "e", int ++ e)
+        toggleNs(int, "e", e ++ int)
         toggleNs(int, "int", int_)
         toggleNs(int, "str", int ++ str)
         toggleNs(int, "enum", int ++ enum)
 
-        toggleNs(intCo, "e", intCo ++ e)
+        toggleNs(intCo, "e", e ++ intCo)
         toggleNs(intCo, "int", intCo_)
         toggleNs(intCo, "str", intCo ++ str)
 
-        toggleNs(intTx, "e", intTx ++ e)
+        toggleNs(intTx, "e", e ++ intTx)
         toggleNs(intTx, "int", intTx_)
         toggleNs(intTx, "str", intTx ++ str)
 
-        toggleNs(intCoTx, "e", intCoTx ++ e)
+        toggleNs(intCoTx, "e", e ++ intCoTx )
         toggleNs(intCoTx, "int", intCoTx_)
         toggleNs(intCoTx, "str", intCoTx ++ str)
 
-        toggleNs(intEq, "e", intEq ++ e)
+        toggleNs(intEq, "e", e ++ intEq)
         toggleNs(intEq, "int", intEq_)
         toggleNs(intEq, "str", intEq ++ str)
 
-        toggleNs(intEqCo, "e", intEqCo ++ e)
+        toggleNs(intEqCo, "e", e ++ intEqCo )
         toggleNs(intEqCo, "int", intEqCo_)
         toggleNs(intEqCo, "str", intEqCo ++ str)
 
-        toggleNs(intEqTx, "e", intEqTx ++ e)
+        toggleNs(intEqTx, "e", e ++ intEqTx )
         toggleNs(intEqTx, "int", intEqTx_)
         toggleNs(intEqTx, "str", intEqTx ++ str)
 
-        toggleNs(intEqCoTx, "e", intEqCoTx ++ e)
+        toggleNs(intEqCoTx, "e", e ++ intEqCoTx )
         toggleNs(intEqCoTx, "int", intEqCoTx_)
         toggleNs(intEqCoTx, "str", intEqCoTx ++ str)
       }
 
       test("tacit") {
-        toggleNs(int_, "e", int_ ++ e)
+        toggleNs(int_, "e", e ++ int_ )
         toggleNs(int_, "int", int$)
         toggleNs(int_, "str", int_ ++ str)
 
-        toggleNs(intCo_, "e", intCo_ ++ e)
+        toggleNs(intCo_, "e", e ++ intCo_ )
         toggleNs(intCo_, "int", int$)
         toggleNs(intCo_, "str", intCo_ ++ str)
 
-        toggleNs(intTx_, "e", intTx_ ++ e)
+        toggleNs(intTx_, "e", e ++ intTx_ )
         toggleNs(intTx_, "int", int$)
         toggleNs(intTx_, "str", intTx_ ++ str)
 
-        toggleNs(intCoTx_, "e", intCoTx_ ++ e)
+        toggleNs(intCoTx_, "e", e ++ intCoTx_ )
         toggleNs(intCoTx_, "int", int$)
         toggleNs(intCoTx_, "str", intCoTx_ ++ str)
 
-        toggleNs(intEq_, "e", intEq_ ++ e)
+        toggleNs(intEq_, "e", e ++ intEq_ )
         toggleNs(intEq_, "int", int$)
         toggleNs(intEq_, "str", intEq_ ++ str)
 
-        toggleNs(intEqCo_, "e", intEqCo_ ++ e)
+        toggleNs(intEqCo_, "e", e ++ intEqCo_ )
         toggleNs(intEqCo_, "int", int$)
         toggleNs(intEqCo_, "str", intEqCo_ ++ str)
 
-        toggleNs(intEqTx_, "e", intEqTx_ ++ e)
+        toggleNs(intEqTx_, "e", e ++ intEqTx_ )
         toggleNs(intEqTx_, "int", int$)
         toggleNs(intEqTx_, "str", intEqTx_ ++ str)
 
-        toggleNs(intEqCoTx_, "e", intEqCoTx_ ++ e)
+        toggleNs(intEqCoTx_, "e", e ++ intEqCoTx_ )
         toggleNs(intEqCoTx_, "int", int$)
         toggleNs(intEqCoTx_, "str", intEqCoTx_ ++ str)
       }
 
       test("optional") {
-        toggleNs(int$, "e", int$ ++ e)
+        toggleNs(int$, "e", e ++ int$ )
         toggleNs(int$, "int", intNil)
         toggleNs(int$, "str", int$ ++ str)
       }
 
       test("nil") {
-        toggleNs(intNil, "e", intNil ++ e)
+        toggleNs(intNil, "e", e ++ intNil )
         toggleNs(intNil, "int", dum)
         toggleNs(intNil, "str", intNil ++ str)
       }
@@ -185,20 +185,6 @@ object ToggleMode extends TestSuite with TreeSchema with ModeOps {
 
 
     test("2 attr") {
-
-      test("attr + e") {
-        toggleNs(int ++ e, "e", int ++ e_)
-        toggleNs(int ++ e, "int", int_ ++ e)
-        toggleNs(int ++ e, "str", int ++ e ++ str)
-
-        toggleNs(int_ ++ e, "e", int_ ++ e_)
-        toggleNs(int_ ++ e, "int", int$ ++ e)
-        toggleNs(int_ ++ e, "str", int_ ++ e ++ str)
-
-        toggleNs(intEqCoTx ++ e, "e", intEqCoTx ++ e_)
-        toggleNs(intEqCoTx ++ e, "int", intEqCoTx_ ++ e)
-        toggleNs(intEqCoTx ++ e, "str", intEqCoTx ++ e ++ str)
-      }
 
       test("e + attr") {
         toggleNs(e ++ int, "e", e_ ++ int)
@@ -215,27 +201,9 @@ object ToggleMode extends TestSuite with TreeSchema with ModeOps {
       }
 
       test("attr1 + attr2") {
-        toggleNs(int ++ str, "e", int ++ str ++ e)
+        toggleNs(int ++ str, "e", e ++ int ++ str)
         toggleNs(int ++ str, "int", int_ ++ str)
         toggleNs(int ++ str, "str", int ++ str_)
-      }
-    }
-
-
-    test("attr + additive") {
-
-      test("e") {
-        toggleNs(int ++ e, "e", int ++ e_)
-        toggleNs(int ++ e, "int", int_ ++ e)
-        toggleNs(int ++ e, "str", int ++ e ++ str)
-
-        toggleNs(int_ ++ e, "e", int_ ++ e_)
-        toggleNs(int_ ++ e, "int", int$ ++ e)
-        toggleNs(int_ ++ e, "str", int_ ++ e ++ str)
-
-        toggleNs(intEqCoTx ++ e, "e", intEqCoTx ++ e_)
-        toggleNs(intEqCoTx ++ e, "int", intEqCoTx_ ++ e)
-        toggleNs(intEqCoTx ++ e, "str", intEqCoTx ++ e ++ str)
       }
     }
 
@@ -256,30 +224,30 @@ object ToggleMode extends TestSuite with TreeSchema with ModeOps {
         toggleNs(e_ ++ ref1 ++ dum1, "str", e_ ++ str ++ ref1 ++ dum1)
 
 
-        toggleNs(int ++ ref1 ++ dum1, "e", int ++ e ++ ref1 ++ dum1)
+        toggleNs(int ++ ref1 ++ dum1, "e", e ++ int ++ ref1 ++ dum1)
         toggleNs(int ++ ref1 ++ dum1, "int", int_ ++ ref1 ++ dum1)
         toggleNs(int ++ ref1 ++ dum1, "str", int ++ str ++ ref1 ++ dum1)
 
-        toggleNs(intEqCoTx ++ ref1 ++ dum1, "e", intEqCoTx ++ e ++ ref1 ++ dum1)
+        toggleNs(intEqCoTx ++ ref1 ++ dum1, "e", e ++ intEqCoTx ++ ref1 ++ dum1)
         toggleNs(intEqCoTx ++ ref1 ++ dum1, "int", intEqCoTx_ ++ ref1 ++ dum1)
         toggleNs(intEqCoTx ++ ref1 ++ dum1, "str", intEqCoTx ++ str ++ ref1 ++ dum1)
 
 
-        toggleNs(int_ ++ ref1 ++ dum1, "e", int_ ++ e ++ ref1 ++ dum1)
+        toggleNs(int_ ++ ref1 ++ dum1, "e", e ++ int_ ++ ref1 ++ dum1)
         toggleNs(int_ ++ ref1 ++ dum1, "int", int$ ++ ref1 ++ dum1)
         toggleNs(int_ ++ ref1 ++ dum1, "str", int_ ++ str ++ ref1 ++ dum1)
 
-        toggleNs(intEqCoTx_ ++ ref1 ++ dum1, "e", intEqCoTx_ ++ e ++ ref1 ++ dum1)
+        toggleNs(intEqCoTx_ ++ ref1 ++ dum1, "e", e ++ intEqCoTx_ ++ ref1 ++ dum1)
         toggleNs(intEqCoTx_ ++ ref1 ++ dum1, "int", int$ ++ ref1 ++ dum1)
         toggleNs(intEqCoTx_ ++ ref1 ++ dum1, "str", intEqCoTx_ ++ str ++ ref1 ++ dum1)
 
 
-        toggleNs(int$ ++ ref1 ++ dum1, "e", int$ ++ e ++ ref1 ++ dum1)
+        toggleNs(int$ ++ ref1 ++ dum1, "e", e ++ int$ ++ ref1 ++ dum1)
         toggleNs(int$ ++ ref1 ++ dum1, "int", intNil ++ ref1 ++ dum1)
         toggleNs(int$ ++ ref1 ++ dum1, "str", int$ ++ str ++ ref1 ++ dum1)
 
 
-        toggleNs(intNil ++ ref1 ++ dum1, "e", intNil ++ e ++ ref1 ++ dum1)
+        toggleNs(intNil ++ ref1 ++ dum1, "e", e ++ intNil ++ ref1 ++ dum1)
         toggleNs(intNil ++ ref1 ++ dum1, "int", ref1 ++ dum1)
         toggleNs(intNil ++ ref1 ++ dum1, "str", intNil ++ str ++ ref1 ++ dum1)
       }
@@ -298,29 +266,29 @@ object ToggleMode extends TestSuite with TreeSchema with ModeOps {
         toggleRef1(ref1 ++ e1_, "str1", ref1 ++ e1_ ++ str1)
 
 
-        toggleRef1(ref1 ++ int1, "e", ref1 ++ int1 ++ e1)
+        toggleRef1(ref1 ++ int1, "e", ref1 ++ e1 ++ int1)
         toggleRef1(ref1 ++ int1, "int1", ref1 ++ int1_)
         toggleRef1(ref1 ++ int1, "str1", ref1 ++ int1 ++ str1)
 
-        toggleRef1(ref1 ++ int1_, "e", ref1 ++ int1_ ++ e1)
+        toggleRef1(ref1 ++ int1_, "e", ref1 ++ e1 ++ int1_)
         toggleRef1(ref1 ++ int1_, "int1", ref1 ++ int1$)
         toggleRef1(ref1 ++ int1_, "str1", ref1 ++ int1_ ++ str1)
 
-        toggleRef1(ref1 ++ int1$, "e", ref1 ++ int1$ ++ e1)
+        toggleRef1(ref1 ++ int1$, "e", ref1 ++ e1 ++ int1$)
         toggleRef1(ref1 ++ int1$, "int1", ref1 ++ intNil1)
         toggleRef1(ref1 ++ int1$, "str1", ref1 ++ int1$ ++ str1)
 
 
-        toggleRef1(ref1 ++ intEqCoTx1, "e", ref1 ++ intEqCoTx1 ++ e1)
+        toggleRef1(ref1 ++ intEqCoTx1, "e", ref1 ++ e1 ++ intEqCoTx1)
         toggleRef1(ref1 ++ intEqCoTx1, "int1", ref1 ++ intEqCoTx1_)
         toggleRef1(ref1 ++ intEqCoTx1, "str1", ref1 ++ intEqCoTx1 ++ str1)
 
-        toggleRef1(ref1 ++ intEqCoTx1_, "e", ref1 ++ intEqCoTx1_ ++ e1)
+        toggleRef1(ref1 ++ intEqCoTx1_, "e", ref1 ++ e1 ++ intEqCoTx1_)
         toggleRef1(ref1 ++ intEqCoTx1_, "int1", ref1 ++ int1$)
         toggleRef1(ref1 ++ intEqCoTx1_, "str1", ref1 ++ intEqCoTx1_ ++ str1)
 
 
-        toggleRef1(ref1 ++ intNil1, "e", ref1 ++ intNil1 ++ e1)
+        toggleRef1(ref1 ++ intNil1, "e", ref1 ++ e1 ++ intNil1)
         toggleRef1(ref1 ++ intNil1, "int1", ref1 ++ dum1)
         toggleRef1(ref1 ++ intNil1, "str1", ref1 ++ intNil1 ++ str1)
       }
@@ -411,6 +379,59 @@ object ToggleMode extends TestSuite with TreeSchema with ModeOps {
         )
 
         toggleMode(tac, List("" -> "Aaa", "ab" -> "Bbb"), "e") ==> non
+      }
+
+
+      test("before rebond") {
+        val non = List(
+          Atom("Aaa", "attrA", "String", 1, VarValue, None, Seq(), Seq()),
+          Bond("Aaa", "ab", "Bbb", 1, Seq()),
+          Atom("Bbb", "attrB", "String", 1, VarValue, None, Seq(), Seq()),
+          ReBond("Aaa"),
+          Bond("Aaa", "ac", "Ccc", 1, Seq()),
+          Atom("Ccc", "attrC", "String", 1, VarValue, None, Seq(), Seq()))
+
+        val man = toggleMode(non, List("" -> "Aaa", "ab" -> "Bbb"), "ba")
+        man ==> List(
+          Atom("Aaa", "attrA", "String", 1, VarValue, None, Seq(), Seq()),
+          Bond("Aaa", "ab", "Bbb", 1, Seq()),
+          Atom("Bbb", "attrB", "String", 1, VarValue, None, Seq(), Seq()),
+          Atom("Bbb", "ba", "ref", 1, VarValue, None, Seq(), Seq()),
+          ReBond("Aaa"),
+          Bond("Aaa", "ac", "Ccc", 1, Seq()),
+          Atom("Ccc", "attrC", "String", 1, VarValue, None, Seq(), Seq()))
+
+        val tac = toggleMode(man, List("" -> "Aaa", "ab" -> "Bbb"), "ba")
+        tac ==> List(
+          Atom("Aaa", "attrA", "String", 1, VarValue, None, Seq(), Seq()),
+          Bond("Aaa", "ab", "Bbb", 1, Seq()),
+          Atom("Bbb", "attrB", "String", 1, VarValue, None, Seq(), Seq()),
+          Atom("Bbb", "ba_", "ref", 1, VarValue, None, Seq(), Seq()),
+          ReBond("Aaa"),
+          Bond("Aaa", "ac", "Ccc", 1, Seq()),
+          Atom("Ccc", "attrC", "String", 1, VarValue, None, Seq(), Seq()))
+
+        val opt = toggleMode(tac, List("" -> "Aaa", "ab" -> "Bbb"), "ba")
+        opt ==> List(
+          Atom("Aaa", "attrA", "String", 1, VarValue, None, Seq(), Seq()),
+          Bond("Aaa", "ab", "Bbb", 1, Seq()),
+          Atom("Bbb", "attrB", "String", 1, VarValue, None, Seq(), Seq()),
+          Atom("Bbb", "ba$", "ref", 1, VarValue, None, Seq(), Seq()),
+          ReBond("Aaa"),
+          Bond("Aaa", "ac", "Ccc", 1, Seq()),
+          Atom("Ccc", "attrC", "String", 1, VarValue, None, Seq(), Seq()))
+
+        val nil = toggleMode(opt, List("" -> "Aaa", "ab" -> "Bbb"), "ba")
+        nil ==> List(
+          Atom("Aaa", "attrA", "String", 1, VarValue, None, Seq(), Seq()),
+          Bond("Aaa", "ab", "Bbb", 1, Seq()),
+          Atom("Bbb", "attrB", "String", 1, VarValue, None, Seq(), Seq()),
+          Atom("Bbb", "ba_", "ref", 1, Fn("not", None), None, Seq(), Seq()),
+          ReBond("Aaa"),
+          Bond("Aaa", "ac", "Ccc", 1, Seq()),
+          Atom("Ccc", "attrC", "String", 1, VarValue, None, Seq(), Seq()))
+
+        toggleMode(nil, List("" -> "Aaa", "ab" -> "Bbb"), "ba") ==> non
       }
     }
   }

@@ -5,11 +5,13 @@ import boopickle.Default._
 import moleculeadmin.client.app.domain.query.QueryState.{cachedFilterIndex, curFlags, _}
 import moleculeadmin.client.app.element.AppElements
 import moleculeadmin.client.autowire.queryWire
+import moleculeadmin.shared.util.HelpersAdmin
 import org.scalajs.dom.html.TableSection
 import org.scalajs.dom.raw.{Element, HTMLCollection}
 import org.scalajs.dom.window
 import rx.Ctx
-import scala.collection.mutable
+import scala.collection.{GenSet, mutable}
+import scala.collection.mutable.ListBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
 
 
@@ -19,38 +21,45 @@ case class Toggle(
   currentlyOn: Boolean,
   colIndex: Int = 0,
   eid: Long = 0L,
-) extends AppElements {
+) extends AppElements with HelpersAdmin {
   type keepBooPickleImport_SetMany = PickleState
 
-  var entityRow               = 0
-  var cells  : HTMLCollection = null
-  var cell   : Element        = null
-  val eidStrs                 = mutable.Set.empty[String]
-  val allEids: Set[Long]      =
-    if (eid == 0L) {
-      val qr               = queryCache.queryResult
-      val eidArray         = qr.num(qr.arrayIndexes(colIndex))
-      val filteredEidArray =
-        if (cachedFilterIndex.nonEmpty) {
-          val a2     = new Array[Option[Double]](cachedFilterIndex.length)
-          var i      = 0
-          val length = cachedFilterIndex.length
-          while (i < length) {
-            a2(i) = eidArray(cachedFilterIndex(i))
-            i += 1
-          }
-          a2
-        } else {
-          eidArray
+  var entityRow             = 0
+  var cells: HTMLCollection = null
+  var cell : Element        = null
+  val allEids               = mutable.Set.empty[Long]
+
+  val eidStrs = if (eid == 0L) {
+    val qr               = queryCache.queryResult
+    val eidArray         = qr.num(qr.arrayIndexes(colIndex))
+    val filteredEidArray =
+      if (cachedFilterIndex.nonEmpty) {
+        val a2     = new Array[Option[Double]](cachedFilterIndex.length)
+        var i      = 0
+        val length = cachedFilterIndex.length
+        while (i < length) {
+          a2(i) = eidArray(cachedFilterIndex(i))
+          i += 1
         }
-      filteredEidArray.flatten.map { eDouble =>
-        eidStrs += eDouble.toString
-        eDouble.toLong
-      }.toSet
-    } else {
-      eidStrs += eid.toString
-      Set(eid)
+        a2
+      } else {
+        eidArray
+      }
+
+    val eidStrs = new Array[String](filteredEidArray.length)
+    var i       = 0
+    filteredEidArray.foreach {
+      case Some(eDouble) =>
+        allEids += eDouble.toLong
+        eidStrs(i) = eDouble.toString
+        i += 1
+      case _             =>
     }
+    eidStrs
+  } else {
+    allEids += eid
+    Array(eid.toString)
+  }
 
   val (curMarkerIndexes, newCls, iconIndex, eids, count, toggling, toggled) =
     if (currentlyOn) {
@@ -58,9 +67,9 @@ case class Toggle(
         case "star" =>
           val (starred, count) =
             if (eid == 0L) {
-              val starred: Set[Long] = allEids.intersect(curStars)
+              val starred = allEids.intersect(curStars)
               curStars --= starred
-              (allEids.intersect(curStars), starred.size)
+              (starred, starred.size)
             } else {
               curStars -= eid
               (Set(eid), 1)
@@ -70,7 +79,7 @@ case class Toggle(
         case "flag" =>
           val (flagged, count) =
             if (eid == 0L) {
-              val flagged: Set[Long] = allEids.intersect(curFlags)
+              val flagged = allEids.intersect(curFlags)
               curFlags --= flagged
               (flagged, flagged.size)
             } else {
@@ -82,7 +91,7 @@ case class Toggle(
         case "check" =>
           val (checked, count) =
             if (eid == 0L) {
-              val checked: Set[Long] = allEids.intersect(curChecks)
+              val checked = allEids.intersect(curChecks)
               curChecks --= checked
               (checked, checked.size)
             } else {
@@ -133,11 +142,11 @@ case class Toggle(
 
   // Log
   if (count < 10000)
-    print(s"$toggling $count entities in database...")
+    print(s"$toggling $count entities in database ...")
   else if (count < 100000)
-    print(s"$toggling $count entities in database - can take a few seconds...")
+    print(s"$toggling $count entities in database - can take a few seconds ...")
   else
-    print(s"$toggling $count entities in database - can take more than 5 seconds...")
+    print(s"$toggling $count entities in database - can take more than 5 seconds ...")
 
 
   def toggleIcon(eidCol: Int): Unit = {
@@ -151,8 +160,8 @@ case class Toggle(
     // Update markers for each entity id column
     eidCols.foreach { eidCol =>
 
-      // Loop affected entity ids
-      eids.foreach { eid =>
+      // Loop entity ids
+      allEids.foreach { eid =>
 
         // Eid might not be present in (other) column
         val entityIndexOpt: Option[List[Int]] = curEntityIndexes(eidCol).get(eid)
@@ -164,7 +173,7 @@ case class Toggle(
           val entityIndexLength              = entityIndex.length
           while (i < entityIndexLength) {
             entityRow = entityIndex(i)
-            curMarkerIndex(entityRow) = currentlyOn
+            curMarkerIndex(entityRow) = !currentlyOn
             i += 1
           }
         }
@@ -177,9 +186,7 @@ case class Toggle(
         case Left(err)            => window.alert(err)
         case Right(dbSettingsId1) =>
           dbSettingsIdOpt = Some(dbSettingsId1)
-          //          println(s"$toggled $count entity ids in database")
           println(" done")
-
       }
   }
 

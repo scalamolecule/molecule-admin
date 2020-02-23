@@ -8,11 +8,12 @@ import utest._
 import scala.languageFeature.implicitConversions._
 
 
+
 object AddNs extends TestSuite with TreeSchema with TreeOps {
 
   val tests = Tests {
 
-    test("dummy > bond") {
+    test.apply("dummy > bond")  {
       val model = List(
         Atom("Aaa", "Dummy to keep ns open", "", 1, NoValue, None, List(), List())
       )
@@ -22,7 +23,6 @@ object AddNs extends TestSuite with TreeSchema with TreeOps {
         Atom("Bbb", "Dummy to keep ns open", "", 1, NoValue, None, List(), List())
       )).toString
     }
-
 
     test("attr > bond") {
       val model = List(
