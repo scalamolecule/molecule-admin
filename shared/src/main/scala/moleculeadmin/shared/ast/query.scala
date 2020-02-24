@@ -55,6 +55,7 @@ object query extends HelpersAdmin {
   case class Filter[T](
     colIndex: Int,
     colType: String,
+    isAggr: Boolean,
     filterExpr: String,
     pred: Option[T] => Boolean
   )
