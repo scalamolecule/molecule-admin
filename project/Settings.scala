@@ -16,7 +16,8 @@ object Settings {
       "-encoding",
       "UTF-8",
       "-feature",
-      "-unchecked"
+      "-unchecked",
+      "-language:postfixOps"
     )
   )
 

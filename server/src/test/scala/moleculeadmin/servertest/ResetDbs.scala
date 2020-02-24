@@ -129,7 +129,11 @@ object ResetDbs extends TestSuite with ExampleData with Settings {
   }
 
   def populateCoreTest(implicit conn: Conn): Unit = {
-    Ns.str insert List("", " ", "   ", "\n", "  \n  ", "Hello World", "  Hello  \n  World  ")
+    Ns.str insert List(
+      "", " ", "   ", "\n", "  \n  ", "Hello World", "  Hello  \n  World  ",
+      "https://en.wikipedia.org/wiki/Giuditta",
+      "https://en.wikipedia.org/wiki/Album"
+    )
     Ns.long insert 2L
     Ns.float insert 3.3f
     Ns.double insert 4.4
@@ -176,7 +180,13 @@ object ResetDbs extends TestSuite with ExampleData with Settings {
 
     Ns.int(42).dates(date1).save
 
-    Ns.strs insert List(Set("", " ", " \n ", "a", "b"), Set("c", "Hi there, Ben!\nHi Lisa"))
+    Ns.strs insert List(
+      Set("", " ", " \n ", "a", "b"),
+      Set(
+        "https://en.wikipedia.org/wiki/Giuditta",
+        "c", "Hi there, Ben!\nHi Lisa"),
+      Set("hejsa", "https://en.wikipedia.org/wiki/Album")
+    )
     Ns.ints insert List(Set(1, 2), Set(3, 4, 5, 6, 7))
     Ns.longs insert List(Set(1L, 2L), Set(3L, 4L, 5L))
     Ns.floats insert List(Set(1.1f, 2.2f), Set(3.3f, 4.4f, 5.5f))

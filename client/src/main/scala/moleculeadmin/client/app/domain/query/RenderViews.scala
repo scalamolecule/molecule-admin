@@ -28,12 +28,13 @@ case class RenderViews()(implicit val ctx: Ctx.Owner)
           case "view03_Entity"        => Entity().view: Frag
           case "view04_EntityHistory" => EntityHistory().view: Frag
           case "view05_Transaction"   => Transaction().view: Frag
-          case "view06_MoleculeModel" => moleculeModelView: Frag
-          case "view07_MoleculeQuery" => moleculeQueryView: Frag
-          case "view08_Columns"       => columnsView: Frag
-          case "view09_Tree1"         => tree1View: Frag
-          case "view10_Tree2"         => tree2View: Frag
-          case "view11_Tree3"         => tree3View: Frag
+          case "view06_Url"           => urlView: Frag
+          case "view07_MoleculeModel" => moleculeModelView: Frag
+          case "view08_MoleculeQuery" => moleculeQueryView: Frag
+          case "view09_Columns"       => columnsView: Frag
+          case "view10_Tree1"         => tree1View: Frag
+          case "view11_Tree2"         => tree2View: Frag
+          case "view12_Tree3"         => tree3View: Frag
         }
       )
     } else span()
@@ -77,4 +78,9 @@ case class RenderViews()(implicit val ctx: Ctx.Owner)
     _codeView("Tree with attr definitions", "scala", tree.now.code)
   def tree3View: TypedTag[Element] =
     _codeView("Full Tree", "scala", tree.now.code2)
+
+  def urlView = Rx {
+    curUrl()
+    _urlView(curUrl.now)
+  }
 }

@@ -1,13 +1,17 @@
 package moleculeadmin.client.app.element.query.datatable
+
 import molecule.util.DateHandling
+import moleculeadmin.client.app.domain.query.QueryState.curUrl
 import moleculeadmin.client.app.element.AppElements
 import moleculeadmin.client.rxstuff.RxBindings
-import org.scalajs.dom.html.{Element, TableCell, TableRow}
+import moleculeadmin.shared.styles.Color
+import org.scalajs.dom.html.{Anchor, Element, Span, TableCell, TableRow}
 import org.scalajs.dom.raw.Node
 import rx.{Ctx, Rx}
 import scalatags.JsDom
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
+import org.scalajs.dom.{document, window}
 
 
 trait BodyElements extends AppElements with DateHandling with RxBindings {
@@ -26,10 +30,28 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     onclick := retract
   )
 
+  // Use span to ease editing conversions between txt/html
+  def _urlSpan(url: String, edit: Boolean)(implicit ctx: Ctx.Owner): TypedTag[Span] = {
+    if (edit)
+      span(
+        color := Color.link,
+        cursor.text,
+        onmouseover := { () => curUrl() = url },
+        url
+      )
+    else
+      span(
+        color := Color.link,
+        cursor.pointer,
+        onclick := { () => window.open(url) },
+        onmouseover := { () => curUrl() = url },
+        url
+      )
+  }
 
   // Card one ======================================================
 
-  def _tdNoEdit: TypedTag[TableCell] = td(noEdit)
+  def _tdNoEdit: TypedTag[TableCell] = td(noEdit, cursor.default)
   def _tdNoAggrEdit: TypedTag[TableCell] = td(noAggrEdit)
   def _tdOneNumNoEdit: TypedTag[TableCell] = td(cls := "num", noEdit)
   def _tdOneNumNoAggrEdit: TypedTag[TableCell] = td(cls := "num", noAggrEdit)
@@ -74,7 +96,7 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     cellClass: String,
     cellId: String,
     eid: Long,
-    optStr: Option[String],
+    strFrag: Frag,
     update: () => Unit
   ): TypedTag[TableCell] = td(
     cls := cellClass,
@@ -83,7 +105,7 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     attr("eid") := eid,
     contenteditable := true,
     onblur := update,
-    _optStr2frags(optStr)
+    strFrag
   )
 
   def _tdOneDateEdit(
@@ -179,6 +201,18 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
 
   // Card many ========================================================
 
+  def _tdManyStringUrl(
+    strFrags: List[Seq[Frag]],
+    cellType: String,
+    showAll: Boolean
+  ): TypedTag[TableCell] = td(
+    cls := cellType,
+    attr("card") := 2,
+    if (showAll)
+      ul(strFrags.map(li(_)))
+    else
+      expandingList(strFrags.map(li(_)), true)
+  )
 
   def _tdManyString(
     vs: List[String],
@@ -190,7 +224,12 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     if (showAll)
       ul(vs.sorted.map(v => li(_str2frags(v))))
     else
-      expandingList(vs.sorted.map(v => li(_str2frags(v))), true)
+      expandingList(
+        vs.sorted.map(v =>
+          li(_str2frags(v))
+        ),
+        true
+      )
   )
 
   def _tdManyDate(
@@ -215,7 +254,6 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
       ul(vs.sorted.map(li(_)))
     else
       expandingList(vs.sorted.map(li(_)))
-
   )
 
   def _tdManyRef(
@@ -258,8 +296,9 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     )
   }
 
+
   def _tdManyStringEdit(
-    vs: List[String],
+    strFrags: List[Seq[Frag]],
     cellClass: String,
     cellId: String,
     eid: Long,
@@ -271,7 +310,7 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     attr("eid") := eid,
     contenteditable := true,
     onblur := update,
-    ul(vs.sorted.map(v => li(_str2frags(v))))
+    ul(strFrags.map(li(_)))
   )
 
   def _tdManyDateEdit(

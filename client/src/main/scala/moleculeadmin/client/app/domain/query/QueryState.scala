@@ -85,12 +85,13 @@ object QueryState extends QueryApi {
     ("view03_Entity", "Entity"),
     ("view04_EntityHistory", "Entity History"),
     ("view05_Transaction", "Transaction"),
-    ("view06_MoleculeModel", "Molecule Model"),
-    ("view07_MoleculeQuery", "Molecule Query"),
-    ("view08_Columns", "Columns"),
-    ("view09_Tree1", "Tree with attr names only"),
-    ("view10_Tree2", "Tree with attr definitions"),
-    ("view11_Tree3", "Full Tree")
+    ("view06_Url", "Live Url"),
+    ("view07_MoleculeModel", "Molecule Model"),
+    ("view08_MoleculeQuery", "Molecule Query"),
+    ("view09_Columns", "Columns"),
+    ("view10_Tree1", "Tree with attr names only"),
+    ("view11_Tree2", "Tree with attr definitions"),
+    ("view12_Tree3", "Full Tree")
   )
   val curViews: Var[Seq[String]] = Var(Seq.empty[String])
 
@@ -127,4 +128,7 @@ object QueryState extends QueryApi {
   val curT        : Var[Long]                 = Var(0L)
   val curTx       : Var[Long]                 = Var(0L)
   val curTxInstant: Var[String]               = Var("")
+
+  // Url
+  val curUrl: Var[String] = Var("")
 }

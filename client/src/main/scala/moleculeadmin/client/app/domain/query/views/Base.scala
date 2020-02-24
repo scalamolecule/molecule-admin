@@ -45,17 +45,24 @@ class Base(implicit val ctx: Ctx.Owner)
     }
   }
 
-  def getValueCell(cellType: String,
-                   valueCellId: String,
-                   v: String,
-                   txs: Boolean,
-                   level: Int,
-                   asserted: Boolean = true
-                  ): TypedTag[TableCell] = cellType match {
+  def getValueCell(
+    cellType: String,
+    valueCellId: String,
+    v: String,
+    txs: Boolean,
+    level: Int,
+    asserted: Boolean = true
+  )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = cellType match {
     case "str" => td(
       if (asserted) () else cls := "retracted",
       if (v.startsWith("http"))
-        a(href := s"$v", target := "_blank", rel := "noopener noreferrer", v)
+        a(
+          href := v,
+          target := "_blank",
+          rel := "noopener noreferrer",
+          onmouseover := { () => curUrl() = v },
+          v
+        )
       else
         _str2frags(v)
     )
@@ -94,8 +101,14 @@ class Base(implicit val ctx: Ctx.Owner)
       if (asserted) () else cls := "retracted",
       expandingList(
         v.split("__~~__").toSeq.sorted.map { s =>
-          if (v.startsWith("http"))
-            li(a(href := s"$v", target := "_blank", rel := "noopener noreferrer", v))
+          if (s.startsWith("http"))
+            li(
+              a(
+                href := s, target := "_blank", rel := "noopener noreferrer",
+                onmouseover := { () => curUrl() = s },
+                s
+              )
+            )
           else
             li(_str2frags(s))
         },
