@@ -162,6 +162,8 @@ object ResetDbs extends TestSuite with ExampleData with Settings {
     ) eids
 
     val r4 = Ref1.int1(21).save.eid
+    Ns.int(31).ref1(r1).save
+    Ns.int(32).ref1(r2).save
     Ns.int(41).refs1(r1).save
     Ns.int(42).refs1(r1).save
     Ns.int(43).refs1(r1).save

@@ -49,7 +49,7 @@ trait FilterFactory extends RegexMatching with DateHandling {
     case r"(-?\d+)$n1 *- *(-?\d+)$n2" => Some(_.fold(false)(s => BigInt(n1) <= BigInt(s) && BigInt(s) <= BigInt(n2)))
     case ""                           => None
     case other                        =>
-      println(s"Unrecognized number filter expr: `$other`")
+      println(s"Unrecognized BigInt filter expr: `$other`")
       None
   }
 
@@ -64,7 +64,7 @@ trait FilterFactory extends RegexMatching with DateHandling {
     case r"(-?\d+\.?\d*)$n1 *- *(-?\d+\.?\d*)$n2" => Some(_.fold(false)(s => BigDecimal(n1) <= BigDecimal(s) && BigDecimal(s) <= BigDecimal(n2)))
     case ""                                       => None
     case other                                    =>
-      println(s"Unrecognized decimal filter expr: `$other`")
+      println(s"Unrecognized BigDecimal filter expr: `$other`")
       None
   }
 
