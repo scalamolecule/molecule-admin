@@ -3,7 +3,7 @@ import moleculeadmin.shared.styles.Color
 import org.scalajs.dom.html.{Div, Element}
 import org.scalajs.dom.window
 import scalatags.JsDom.TypedTag
-import scalatags.JsDom.all.{h5, _}
+import scalatags.JsDom.all._
 
 trait ViewElements extends SubMenuElements {
 
@@ -100,4 +100,22 @@ trait ViewElements extends SubMenuElements {
       )
     )
 
+  def _urlView(
+    url: String
+  ): TypedTag[Element] =
+    _card(
+      _cardHeader(
+        h5("Url"),
+        h6(url)
+      ),
+      _cardBody(
+        iframe(
+          id := "urlView",
+          src := url,
+          height := "800px",
+          width := "1000px",
+          border := 0
+        )
+      )
+    )
 }

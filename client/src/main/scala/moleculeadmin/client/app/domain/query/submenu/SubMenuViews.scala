@@ -33,9 +33,9 @@ case class SubMenuViews()(implicit val ctx: Ctx.Owner)
           () => toggleShowViews()
         ),
         hr
-      ) ++ viewCheckboxes.take(5)
+      ) ++ viewCheckboxes.take(6)
         ++ Seq(h5("Debugging", paddingTop := 10, paddingBottom := 10))
-        ++ viewCheckboxes.drop(5)
+        ++ viewCheckboxes.drop(6)
     ).render
   }
 }

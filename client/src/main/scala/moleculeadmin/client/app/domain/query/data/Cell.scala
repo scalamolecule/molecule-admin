@@ -140,15 +140,20 @@ abstract class Cell(
         if (editable) {
           val getCls = getClassLambda(origArray, array)
           cellType match {
-            case "str" if editable =>
+            case "str" =>
               (rowIndex: Int) =>
+                val s = array(rowIndex)
                 _tdOneStrEdit(
                   getCls("str", rowIndex),
-                  id(rowIndex), e, array(rowIndex),
+                  id(rowIndex), e,
+                  if (s.getOrElse("").startsWith("http"))
+                    _urlSpan(s.get, true)
+                  else
+                    _optStr2frags(s),
                   update(origArray, array, rowIndex, "str")
                 )
 
-            case "date" if editable =>
+            case "date" =>
               (rowIndex: Int) =>
                 _tdOneDateEdit(
                   getCls("date", rowIndex),
@@ -156,7 +161,7 @@ abstract class Cell(
                   update(origArray, array, rowIndex, "date")
                 )
 
-            case "big" if editable =>
+            case "big" =>
               (rowIndex: Int) =>
                 _tdOneNumEdit(
                   getCls("num", rowIndex),
@@ -164,7 +169,7 @@ abstract class Cell(
                   update(origArray, array, rowIndex, "num")
                 )
 
-            case _ if editable =>
+            case _ =>
               (rowIndex: Int) =>
                 _tdOneEdit(
                   getCls("", rowIndex),
@@ -177,7 +182,13 @@ abstract class Cell(
             case "str" =>
               (rowIndex: Int) =>
                 array(rowIndex).fold(_tdNoEdit)(s =>
-                  _tdNoEdit(_str2frags(s)))
+                  _tdNoEdit {
+                    if (s.startsWith("http"))
+                      _urlSpan(s, false)
+                    else
+                      _str2frags(s)
+                  }
+                )
 
             case "date" =>
               (rowIndex: Int) =>
@@ -258,7 +269,6 @@ abstract class Cell(
                 () => Toggle(tableBody, "check", curChecks.contains(eid), eid = eid),
               )
 
-
           case "ref" if groupEdit =>
             (rowIndex: Int) =>
               _tdOneRefEdit2(
@@ -319,16 +329,22 @@ abstract class Cell(
         if (editable) {
           val getCls = getClassLambda(origArray, array)
           cellType match {
-            case "str" if editable =>
+            case "str" =>
               (rowIndex: Int) =>
                 array(rowIndex).fold(_tdNoEdit)(vs =>
                   _tdManyStringEdit(
-                    vs, getCls("items", rowIndex), id(rowIndex), e,
+                    vs.sorted.map { s =>
+                      if (s.startsWith("http"))
+                        Seq(_urlSpan(s, true))
+                      else
+                        _str2frags(s)
+                    },
+                    getCls("items", rowIndex), id(rowIndex), e,
                     update(origArray, array, rowIndex, "items")
                   )
                 )
 
-            case "date" if editable =>
+            case "date" =>
               (rowIndex: Int) =>
                 array(rowIndex).fold(_tdNoEdit)(vs =>
                   _tdManyDateEdit(
@@ -337,7 +353,7 @@ abstract class Cell(
                   )
                 )
 
-            case "big" if editable =>
+            case "big" =>
               (rowIndex: Int) =>
                 array(rowIndex).fold(_tdNoEdit)(vs =>
                   _tdManyStringBigEdit(
@@ -346,7 +362,7 @@ abstract class Cell(
                   )
                 )
 
-            case _ if editable =>
+            case _ =>
               (rowIndex: Int) =>
                 array(rowIndex).fold(_tdNoEdit)(vs =>
                   _tdManyStringOtherEdit(
@@ -359,8 +375,17 @@ abstract class Cell(
           cellType match {
             case "str" =>
               (rowIndex: Int) =>
-                array(rowIndex).fold(_tdNoEdit)(
-                  _tdManyString(_, "items", showAll))
+                array(rowIndex).fold(_tdNoEdit)(vs =>
+                  _tdManyStringUrl(
+                    vs.sorted.map { s =>
+                      if (s.startsWith("http"))
+                        Seq(_urlSpan(s, false))
+                      else
+                        _str2frags(s)
+                    },
+                    "items", showAll
+                  )
+                )
 
             case "date" =>
               (rowIndex: Int) =>
@@ -390,7 +415,7 @@ abstract class Cell(
                   (eid: Long) => () => curEntity() = eid))
 
           case "ref" if groupEdit =>
-            val getCls    = getClassLambda(origArray, array)
+            val getCls = getClassLambda(origArray, array)
             (rowIndex: Int) =>
               array(rowIndex).fold(_tdNoEdit)(vs =>
                 _tdManyRefEdit2(
@@ -404,7 +429,7 @@ abstract class Cell(
                 )
               )
 
-          case "ref" if editable  =>
+          case "ref" if editable =>
             (rowIndex: Int) =>
               array(rowIndex).fold(_tdNoEdit)(vs =>
                 _tdManyRefEdit(
@@ -423,9 +448,8 @@ abstract class Cell(
                 _tdManyRef(vs, curEntity,
                   (eid: Long) => () => curEntity() = eid, true))
 
-
           case _ if editable =>
-            val getCls    = getClassLambda(origArray, array)
+            val getCls = getClassLambda(origArray, array)
             (rowIndex: Int) =>
               array(rowIndex).fold(_tdNoEdit)(vs =>
                 _tdManyDoubleEdit(

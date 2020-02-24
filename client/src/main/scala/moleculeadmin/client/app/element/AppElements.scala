@@ -258,18 +258,14 @@ trait AppElements extends Bootstrap {
     scriptWrapper.innerHTML = ""
     scriptWrapper.appendChild(
       script(
-        """
-          |$(function () {
-          |  $('[data-toggle="tooltip"]').tooltip()
-          |})
+        raw(
+          """
+            |$(function () {
+            |   window.alert('hej');
+            |  $('[data-toggle="tooltip"]').tooltip()
+            |})
         """.stripMargin
-        //        """
-        //          |$(function () {
-        //          |  $('.help-popover').popover({
-        //          |    container: 'body'
-        //          |  })
-        //          |})
-        //        """.stripMargin
+        )
       ).render
     )
     ()

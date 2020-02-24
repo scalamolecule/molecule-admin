@@ -180,10 +180,10 @@ class QueryBackend extends ToggleBackend {
     prevFirstT0: Long,
     enumAttrs: Seq[String]
   ): Either[String, Array[TxData]] = {
-    val conn         = Conn(base + "/" + db)
-    val datomicDb    = conn.db
-    val prevFirstT   = if (prevFirstT0 == 0L) datomicDb.basisT() else prevFirstT0
-    val firstT       = if (prevFirstT > 1100) prevFirstT - 100 else 1001
+    val conn       = Conn(base + "/" + db)
+    val datomicDb  = conn.db
+    val prevFirstT = if (prevFirstT0 == 0L) datomicDb.basisT() else prevFirstT0
+    val firstT     = if (prevFirstT > 1100) prevFirstT - 100 else 1001
     //    val firstT       = 1001
 
     println("prevFirstT0 " + prevFirstT0)
@@ -657,15 +657,13 @@ class QueryBackend extends ToggleBackend {
         retracts.map(v => Retract(eid, attrFull, cast(v), NoValue)) ++
           asserts.map(v => Add(eid, attrFull, cast(v), NoValue))
     }
-    println("------------- SAVE STMTSS ---------------")
-    stmtss foreach println
+    //    println("------------- SAVE STMTSS ---------------")
+    //    stmtss foreach println
 
     withTransactor {
       try {
         val txR: TxReport = conn.transact(stmtss)
         Right((txR.t, txR.tx, date2strLocal(txR.inst)))
-
-//        Right(1L, 2L, "test")
       } catch {
         case t: Throwable => Left(t.getMessage)
       }
@@ -693,6 +691,7 @@ class QueryBackend extends ToggleBackend {
   }
 
   import moleculeadmin.shared.ast.schema
+
   override def insert(
     db: String,
     molecule: String,
@@ -734,7 +733,6 @@ class QueryBackend extends ToggleBackend {
     withTransactor {
       try {
         Right(conn.transact(stmtss).eid)
-        //        Left("going again...")
       } catch {
         case t: Throwable => Left(t.getMessage)
       }
