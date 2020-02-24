@@ -1,4 +1,5 @@
 package moleculeadmin.shared.ops.query.data
+
 import java.util.regex.Pattern
 import molecule.util.{DateHandling, RegexMatching}
 import moleculeadmin.shared.ast.query.{Col, Filter}
@@ -71,7 +72,9 @@ trait FilterFactory extends RegexMatching with DateHandling {
   def predDate(token: String): Option[Option[String] => Boolean] = {
     // Verify date conversions without throwing exceptions in the browser
     def verifiedDates(body: => Option[String] => Boolean): Option[Option[String] => Boolean] = try {
-      Some {body}
+      Some {
+        body
+      }
     } catch {
       case e: Throwable =>
         println(e.getMessage)
@@ -260,7 +263,7 @@ trait FilterFactory extends RegexMatching with DateHandling {
       mergedPredicate(filterExpr, predicateFactory, splitComma) match {
         case None             => Option.empty[Filter[T]]
         case Some(mergedPred) => Some(
-          Filter[T](colIndex, colType, filterExpr, mergedPred)
+          Filter[T](colIndex, colType, aggrType.nonEmpty, filterExpr, mergedPred)
         )
       }
     }

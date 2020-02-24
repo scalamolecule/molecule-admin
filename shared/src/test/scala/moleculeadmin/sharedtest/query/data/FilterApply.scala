@@ -67,7 +67,7 @@ object FilterApply extends TestSuite with FilterFactory with FilterIndex {
         Map(0 -> 0),
         4, 4, 777)
 
-      val filters = Map(0 -> Filter(0, "double", ">1", (opt: Option[Double]) => opt.fold(false)(_ > 1)))
+      val filters = Map(0 -> Filter(0, "double", false, ">1", (opt: Option[Double]) => opt.fold(false)(_ > 1)))
 
 
       // filter only
@@ -110,7 +110,7 @@ object FilterApply extends TestSuite with FilterFactory with FilterIndex {
         4, 4, 777
       )
 
-      val f1 = 0 -> Filter(0, "double", "1", (opt: Option[Double]) => opt.fold(false)(_ == 1))
+      val f1 = 0 -> Filter(0, "double", false, "1", (opt: Option[Double]) => opt.fold(false)(_ == 1))
 
 
       val noSort = getFilterIndex(qr, Map(f1)).toList
@@ -164,7 +164,7 @@ object FilterApply extends TestSuite with FilterFactory with FilterIndex {
       //      filteredAndDescIndex.flatMap(col(_)) ==> List(4, 3, 2)
 
 
-      val f2 = 0 -> Filter(0, "double", "2", (opt: Option[Double]) => opt.fold(false)(_ == 2))
+      val f2 = 0 -> Filter(0, "double", false, "2", (opt: Option[Double]) => opt.fold(false)(_ == 2))
     }
   }
 }

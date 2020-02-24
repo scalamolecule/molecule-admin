@@ -80,13 +80,16 @@ trait FilterIndex {
     val lastRow                          = qr.rowCount
     val positives                        = new Array[Int](lastRow)
     val predicates: List[Int => Boolean] = filters.values.toList.map { f =>
-      f.colType match {
-        case "double"     => double(f)
-        case "string"     => string(f)
-        case "listDouble" => listDouble(f)
-        case "listString" => listString(f)
-        case _            => _: Int => true
-      }
+      if (f.isAggr)
+        double(f)
+      else
+        f.colType match {
+          case "double"     => double(f)
+          case "string"     => string(f)
+          case "listDouble" => listDouble(f)
+          case "listString" => listString(f)
+          case _            => _: Int => true
+        }
     }
 
     if (filters.size == 1) {
