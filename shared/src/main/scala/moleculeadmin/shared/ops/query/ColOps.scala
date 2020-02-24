@@ -244,19 +244,13 @@ trait ColOps extends HelpersAdmin {
     var i          = 0
     val cols       = new ListBuffer[Col]()
     var related    = 0
-    var firstNs    = true
     var curNsAlias = ""
-    var curNs      = ""
-    var curRefAttr = ""
-    var curRefNs   = ""
     var prevAttr   = ""
     elements.foreach {
       case Atom(nsFull, attr, tpe, card, value, enumPrefix, _, keys) if attr.last != '_' => {
-        if (firstNs) {
+        if (curNsAlias.isEmpty)
           curNsAlias = nsFull
-          curNs = nsFull
-          firstNs = false
-        }
+
         val enums = if (enumPrefix.isDefined) {
           val attr0 = clean(attr)
           nsMap(nsFull).attrs.collectFirst {
@@ -274,7 +268,7 @@ trait ColOps extends HelpersAdmin {
         else
           getExpr(value)
         cols += Col(
-          i, related, curNsAlias, curNs, attr, tpe,
+          i, related, curNsAlias, nsFull, attr, tpe,
           getColType(attr, card, tpe),
           card,
           attr.last == '$',
@@ -283,38 +277,34 @@ trait ColOps extends HelpersAdmin {
           expr
         )
         i += 1
-
-        curRefAttr = ""
-        curRefNs = ""
         prevAttr = attr
       }
 
       case _: Atom => // tacit attribute
 
       case Generic(nsFull, attr, tpe, value) =>
-        val nsAlias = if (curNsAlias.nonEmpty) curNsAlias else nsFull
+        if (curNsAlias.isEmpty)
+          curNsAlias = nsFull
+
         attr match {
           case "e" =>
-            cols += Col(i, related, nsAlias, nsFull, attr, tpe, "double", 1, aggrType = getAggrType(value), attrExpr = getExpr(value))
+            cols += Col(i, related, curNsAlias, nsFull, attr, tpe, "double", 1, aggrType = getAggrType(value), attrExpr = getExpr(value))
             i += 1
 
           case "t" | "tx" =>
-            cols += Col(i, related, nsAlias, nsFull, prevAttr, "Long", "double", 1, attrExpr = attr)
+            cols += Col(i, related, curNsAlias, nsFull, prevAttr, "Long", "double", 1, attrExpr = attr)
             i += 1
 
           case "txInstant" =>
-            cols += Col(i, related, nsAlias, nsFull, prevAttr, "Date", "string", 1, attrExpr = attr)
+            cols += Col(i, related, curNsAlias, nsFull, prevAttr, "Date", "string", 1, attrExpr = attr)
             i += 1
 
           case _ =>
         }
 
-      case Bond(_, refAttr1, refNs1, _, _) =>
+      case Bond(_, refAttr1, _, _, _) =>
         related = 1
-        curRefAttr = if (curRefAttr.isEmpty) refAttr1.capitalize else curRefAttr + " > " + refAttr1.capitalize
-        curRefNs = if (curRefNs.isEmpty) refNs1 else curRefNs + " > " + refNs1
-        curNsAlias = curRefAttr
-        curNs = curRefNs
+        curNsAlias = refAttr1.capitalize
 
       case _: ReBond =>
       case e         => throw new IllegalArgumentException("Unexpected element for table layout: " + e)
@@ -323,8 +313,10 @@ trait ColOps extends HelpersAdmin {
     cols
   }
 
+
   def colSettings(cols: Seq[Col]): Seq[(Int, String, Int)] =
     cols.map(c => (c.colIndex, c.sortDir, c.sortPos))
+
 
   def getSortedColumns(cols: Seq[Col], colIndex: Int, additive: Boolean): Seq[Col] = {
 

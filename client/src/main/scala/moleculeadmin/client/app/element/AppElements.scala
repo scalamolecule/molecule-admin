@@ -113,7 +113,7 @@ trait AppElements extends Bootstrap {
       hljs
     )
 
-  val defaultSize = 3
+  val defaultSize = 10
 
   protected def expandingList(
     items: Seq[TypedTag[LI]],

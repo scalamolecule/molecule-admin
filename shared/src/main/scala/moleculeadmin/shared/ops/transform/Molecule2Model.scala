@@ -15,7 +15,7 @@ import scala.collection.mutable.ListBuffer
 
 object Molecule2Model {
   def apply(molecule: String)
-    (implicit nsMap: Map[String, Ns]): Either[String, Seq[Element]] =
+           (implicit nsMap: Map[String, Ns]): Either[String, Seq[Element]] =
     new Molecule2Model(molecule, nsMap).getModel
 }
 
@@ -92,6 +92,7 @@ class Molecule2Model(molecule0: String, nsMap: Map[String, Ns])
       attrs1 foreach println
     }
   }
+
   //  debug("1")
 
 
@@ -262,7 +263,7 @@ class Molecule2Model(molecule0: String, nsMap: Map[String, Ns])
         case "e" | "e_" => fn match {
           case "apply" => expr.trim match {
             case r"([1-9][0-9]*)${number}L?" => elements += Generic(curNsFull, attr, "datom", Eq(Seq(number.toInt)))
-            case r"(count)"                  => elements += Generic(curNsFull, attr, "datom", Fn("count"))
+            case "count"                     => elements += Generic(curNsFull, attr, "datom", Fn("count"))
             case _                           => throw new IllegalArgumentException(
               s"Unrecognized expression value `$expr` for entity id attribute `$attr` in molecule: $molecule0")
           }
