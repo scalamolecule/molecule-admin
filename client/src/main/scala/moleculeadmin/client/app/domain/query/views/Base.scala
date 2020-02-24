@@ -92,7 +92,6 @@ class Base(implicit val ctx: Ctx.Owner)
 
     case "strSet" => td(
       if (asserted) () else cls := "retracted",
-      //          if (txs && level == 0) _str2frags(v) else
       expandingList(
         v.split("__~~__").toSeq.sorted.map { s =>
           if (v.startsWith("http"))
@@ -106,7 +105,6 @@ class Base(implicit val ctx: Ctx.Owner)
 
     case "numSet" => td(
       cls := (if (asserted) "num" else "num retracted"),
-      //          if (txs && level == 0) v else
       expandingList(
         v.split("__~~__").toSeq.map(_.toDouble).sorted.map(n => li(n))))
 

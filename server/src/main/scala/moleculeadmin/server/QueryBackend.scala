@@ -70,6 +70,9 @@ class QueryBackend extends ToggleBackend {
     else
       conn.db +: rules.get +: inputs(l ++ ll ++ lll)
 
+    println("--------------------")
+    println(datalogQuery)
+
     //    val t         = Timer("Query")
     val t0        = System.currentTimeMillis
     val allRows   = Peer.q(datalogQuery, allInputs: _*)
@@ -79,8 +82,6 @@ class QueryBackend extends ToggleBackend {
     val rowCountAll = allRows.size
     val rowCount    = if (maxRows == -1 || rowCountAll < maxRows) rowCountAll else maxRows
 
-    println("--------------------")
-    println(datalogQuery)
     println("rowCountAll: " + rowCountAll +
       " (query time, all rows: " + thousands(queryTime) + " ms)")
     println("maxRows    : " + (if (maxRows == -1) "all" else maxRows))
