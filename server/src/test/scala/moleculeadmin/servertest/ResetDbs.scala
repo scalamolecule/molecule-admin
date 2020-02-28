@@ -234,6 +234,7 @@ object ResetDbs extends TestSuite with ExampleData with Settings {
     Ns.int.bigDec$ insert List((12, None), (12, Some(bigDec2)))
 
     Ns.int.strs$ insert List((1, None), (1, Some(Set("", "b"))))
+    Ns.long.ints$ insert List((2, None), (2, Some(Set(1, 2, 3, 4, 5))))
     Ns.int.ints$ insert List((2, None), (2, Some(Set(1, 2, 3, 4, 5))))
     Ns.int.longs$ insert List((3, None), (3, Some(Set(21L, 22L))))
     Ns.int.floats$ insert List((4, None), (4, Some(Set(1.0f, 2.0f))))

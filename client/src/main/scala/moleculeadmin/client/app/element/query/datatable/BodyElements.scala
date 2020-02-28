@@ -52,6 +52,7 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
   // Card one ======================================================
 
   def _tdNoEdit: TypedTag[TableCell] = td(noEdit, cursor.default)
+  def _tdNoEditItems: TypedTag[TableCell] = td(noEdit, cursor.default)(ul(li()), contenteditable := true, cls := "items")
   def _tdNoAggrEdit: TypedTag[TableCell] = td(noAggrEdit)
   def _tdOneNumNoEdit: TypedTag[TableCell] = td(cls := "num", noEdit)
   def _tdOneNumNoAggrEdit: TypedTag[TableCell] = td(cls := "num", noAggrEdit)
@@ -326,7 +327,7 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     attr("eid") := eid,
     contenteditable := true,
     onblur := update,
-    ul(vs.sorted.map(li(_)))
+    ul(vs.map(li(_)))
   )
 
   def _tdManyStringOtherEdit(
@@ -342,7 +343,7 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     attr("eid") := eid,
     contenteditable := true,
     onblur := update,
-    ul(vs.sorted.map(li(_)))
+    ul(vs.map(li(_)))
   )
 
   def _tdManyStringBigEdit(
@@ -358,7 +359,7 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     attr("eid") := eid,
     contenteditable := true,
     onblur := update,
-    ul(vs.sorted.map(li(_)))
+    ul(vs.map(li(_)))
   )
 
   def _tdManyDoubleEdit(
@@ -374,11 +375,11 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     attr("eid") := eid,
     contenteditable := true,
     onblur := update,
-    ul(vs.sorted.map(li(_)))
+    vs.flatMap(v => Seq(v: Frag, br)).init
   )
 
   def _tdManyRefEdit(
-    refs: List[Double],
+    refs: List[Long],
     cellId: String,
     eid: Long,
     curEntity: rx.Var[Long],
@@ -392,7 +393,7 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
       contenteditable := true,
       onblur := update,
       ul(
-        refs.map(_.toLong).sorted.map(ref =>
+        refs.map(ref =>
           li(
             cls := Rx(if (ref == curEntity()) "eidChosen" else "eid"),
             ref,
@@ -403,8 +404,8 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     )
   }
 
-  def _tdManyRefEdit2(
-    refs: List[Double],
+  def _tdManyRefGroupEdit(
+    refs: List[Long],
     cellClass: String,
     cellId: String,
     eid: Long,
@@ -420,9 +421,8 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
       contenteditable := true,
       onblur := update,
       ul(
-        refs.map(_.toLong).sorted.map(ref =>
+        refs.map(ref =>
           li(
-            //            cls := Rx(if (ref == curEntity()) "eidChosen" else "eid"),
             cls := "num",
             ref,
             onmouseover := mouseovers(ref)

@@ -1,4 +1,5 @@
 package moleculeadmin.client.app.domain.query.data.edit
+
 import autowire._
 import boopickle.Default._
 import moleculeadmin.client.app.domain.query.QueryState.{db, curEntity, editCellId}
@@ -49,6 +50,7 @@ case class UpdateCardMany[T](
     isNum: Boolean
   ): Unit = {
 
+
     val oldStrs: List[String] = oldVOpt.fold(List.empty[String]) {
       case vs: List[_] =>
         vs.map(_.toString).distinct.sorted
@@ -56,14 +58,22 @@ case class UpdateCardMany[T](
 
     val raw = cell.innerHTML
 
+    //    println("raw : " + raw)
+
     val strs = if (cellType == "ref") {
       val s1 = raw.replaceAll("</*ul[^>]*>", "")
       s1.substring(s1.indexOf(">", 5) + 1, s1.length - 5)
         .replaceAll("(<br>)*$", "")
         .split("""</li><li class="eid(Chosen)*">""").toList
-    } else {
+    } else if (raw.endsWith("<ul></ul>")) {
+      List(raw.replaceAllLiterally("<ul></ul>", "")) //.split("<br>").toList
+    } else if (cellType == "str") {
       raw.substring(8, raw.length - 10).split("</li><li>").toList
+    } else {
+      raw.split("<br>").toList
     }
+
+    //    println("strs: " + strs)
 
     val vs = if (attrType == "String" && enums.isEmpty) {
       strs.map(_
@@ -87,6 +97,9 @@ case class UpdateCardMany[T](
           .filter(_.nonEmpty)
       )
     }
+
+
+    //    println("vs  : " + vs)
 
     val newStrs: List[String] = vs.distinct.sorted
 
