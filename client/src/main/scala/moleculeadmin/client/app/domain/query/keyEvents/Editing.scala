@@ -1,8 +1,9 @@
 package moleculeadmin.client.app.domain.query.keyEvents
+
 import moleculeadmin.client.app.domain.query.QueryState.editCellId
-import org.scalajs.dom.raw.{HTMLInputElement, KeyboardEvent}
+import org.scalajs.dom.raw.{HTMLInputElement, HTMLUListElement, KeyboardEvent}
 import org.scalajs.dom.{Node, document, window}
-import scalatags.JsDom.all.li
+import scalatags.JsDom.all._
 
 
 trait Editing {
@@ -84,16 +85,55 @@ trait Editing {
     if (curCell.getAttribute("class") == "items") {
       // Prevent line shift
       e.preventDefault()
-      // add list item
-      val ul = curCell.firstChild
-      ul.appendChild(li().render)
-      // Set caret in new item
-      val range = document.createRange
-      val sel   = window.getSelection
-      range.setStart(ul.childNodes.item(ul.childNodes.length - 1), 0)
-      range.collapse(true)
-      sel.removeAllRanges
-      sel.addRange(range)
+      val uList: Node = curCell.firstChild
+
+//      println("------------------")
+//      println("curCell " + curCell.innerHTML)
+////      println("curCell " + curCell.removeChild(curCell.lastElementChild))
+////      println("curCell " + curCell.innerHTML)
+//      println("child   " + uList)
+////      println("ul? " + uList.isInstanceOf[HTMLUListElement])
+
+      if (uList.isInstanceOf[HTMLUListElement]) {
+//        println("ulist...")
+
+        // add list item to unordered list element
+        uList.appendChild(li().render)
+        // Set caret in new item
+        val range = document.createRange
+        val sel   = window.getSelection
+        range.setStart(uList.childNodes.item(
+          uList.childNodes.length - 1
+        ), 0)
+        range.collapse(true)
+        sel.removeAllRanges
+        sel.addRange(range)
+
+      } else {
+
+//        println("other...")
+        // Remove empty unordered list
+        curCell.removeChild(curCell.lastElementChild)
+        // Place text in unordered list and add new item
+        val curVs = curCell.innerHTML.split("<br>").toList
+        val uList1 = ul(
+          li(curVs.flatMap(v => Seq(v:Frag, br)).init),
+          li()
+        ).render
+        // Replace cell with uList
+        curCell.innerHTML = ""
+        curCell.appendChild(uList1)
+
+//        println("curCell " + curCell.innerHTML)
+
+        // Set caret in new item
+        val range = document.createRange
+        val sel   = window.getSelection
+        range.setStart(uList1.childNodes.item(uList1.childNodes.length - 1), 0)
+        range.collapse(true)
+        sel.removeAllRanges
+        sel.addRange(range)
+      }
     }
   }
 

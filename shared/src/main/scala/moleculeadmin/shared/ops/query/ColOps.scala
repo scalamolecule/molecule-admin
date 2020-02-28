@@ -215,7 +215,8 @@ trait ColOps extends HelpersAdmin {
 
   def getEidTableColIndexes(cols: Seq[Col]): Seq[Int] = {
     cols.collect {
-      case Col(colIndex, _, _, _, "e", _, _, _, _, _, _, _, _, _, _) => colIndex + 1
+      case Col(colIndex, _, _, _, "e", _, _, _, _, _, aggrType, _, _, _, _)
+        if aggrType.isEmpty => colIndex + 1
     }
   }
 
@@ -240,7 +241,7 @@ trait ColOps extends HelpersAdmin {
   }
 
   def getCols(elements: Seq[Element])
-    (implicit nsMap: Map[String, Ns]): Seq[Col] = {
+             (implicit nsMap: Map[String, Ns]): Seq[Col] = {
     var i          = 0
     val cols       = new ListBuffer[Col]()
     var related    = 0

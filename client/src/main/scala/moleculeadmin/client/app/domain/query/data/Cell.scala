@@ -331,44 +331,39 @@ abstract class Cell(
           cellType match {
             case "str" =>
               (rowIndex: Int) =>
-                array(rowIndex).fold(_tdNoEdit)(vs =>
-                  _tdManyStringEdit(
-                    vs.sorted.map { s =>
-                      if (s.startsWith("http"))
-                        Seq(_urlSpan(s, true))
-                      else
-                        _str2frags(s)
-                    },
-                    getCls("items", rowIndex), id(rowIndex), e,
-                    update(origArray, array, rowIndex, "items")
-                  )
+                _tdManyStringEdit(
+                  array(rowIndex).getOrElse(List.empty[String]).sorted.map(s =>
+                    if (s.startsWith("http"))
+                      Seq(_urlSpan(s, true))
+                    else
+                      _str2frags(s)
+                  ),
+                  getCls("items", rowIndex), id(rowIndex), e,
+                  update(origArray, array, rowIndex, "items")
                 )
 
             case "date" =>
               (rowIndex: Int) =>
-                array(rowIndex).fold(_tdNoEdit)(vs =>
-                  _tdManyDateEdit(
-                    vs, getCls("str", rowIndex), id(rowIndex), e,
-                    update(origArray, array, rowIndex, "str")
-                  )
+                _tdManyDateEdit(
+                  array(rowIndex).getOrElse(List.empty[String]).sorted,
+                  getCls("str", rowIndex), id(rowIndex), e,
+                  update(origArray, array, rowIndex, "str")
                 )
 
             case "big" =>
               (rowIndex: Int) =>
-                array(rowIndex).fold(_tdNoEdit)(vs =>
-                  _tdManyStringBigEdit(
-                    vs, getCls("num", rowIndex), id(rowIndex), e,
-                    update(origArray, array, rowIndex, "num")
-                  )
+                _tdManyStringBigEdit(
+                  array(rowIndex).getOrElse(List.empty[String]).sorted,
+                  getCls("num", rowIndex), id(rowIndex), e,
+                  update(origArray, array, rowIndex, "num")
                 )
 
             case _ =>
               (rowIndex: Int) =>
-                array(rowIndex).fold(_tdNoEdit)(vs =>
-                  _tdManyStringOtherEdit(
-                    vs, getCls("str", rowIndex), id(rowIndex), e,
-                    update(origArray, array, rowIndex, "str")
-                  )
+                _tdManyStringOtherEdit(
+                  array(rowIndex).getOrElse(List.empty[String]).sorted,
+                  getCls("str", rowIndex), id(rowIndex), e,
+                  update(origArray, array, rowIndex, "str")
                 )
           }
         } else {
@@ -389,18 +384,18 @@ abstract class Cell(
 
             case "date" =>
               (rowIndex: Int) =>
-                array(rowIndex).fold(_tdNoEdit)(
-                  _tdManyDate(_, showAll))
+                array(rowIndex).fold(_tdNoEdit)(vs =>
+                  _tdManyDate(vs.sorted, showAll))
 
             case "big" =>
               (rowIndex: Int) =>
-                array(rowIndex).fold(_tdNoEdit)(
-                  _tdManyString(_, "num", showAll))
+                array(rowIndex).fold(_tdNoEdit)(vs =>
+                  _tdManyString(vs.sorted, "num", showAll))
 
             case _ =>
               (rowIndex: Int) =>
-                array(rowIndex).fold(_tdNoEdit)(
-                  _tdManyString(_, "str", showAll))
+                array(rowIndex).fold(_tdNoEdit)(vs =>
+                  _tdManyString(vs.sorted, "str", showAll))
           }
         }
 
@@ -418,8 +413,8 @@ abstract class Cell(
             val getCls = getClassLambda(origArray, array)
             (rowIndex: Int) =>
               array(rowIndex).fold(_tdNoEdit)(vs =>
-                _tdManyRefEdit2(
-                  vs,
+                _tdManyRefGroupEdit(
+                  vs.map(_.toLong).sorted,
                   getCls("num", rowIndex),
                   id(rowIndex),
                   e,
@@ -431,37 +426,35 @@ abstract class Cell(
 
           case "ref" if editable =>
             (rowIndex: Int) =>
-              array(rowIndex).fold(_tdNoEdit)(vs =>
                 _tdManyRefEdit(
-                  vs,
+                  array(rowIndex).getOrElse(List.empty[Double]).map(_.toLong).sorted,
                   id(rowIndex),
                   e,
                   curEntity,
                   (ref: Long) => () => curEntity() = ref,
                   update(origArray, array, rowIndex, "")
                 )
-              )
 
           case "ref" =>
             (rowIndex: Int) =>
               array(rowIndex).fold(_tdNoEdit)(vs =>
-                _tdManyRef(vs, curEntity,
+                _tdManyRef(vs.sorted, curEntity,
                   (eid: Long) => () => curEntity() = eid, true))
 
           case _ if editable =>
+            //            println("listDouble - Int -----------")
             val getCls = getClassLambda(origArray, array)
             (rowIndex: Int) =>
-              array(rowIndex).fold(_tdNoEdit)(vs =>
-                _tdManyDoubleEdit(
-                  vs, getCls("num", rowIndex), id(rowIndex), e,
-                  update(origArray, array, rowIndex, "num")
-                )
+              _tdManyDoubleEdit(
+                array(rowIndex).getOrElse(List.empty[Double]).sorted,
+                getCls("num", rowIndex), id(rowIndex), e,
+                update(origArray, array, rowIndex, "num")
               )
 
           case _ =>
             (rowIndex: Int) =>
-              array(rowIndex).fold(_tdNoEdit)(
-                _tdManyDouble(_, showAll))
+              array(rowIndex).fold(_tdNoEdit)(vs =>
+                _tdManyDouble(vs.sorted, showAll))
         }
 
 

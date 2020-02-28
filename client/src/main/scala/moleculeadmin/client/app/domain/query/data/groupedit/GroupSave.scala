@@ -127,8 +127,8 @@ case class GroupSave(col: Col)(implicit val ctx: Ctx.Owner)
     var i         = 0
     var j         = 0
 
-    println("eidArray -------------")
-    eidArray foreach println
+    //    println("eidArray -------------")
+    //    eidArray foreach println
 
     while (i < lastRow) {
       j = indexBridge(i)
@@ -139,8 +139,8 @@ case class GroupSave(col: Col)(implicit val ctx: Ctx.Owner)
       i += 1
     }
 
-    println("data -----------------")
-    data foreach println
+    //    println("data -----------------")
+    //    data foreach println
 
 
     if (data.nonEmpty) {
