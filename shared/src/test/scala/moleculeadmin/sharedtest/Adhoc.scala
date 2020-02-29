@@ -1,6 +1,8 @@
 package moleculeadmin.sharedtest
 
+import molecule.ast.model.{Atom, EnumVal, Eq, VarValue}
 import moleculeadmin.shared.ops.query.builder.TreeOps
+import moleculeadmin.shared.ops.transform.Molecule2Model
 import moleculeadmin.shared.testdata.TreeSchema
 import utest._
 import scala.languageFeature.implicitConversions._
