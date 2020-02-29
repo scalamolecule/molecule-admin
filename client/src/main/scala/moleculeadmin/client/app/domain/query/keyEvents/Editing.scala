@@ -85,55 +85,32 @@ trait Editing {
     if (curCell.getAttribute("class") == "items") {
       // Prevent line shift
       e.preventDefault()
-      val uList: Node = curCell.firstChild
-
-//      println("------------------")
-//      println("curCell " + curCell.innerHTML)
-////      println("curCell " + curCell.removeChild(curCell.lastElementChild))
-////      println("curCell " + curCell.innerHTML)
-//      println("child   " + uList)
-////      println("ul? " + uList.isInstanceOf[HTMLUListElement])
-
-      if (uList.isInstanceOf[HTMLUListElement]) {
-//        println("ulist...")
-
-        // add list item to unordered list element
-        uList.appendChild(li().render)
-        // Set caret in new item
-        val range = document.createRange
-        val sel   = window.getSelection
-        range.setStart(uList.childNodes.item(
-          uList.childNodes.length - 1
-        ), 0)
-        range.collapse(true)
-        sel.removeAllRanges
-        sel.addRange(range)
-
+      val node0: Node = curCell.firstChild
+      val uList: Node = if (node0.isInstanceOf[HTMLUListElement]) {
+        // add list item to existing unordered list
+        node0.appendChild(li().render)
+        node0
       } else {
-
-//        println("other...")
-        // Remove empty unordered list
+        // Remove empty unordered list in empty cell
         curCell.removeChild(curCell.lastElementChild)
-        // Place text in unordered list and add new item
-        val curVs = curCell.innerHTML.split("<br>").toList
-        val uList1 = ul(
-          li(curVs.flatMap(v => Seq(v:Frag, br)).init),
+        // Place text in unordered list and add new empty item to continue editing
+        val curVs  = curCell.innerHTML.split("<br>").toList
+        val newUList = ul(
+          li(curVs.flatMap(v => Seq(v: Frag, br)).init),
           li()
         ).render
         // Replace cell with uList
         curCell.innerHTML = ""
-        curCell.appendChild(uList1)
-
-//        println("curCell " + curCell.innerHTML)
-
-        // Set caret in new item
-        val range = document.createRange
-        val sel   = window.getSelection
-        range.setStart(uList1.childNodes.item(uList1.childNodes.length - 1), 0)
-        range.collapse(true)
-        sel.removeAllRanges
-        sel.addRange(range)
+        curCell.appendChild(newUList)
+        newUList
       }
+      // Set caret in new item
+      val range       = document.createRange
+      val sel         = window.getSelection
+      range.setStart(uList.childNodes.item(uList.childNodes.length - 1), 0)
+      range.collapse(true)
+      sel.removeAllRanges
+      sel.addRange(range)
     }
   }
 

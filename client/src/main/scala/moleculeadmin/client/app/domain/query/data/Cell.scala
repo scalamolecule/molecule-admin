@@ -426,14 +426,14 @@ abstract class Cell(
 
           case "ref" if editable =>
             (rowIndex: Int) =>
-                _tdManyRefEdit(
-                  array(rowIndex).getOrElse(List.empty[Double]).map(_.toLong).sorted,
-                  id(rowIndex),
-                  e,
-                  curEntity,
-                  (ref: Long) => () => curEntity() = ref,
-                  update(origArray, array, rowIndex, "")
-                )
+              _tdManyRefEdit(
+                array(rowIndex).getOrElse(List.empty[Double]).map(_.toLong).sorted,
+                id(rowIndex),
+                e,
+                curEntity,
+                (ref: Long) => () => curEntity() = ref,
+                update(origArray, array, rowIndex, "")
+              )
 
           case "ref" =>
             (rowIndex: Int) =>
@@ -442,7 +442,6 @@ abstract class Cell(
                   (eid: Long) => () => curEntity() = eid, true))
 
           case _ if editable =>
-            //            println("listDouble - Int -----------")
             val getCls = getClassLambda(origArray, array)
             (rowIndex: Int) =>
               _tdManyDoubleEdit(
@@ -464,45 +463,46 @@ abstract class Cell(
         val origArray = getOrigArray(qr.mapStr)
         val array     = qr.mapStr(arrayIndex)
         val getCls    = getClassLambda(origArray, array)
-        cellType match {
-          case "str" if editable =>
-            (rowIndex: Int) =>
-              array(rowIndex).fold(_tdNoEdit)(vs =>
+        if (editable) {
+          cellType match {
+            case "str" =>
+              (rowIndex: Int) =>
                 _tdMapStrEdit(
-                  vs, getCls("items", rowIndex), id(rowIndex), e,
+                  array(rowIndex).getOrElse(Map.empty[String, String]),
+                  getCls("items", rowIndex), id(rowIndex), e,
                   update(origArray, array, rowIndex, "items")
                 )
-              )
 
-          case "date" if editable =>
-            (rowIndex: Int) =>
-              array(rowIndex).fold(_tdNoEdit)(vs =>
+            case "date" =>
+              (rowIndex: Int) =>
                 _tdMapDateEdit(
-                  vs, getCls("str", rowIndex), id(rowIndex), e,
+                  array(rowIndex).getOrElse(Map.empty[String, String]),
+                  getCls("str", rowIndex), id(rowIndex), e,
                   update(origArray, array, rowIndex, "str")
                 )
-              )
 
-          case _ if editable =>
-            (rowIndex: Int) =>
-              array(rowIndex).fold(_tdNoEdit)(vs =>
+            case _ =>
+              (rowIndex: Int) =>
                 _tdMapStrOtherEdit(
-                  vs, getCls("str", rowIndex), id(rowIndex), e,
+                  array(rowIndex).getOrElse(Map.empty[String, String]),
+                  getCls("str", rowIndex), id(rowIndex), e,
                   update(origArray, array, rowIndex, "str")
                 )
-              )
+          }
+        } else {
+          cellType match {
+            case "date" =>
+              (rowIndex: Int) =>
+                array(rowIndex).fold(_tdNoEdit)(_tdMapDate)
 
-          case "date" =>
-            (rowIndex: Int) =>
-              array(rowIndex).fold(_tdNoEdit)(_tdMapDate)
+            case "str" =>
+              (rowIndex: Int) =>
+                array(rowIndex).fold(_tdNoEdit)(_tdMapStr)
 
-          case "str" =>
-            (rowIndex: Int) =>
-              array(rowIndex).fold(_tdNoEdit)(_tdMapStr)
-
-          case _ =>
-            (rowIndex: Int) =>
-              array(rowIndex).fold(_tdNoEdit)(_tdMapStrOther)
+            case _ =>
+              (rowIndex: Int) =>
+                array(rowIndex).fold(_tdNoEdit)(_tdMapStrOther)
+          }
         }
 
       case "mapDouble" =>
