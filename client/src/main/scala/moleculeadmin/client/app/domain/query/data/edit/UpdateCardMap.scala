@@ -1,4 +1,5 @@
 package moleculeadmin.client.app.domain.query.data.edit
+
 import autowire._
 import boopickle.Default._
 import moleculeadmin.client.app.domain.query.QueryState.{db, curEntity, editCellId}
@@ -57,10 +58,13 @@ case class UpdateCardMap[T](
 
     val raw = cell.innerHTML
 
-    val strs = raw
-      .substring(8, raw.length - 10)
-      .split("</li><li>")
-      .toList
+    val strs = if (raw.endsWith("<ul></ul>")) {
+      raw.replaceAllLiterally("<ul></ul>", "").split("<br>").toList
+    } else
+      raw
+        .substring(8, raw.length - 10)
+        .split("</li><li>")
+        .toList
 
     val vs = if (attrType == "String" && enums.isEmpty) {
       strs
@@ -99,8 +103,6 @@ case class UpdateCardMap[T](
         (k, v)
     }.toMap.toList // remove pairs with duplicate keys
       .sortBy(_._1)
-
-    //    println(newPairs)
 
     val newVopt: Option[T] = {
       if (newPairs.isEmpty)

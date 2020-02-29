@@ -58,22 +58,19 @@ case class UpdateCardMany[T](
 
     val raw = cell.innerHTML
 
-    //    println("raw : " + raw)
-
     val strs = if (cellType == "ref") {
       val s1 = raw.replaceAll("</*ul[^>]*>", "")
       s1.substring(s1.indexOf(">", 5) + 1, s1.length - 5)
         .replaceAll("(<br>)*$", "")
         .split("""</li><li class="eid(Chosen)*">""").toList
     } else if (raw.endsWith("<ul></ul>")) {
-      List(raw.replaceAllLiterally("<ul></ul>", "")) //.split("<br>").toList
+      // Consider line shifts not as new item but as line shift within string
+      List(raw.replaceAllLiterally("<ul></ul>", ""))
     } else if (cellType == "str") {
       raw.substring(8, raw.length - 10).split("</li><li>").toList
     } else {
       raw.split("<br>").toList
     }
-
-    //    println("strs: " + strs)
 
     val vs = if (attrType == "String" && enums.isEmpty) {
       strs.map(_
@@ -97,9 +94,6 @@ case class UpdateCardMany[T](
           .filter(_.nonEmpty)
       )
     }
-
-
-    //    println("vs  : " + vs)
 
     val newStrs: List[String] = vs.distinct.sorted
 

@@ -375,7 +375,7 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     attr("eid") := eid,
     contenteditable := true,
     onblur := update,
-    vs.flatMap(v => Seq(v: Frag, br)).init
+    vs.flatMap(v => Seq(v: Frag, br))
   )
 
   def _tdManyRefEdit(
