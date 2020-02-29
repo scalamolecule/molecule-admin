@@ -225,6 +225,8 @@ object Molecule2ModelTest extends TestSuite with TreeSchema with Helpers with Ex
       Molecule2Model("""Ns.str(Seq("a", "b"), Seq("c"), Seq("d"))""") ==> Right(Seq(Atom("Ns", "str", "String", 1, Eq(Seq("a", "b", "c", "d")))))
       Molecule2Model("""Ns.str(Seq("a", "b"), Seq("c, d"))""") ==> Right(Seq(Atom("Ns", "str", "String", 1, Eq(Seq("a", "b", "c, d")))))
 
+      Molecule2Model("Ns.ref1(42)") ==> Right(Seq(Atom("Ns", "ref1", "Long", 1, Eq(Seq(42)))))
+
       // Punctuations inside text strings ok
       Molecule2Model("""Ns.str("...")""") ==> Right(Seq(Atom("Ns", "str", "String", 1, Eq(Seq("...")))))
       Molecule2Model("""Ns.str("a (b), (c)")""") ==> Right(Seq(Atom("Ns", "str", "String", 1, Eq(Seq("a (b), (c)")))))

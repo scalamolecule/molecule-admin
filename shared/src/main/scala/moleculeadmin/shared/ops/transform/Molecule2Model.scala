@@ -308,7 +308,7 @@ class Molecule2Model(molecule0: String, nsMap: Map[String, Ns])
         s"Comparing an empty value to attribute `$attr` not allowed in molecule: $molecule0")
       case _  => tpe match {
         case "Int"          => elements += Atom(curNsFull, attr, tpe, card, fn(intValues(attr, expr)), enumPrefix)
-        case "Long" | "ref" => elements += Atom(curNsFull, attr, tpe, card, fn(longValues(attr, expr)), enumPrefix)
+        case "Long" | "ref" => elements += Atom(curNsFull, attr, "Long", card, fn(longValues(attr, expr)), enumPrefix)
         case "Float"        => elements += Atom(curNsFull, attr, tpe, card, fn(floatValues(attr, expr)), enumPrefix)
         case "Double"       => elements += Atom(curNsFull, attr, tpe, card, fn(doubleValues(attr, expr)), enumPrefix)
         case "String"       => elements += Atom(curNsFull, attr, tpe, card, fn(stringValues(attr, expr, fulltext)), enumPrefix)
@@ -352,7 +352,7 @@ class Molecule2Model(molecule0: String, nsMap: Map[String, Ns])
 
       case _ => tpe match {
         case "Int"          => elements += Atom(curNsFull, attr, tpe, card, Eq(intValues(attr, expr)), enumPrefix)
-        case "Long" | "ref" => elements += Atom(curNsFull, attr, tpe, card, Eq(longValues(attr, expr)), enumPrefix)
+        case "Long" | "ref" => elements += Atom(curNsFull, attr, "Long", card, Eq(longValues(attr, expr)), enumPrefix)
         case "Float"        => elements += Atom(curNsFull, attr, tpe, card, Eq(floatValues(attr, expr)), enumPrefix)
         case "Double"       => elements += Atom(curNsFull, attr, tpe, card, Eq(doubleValues(attr, expr)), enumPrefix)
         case "String"       => elements += Atom(curNsFull, attr, tpe, card, Eq(stringValues(attr, expr)), enumPrefix)
