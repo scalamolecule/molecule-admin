@@ -383,7 +383,8 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     cellId: String,
     eid: Long,
     curEntity: rx.Var[Long],
-    mouseovers: Long => () => Unit,
+    mouseover: Long => () => Unit,
+    click: Long => () => Unit,
     update: () => Unit
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = {
     td(
@@ -397,7 +398,8 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
           li(
             cls := Rx(if (ref == curEntity()) "eidChosen" else "eid"),
             ref,
-            onmouseover := mouseovers(ref)
+            onmouseover := mouseover(ref),
+            onclick := click(ref)
           )
         )
       )
@@ -409,7 +411,6 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     cellClass: String,
     cellId: String,
     eid: Long,
-    curEntity: rx.Var[Long],
     mouseovers: Long => () => Unit,
     update: () => Unit
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = {

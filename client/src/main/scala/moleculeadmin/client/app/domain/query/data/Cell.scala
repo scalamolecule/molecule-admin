@@ -418,7 +418,6 @@ abstract class Cell(
                   getCls("num", rowIndex),
                   id(rowIndex),
                   e,
-                  curEntity,
                   (ref: Long) => () => curEntity() = ref,
                   update(origArray, array, rowIndex, "")
                 )
@@ -431,7 +430,19 @@ abstract class Cell(
                 id(rowIndex),
                 e,
                 curEntity,
-                (ref: Long) => () => curEntity() = ref,
+                (ref: Long) => () => {
+                  if (!curEntityLocked)
+                    curEntity() = ref
+                },
+                (ref: Long) => () => {
+                  if (curEntityLocked) {
+                    if (ref == curEntity.now)
+                      curEntityLocked = false
+                    curEntity() = ref
+                  } else {
+                    curEntityLocked = true
+                  }
+                },
                 update(origArray, array, rowIndex, "")
               )
 

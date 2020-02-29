@@ -107,7 +107,7 @@ trait AttrOps extends BaseQuery with DebugBranches {
     val (before, branch0, after) = isolateBranch(model, path0)
     val (prev, cur, sub)         = isolateAttr(branch0, ns, attr)
 
-    //    println("")
+    //    println("-----")
     //    println(s":$ns/$attr   " + v)
     //    println("PRE: " + prev)
     //    println("CUR: " + cur)
@@ -141,8 +141,9 @@ trait AttrOps extends BaseQuery with DebugBranches {
               Generic(ns, fn, "datom", NoValue)
             )
 
-          case Eq(vs) if vs.isEmpty => Seq(Atom(ns, attr, attrType, car, VarValue, enumPrefix))
-          case _                    => Seq(Atom(ns, attr, attrType, car, v, enumPrefix))
+          case Eq(vs) if vs.isEmpty   => Seq(Atom(ns, attr, attrType, car, VarValue, enumPrefix))
+          case _ if attrType == "ref" => Seq(Atom(ns, attr, "Long", car, v, enumPrefix))
+          case _                      => Seq(Atom(ns, attr, attrType, car, v, enumPrefix))
         }
       }
     } else {
@@ -191,7 +192,8 @@ trait AttrOps extends BaseQuery with DebugBranches {
           // Toggle
           case Fn(fn, None) => oldFn match {
             case Fn(`fn`, _) => a.copy(value = VarValue) +: cur.tail
-            case _           => a.copy(value = v) +: cur.tail
+            case _           =>
+              a.copy(value = v) +: cur.tail
           }
 
           case _ => a.copy(value = v) +: cur.tail

@@ -520,6 +520,20 @@ object UpsertBranch extends TestSuite with TreeSchema with AttrOps {
         upsertBranch(m1, List("" -> "Ns"), "int", "Int", 1, None, fnT__) ==> m2
         upsertBranch(m2, List("" -> "Ns"), "int", "Int", 1, None, fnT__) ==> m1
       }
+
+
+      test("toggle ref attribute value") {
+        val m1 = List(
+          Atom("Ns", "int", "Int", 1, VarValue, None, Seq(), Seq())
+        )
+
+        val m2 = List(
+          Atom("Ns", "int", "Int", 1, VarValue, None, Seq(), Seq()),
+          Atom("Ns", "ref1", "Long", 1, Eq(Seq(42L)), None, Seq(), Seq())
+        )
+
+        upsertBranch(m1, List("" -> "Ns"), "ref1", "ref", 1, None, Eq(Seq(42L))) ==> m2
+      }
     }
   }
 }
