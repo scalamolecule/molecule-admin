@@ -281,7 +281,7 @@ case class AttrOptions(
             modelElements() =
               upsertAttr(modelElements.now, path, attr, attrType, car, enums, "=", newValues) match {
                 case Right(updatedModel) => updatedModel
-                case Left(err)           => throw new RuntimeException("auch!")
+                case Left(err)           => throw new RuntimeException("auch! " + err)
 
               }
             keepSettingsOpen
