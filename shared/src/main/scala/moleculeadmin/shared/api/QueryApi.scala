@@ -98,7 +98,8 @@ trait QueryApi extends BaseApi {
   def createJoins(
     db: String,
     eids: Seq[Long],
-    ns: String,
+    part: String,
+    nsFull: String,
     refAttr: String,
     refCard: Int,
     refNs: String,

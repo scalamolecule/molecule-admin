@@ -24,9 +24,9 @@ case class GroupJoin(colIndex: Int, nsFull: String)(implicit val ctx: Ctx.Owner)
   extends RxBindings with ColOps with BodyElements with Paging {
 
   type keepBooPickleImport_GroupSave = PickleState
-  type NsData = (String, String, Int, String, Seq[(String, String, Boolean, String)])
+  type NsData = (String, String, String, Int, String, Seq[(String, String, Boolean, String)])
 
-  private def nsData(part: Part, partName: String = ""): Seq[NsData] = {
+  private def nsData(part: Part, partName: String): Seq[NsData] = {
     val nss = part.nss
     val ns  = nss.find(_.nameFull == nsFull).get
     ns.attrs.collect {
@@ -44,20 +44,21 @@ case class GroupJoin(colIndex: Int, nsFull: String)(implicit val ctx: Ctx.Owner)
           }
           (at.name, at.tpe, at.enums$.isDefined, opt)
         }
-        (partName + ns.name, refAttr, refCard, refNs, valueAttrs)
+        (partName, nsFull, refAttr, refCard, refNs, valueAttrs)
     }
   }
 
   val attrs: Seq[NsData] = {
     if (metaSchema.parts.head.name == "db.part/user") {
-      nsData(metaSchema.parts.head)
+      nsData(metaSchema.parts.head, ":db.part/user")
     } else {
       val part = nsFull.split('_')(0)
-      nsData(metaSchema.parts.find(_.name == part).get, part + "_")
+      nsData(metaSchema.parts.find(_.name == part).get, s":$part")
     }
   }
 
   def create(
+    part: String,
     nsFull: String,
     refAttr: String,
     refCard: Int,
@@ -82,6 +83,7 @@ case class GroupJoin(colIndex: Int, nsFull: String)(implicit val ctx: Ctx.Owner)
     queryWire().createJoins(
       db,
       eids,
+      part,
       nsFull,
       refAttr,
       refCard,

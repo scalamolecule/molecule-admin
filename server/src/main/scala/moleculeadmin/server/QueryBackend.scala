@@ -757,6 +757,7 @@ class QueryBackend extends ToggleBackend {
   override def createJoins(
     db: String,
     eids: Seq[Long],
+    part: String,
     nsFull: String,
     refAttr: String,
     refCard: Int,
@@ -789,9 +790,8 @@ class QueryBackend extends ToggleBackend {
             s":$refNs.$valueAttr/$value"
           else
             getCaster(attrType, "")(value)
-
           val stmtss = eligibleEids.map { eid =>
-            val refId = Peer.tempid(":db.part/user")
+            val refId = Peer.tempid(part)
             Seq(
               Add(eid, refAttrFull, refId, NoValue),
               Add(refId, s":$refNs/$valueAttr", castedValue, NoValue)
