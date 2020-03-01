@@ -1,7 +1,7 @@
 package moleculeadmin.client.app.domain.query
 
 import moleculeadmin.shared.ast.query.{Col, Filter, QueryCache, QueryDTO}
-import moleculeadmin.shared.ast.schema.Ns
+import moleculeadmin.shared.ast.schema.{MetaSchema, Ns}
 import moleculeadmin.shared.ast.tree.Tree
 import molecule.ast.model.Element
 import moleculeadmin.client.app.domain.query.data.RowBuilder
@@ -21,6 +21,7 @@ object QueryState extends QueryApi {
 
   // Schema ----------------------------------------
   implicit var nsMap: Map[String, Ns] = Map.empty[String, Ns]
+  var metaSchema   : MetaSchema          = null
   var valuesCounted: Boolean             = false
   var viewCellTypes: Map[String, String] = Map.empty
   var enumAttrs    : Seq[String]         = Seq.empty

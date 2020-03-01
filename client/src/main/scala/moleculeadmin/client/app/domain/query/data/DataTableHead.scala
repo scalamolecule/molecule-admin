@@ -2,12 +2,14 @@ package moleculeadmin.client.app.domain.query.data
 
 import moleculeadmin.client.app.domain.query.KeyEvents
 import moleculeadmin.client.app.domain.query.QueryState._
-import moleculeadmin.client.app.domain.query.data.groupedit.{GroupEdit, GroupSave}
+import moleculeadmin.client.app.domain.query.data.groupEdit.{GroupEdit, GroupJoin, GroupSave}
 import moleculeadmin.client.app.domain.query.marker.{Toggle, ToggleOffAll}
 import moleculeadmin.client.app.element.AppElements
 import moleculeadmin.client.app.element.query.datatable.HeadElements
 import moleculeadmin.client.rxstuff.RxBindings
 import moleculeadmin.shared.ast.query.{Col, QueryResult}
+import moleculeadmin.shared.ast.schema
+import moleculeadmin.shared.ast.schema.Attr
 import moleculeadmin.shared.ops.query.data.FilterFactory
 import moleculeadmin.shared.ops.query.{ColOps, ModelOps}
 import org.scalajs.dom.html.{TableHeaderCell, TableSection}
@@ -87,11 +89,32 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
     } else Nil
 
     if (sortable) {
-      _attrHeaderSortable(
-        attr, postfix, expr, sortDir, sortPos, sort, editable,
-        edit, save, cancel, retract,
-        togglers
-      )
+      if (attr == "e") {
+        val joins = GroupJoin(colIndex, nsFull)
+        val joinMaker = (
+          ns: String,
+          refAttr: String,
+          refNs: String,
+          valueAttr: String,
+          attrType: String,
+          isEnum: Boolean,
+          value: String
+        ) =>
+          joins.create(ns, refAttr, refNs, valueAttr, attrType, isEnum, value)
+
+        _attrHeaderSortable(
+          attr, postfix, expr, sortDir, sortPos, sort, editable,
+          edit, save, cancel, retract,
+          togglers,
+          joins.attrs, joinMaker
+        )
+      } else {
+        _attrHeaderSortable(
+          attr, postfix, expr, sortDir, sortPos, sort, editable,
+          edit, save, cancel, retract,
+          togglers,
+        )
+      }
     } else {
       _attrHeader(
         attr, postfix, expr, editable,
@@ -99,7 +122,7 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
     }
   }
 
-  def resetEditColToOrigColCache(colIndex: Int, colType: String) = {
+  def resetEditColToOrigColCache(colIndex: Int, colType: String): Unit = {
     val curQueryCache   = queryCache
     val qr: QueryResult = curQueryCache.queryResult
     val arrayIndexes    = qr.arrayIndexes

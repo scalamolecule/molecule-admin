@@ -98,7 +98,6 @@ case class ValueTab(db: String, flatSchema0: FlatSchema)(implicit val ctx: Ctx.O
                   ),
                   " Show all"
                 )
-
               )
             ),
             tr(

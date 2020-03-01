@@ -116,8 +116,8 @@ trait ColOps extends HelpersAdmin {
     nsFull: String
   ): Int = {
     cols.foldRight(-1) {
-      // skip asking col and cols after
-      case (col, -1) if col.colIndex >= colIndex => -1
+      // skip asking cols after
+      case (col, -1) if col.colIndex > colIndex => -1
 
       // Entity id col
       case (Col(colIndex, _, `nsAlias`, `nsFull`, "e",

@@ -31,7 +31,7 @@ object QueryClient
 
   @JSExport
   def load(db0: String): Unit = queryWire().loadMetaData(db0).call().map {
-    case (dbs, metaSchema, (settings, stars, flags, checks, undoneTs, queries)) =>
+    case (dbs, metaSchema0, (settings, stars, flags, checks, undoneTs, queries)) =>
 
       // Uncomment to test dynamic ScalaFiddle compilation
       // import moleculeadmin.client.app.domain.query.data.groupedit.compileTest.TestScalaFiddle
@@ -39,6 +39,7 @@ object QueryClient
 
       // Base settings
       db = db0
+      metaSchema = metaSchema0
       val dbMetaInfo = mkNsMap(metaSchema)
       nsMap = dbMetaInfo._1
       valuesCounted = dbMetaInfo._2

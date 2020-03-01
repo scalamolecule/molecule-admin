@@ -1,7 +1,7 @@
 package moleculeadmin.clienttest
 import molecule.util.DateHandling
 import moleculeadmin.client.app.domain.query.QueryState._
-import moleculeadmin.client.app.domain.query.data.groupedit.ops.ScalaCode
+import moleculeadmin.client.app.domain.query.data.groupEdit.ops.ScalaCode
 import moleculeadmin.client.rxstuff.RxBindings
 import moleculeadmin.client.scalafiddle.ScalaFiddle
 import moleculeadmin.shared.ast.query.Col

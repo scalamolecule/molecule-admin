@@ -1,4 +1,4 @@
-package moleculeadmin.client.app.domain.query.data.groupedit.ops
+package moleculeadmin.client.app.domain.query.data.groupEdit.ops
 import molecule.util.DateHandling
 import org.scalajs.dom.html.{LI, TableCell}
 import org.scalajs.dom.{Node, NodeList}

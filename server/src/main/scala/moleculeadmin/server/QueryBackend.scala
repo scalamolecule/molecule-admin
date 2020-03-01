@@ -186,9 +186,9 @@ class QueryBackend extends ToggleBackend {
     val firstT     = if (prevFirstT > 1100) prevFirstT - 100 else 1001
     //    val firstT       = 1001
 
-    println("prevFirstT0 " + prevFirstT0)
-    println("basisT " + datomicDb.basisT())
-    println("firstT " + firstT)
+    //    println("prevFirstT0 " + prevFirstT0)
+    //    println("basisT " + datomicDb.basisT())
+    //    println("firstT " + firstT)
 
     val txs          = conn.datomicConn.log.txRange(firstT, null).asScala
     val txData       = new Array[TxData](txs.size)
@@ -747,6 +747,52 @@ class QueryBackend extends ToggleBackend {
       try {
         val txR: TxReport = conn.transact(stmtss)
         Right(txR.tx)
+      } catch {
+        case t: Throwable => Left(t.getMessage)
+      }
+    }
+  }
+
+  // todo: check empty refs and create new in one tx fn to guarantee atomicity
+  override def createJoins(
+    db: String,
+    eids: Seq[Long],
+    ns: String,
+    refAttr: String,
+    refNs: String,
+    valueAttr: String,
+    attrType: String,
+    isEnum: Boolean,
+    value: String
+  ): Either[String, Int] = {
+    implicit val conn = Conn(base + "/" + db)
+    withTransactor {
+      try {
+        val eidsWithNoJoin = conn.q(
+          s"""[:find  ?e
+             | :in    $$ [?e ...]
+             | :where (not [?e :$ns/$refAttr])]""".stripMargin,
+          eids
+        )
+        if (eidsWithNoJoin.isEmpty) {
+          Left("All entities already have joins")
+        } else {
+          val castedValue = if (isEnum)
+            s":$refNs.$valueAttr/$value"
+          else
+            getCaster(attrType, "")(value)
+          val stmtss      = eidsWithNoJoin.map { row =>
+            val refId = Peer.tempid(":db.part/user")
+            Seq(
+              Add(row.head, s":$ns/$refAttr", refId, NoValue),
+              Add(refId, s":$refNs/$valueAttr", castedValue, NoValue)
+            )
+          }
+          //          println("------------- SAVE STMTSS ---------------")
+          //          stmtss foreach println
+          conn.transact(stmtss)
+          Right(stmtss.length)
+        }
       } catch {
         case t: Throwable => Left(t.getMessage)
       }

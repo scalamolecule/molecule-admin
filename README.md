@@ -39,20 +39,20 @@ Test all
 Test
 ``` 
 > sbt
-> moleculeAdminJVM/test
-> moleculeAdminJS/test
+> sharedJVM/test
+> sharedJS/test
 ```
 
 Individual test
 ```
 > sbt
-> moleculeAdminJVM/testOnly -- moleculeadmin.sharedtest2.util.DateTransformation
-> moleculeAdminJS/testOnly -- moleculeadmin.sharedtest.util.DateTransformation
+> sharedJVM/testOnly -- moleculeadmin.sharedtest2.util.DateTransformation
+> sharedJS/testOnly -- moleculeadmin.sharedtest.util.DateTransformation
 ```
 
 ## Compile
 
 ```
 > sbt clean compile
-> sbt moleculeAdminJS/fastOptJS
+> sbt sharedJS/fastOptJS
 ```

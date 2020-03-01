@@ -1,10 +1,10 @@
-package moleculeadmin.client.app.domain.query.data.groupedit
+package moleculeadmin.client.app.domain.query.data.groupEdit
 import java.net.URI
 import java.util.{Date, UUID}
 import moleculeadmin.client.app.domain.query.KeyEvents
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.domain.query.data.Indexes
-import moleculeadmin.client.app.domain.query.data.groupedit.ops._
+import moleculeadmin.client.app.domain.query.data.groupEdit.ops._
 import moleculeadmin.client.app.element.query.datatable.BodyElements
 import moleculeadmin.client.rxstuff.RxBindings
 import moleculeadmin.client.scalafiddle.ScalaFiddle

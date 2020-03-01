@@ -84,10 +84,10 @@ case class AttrOptions(
     }
   ).render
 
-  val inputMin   : Input = _inputNum("Min", id_("min"), "min", attrValue)
-  val inputMax   : Input = _inputNum("Max", id_("max"), "max", attrValue)
-  val inputRandom: Input = _inputNum("Random", id_("random"), "rand", attrValue)
-  val inputSample: Input = _inputNum("Sample", id_("sample"), "sample", attrValue)
+  val inputMin   : Input = _inputNum(id_("min"), "min", attrValue)
+  val inputMax   : Input = _inputNum(id_("max"), "max", attrValue)
+  val inputRandom: Input = _inputNum(id_("random"), "rand", attrValue)
+  val inputSample: Input = _inputNum(id_("sample"), "sample", attrValue)
 
   val operandSelector: Select = {
     val ops0 = Seq("=", "!=", "<", ">", "<=", ">=")

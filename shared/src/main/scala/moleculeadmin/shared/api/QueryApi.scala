@@ -94,4 +94,16 @@ trait QueryApi extends BaseApi {
   ): Either[String, Long] = ???
 
   def retractEntity(db: String, eid: Long): Either[String, Long] = ???
+
+  def createJoins(
+    db: String,
+    eids: Seq[Long],
+    ns: String,
+    refAttr: String,
+    refNs: String,
+    valueAttr: String,
+    attrType: String,
+    isEnum: Boolean,
+    value: String
+  ): Either[String, Int] = ???
 }

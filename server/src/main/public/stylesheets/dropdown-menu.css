@@ -54,7 +54,8 @@
 }
 
 .dropdown-menu .dropdown-item {
-    padding: 0px 10px 0px 8px;
+    Xpadding: 0px 10px 0px 8px;
+    padding: 0px 24px 0px 8px;
 }
 .dropdown-menu .dropdown-item:hover {
     background-color: #eaeaea;
