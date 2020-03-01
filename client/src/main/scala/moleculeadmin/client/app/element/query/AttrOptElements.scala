@@ -47,7 +47,7 @@ trait AttrOptElements extends AppElements {
   )
 
 
-  def _inputNum(label: String, id1: String, fn: String, attrValue: Value): Input = input(
+  def _inputNum(id1: String, fn: String, attrValue: Value): Input = input(
     tpe := "text",
     id := id1,
     cls := "form-control",

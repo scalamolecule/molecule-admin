@@ -1,8 +1,8 @@
-package moleculeadmin.client.app.domain.query.data.groupedit.compileTest
+package moleculeadmin.client.app.domain.query.data.groupEdit.compileTest
 
 import java.time.LocalDateTime
 import moleculeadmin.client.app.domain.query.QueryState.columns
-import moleculeadmin.client.app.domain.query.data.groupedit.ops.ScalaCode
+import moleculeadmin.client.app.domain.query.data.groupEdit.ops.ScalaCode
 import moleculeadmin.client.scalafiddle.ScalaFiddle
 import moleculeadmin.shared.ast.query.Col
 import moleculeadmin.shared.ops.query.ColOps

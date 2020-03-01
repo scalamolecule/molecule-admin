@@ -11,6 +11,7 @@ trait TypeValidation extends HelpersAdmin {
     true
   else
     attrType match {
+      case "String"     => true
       case "Int"        => s.isInt
       case "Long"       => s.isLong
       case "Float"      => s.isFloat
@@ -21,6 +22,5 @@ trait TypeValidation extends HelpersAdmin {
       case "URI"        => Try(new URI(s)).isSuccess
       case "BigInt"     => s.matches("\\d+")
       case "BigDecimal" => s.matches("\\d+(\\.\\d+)?")
-      case _            => true // String, UUID, URI
     }
 }

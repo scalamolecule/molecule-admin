@@ -1,4 +1,4 @@
-package moleculeadmin.client.app.domain.query.data.groupedit
+package moleculeadmin.client.app.domain.query.data.groupEdit
 
 import autowire._
 import boopickle.Default._

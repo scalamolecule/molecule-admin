@@ -67,7 +67,7 @@ trait HelpersAdmin extends Helpers with SpecialNames {
       time1 = System.currentTimeMillis()
     }
     def total: Unit = if (on) println(
-      s"$txt total: ${thousands(System.currentTimeMillis - time0)} ms"
+      s"$txt saving time: ${thousands(System.currentTimeMillis - time0)} ms"
     )
   }
 

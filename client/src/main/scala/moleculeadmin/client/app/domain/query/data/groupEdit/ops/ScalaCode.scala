@@ -1,4 +1,4 @@
-package moleculeadmin.client.app.domain.query.data.groupedit.ops
+package moleculeadmin.client.app.domain.query.data.groupEdit.ops
 import moleculeadmin.client.app.domain.query.QueryState.columns
 import moleculeadmin.shared.ast.query.Col
 import moleculeadmin.shared.ops.query.ColOps

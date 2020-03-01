@@ -1,4 +1,4 @@
-package moleculeadmin.client.app.domain.query.data.groupedit.compileTest
+package moleculeadmin.client.app.domain.query.data.groupEdit.compileTest
 import moleculeadmin.client.app.domain.query.QueryState.columns
 import moleculeadmin.shared.ast.query.Col
 

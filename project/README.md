@@ -6,10 +6,11 @@ Testing_
   test them too from IntelliJ
 
 Scala-js:
-- don't have play server running while testing in Intellij (double compiling)
 - be aware not to double-render because of implicit Rx double-wrapping
 - Client code: if "nothing happens", wrap code in try-catch and println to see possible undefined in console or debug in browser
 - "LinkingException: There were linking errors": wipe out target folders and do `sbt clean compile`
+- molecule library as dependency needs to be compiled to both 2.12 and 2.13 to not 
+    show as red in code (although it still compiles, oddly enough) 
 
 Autowire:
 - passing `None` results in `InvalidInput: null`
