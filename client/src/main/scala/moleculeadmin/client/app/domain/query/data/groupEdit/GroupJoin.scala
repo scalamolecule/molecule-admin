@@ -9,7 +9,7 @@ import moleculeadmin.client.app.element.query.datatable.BodyElements
 import moleculeadmin.client.autowire.queryWire
 import moleculeadmin.client.rxstuff.RxBindings
 import moleculeadmin.shared.ast.query.Col
-import moleculeadmin.shared.ast.schema.Attr
+import moleculeadmin.shared.ast.schema.{Attr, Part}
 import moleculeadmin.shared.ops.query.ColOps
 import org.scalajs.dom.html.{LI, TableCell, TableRow}
 import org.scalajs.dom.{Node, NodeList, document, window}
@@ -20,39 +20,45 @@ import scala.collection.mutable.ListBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-case class GroupJoin(colIndex: Int, baseNs: String)(implicit val ctx: Ctx.Owner)
+case class GroupJoin(colIndex: Int, nsFull: String)(implicit val ctx: Ctx.Owner)
   extends RxBindings with ColOps with BodyElements with Paging {
 
   type keepBooPickleImport_GroupSave = PickleState
+  type NsData = (String, String, Int, String, Seq[(String, String, Boolean, String)])
 
-  val attrs: Seq[(String, String, Int, String, Seq[(String, String, Boolean, String)])] = {
-    if (metaSchema.parts.head.name == "db.part/user") {
-      val nss = metaSchema.parts.head.nss
-      val ns  = nss.find(_.nameFull == baseNs).get
-      ns.attrs.collect {
-        case Attr(_, refAttr, refCard, _, _, Some(refNs), _, _, _, _, _, _, _) =>
-          val valueAttrs = nss.find(_.nameFull == refNs).get.attrs.map { at =>
-            val opt = at.options$ match {
-              case None       => ""
-              case Some(opts) =>
-                if (opts.contains("uniqueIdentity"))
-                  "uniqueIdentity"
-                else if (opts.contains("uniqueValue"))
-                  "uniqueValue"
-                else
-                  ""
-            }
-            (at.name, at.tpe, at.enums$.isDefined, opt)
+  private def nsData(part: Part, partName: String = ""): Seq[NsData] = {
+    val nss = part.nss
+    val ns  = nss.find(_.nameFull == nsFull).get
+    ns.attrs.collect {
+      case Attr(_, refAttr, refCard, _, _, Some(refNs), _, _, _, _, _, _, _) =>
+        val valueAttrs = nss.find(_.nameFull == refNs).get.attrs.map { at =>
+          val opt = at.options$ match {
+            case None       => ""
+            case Some(opts) =>
+              if (opts.contains("uniqueIdentity"))
+                "uniqueIdentity"
+              else if (opts.contains("uniqueValue"))
+                "uniqueValue"
+              else
+                ""
           }
-          (ns.name, refAttr, refCard, refNs, valueAttrs)
-      }
+          (at.name, at.tpe, at.enums$.isDefined, opt)
+        }
+        (partName + ns.name, refAttr, refCard, refNs, valueAttrs)
+    }
+  }
+
+  val attrs: Seq[NsData] = {
+    if (metaSchema.parts.head.name == "db.part/user") {
+      nsData(metaSchema.parts.head)
     } else {
-      Nil
+      val part = nsFull.split('_')(0)
+      nsData(metaSchema.parts.find(_.name == part).get, part + "_")
     }
   }
 
   def create(
-    ns: String,
+    nsFull: String,
     refAttr: String,
     refCard: Int,
     refNs: String,
@@ -76,7 +82,7 @@ case class GroupJoin(colIndex: Int, baseNs: String)(implicit val ctx: Ctx.Owner)
     queryWire().createJoins(
       db,
       eids,
-      ns,
+      nsFull,
       refAttr,
       refCard,
       refNs,
@@ -87,7 +93,7 @@ case class GroupJoin(colIndex: Int, baseNs: String)(implicit val ctx: Ctx.Owner)
     ).call().map {
       case Right(count) =>
         val queryHasRefAttr = columns.now.exists {
-          case Col(_, _, `ns`, _, attr, "ref", _, _, _, _, _, _, _, _, _)
+          case Col(_, _, `nsFull`, _, attr, "ref", _, _, _, _, _, _, _, _, _)
             if clean(attr) == refAttr => true
           case _                      => false
         }

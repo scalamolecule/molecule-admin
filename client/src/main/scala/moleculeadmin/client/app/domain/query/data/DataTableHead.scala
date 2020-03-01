@@ -92,7 +92,7 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
       if (attr == "e") {
         val joins = GroupJoin(colIndex, nsFull)
         val joinMaker = (
-          ns: String,
+          nsFull: String,
           refAttr: String,
           refCard: Int,
           refNs: String,
@@ -101,7 +101,7 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
           isEnum: Boolean,
           value: String
         ) =>
-          joins.create(ns, refAttr, refCard, refNs, valueAttr, attrType, isEnum, value)
+          joins.create(nsFull, refAttr, refCard, refNs, valueAttr, attrType, isEnum, value)
 
         _attrHeaderSortable(
           attr, postfix, expr, sortDir, sortPos, sort, editable,

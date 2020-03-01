@@ -757,7 +757,7 @@ class QueryBackend extends ToggleBackend {
   override def createJoins(
     db: String,
     eids: Seq[Long],
-    ns: String,
+    nsFull: String,
     refAttr: String,
     refCard: Int,
     refNs: String,
@@ -769,7 +769,7 @@ class QueryBackend extends ToggleBackend {
     implicit val conn = Conn(base + "/" + db)
     withTransactor {
       try {
-        val refAttrFull = s":$ns/$refAttr"
+        val refAttrFull             = s":$nsFull/$refAttr"
         val eligibleEids: Seq[Long] = if (refCard == 1) {
           // Don't overwrite existing card-one refs
           conn.q(
@@ -801,6 +801,7 @@ class QueryBackend extends ToggleBackend {
           //          stmtss foreach println
           conn.transact(stmtss)
           Right(stmtss.length)
+          //          Left("test..")
         }
       } catch {
         case t: Throwable => Left(t.getMessage)

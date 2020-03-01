@@ -81,14 +81,14 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
       Nil
     } else {
       val nss = joinAttrs.map {
-        case (ns, refAttr, refCard, refNs, attrs) =>
+        case (nsFull, refAttr, refCard, refNs, attrs) =>
           div(
             cls := "dropdown-submenu",
             a(href := "#", cls := "dropdown-item", s"$refAttr ($refNs)"),
             _menu(
               paddingTop := 10,
               attrs.map { case (attrName, attrType, isEnum, opt) =>
-                val fullRefAttr     = s":$ns/$refAttr"
+                val fullRefAttr     = s":$nsFull/$refAttr"
                 val fullValueAttr   = s":$refNs/$attrName"
                 val valueFrag: Frag =
                   if (opt == "uniqueIdentity") {
@@ -108,7 +108,7 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
                         checkValue(value, attrType) match {
                           case Success(_)         =>
                             println(s"Creating `$fullRefAttr` joins to attribute `$fullValueAttr` with value `$value`...")
-                            joinMaker(ns, refAttr, refCard, refNs, attrName, attrType, isEnum, value)
+                            joinMaker(nsFull, refAttr, refCard, refNs, attrName, attrType, isEnum, value)
                           case Failure(exception) =>
                             window.alert(s"Invalid input for attribute `$fullValueAttr`:\n" + exception)
                             joinInput.select()
