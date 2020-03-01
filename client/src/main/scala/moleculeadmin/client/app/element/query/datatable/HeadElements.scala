@@ -73,15 +73,17 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
     }
   }
 
+  type NsData = (String, String, String, Int, String, Seq[(String, String, Boolean, String)])
+
   private def refMenu(
-    joinAttrs: Seq[(String, String, Int, String, Seq[(String, String, Boolean, String)])],
-    joinMaker: (String, String, Int, String, String, String, Boolean, String) => Unit = null
+    joinAttrs: Seq[NsData],
+    joinMaker: (String, String, String, Int, String, String, String, Boolean, String) => Unit = null
   ): Seq[TypedTag[Element]] = {
     if (joinAttrs.isEmpty) {
       Nil
     } else {
       val nss = joinAttrs.map {
-        case (nsFull, refAttr, refCard, refNs, attrs) =>
+        case (part, nsFull, refAttr, refCard, refNs, attrs) =>
           div(
             cls := "dropdown-submenu",
             a(href := "#", cls := "dropdown-item", s"$refAttr ($refNs)"),
@@ -108,7 +110,7 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
                         checkValue(value, attrType) match {
                           case Success(_)         =>
                             println(s"Creating `$fullRefAttr` joins to attribute `$fullValueAttr` with value `$value`...")
-                            joinMaker(nsFull, refAttr, refCard, refNs, attrName, attrType, isEnum, value)
+                            joinMaker(part, nsFull, refAttr, refCard, refNs, attrName, attrType, isEnum, value)
                           case Failure(exception) =>
                             window.alert(s"Invalid input for attribute `$fullValueAttr`:\n" + exception)
                             joinInput.select()
@@ -163,8 +165,8 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
     cancel: MouseEvent => Unit,
     retract: MouseEvent => Unit,
     togglers: Seq[MouseEvent => Unit] = Nil,
-    joinAttrs: Seq[(String, String, Int, String, Seq[(String, String, Boolean, String)])] = Nil,
-    joinMaker: (String, String, Int, String, String, String, Boolean, String) => Unit = null
+    joinAttrs: Seq[NsData] = Nil,
+    joinMaker: (String, String, String, Int, String, String, String, Boolean, String) => Unit = null
   ): TypedTag[UList] = {
     val items = if (attribute == "e") {
       Seq(
@@ -233,8 +235,8 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
     cancel: MouseEvent => Unit,
     retract: MouseEvent => Unit,
     togglers: Seq[MouseEvent => Unit] = Nil,
-    joinAttrs: Seq[(String, String, Int, String, Seq[(String, String, Boolean, String)])] = Nil,
-    joinMaker: (String, String, Int, String, String, String, Boolean, String) => Unit = null
+    joinAttrs: Seq[NsData] = Nil,
+    joinMaker: (String, String, String, Int, String, String, String, Boolean, String) => Unit = null
   ): TypedTag[TableHeaderCell] = {
     val headerCell = {
       if (expr == "orig") {
