@@ -25,29 +25,26 @@ case class GroupJoin(colIndex: Int, baseNs: String)(implicit val ctx: Ctx.Owner)
 
   type keepBooPickleImport_GroupSave = PickleState
 
-  val attrs: Seq[(String, String, String, Seq[(String, String, Boolean, String)])] = {
+  val attrs: Seq[(String, String, Int, String, Seq[(String, String, Boolean, String)])] = {
     if (metaSchema.parts.head.name == "db.part/user") {
       val nss = metaSchema.parts.head.nss
       val ns  = nss.find(_.nameFull == baseNs).get
       ns.attrs.collect {
-        case Attr(_, refAttr, _, _, _, Some(refNs), options$, _, _, _, _, _, _) =>
-          (ns.name, refAttr, refNs)
-      }.distinct.map {
-        case (ns, refAttr, refNs) =>
+        case Attr(_, refAttr, refCard, _, _, Some(refNs), _, _, _, _, _, _, _) =>
           val valueAttrs = nss.find(_.nameFull == refNs).get.attrs.map { at =>
             val opt = at.options$ match {
-              case None  => ""
-              case Some(opts)  =>
-                if(opts.contains("uniqueIdentity"))
+              case None       => ""
+              case Some(opts) =>
+                if (opts.contains("uniqueIdentity"))
                   "uniqueIdentity"
-                else if(opts.contains("uniqueValue"))
+                else if (opts.contains("uniqueValue"))
                   "uniqueValue"
                 else
                   ""
             }
             (at.name, at.tpe, at.enums$.isDefined, opt)
           }
-          (ns, refAttr, refNs, valueAttrs)
+          (ns.name, refAttr, refCard, refNs, valueAttrs)
       }
     } else {
       Nil
@@ -57,6 +54,7 @@ case class GroupJoin(colIndex: Int, baseNs: String)(implicit val ctx: Ctx.Owner)
   def create(
     ns: String,
     refAttr: String,
+    refCard: Int,
     refNs: String,
     valueAttr: String,
     attrType: String,
@@ -80,6 +78,7 @@ case class GroupJoin(colIndex: Int, baseNs: String)(implicit val ctx: Ctx.Owner)
       eids,
       ns,
       refAttr,
+      refCard,
       refNs,
       valueAttr,
       attrType,
@@ -92,14 +91,14 @@ case class GroupJoin(colIndex: Int, baseNs: String)(implicit val ctx: Ctx.Owner)
             if clean(attr) == refAttr => true
           case _                      => false
         }
-        window.alert(
+        val msg             =
           s"Successfully created $count " +
-            s"joins to `:$refNs/$valueAttr` with value `$value`." + (
-            if (queryHasRefAttr) "" else
+            s"joins to `:$refNs/$valueAttr` with value `$value`." +
+            (if (queryHasRefAttr) "" else
               "\nPlease note that new joins won't show " +
-                "since ref attribute is not in current query."
-            )
-        )
+                "since ref attribute is not in current query.")
+        println(msg)
+        window.alert(msg)
         modelElements.recalc()
 
       case Left(err) =>

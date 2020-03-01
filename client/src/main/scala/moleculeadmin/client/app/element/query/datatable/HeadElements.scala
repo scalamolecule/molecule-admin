@@ -74,53 +74,56 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
   }
 
   private def refMenu(
-    joinAttrs: Seq[(String, String, String, Seq[(String, String, Boolean, String)])],
-    joinMaker: (String, String, String, String, String, Boolean, String) => Unit = null
+    joinAttrs: Seq[(String, String, Int, String, Seq[(String, String, Boolean, String)])],
+    joinMaker: (String, String, Int, String, String, String, Boolean, String) => Unit = null
   ): Seq[TypedTag[Element]] = {
     if (joinAttrs.isEmpty) {
       Nil
     } else {
       val nss = joinAttrs.map {
-        case (ns, refAttr, refNs, attrs) =>
+        case (ns, refAttr, refCard, refNs, attrs) =>
           div(
             cls := "dropdown-submenu",
             a(href := "#", cls := "dropdown-item", s"$refAttr ($refNs)"),
             _menu(
               paddingTop := 10,
               attrs.map { case (attrName, attrType, isEnum, opt) =>
-                val fullRefAttr = s":$ns/$refAttr"
-                val fullValueAttr = s":$refNs/$attrName"
-                val joinInput = input(
-                  tpe := "text",
-                  marginLeft := 5,
-                ).render
-                label(
-                  cls := "dropdown-item",
-                  marginBottom := 3,
-                  textAlign.right,
-                  form(
-                    onsubmit := { () => false },
-                    onchange := { () =>
-                      if (opt == "uniqueIdentity") {
-                        window.alert(s"Can't add joins to unique identity attribute `$fullValueAttr`")
-                      } else if (opt == "uniqueValue") {
-                        window.alert(s"Can't add joins to unique value attribute `$fullValueAttr`")
-                      } else {
+                val fullRefAttr     = s":$ns/$refAttr"
+                val fullValueAttr   = s":$refNs/$attrName"
+                val valueFrag: Frag =
+                  if (opt == "uniqueIdentity") {
+                    s"$attrName (unique identity)"
+                  } else if (opt == "uniqueValue") {
+                    s"$attrName (unique value)"
+                  } else {
+                    val joinInput = input(
+                      tpe := "text",
+                      marginLeft := 5,
+                    ).render
+                    form(
+                      onsubmit := { () => false },
+                      onchange := { () =>
                         val value = joinInput.value
                         // Basic client validation before submitting
                         checkValue(value, attrType) match {
                           case Success(_)         =>
                             println(s"Creating `$fullRefAttr` joins to attribute `$fullValueAttr` with value `$value`...")
-                            joinMaker(ns, refAttr, refNs, attrName, attrType, isEnum, value)
+                            joinMaker(ns, refAttr, refCard, refNs, attrName, attrType, isEnum, value)
                           case Failure(exception) =>
                             window.alert(s"Invalid input for attribute `$fullValueAttr`:\n" + exception)
                             joinInput.select()
                         }
-                      }
-                    },
-                    attrName,
-                    joinInput
-                  )
+                      },
+                      attrName,
+                      joinInput
+                    )
+                  }
+
+                label(
+                  cls := "dropdown-item",
+                  marginBottom := 3,
+                  textAlign.right,
+                  valueFrag
                 )
               }
             )
@@ -160,8 +163,8 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
     cancel: MouseEvent => Unit,
     retract: MouseEvent => Unit,
     togglers: Seq[MouseEvent => Unit] = Nil,
-    joinAttrs: Seq[(String, String, String, Seq[(String, String, Boolean, String)])] = Nil,
-    joinMaker: (String, String, String, String, String, Boolean, String) => Unit = null
+    joinAttrs: Seq[(String, String, Int, String, Seq[(String, String, Boolean, String)])] = Nil,
+    joinMaker: (String, String, Int, String, String, String, Boolean, String) => Unit = null
   ): TypedTag[UList] = {
     val items = if (attribute == "e") {
       Seq(
@@ -230,8 +233,8 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
     cancel: MouseEvent => Unit,
     retract: MouseEvent => Unit,
     togglers: Seq[MouseEvent => Unit] = Nil,
-    joinAttrs: Seq[(String, String, String, Seq[(String, String, Boolean, String)])] = Nil,
-    joinMaker: (String, String, String, String, String, Boolean, String) => Unit = null
+    joinAttrs: Seq[(String, String, Int, String, Seq[(String, String, Boolean, String)])] = Nil,
+    joinMaker: (String, String, Int, String, String, String, Boolean, String) => Unit = null
   ): TypedTag[TableHeaderCell] = {
     val headerCell = {
       if (expr == "orig") {
@@ -275,7 +278,7 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
         )
       }
     }
-    val sortCell = td(
+    val sortCell   = td(
       cursor.pointer,
       sortDir match {
         case "asc"  => _sortIcon("oi oi-caret-top", sortPos)

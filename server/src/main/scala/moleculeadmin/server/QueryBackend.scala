@@ -759,6 +759,7 @@ class QueryBackend extends ToggleBackend {
     eids: Seq[Long],
     ns: String,
     refAttr: String,
+    refCard: Int,
     refNs: String,
     valueAttr: String,
     attrType: String,
@@ -768,23 +769,31 @@ class QueryBackend extends ToggleBackend {
     implicit val conn = Conn(base + "/" + db)
     withTransactor {
       try {
-        val eidsWithNoJoin = conn.q(
-          s"""[:find  ?e
-             | :in    $$ [?e ...]
-             | :where (not [?e :$ns/$refAttr])]""".stripMargin,
+        val refAttrFull = s":$ns/$refAttr"
+        val eligibleEids: Seq[Long] = if (refCard == 1) {
+          // Don't overwrite existing card-one refs
+          conn.q(
+            s"""[:find  ?e
+               | :in    $$ [?e ...]
+               | :where (not [?e $refAttrFull])]""".stripMargin,
+            eids
+          ).map(_.head.toString.toLong)
+        } else {
+          // Add ref to card-many refs
           eids
-        )
-        if (eidsWithNoJoin.isEmpty) {
-          Left("All entities already have joins")
+        }
+        if (eligibleEids.isEmpty) {
+          Left("All entities already have card-one joins to attribute ``")
         } else {
           val castedValue = if (isEnum)
             s":$refNs.$valueAttr/$value"
           else
             getCaster(attrType, "")(value)
-          val stmtss      = eidsWithNoJoin.map { row =>
+
+          val stmtss = eligibleEids.map { eid =>
             val refId = Peer.tempid(":db.part/user")
             Seq(
-              Add(row.head, s":$ns/$refAttr", refId, NoValue),
+              Add(eid, refAttrFull, refId, NoValue),
               Add(refId, s":$refNs/$valueAttr", castedValue, NoValue)
             )
           }
