@@ -94,13 +94,14 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
         val joinMaker = (
           ns: String,
           refAttr: String,
+          refCard: Int,
           refNs: String,
           valueAttr: String,
           attrType: String,
           isEnum: Boolean,
           value: String
         ) =>
-          joins.create(ns, refAttr, refNs, valueAttr, attrType, isEnum, value)
+          joins.create(ns, refAttr, refCard, refNs, valueAttr, attrType, isEnum, value)
 
         _attrHeaderSortable(
           attr, postfix, expr, sortDir, sortPos, sort, editable,

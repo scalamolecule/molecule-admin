@@ -141,9 +141,9 @@ case class UpdateCardMap[T](
       val duplicateKeys = newKeys.length - newKeys.distinct.length
 
       val retractsAsserts = (if (retracts.isEmpty) "" else
-        retracts.mkString("\nRETRACT: `", "`\nRETRACT: `", "`")) +
+        retracts.mkString("\n  RETRACT: `", "`\n  RETRACT: `", "`")) +
         (if (asserts.isEmpty) "" else
-          asserts.mkString("\nASSERT : `", "`\nASSERT : `", "`"))
+          asserts.mkString("\n  ASSERT : `", "`\n  ASSERT : `", "`"))
 
       if (!newPairs.forall { case (k, v) => k.nonEmpty && v.nonEmpty }) {
         editCellId = ""

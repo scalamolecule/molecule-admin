@@ -100,6 +100,7 @@ trait QueryApi extends BaseApi {
     eids: Seq[Long],
     ns: String,
     refAttr: String,
+    refCard: Int,
     refNs: String,
     valueAttr: String,
     attrType: String,

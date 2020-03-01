@@ -134,9 +134,9 @@ case class UpdateCardMany[T](
       val (retracts, asserts) = (oldStrs.diff(newStrs), newStrs.diff(oldStrs))
 
       val retractsAsserts = (if (retracts.isEmpty) "" else
-        retracts.mkString("\nRETRACT: `", "`\nRETRACT: `", "`")) +
+        retracts.mkString("\n  RETRACT: `", "`\n  RETRACT: `", "`")) +
         (if (asserts.isEmpty) "" else
-          asserts.mkString("\nASSERT : `", "`\nASSERT : `", "`"))
+          asserts.mkString("\n  ASSERT : `", "`\n  ASSERT : `", "`"))
 
       if (enums.nonEmpty && !newStrs.forall(enums.contains(_))) {
         editCellId = ""
@@ -175,7 +175,7 @@ case class UpdateCardMany[T](
         update.foreach {
           case Right((t, tx, txInstant)) =>
             updateClient(t, tx, txInstant, row, eid, newVopt)
-            println(s"Updated $attrFull: $retractsAsserts")
+            println(s"Updated $attrFull $retractsAsserts")
 
           case Left(err) =>
             editCellId = ""

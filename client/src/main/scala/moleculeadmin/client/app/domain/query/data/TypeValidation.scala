@@ -11,16 +11,16 @@ trait TypeValidation extends HelpersAdmin {
     true
   else
     attrType match {
-      case "String"     => true
-      case "Int"        => s.isInt
-      case "Long"       => s.isLong
-      case "Float"      => s.isFloat
-      case "Double"     => s.isDouble
-      case "Boolean"    => s.isBoolean
-      case "Date"       => Try(expandDateStr(s)).isSuccess
-      case "UUID"       => Try(UUID.fromString(s)).isSuccess
-      case "URI"        => Try(new URI(s)).isSuccess
-      case "BigInt"     => s.matches("\\d+")
-      case "BigDecimal" => s.matches("\\d+(\\.\\d+)?")
+      case "String"       => true
+      case "Int"          => s.isInt
+      case "Long" | "ref" => s.isLong
+      case "Float"        => s.isFloat
+      case "Double"       => s.isDouble
+      case "Boolean"      => s.isBoolean
+      case "Date"         => Try(expandDateStr(s)).isSuccess
+      case "UUID"         => Try(UUID.fromString(s)).isSuccess
+      case "URI"          => Try(new URI(s)).isSuccess
+      case "BigInt"       => s.matches("\\d+")
+      case "BigDecimal"   => s.matches("\\d+(\\.\\d+)?")
     }
 }
