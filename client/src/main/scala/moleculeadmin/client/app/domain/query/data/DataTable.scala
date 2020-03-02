@@ -27,7 +27,7 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
   type keepBooPickleImport_DataTable = PickleState
 
   // Table elements
-  val tableHead: TableSection = thead(cls := "xx").render
+  val tableHead: TableSection = thead().render
   val tableBody: TableSection = tbody(id := "tableBody",
     tr(td(), td(colspan := columns.now.size, "fetching data..."))
   ).render

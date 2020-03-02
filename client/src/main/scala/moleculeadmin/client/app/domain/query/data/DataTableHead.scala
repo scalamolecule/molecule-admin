@@ -34,9 +34,9 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
     val Col(colIndex, _, nsAlias, nsFull, attr, _, colType, card, _, _,
     aggrType, expr, sortDir, sortPos, _) = col
 
-    val postfix  = attrResolver.postfix(col)
-    val sortable = card == 1 || singleAggrTypes.contains(aggrType)
-    val sort     = { e: MouseEvent =>
+    val postfix         = attrResolver.postfix(col)
+    val sortable        = card == 1 || singleAggrTypes.contains(aggrType)
+    val sort            = { e: MouseEvent =>
       if (columns.now.size == 5 &&
         !columns.now.exists(_.colIndex == colIndex)) {
         window.alert("Can sort maximum 5 columns.")
@@ -51,11 +51,11 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
         )
       }
     }
-    val editable = isEditable(columns.now, colIndex, nsAlias, nsFull)
-    val edit     = { _: MouseEvent =>
+    val editable        = isEditable(columns.now, colIndex, nsAlias, nsFull)
+    val edit            = { _: MouseEvent =>
       modelElements() = toggleEdit(modelElements.now, colIndex, nsFull, attr)
     }
-    val save     = { _: MouseEvent =>
+    val save            = { _: MouseEvent =>
       colType match {
         case "string"     => GroupSave(col).string()
         case "double"     => GroupSave(col).double()
@@ -65,15 +65,15 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
         case "mapDouble"  => GroupSave(col).mapDouble()
       }
     }
-    val retractEntities  = { _: MouseEvent =>
+    val retractEntities = { _: MouseEvent =>
       println("retract entities... " + attr)
       //      modelElements() = toggleEdit(modelElements.now, i, nsFull, attr)
     }
-    val retractValues  = { _: MouseEvent =>
+    val retractValues   = { _: MouseEvent =>
       println("retract values... " + attr)
       //      modelElements() = toggleEdit(modelElements.now, i, nsFull, attr)
     }
-    val cancel   = { _: MouseEvent =>
+    val cancel          = { _: MouseEvent =>
       resetEditColToOrigColCache(colIndex, colType)
       modelElements() = toggleEdit(modelElements.now, colIndex, nsFull, attr)
     }
@@ -254,11 +254,20 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
       colIndex += 1
     }
     val toggleCell = _openCloseQueryBuilder(
-      querySelection() == "", () => toggleQueryBuilder)
-    val nsCells    = nss.map { case (nsAlias, _, i) => td(colspan := i, nsAlias) }
+      querySelection() == "",
+      () => toggleQueryBuilder
+    )
+    val nsCells    = nss.map {
+      case (nsAlias, _, i) =>
+        td(
+          cls := "header",
+          colspan := i,
+          nsAlias
+        )
+    }
     tableHead.innerHTML = ""
     tableHead.appendChild(tr(toggleCell +: nsCells).render)
     tableHead.appendChild(tr(_rowNumberCell +: sortCells).render)
-    tableHead.appendChild(tr(td() +: filterCells).render)
+    tableHead.appendChild(tr(td(cls := "header") +: filterCells).render)
   }
 }

@@ -1,9 +1,10 @@
 package moleculeadmin.client.app.element.query
 
 import moleculeadmin.client.app.element.query.datatable.HeadElements
+import moleculeadmin.shared.styles.Color
 import org.scalajs.dom.html._
 import scalatags.JsDom.TypedTag
-import scalatags.JsDom.all._
+import scalatags.JsDom.all.{marginTop, _}
 
 
 trait GroupedAttrElements extends SubMenuElements with HeadElements {
@@ -90,9 +91,15 @@ trait GroupedAttrElements extends SubMenuElements with HeadElements {
   }
 
   def _sort(colType: String, dir: String): TypedTag[Span] =
-    _sortIcon(s"oi oi-caret-$dir", 0)(
+    span(
+      if (colType == "double") float.right else float.left,
       marginTop := -1,
-      if (colType == "double") float.right else float.left
+      span(cls := s"oi oi-caret-$dir", verticalAlign.middle,
+        paddingLeft := 0,
+      ),
+      color := Color.icon,
+      whiteSpace.nowrap,
+      cursor.pointer,
     )
 
   def _noSort(colType: String): TypedTag[Span] =

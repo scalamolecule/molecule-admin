@@ -11,51 +11,25 @@ import org.scalajs.dom.html._
 import org.scalajs.dom.{MouseEvent, window}
 import rx.{Ctx, Rx}
 import scalatags.JsDom.TypedTag
-import scalatags.JsDom.all._
+import scalatags.JsDom.all.{span, _}
 import scala.util.{Failure, Success, Try}
 
 
 trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
 
   def _openCloseQueryBuilder(closed: Boolean, onclck: () => Unit): TypedTag[Element] = td(
-    cls := "hover",
+    cls := "header open-close",
     i(cls := "fas fa-angle-double-" + (if (closed) "right" else "left")),
     textAlign.center,
     onclick := onclck
   )
 
   def _rowNumberCell: TypedTag[TableCell] = td(
+    cls := "header attr",
     "n",
     verticalAlign.middle,
     textAlign.center
   )
-
-  def _rowNumberCell2: TypedTag[TableCell] = td(
-    "n",
-    verticalAlign.middle,
-    textAlign.center
-  )
-
-  def _sortIcon(clazz: String, sortPos: Int): TypedTag[Span] = span(
-    float.right,
-    color := Color.icon,
-    whiteSpace.nowrap,
-    span(cls := clazz, verticalAlign.middle,
-      paddingLeft := 0,
-    ),
-    if (sortPos == 0) () else span(sortPos)
-  )
-
-  //  def nsUls(nss: Seq[Ns]): Seq[TypedTag[Element]] = {
-  //    nss.map(ns =>
-  //      div(cls := "dropdown-submenu",
-  //        a(href := "#", cls := "dropdown-item", ns.nameFull),
-  //        _menu(
-  //          ns.attrs.map(at => a(href := "#", cls := "dropdown-item", at.name))
-  //        )
-  //      )
-  //    )
-  //  }
 
   private def checkValue(v: String, tpe: String): Try[Any] = {
     tpe match {
@@ -75,7 +49,6 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
 
   type NsData = (String, String, String, Int, String, Seq[(String, String, Boolean, String)])
   type JoinMaker = (String, String, String, Int, String, String, String, Boolean, String) => Unit
-
 
   private def refMenu(
     joinAttrs: Seq[NsData],
@@ -145,17 +118,6 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
         )
       )
     }
-
-    // When composite queries are implemented in MoleculeAdmin we can reference
-    // any attribute and can then take values directly from metaSchema:
-    //    if (metaSchema.parts.head.name == "db.part/user") {
-    //      metaSchema.parts.head match {
-    //        case Part(_, _, _, _, nss) =>
-    //          nsUls(nss)
-    //      }
-    //    } else {
-    //      Nil
-    //    }
   }
 
   private def attrMenu(
@@ -188,7 +150,7 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
         refMenu(joinAttrs, joinMaker) ++
         Seq(
           div(cls := "dropdown-divider", margin := "3px 0"),
-          a(href := "#", cls := "dropdown-item", "Retract values", onclick := retractEntities)
+          a(href := "#", cls := "dropdown-item", "Retract entities", onclick := retractEntities)
         )
     } else if (expr == "edit") {
       Seq(
@@ -210,7 +172,7 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
       li(
         cls := "dropdown",
         width := "100%",
-        padding := "1px 6px 2px 6px",
+        padding := "1px 6px 1px 6px",
         attribute,
         if (postfix.isEmpty) () else _pf(postfix),
         if (expr.nonEmpty) span(cls := "expr", expr) else (),
@@ -247,23 +209,29 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
     joinAttrs: Seq[NsData] = Nil,
     joinMaker: JoinMaker = null
   ): TypedTag[TableCell] = {
-    val headerCell = {
+    val attrCell = {
       if (expr == "orig") {
         td(
-          attribute,
+          paddingTop := 1,
+          paddingLeft := 6,
+          attribute + "A",
           if (postfix.isEmpty) () else _pf(postfix)
         )
       } else if (expr == "edit") {
         td(
+          paddingTop := 2,
+          paddingLeft := 6,
           padding := 0,
-          attrMenu(attribute, postfix, expr, edit, save, cancel,
+          attrMenu(attribute + "B", postfix, expr, edit, save, cancel,
             retractEntities, retractValues),
           onchange := { () => processing() = "" }
         )
       } else if (nonMenuExprs.contains(expr)) {
         // non-editable aggr/tx
         td(
-          attribute,
+          paddingTop := 1,
+          paddingLeft := 6,
+          attribute + "C",
           if (postfix.isEmpty) () else _pf(postfix),
           span(cls := "expr", expr),
         )
@@ -275,13 +243,17 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
         )
       } else if (editable) {
         td(
+          paddingTop := 2,
+          paddingLeft := 6,
           padding := 0,
-          attrMenu(attribute, postfix, expr, edit, save, cancel,
+          attrMenu(attribute + "D", postfix, expr, edit, save, cancel,
             retractEntities, retractValues)
         )
       } else {
         td(
-          attribute,
+          paddingTop := 1,
+          paddingLeft := 6,
+          attribute + "E",
           if (postfix.isEmpty) () else _pf(postfix),
           span(cls := "expr", expr),
           cursor.pointer,
@@ -293,27 +265,46 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
         )
       }
     }
-    val sortCell   = td(
-      cursor.pointer,
-      sortDir match {
-        case "asc"  => _sortIcon("oi oi-caret-top", sortPos)
-        case "desc" => _sortIcon("oi oi-caret-bottom", sortPos)
-        case _      => span(
-          cls := "oi oi-elevator",
-          paddingTop := 3,
-          float.right,
-          color := "#bbbbbb"
-        )
-      },
-      onclick := sort
-    )
+    val sortCell =
+      td(
+        cursor.pointer,
+        width := "30%",
+        minWidth := 26,
+        sortDir match {
+          case "asc"  => _sortIcon("oi oi-caret-top", sortPos)
+          case "desc" => _sortIcon("oi oi-caret-bottom", sortPos)
+          case _      => span(
+            cls := "oi oi-elevator",
+            paddingRight := 6,
+            float.right,
+            color := "#bbbbbb"
+          )
+        },
+        onclick := sort
+      )
+
     td(
+      cls := "header",
       table(
-        cls := "neutral",
-        tr(headerCell, sortCell)
+        width := "100%",
+        tr(
+          attrCell(width := "70%"),
+          sortCell
+        )
       )
     )
   }
+
+  def _sortIcon(clazz: String, sortPos: Int): TypedTag[Span] = span(
+    float.right,
+    paddingRight := 4,
+    color := Color.icon,
+    whiteSpace.nowrap,
+    span(cls := clazz, verticalAlign.middle,
+      paddingLeft := 0,
+    ),
+    if (sortPos == 0) () else span(sortPos)
+  )
 
   def _attrHeader(
     attribute: String,
@@ -328,6 +319,7 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
   ): TypedTag[TableCell] = {
     if (expr == "orig" || !editable) {
       td(
+        cls := "header",
         verticalAlign.middle,
         paddingLeft := 6,
         paddingRight := 6,
@@ -336,8 +328,11 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
         noEdit
       )
     } else {
-      td(attrMenu(attribute, postfix, expr, edit, save, cancel,
-        retractEntities, retractValues))
+      td(
+        cls := "header",
+        attrMenu(attribute, postfix, expr, edit, save, cancel,
+          retractEntities, retractValues)
+      )
     }
   }
 
@@ -352,7 +347,7 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
     else
       Seq(filterExpr)
     td(
-      cls := "input",
+      cls := "header input",
       id := filterId,
       contenteditable := true,
       htmlFilter,
@@ -369,7 +364,7 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
     val lambdaHtml: Seq[Frag] =
       lambdaRaw.split("\n").toSeq.flatMap(s => Seq(StringFrag(s), br)).init
     td(
-      cls := "input",
+      cls := "header input",
       id := filterId,
       contenteditable := true,
       lambdaHtml,

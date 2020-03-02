@@ -47,11 +47,6 @@ a.discrete:hover {
     color: #00a4db;
     text-decoration: none;
 }
-.hover:hover {
-    color: #00a4db;
-    text-decoration: none;
-}
-
 
 pre {
     margin-bottom: 0.5rem;
@@ -146,23 +141,6 @@ input, button, select, optgroup, textarea {
     empty-cells: show;
 }
 
-
-table.neutral {
-    width: 99%;
-}
-table.neutral td {
-    border: 0;
-    white-space: nowrap;
-}
-table.neutral td.tempHidden {
-    color: white;
-}
-table.neutral tr:hover td.tempHidden {
-    color: #d6d6d6;
-}
-table.neutral tr:hover td.tempHidden:hover {
-    color: #66c166;
-}
 
 
 table.tableRowLink {

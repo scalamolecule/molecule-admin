@@ -11,7 +11,7 @@
 }
 
 
-.tableData thead th {
+.tableData thead td.header {
     padding: 0px;
 
     border-right-style: solid;
@@ -22,26 +22,32 @@
     border-bottom-color: #ababab;
     border-bottom-width: 1px;
     vertical-align: top;
+
+    font-weight: bold;
 }
-.tableData thead tr:nth-child(1) th {
+.tableData thead .open-close:hover {
+    color: #00a4db;
+    text-decoration: none;
+}
+.tableData thead tr:nth-child(1) td.header  {
     font-weight: normal;
     font-style: italic;
     padding: 2px 6px 2px 6px;
 }
-.tableData thead th span.expr {
+.tableData thead td span.expr {
     padding-left: 6px;
     font-weight: bold;
     font-style: italic;
     color: #f09600;
     white-space: nowrap;
 }
-.tableData thead th span.postfix {
+.tableData thead td span.postfix {
     padding-left: 1px;
     font-weight: normal;
     font-style: italic;
     color: #888;
 }
-.tableData thead th.input {
+.tableData thead td.input {
     padding: 1px 5px 1px 5px;
     font-family: "Menlo", "Courier";
     font-size: 11px;
@@ -50,48 +56,7 @@
 }
 
 
-
-.tableData thead.xx td {
-    padding: 0px;
-
-    border-right-style: solid;
-    border-right-color: #ababab;
-    border-right-width: 1px;
-
-    border-bottom-style: solid;
-    border-bottom-color: #ababab;
-    border-bottom-width: 1px;
-    vertical-align: top;
-}
-.tableData thead.xx tr:nth-child(1) td {
-    font-weight: normal;
-    font-style: italic;
-    padding: 2px 6px 2px 6px;
-}
-.tableData thead.xx td span.expr {
-    padding-left: 6px;
-    font-weight: bold;
-    font-style: italic;
-    color: #f09600;
-    white-space: nowrap;
-}
-.tableData thead.xx td span.postfix {
-    padding-left: 1px;
-    font-weight: normal;
-    font-style: italic;
-    color: #888;
-}
-.tableData thead.xx td.input {
-    padding: 1px 5px 1px 5px;
-    font-family: "Menlo", "Courier";
-    font-size: 11px;
-    color: black;
-    font-weight: normal;
-}
-
-
-
-.tableData td {
+.tableData tBody td {
     padding: 1px 6px 1px 6px;
     vertical-align: top;
 
@@ -103,7 +68,6 @@
     width: 20px;
     cursor: default;
 }
-
 /* Entity id icons */
 .tableData tBody td i {
     cursor: pointer;
@@ -119,50 +83,45 @@
 .tableData tBody td i.retractEntity:hover {
     color: red;
 }
-
-.tableData td.eid {
+.tableData tBody td.eid {
     text-align: right;
     color: #2b7dbe;
     cursor: default;
 }
-.tableData td.eidChosen {
+.tableData tBody td.eidChosen {
     text-align: right;
     background-color: #3cb7ff4f;
     color: #2400ff;
     cursor: default;
 }
-.tableData td.tx {
+.tableData tBody td.tx {
     text-align: right;
     color: #a54ffa;
     cursor: default;
 }
-.tableData td.txChosen {
+.tableData tBody td.txChosen {
     text-align: right;
     background-color: #173eff2e;
     color: #881cc5;
     cursor: default;
 }
-.tableData td.num {
+.tableData tBody td.num {
     text-align: right;
     color: #49a523;
 }
-.tableData td.assert {
+.tableData tBody td.assert {
     border-left: 3px solid #00dc00;
 }
-.tableData td.update {
+.tableData tBody td.update {
     border-left: 3px solid #ffad34;
 }
-.tableData td.retract {
+.tableData tBody td.retract {
     border-left: 3px solid #ff0e0e;
 }
-
-
-
 /* Index column always right-aligned */
 .tableData tbody td:nth-child(1) {
     text-align: right;
 }
-
 .tableData tbody tr:nth-child(even) {
     background: #f2f2f2;
 }
@@ -173,42 +132,46 @@
     background: #ffcc3c6b;
 }
 
+
+.tableData tbody td.items ul {
+    list-style-type: disc;
+    padding-inline-start: 15px;
+    margin-bottom: 0;
+    /* cursor: pointer; */
+}
+.tableData tbody td.num ul{
+    color: #49a523;
+    text-align: right
+}
+.tableData tbody td.date ul{
+    color: orange;
+}
+.tableData tbody ul {
+    list-style-type: none;
+    padding-inline-start: 0;
+    margin-bottom: 0;
+}
+.tableData tbody li.eid {
+    color: #2b7dbe;
+    cursor: pointer;
+}
+.tableData tbody li.eidChosen {
+    color: #2400ff;
+    background-color: #3cb7ff4f;
+    cursor: pointer;
+}
+
+
 .tableData tfoot td {
     padding: 2px 6px 2px 6px;
 
     border-top-style: solid;
     border-top-width: 1px;
     border-top-color: #ababab;
-}
 
-
-
-.tableData td.items ul {
-    list-style-type: disc;
-    padding-inline-start: 15px;
-    margin-bottom: 0;
-    /* cursor: pointer; */
-}
-.tableData td.num ul{
-    color: #49a523;
-    text-align: right
-}
-.tableData td.date ul{
-    color: orange;
-}
-.tableData ul {
-    list-style-type: none;
-    padding-inline-start: 0;
-    margin-bottom: 0;
-}
-.tableData li.eid {
-    color: #2b7dbe;
-    cursor: pointer;
-}
-.tableData li.eidChosen {
-    color: #2400ff;
-    background-color: #3cb7ff4f;
-    cursor: pointer;
+    border-right-style: solid;
+    border-right-color: #ababab;
+    border-right-width: 1px;
 }
 
 
