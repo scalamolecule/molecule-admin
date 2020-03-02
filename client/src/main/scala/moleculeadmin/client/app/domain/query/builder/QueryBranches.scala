@@ -38,6 +38,7 @@ case class QueryBranches(selection: String)(implicit val ctx: Ctx.Owner)
                   _cardHeader(h5(refAttr.capitalize), h6(nsFull)),
 
                 // Attributes section -------------------------------
+
                 for {
                   Attr(i, attr, car, attrType, enums, refNs, options, doc, _, _, _, _, topValues) <- attrs
                 } yield {
@@ -69,6 +70,7 @@ case class QueryBranches(selection: String)(implicit val ctx: Ctx.Owner)
                 },
 
                 // Refs section ---------------------------------------
+
                 if (refs.isEmpty) () else {
                   _divider +: (
                     for ((refAttr, car, Ns(_, _, refNsFull, _, _, refAttrs)) <- refs) yield {
