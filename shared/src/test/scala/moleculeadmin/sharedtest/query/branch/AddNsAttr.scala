@@ -84,6 +84,18 @@ object AddNsAttr extends TestSuite with TreeSchema with TreeOps {
     }
 
 
+
+    test("e, refAttr + bond, e") {
+      val model = List(
+        Generic("Aaa", "e", "datom", EntValue),
+        Atom("Aaa", "ab", "ref", 1, VarValue, None, Seq(), Seq()))
+
+      Model(VerifyRawModel(addNs(model, List("" -> "Aaa"), "ab", "Bbb", "e"))).toString ==> Model(List(
+        Generic("Aaa", "e", "datom", EntValue),
+        Bond("Aaa", "ab", "Bbb", 1, Seq()),
+        Generic("Bbb", "e", "datom", EntValue))).toString
+    }
+
     test("attr, refAttr + bond, attr") {
       val model = List(
         Atom("Aaa", "attrA", "String", 1, VarValue, None, List(), List()),

@@ -1,9 +1,11 @@
 package moleculeadmin.sharedtest
 
-import molecule.ast.model.{Atom, EnumVal, Eq, VarValue}
+import molecule.ast.model.{Atom, Bond, EntValue, EnumVal, Eq, Generic, Model, VarValue}
+import molecule.ops.VerifyRawModel
 import moleculeadmin.shared.ops.query.builder.TreeOps
 import moleculeadmin.shared.ops.transform.Molecule2Model
 import moleculeadmin.shared.testdata.TreeSchema
+import moleculeadmin.sharedtest.query.branch.AddNsAttr.addNs
 import moleculeadmin.sharedtest.query.branch.UpsertBranch.upsertBranch
 import utest._
 import scala.languageFeature.implicitConversions._

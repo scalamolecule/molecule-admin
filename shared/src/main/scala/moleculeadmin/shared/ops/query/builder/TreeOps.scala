@@ -137,7 +137,7 @@ trait TreeOps extends BaseQuery with DebugBranches {
         Bond(ns0, refAttr, refNs, card)
     }.get // In our closed eco-system we can expect the refAttr to be present
 
-    val attr = if (attrName.isEmpty)
+    val attr: GenericAtom = if (attrName.isEmpty)
       Atom(refNs, dummy, "", 1, NoValue, None, List(), List())
     else nsMap(refNs).attrs.collectFirst {
       case Attr(_, `attrName`, _, "datom", _, _, _, _, _, _, _, _, _) =>
@@ -199,8 +199,12 @@ trait TreeOps extends BaseQuery with DebugBranches {
 
       case ((done, acc, path), (Atom(_, refAttr1, _, _, _, _, _, _), `last`))
         if clean(refAttr1) == refAttrClean =>
-        val generic = Generic(refNs, "e", "datom", EntValue)
-        (1, acc ++ (rebonds(path) :+ bond :+ generic :+ attr), Nil)
+        if (attr.attr == "e") {
+          (1, acc ++ (rebonds(path) :+ bond :+ attr), Nil)
+        } else {
+          val generic = Generic(refNs, "e", "datom", EntValue)
+          (1, acc ++ (rebonds(path) :+ bond :+ generic :+ attr), Nil)
+        }
 
       case ((done, acc, path), (lastAttr, `last`)) if acc.exists {
         case Atom(_, refAttr1, _, _, _, _, _, _)
