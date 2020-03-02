@@ -214,7 +214,7 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
         td(
           paddingTop := 1,
           paddingLeft := 6,
-          attribute + "A",
+          attribute,
           if (postfix.isEmpty) () else _pf(postfix)
         )
       } else if (expr == "edit") {
@@ -222,7 +222,7 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
           paddingTop := 2,
           paddingLeft := 6,
           padding := 0,
-          attrMenu(attribute + "B", postfix, expr, edit, save, cancel,
+          attrMenu(attribute, postfix, expr, edit, save, cancel,
             retractEntities, retractValues),
           onchange := { () => processing() = "" }
         )
@@ -231,7 +231,7 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
         td(
           paddingTop := 1,
           paddingLeft := 6,
-          attribute + "C",
+          attribute,
           if (postfix.isEmpty) () else _pf(postfix),
           span(cls := "expr", expr),
         )
@@ -246,14 +246,14 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
           paddingTop := 2,
           paddingLeft := 6,
           padding := 0,
-          attrMenu(attribute + "D", postfix, expr, edit, save, cancel,
+          attrMenu(attribute, postfix, expr, edit, save, cancel,
             retractEntities, retractValues)
         )
       } else {
         td(
           paddingTop := 1,
           paddingLeft := 6,
-          attribute + "E",
+          attribute,
           if (postfix.isEmpty) () else _pf(postfix),
           span(cls := "expr", expr),
           cursor.pointer,
