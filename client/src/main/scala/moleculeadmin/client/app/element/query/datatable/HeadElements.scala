@@ -17,14 +17,14 @@ import scala.util.{Failure, Success, Try}
 
 trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
 
-  def _openCloseQueryBuilder(closed: Boolean, onclck: () => Unit): TypedTag[Element] = th(
+  def _openCloseQueryBuilder(closed: Boolean, onclck: () => Unit): TypedTag[Element] = td(
     cls := "hover",
     i(cls := "fas fa-angle-double-" + (if (closed) "right" else "left")),
     textAlign.center,
     onclick := onclck
   )
 
-  def _rowNumberCell: TypedTag[TableHeaderCell] = th(
+  def _rowNumberCell: TypedTag[TableCell] = td(
     "n",
     verticalAlign.middle,
     textAlign.center
@@ -74,10 +74,12 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
   }
 
   type NsData = (String, String, String, Int, String, Seq[(String, String, Boolean, String)])
+  type JoinMaker = (String, String, String, Int, String, String, String, Boolean, String) => Unit
+
 
   private def refMenu(
     joinAttrs: Seq[NsData],
-    joinMaker: (String, String, String, Int, String, String, String, Boolean, String) => Unit = null
+    joinMaker: JoinMaker = null
   ): Seq[TypedTag[Element]] = {
     if (joinAttrs.isEmpty) {
       Nil
@@ -163,10 +165,11 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
     edit: MouseEvent => Unit,
     save: MouseEvent => Unit,
     cancel: MouseEvent => Unit,
-    retract: MouseEvent => Unit,
+    retractEntities: MouseEvent => Unit,
+    retractValues: MouseEvent => Unit,
     togglers: Seq[MouseEvent => Unit] = Nil,
     joinAttrs: Seq[NsData] = Nil,
-    joinMaker: (String, String, String, Int, String, String, String, Boolean, String) => Unit = null
+    joinMaker: JoinMaker = null
   ): TypedTag[UList] = {
     val items = if (attribute == "e") {
       Seq(
@@ -181,7 +184,12 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
         a(href := "#", cls := "dropdown-item", "Unstar all", onclick := togglers(6)),
         a(href := "#", cls := "dropdown-item", "Unflag all", onclick := togglers(7)),
         a(href := "#", cls := "dropdown-item", "Uncheck all", onclick := togglers(8)),
-      ) ++ refMenu(joinAttrs, joinMaker)
+      ) ++
+        refMenu(joinAttrs, joinMaker) ++
+        Seq(
+          div(cls := "dropdown-divider", margin := "3px 0"),
+          a(href := "#", cls := "dropdown-item", "Retract values", onclick := retractEntities)
+        )
     } else if (expr == "edit") {
       Seq(
         a(href := "#", cls := "dropdown-item", "Save", onclick := save),
@@ -190,7 +198,7 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
     } else {
       Seq(
         a(href := "#", cls := "dropdown-item", "Edit", onclick := edit),
-        a(href := "#", cls := "dropdown-item", "Retract", onclick := retract)
+        a(href := "#", cls := "dropdown-item", "Retract values", onclick := retractValues)
       )
     }
 
@@ -233,11 +241,12 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
     edit: MouseEvent => Unit,
     save: MouseEvent => Unit,
     cancel: MouseEvent => Unit,
-    retract: MouseEvent => Unit,
+    retractEntities: MouseEvent => Unit,
+    retractValues: MouseEvent => Unit,
     togglers: Seq[MouseEvent => Unit] = Nil,
     joinAttrs: Seq[NsData] = Nil,
-    joinMaker: (String, String, String, Int, String, String, String, Boolean, String) => Unit = null
-  ): TypedTag[TableHeaderCell] = {
+    joinMaker: JoinMaker = null
+  ): TypedTag[TableCell] = {
     val headerCell = {
       if (expr == "orig") {
         td(
@@ -247,7 +256,8 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
       } else if (expr == "edit") {
         td(
           padding := 0,
-          attrMenu(attribute, postfix, expr, edit, save, cancel, retract),
+          attrMenu(attribute, postfix, expr, edit, save, cancel,
+            retractEntities, retractValues),
           onchange := { () => processing() = "" }
         )
       } else if (nonMenuExprs.contains(expr)) {
@@ -260,13 +270,14 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
       } else if (attribute == "e") {
         td(
           padding := 0,
-          attrMenu(attribute, postfix, expr, edit, save, cancel, retract,
-            togglers, joinAttrs, joinMaker)
+          attrMenu(attribute, postfix, expr, edit, save, cancel,
+            retractEntities, retractValues, togglers, joinAttrs, joinMaker)
         )
       } else if (editable) {
         td(
           padding := 0,
-          attrMenu(attribute, postfix, expr, edit, save, cancel, retract)
+          attrMenu(attribute, postfix, expr, edit, save, cancel,
+            retractEntities, retractValues)
         )
       } else {
         td(
@@ -275,7 +286,9 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
           span(cls := "expr", expr),
           cursor.pointer,
           onclick := { () =>
-            window.alert("Namespace must have an entity id `e` column first to allow editing.")
+            window.alert(
+              "Namespace must have an entity id `e` column first to allow editing."
+            )
           }
         )
       }
@@ -294,7 +307,7 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
       },
       onclick := sort
     )
-    th(
+    td(
       table(
         cls := "neutral",
         tr(headerCell, sortCell)
@@ -310,10 +323,11 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
     edit: MouseEvent => Unit,
     save: MouseEvent => Unit,
     cancel: MouseEvent => Unit,
-    retract: MouseEvent => Unit,
-  ): TypedTag[TableHeaderCell] = {
+    retractEntities: MouseEvent => Unit,
+    retractValues: MouseEvent => Unit,
+  ): TypedTag[TableCell] = {
     if (expr == "orig" || !editable) {
-      th(
+      td(
         verticalAlign.middle,
         paddingLeft := 6,
         paddingRight := 6,
@@ -322,7 +336,8 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
         noEdit
       )
     } else {
-      th(attrMenu(attribute, postfix, expr, edit, save, cancel, retract))
+      td(attrMenu(attribute, postfix, expr, edit, save, cancel,
+        retractEntities, retractValues))
     }
   }
 
@@ -331,13 +346,13 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
     filterId: String,
     filterExpr: String,
     applyFilter: () => Unit
-  )(implicit ctx: Ctx.Owner): TypedTag[TableHeaderCell] = {
+  )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = {
     val htmlFilter: Seq[Frag] = if (filterExpr.contains("\n"))
       filterExpr.split("\n").toSeq.flatMap(s => Seq(StringFrag(s), br)).init
     else
       Seq(filterExpr)
-    th(
-      cls := "filter",
+    td(
+      cls := "input",
       id := filterId,
       contenteditable := true,
       htmlFilter,
@@ -345,16 +360,16 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
     )
   }
 
-  def _attrLambdaCell(
+  def _attrEditCell(
     filterId: String,
     lambdaRaw: String,
     applyLambda: () => Unit,
     skipSpin: () => Unit,
-  )(implicit ctx: Ctx.Owner): TypedTag[TableHeaderCell] = {
+  )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = {
     val lambdaHtml: Seq[Frag] =
       lambdaRaw.split("\n").toSeq.flatMap(s => Seq(StringFrag(s), br)).init
-    th(
-      cls := "edit",
+    td(
+      cls := "input",
       id := filterId,
       contenteditable := true,
       lambdaHtml,

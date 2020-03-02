@@ -13,5 +13,4 @@ trait TableElements  extends AppElements {
   )
 
   def _dataTable: TypedTag[Table] = table(cls := "tableData")
-
 }

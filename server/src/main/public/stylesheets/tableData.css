@@ -10,6 +10,7 @@
     border-bottom-width: 1px;
 }
 
+
 .tableData thead th {
     padding: 0px;
 
@@ -22,19 +23,6 @@
     border-bottom-width: 1px;
     vertical-align: top;
 }
-.tableData thead tdx {
-    padding: 0px;
-
-    border-right-style: solid;
-    border-right-color: #ababab;
-    border-right-width: 1px;
-
-    border-bottom-style: solid;
-    border-bottom-color: #ababab;
-    border-bottom-width: 1px;
-    vertical-align: top;
-}
-
 .tableData thead tr:nth-child(1) th {
     font-weight: normal;
     font-style: italic;
@@ -53,29 +41,54 @@
     font-style: italic;
     color: #888;
 }
-/*.tableData thead tr:nth-child(2) th:hover {
-    background: #e9e9e9;
-}*/
+.tableData thead th.input {
+    padding: 1px 5px 1px 5px;
+    font-family: "Menlo", "Courier";
+    font-size: 11px;
+    color: black;
+    font-weight: normal;
+}
 
-.tableData th.attr:hover {
-    background: #e9e9e9;
-    cursor: pointer;
-    color: #00a4db;
+
+
+.tableData thead.xx td {
+    padding: 0px;
+
+    border-right-style: solid;
+    border-right-color: #ababab;
+    border-right-width: 1px;
+
+    border-bottom-style: solid;
+    border-bottom-color: #ababab;
+    border-bottom-width: 1px;
+    vertical-align: top;
 }
-.tableData th.filter {
+.tableData thead.xx tr:nth-child(1) td {
+    font-weight: normal;
+    font-style: italic;
+    padding: 2px 6px 2px 6px;
+}
+.tableData thead.xx td span.expr {
+    padding-left: 6px;
+    font-weight: bold;
+    font-style: italic;
+    color: #f09600;
+    white-space: nowrap;
+}
+.tableData thead.xx td span.postfix {
+    padding-left: 1px;
+    font-weight: normal;
+    font-style: italic;
+    color: #888;
+}
+.tableData thead.xx td.input {
     padding: 1px 5px 1px 5px;
     font-family: "Menlo", "Courier";
     font-size: 11px;
     color: black;
     font-weight: normal;
 }
-.tableData th.edit {
-    padding: 1px 5px 1px 5px;
-    font-family: "Menlo", "Courier";
-    font-size: 11px;
-    color: black;
-    font-weight: normal;
-}
+
 
 
 .tableData td {
