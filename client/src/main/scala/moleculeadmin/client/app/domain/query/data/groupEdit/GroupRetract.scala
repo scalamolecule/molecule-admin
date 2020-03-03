@@ -1,6 +1,7 @@
 package moleculeadmin.client.app.domain.query.data.groupEdit
 
 import autowire._
+import boopickle.Default._
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.domain.query.data.Indexes
 import moleculeadmin.client.app.domain.query.keyEvents.Paging
@@ -15,6 +16,8 @@ import scala.concurrent.Future
 
 case class GroupRetract(col: Col)(implicit val ctx: Ctx.Owner)
   extends Paging with ColOps {
+
+  type keepBooPickleImport_GroupSave = PickleState
 
   val Col(colIndex, _, nsAlias, nsFull, attr, attrType, colType, _,
   opt, enums, _, _, _, _, _) = col
