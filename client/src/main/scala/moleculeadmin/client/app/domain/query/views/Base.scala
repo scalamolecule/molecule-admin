@@ -116,10 +116,13 @@ class Base(implicit val ctx: Ctx.Owner)
       )
     )
 
-    case "numSet" => td(
-      cls := (if (asserted) "num" else "num retracted"),
-      expandingList(
-        v.split("__~~__").toSeq.map(_.toDouble).sorted.map(n => li(n))))
+    case "numSet" =>
+      td(
+        cls := (if (asserted) "num" else "num retracted"),
+        expandingList(
+          v.split("__~~__").toSeq.map(_.toDouble).sorted.map(n => li(n)))
+      )
+
 
     case "refSet" => {
       val valueElement = if (txs && level == 0) {
@@ -147,26 +150,41 @@ class Base(implicit val ctx: Ctx.Owner)
       )
     }
 
-    case "dateSet" => td(
-      if (asserted) () else cls := "retracted",
-      expandingList(
-        v.split("__~~__").toSeq.sorted.map(s => li(truncateDateStr(s))))
-    )
+    case "dateSet" =>
+      td(
+        if (asserted) () else cls := "retracted",
+        expandingList(
+          v.split("__~~__").toSeq.sorted.map(s => li(truncateDateStr(s)))
+        )
+      )
 
     case "enumSet" =>
-      if (txs && level == 0)
-        td(v.split('/')(1))
-      else
+      if (txs && level == 0) {
         td(
+          if (asserted) () else cls := "retracted",
+          v.split('/')(1)
+        )
+      } else {
+        td(
+          if (asserted) () else cls := "retracted",
           v.split("__~~__").toSeq.sorted
-            .flatMap(enumAttr => Seq(span(enumAttr.split('/')(1)), br)).init)
+            .flatMap(enumAttr => Seq(span(enumAttr.split('/')(1)), br)).init
+        )
+      }
 
     case "otherSet" => // Boolean, UUID, URI
       if (txs && level == 0)
-        td(v)
+        td(
+          if (asserted) () else cls := "retracted",
+          v
+        )
       else
-        td(expandingList(
-          v.split("__~~__").toSeq.sorted.map(s => li(s))))
+        td(
+          if (asserted) () else cls := "retracted",
+          expandingList(
+            v.split("__~~__").toSeq.sorted.map(s => li(s))
+          )
+        )
 
     case map if map.endsWith("Map") =>
       if (txs && level == 0) {
@@ -198,8 +216,7 @@ class Base(implicit val ctx: Ctx.Owner)
           case "dateMap" => mapCell(rawPairs,
             (v1: String) => td(truncateDateStr(v1)), asserted)
 
-          case _ => mapCell(rawPairs,
-            (v1: String) => td(v1), asserted)
+          case _ => mapCell(rawPairs, (v1: String) => td(v1), asserted)
 
         }
       }

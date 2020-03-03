@@ -93,7 +93,7 @@ trait QueryApi extends BaseApi {
     rowValues: Seq[Seq[String]]
   ): Either[String, Long] = ???
 
-  def retractEntity(db: String, eid: Long): Either[String, Long] = ???
+  def retractEntities(db: String, eids: Array[Long]): Either[String, Long] = ???
 
   def createJoins(
     db: String,

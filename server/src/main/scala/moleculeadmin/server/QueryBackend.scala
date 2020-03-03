@@ -739,10 +739,10 @@ class QueryBackend extends ToggleBackend {
     }
   }
 
-  override def retractEntity(db: String, eid: Long): Either[String, Long] = {
+  override def retractEntities(db: String, eids: Array[Long]): Either[String, Long] = {
     implicit val conn = Conn(base + "/" + db)
-    val stmtss = Seq(Seq(RetractEntity(eid)))
-    println("retractEntity: " + stmtss)
+    val stmtss = Seq(eids.toSeq.map(RetractEntity))
+    println("retractEntities:\n  " + stmtss.mkString("\n  "))
     withTransactor {
       try {
         val txR: TxReport = conn.transact(stmtss)

@@ -2,17 +2,15 @@ package moleculeadmin.client.app.domain.query.data
 
 import moleculeadmin.client.app.domain.query.KeyEvents
 import moleculeadmin.client.app.domain.query.QueryState._
-import moleculeadmin.client.app.domain.query.data.groupEdit.{GroupEdit, GroupJoin, GroupSave}
+import moleculeadmin.client.app.domain.query.data.groupEdit.{GroupEdit, GroupJoin, GroupRetract, GroupSave}
 import moleculeadmin.client.app.domain.query.marker.{Toggle, ToggleOffAll}
 import moleculeadmin.client.app.element.AppElements
 import moleculeadmin.client.app.element.query.datatable.HeadElements
 import moleculeadmin.client.rxstuff.RxBindings
 import moleculeadmin.shared.ast.query.{Col, QueryResult}
-import moleculeadmin.shared.ast.schema
-import moleculeadmin.shared.ast.schema.Attr
 import moleculeadmin.shared.ops.query.data.FilterFactory
 import moleculeadmin.shared.ops.query.{ColOps, ModelOps}
-import org.scalajs.dom.html.{TableCell, TableHeaderCell, TableSection}
+import org.scalajs.dom.html.{TableCell, TableSection}
 import org.scalajs.dom.raw.Node
 import org.scalajs.dom.{MouseEvent, document, window}
 import rx.{Ctx, Rx}
@@ -26,11 +24,10 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
     with AppElements {
 
 
-  def attrSortCell(
+  def attrCell(
     col: Col,
     attrResolver: ResolveAttrs
   ): JsDom.TypedTag[TableCell] = {
-    //      println("attrSortCell...")
     val Col(colIndex, _, nsAlias, nsFull, attr, _, colType, card, _, _,
     aggrType, expr, sortDir, sortPos, _) = col
 
@@ -55,28 +52,13 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
     val edit            = { _: MouseEvent =>
       modelElements() = toggleEdit(modelElements.now, colIndex, nsFull, attr)
     }
-    val save            = { _: MouseEvent =>
-      colType match {
-        case "string"     => GroupSave(col).string()
-        case "double"     => GroupSave(col).double()
-        case "listString" => GroupSave(col).listString()
-        case "listDouble" => GroupSave(col).listDouble()
-        case "mapString"  => GroupSave(col).mapString()
-        case "mapDouble"  => GroupSave(col).mapDouble()
-      }
-    }
-    val retractEntities = { _: MouseEvent =>
-      println("retract entities... " + attr)
-      //      modelElements() = toggleEdit(modelElements.now, i, nsFull, attr)
-    }
-    val retractValues   = { _: MouseEvent =>
-      println("retract values... " + attr)
-      //      modelElements() = toggleEdit(modelElements.now, i, nsFull, attr)
-    }
+    val save            = { _: MouseEvent => GroupSave(col).save() }
     val cancel          = { _: MouseEvent =>
       resetEditColToOrigColCache(colIndex, colType)
       modelElements() = toggleEdit(modelElements.now, colIndex, nsFull, attr)
     }
+    val retractEntities = { _: MouseEvent => GroupRetract(col).entities() }
+    val retractValues   = { _: MouseEvent => GroupRetract(col).values() }
 
     val togglers: Seq[MouseEvent => Unit] = if (attr == "e") {
       Seq(
@@ -110,22 +92,26 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
         )
 
         _attrHeaderSortable(
-          attr, postfix, expr, sortDir, sortPos, sort, editable,
-          edit, save, cancel, retractEntities, retractValues,
+          attr, postfix, expr, sortDir, sortPos, sort,
+          editable, edit, save, cancel,
+          retractEntities, retractValues,
           togglers,
           joins.attrs, joinMaker
         )
       } else {
         _attrHeaderSortable(
-          attr, postfix, expr, sortDir, sortPos, sort, editable,
-          edit, save, cancel, retractEntities, retractValues,
+          attr, postfix, expr, sortDir, sortPos, sort,
+          editable, edit, save, cancel,
+          retractEntities, retractValues,
           togglers,
         )
       }
     } else {
       _attrHeader(
-        attr, postfix, expr, editable,
-        edit, save, cancel, retractEntities, retractValues)
+        attr, postfix, expr,
+        editable, edit, save, cancel,
+        retractEntities, retractValues
+      )
     }
   }
 
@@ -155,7 +141,7 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
   }
 
 
-  def attrFilterCell(
+  def inputCell(
     col: Col,
     attrResolver: ResolveAttrs
   ): JsDom.TypedTag[TableCell] = {
@@ -227,12 +213,17 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
     //    println("---- head ----")
 
     // re-calculate column attr headers on change
-    val cols           = columns()
-    val colCount       = cols.size
-    val attrResolver   = ResolveAttrs(columns.now)
-    var nss            = Seq.empty[(String, String, Int)]
-    val sortCells      = new Array[JsDom.TypedTag[TableCell]](colCount)
-    val filterCells    = new Array[JsDom.TypedTag[TableCell]](colCount)
+    val cols         = columns()
+    val colCount     = cols.size
+    val attrResolver = ResolveAttrs(columns.now)
+    var nss          = Seq.empty[(String, String, Int)]
+    val attrCells    = new Array[JsDom.TypedTag[TableCell]](1 + colCount)
+    val inputCells  = new Array[JsDom.TypedTag[TableCell]](1 + colCount)
+
+    // Row number column
+    attrCells(0) = _rowNumberCell
+    inputCells(0) = td(cls := "header")
+
     var colIndex       = 0
     var col   : Col    = null
     var prevNs: String = ""
@@ -249,15 +240,15 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
           nss = nss :+ (col.nsAlias, col.nsFull, 1)
       }
 
-      sortCells(colIndex) = attrSortCell(col, attrResolver)
-      filterCells(colIndex) = attrFilterCell(col, attrResolver)
       colIndex += 1
+      attrCells(colIndex) = attrCell(col, attrResolver)
+      inputCells(colIndex) = inputCell(col, attrResolver)
     }
     val toggleCell = _openCloseQueryBuilder(
       querySelection() == "",
       () => toggleQueryBuilder
     )
-    val nsCells    = nss.map {
+    val nsCells    = toggleCell +: nss.map {
       case (nsAlias, _, i) =>
         td(
           cls := "header",
@@ -266,8 +257,8 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
         )
     }
     tableHead.innerHTML = ""
-    tableHead.appendChild(tr(toggleCell +: nsCells).render)
-    tableHead.appendChild(tr(_rowNumberCell +: sortCells).render)
-    tableHead.appendChild(tr(td(cls := "header") +: filterCells).render)
+    tableHead.appendChild(tr(nsCells).render)
+    tableHead.appendChild(tr(attrCells.toSeq).render)
+    tableHead.appendChild(tr(inputCells.toSeq).render)
   }
 }

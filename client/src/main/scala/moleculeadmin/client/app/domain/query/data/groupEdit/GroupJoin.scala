@@ -5,26 +5,20 @@ import boopickle.Default._
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.domain.query.data.Indexes
 import moleculeadmin.client.app.domain.query.keyEvents.Paging
-import moleculeadmin.client.app.element.query.datatable.BodyElements
+import moleculeadmin.client.app.element.query.datatable.HeadElements
 import moleculeadmin.client.autowire.queryWire
-import moleculeadmin.client.rxstuff.RxBindings
 import moleculeadmin.shared.ast.query.Col
 import moleculeadmin.shared.ast.schema.{Attr, Part}
-import moleculeadmin.shared.ops.query.ColOps
-import org.scalajs.dom.html.{LI, TableCell, TableRow}
-import org.scalajs.dom.{Node, NodeList, document, window}
-import rx.{Ctx, Rx}
-import scalatags.JsDom.TypedTag
-import scalatags.JsDom.all._
+import org.scalajs.dom.window
+import rx.Ctx
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 case class GroupJoin(colIndex: Int, nsFull: String)(implicit val ctx: Ctx.Owner)
-  extends RxBindings with ColOps with BodyElements with Paging {
+  extends HeadElements with Paging {
 
   type keepBooPickleImport_GroupSave = PickleState
-  type NsData = (String, String, String, Int, String, Seq[(String, String, Boolean, String)])
+//  type NsData = (String, String, String, Int, String, Seq[(String, String, Boolean, String)])
 
   private def nsData(part: Part, partName: String): Seq[NsData] = {
     val nss = part.nss
