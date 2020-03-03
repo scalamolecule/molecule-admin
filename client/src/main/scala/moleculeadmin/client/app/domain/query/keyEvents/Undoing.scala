@@ -173,9 +173,10 @@ trait Undoing extends UndoElements with QueryApi {
 
         ePrev = 0L
         aPrev = ""
+        var i = 1
         datoms.foreach { case (e, a, v, op) =>
           val cellType        = viewCellTypes(a)
-          val vElementId      = s"undoTxs $countDown $t $a"
+          val vElementId      = s"undoTxs $countDown $t $i $a"
           val showEntity      = e != ePrev
           val attr1           = if (showEntity || a != aPrev) a else ""
           val highlightEntity = { () => curEntity() = e }
@@ -189,6 +190,7 @@ trait Undoing extends UndoElements with QueryApi {
               tx, e, isUndone, setTx,
               showEntity, highlightEntity, attrCell, valueCell)
           )
+          i += 1
         }
 
         countDown -= 1

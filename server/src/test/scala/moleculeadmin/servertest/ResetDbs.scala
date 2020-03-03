@@ -158,6 +158,16 @@ object ResetDbs extends TestSuite with ExampleData with Settings {
     Ns.int(3).Refs1.int1(13).Refs2.int2(23).save
     Ns.int(4).Refs1.int1(14).Refs2.int2(24).save
 
+    Ns.int.RefsSub1.*(Ref1.int1.RefsSub2.*(Ref2.int2)) insert List(
+      (1, List(
+        (10, List(100, 101)),
+        (11, List(110, 111)),
+      )),
+      (2, List(
+        (20, List(200, 201)),
+        (21, List(210, 211)),
+      ))
+    )
 
     val List(r1, r2, r3) = Ref1.int1.str1 insert List(
       (21, "aa"),

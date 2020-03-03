@@ -109,6 +109,16 @@ case class GroupSave(col: Col)(implicit val ctx: Ctx.Owner)
     }
   }
 
+  def save(): Unit = {
+    colType match {
+      case "string"     => string()
+      case "double"     => double()
+      case "listString" => listString()
+      case "listDouble" => listDouble()
+      case "mapString"  => mapString()
+      case "mapDouble"  => mapDouble()
+    }
+  }
 
   /**
    * @tparam T String / Double
@@ -174,6 +184,7 @@ case class GroupSave(col: Col)(implicit val ctx: Ctx.Owner)
       println("No changes")
     }
   }
+
 
   def string(): Unit = {
     val prepare: (Long, Option[String], Option[String]) =>
