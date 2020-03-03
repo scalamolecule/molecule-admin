@@ -1,15 +1,12 @@
 package moleculeadmin.client.app.domain.query
 
+import molecule.ast.model.Element
+import moleculeadmin.shared.api.QueryApi
 import moleculeadmin.shared.ast.query.{Col, Filter, QueryCache, QueryDTO}
 import moleculeadmin.shared.ast.schema.{MetaSchema, Ns}
 import moleculeadmin.shared.ast.tree.Tree
-import molecule.ast.model.Element
-import moleculeadmin.client.app.domain.query.data.RowBuilder
-import moleculeadmin.shared.api.QueryApi
 import rx.Var
-import scalatags.JsDom.all.s
 import scala.collection.mutable
-import scala.collection.mutable.ListBuffer
 
 
 object QueryState extends QueryApi {

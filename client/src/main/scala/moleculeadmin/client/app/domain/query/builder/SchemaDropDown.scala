@@ -13,7 +13,7 @@ import scalatags.JsDom
 import scalatags.JsDom.all._
 
 
-case class SchemaDropDown(schema: MetaSchema, selection: String)
+case class SchemaDropDown(metaSchema: MetaSchema, selection: String)
                          (implicit val ctx: Ctx.Owner)
   extends RxBindings with SchemaOps with SchemaDropdownElements {
 
@@ -57,7 +57,7 @@ case class SchemaDropDown(schema: MetaSchema, selection: String)
     }
   )
 
-  val partitions: Seq[Part] = getFilteredSchema(schema, selection).parts
+  val partitions: Seq[Part] = getFilteredSchema(metaSchema, selection).parts
 
   def schemaWithPartitions: JsDom.TypedTag[UList] = _topMenu(
     for (Part(_, part, _, _, nss) <- partitions) yield {
@@ -74,7 +74,7 @@ case class SchemaDropDown(schema: MetaSchema, selection: String)
 
   def dynRender: Rx.Dynamic[JsDom.TypedTag[HTMLElement]] = Rx {
     //    println("SchemaDropDown...")
-    if (schema.parts.isEmpty) {
+    if (metaSchema.parts.isEmpty) {
       div(
         s"Couldn't find partitions for database `$db` in meta_Partitions. ", br,
         s"Has definition file path for database `$db` been saved (check on `Dbs` page)?"
@@ -85,7 +85,7 @@ case class SchemaDropDown(schema: MetaSchema, selection: String)
         s"Please generate a fresh value count in 'Schema' -> 'Value' -> 'Update value counts' (if the database is not empty).", br,
         s"Alternatively you can click the 'a' selector to show all available attributes of the database."
       )
-    } else if (schema.parts.head.name != "db.part/user") {
+    } else if (metaSchema.parts.head.name != "db.part/user") {
       schemaWithPartitions(float.none)
     } else {
       schemaWithoutPartitions(float.none)

@@ -12,7 +12,7 @@ import molecule.ast.model.{Atom, Bond, Model, NoValue}
 import molecule.ast.transactionModel.{Add, Retract, RetractEntity, Statement}
 import molecule.facade.{Conn, TxReport}
 import molecule.transform.Model2Transaction
-import moleculeadmin.server.query.{ToggleBackend, Rows2QueryResult}
+import moleculeadmin.server.query.{Rows2QueryResult, ToggleBackend}
 import moleculeadmin.shared.ast.query.{Col, QueryDTO, QueryResult}
 import moleculeadmin.shared.ops.transform.Molecule2Model
 import scala.collection.JavaConverters._
@@ -757,7 +757,6 @@ class QueryBackend extends ToggleBackend {
   override def createJoins(
     db: String,
     eids: Seq[Long],
-    part: String,
     nsFull: String,
     refAttr: String,
     refCard: Int,
@@ -768,29 +767,35 @@ class QueryBackend extends ToggleBackend {
     value: String
   ): Either[String, Int] = {
     implicit val conn = Conn(base + "/" + db)
+    val refAttrFull  = s":$nsFull/$refAttr"
+    val eligibleEids = if (refCard == 1) {
+      // Don't overwrite existing card-one refs
+      conn.q(
+        s"""[:find  ?e
+           | :in    $$ [?e ...]
+           | :where (not [?e $refAttrFull])]""".stripMargin,
+        eids
+      ).map(_.head.toString.toLong)
+    } else {
+      // Add ref to card-many refs
+      eids
+    }
     withTransactor {
       try {
-        val refAttrFull             = s":$nsFull/$refAttr"
-        val eligibleEids: Seq[Long] = if (refCard == 1) {
-          // Don't overwrite existing card-one refs
-          conn.q(
-            s"""[:find  ?e
-               | :in    $$ [?e ...]
-               | :where (not [?e $refAttrFull])]""".stripMargin,
-            eids
-          ).map(_.head.toString.toLong)
-        } else {
-          // Add ref to card-many refs
-          eids
-        }
         if (eligibleEids.isEmpty) {
           Left("All entities already have card-one joins to attribute ``")
         } else {
+          val part        = if (nsFull.contains('_'))
+            ":" + nsFull.split('_')(0)
+          else
+            ":db.part/user"
+
           val castedValue = if (isEnum)
             s":$refNs.$valueAttr/$value"
           else
             getCaster(attrType, "")(value)
-          val stmtss = eligibleEids.map { eid =>
+
+          val stmtss      = eligibleEids.map { eid =>
             val refId = Peer.tempid(part)
             Seq(
               Add(eid, refAttrFull, refId, NoValue),
