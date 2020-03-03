@@ -18,14 +18,11 @@ case class GroupJoin(colIndex: Int, nsFull: String)(implicit val ctx: Ctx.Owner)
   extends HeadElements with Paging {
 
   type keepBooPickleImport_GroupSave = PickleState
-//  type NsData = (String, String, String, Int, String, Seq[(String, String, Boolean, String)])
 
-  private def nsData(part: Part, partName: String): Seq[NsData] = {
-    val nss = part.nss
-    val ns  = nss.find(_.nameFull == nsFull).get
-    ns.attrs.collect {
+  val attrs: Seq[NsData] = {
+    nsMap(nsFull).attrs.collect {
       case Attr(_, refAttr, refCard, _, _, Some(refNs), _, _, _, _, _, _, _) =>
-        val valueAttrs = nss.find(_.nameFull == refNs).get.attrs.map { at =>
+        val valueAttrs = nsMap(refNs).attrs.map { at =>
           val opt = at.options$ match {
             case None       => ""
             case Some(opts) =>
@@ -38,21 +35,11 @@ case class GroupJoin(colIndex: Int, nsFull: String)(implicit val ctx: Ctx.Owner)
           }
           (at.name, at.tpe, at.enums$.isDefined, opt)
         }
-        (partName, nsFull, refAttr, refCard, refNs, valueAttrs)
-    }
-  }
-
-  val attrs: Seq[NsData] = {
-    if (metaSchema.parts.head.name == "db.part/user") {
-      nsData(metaSchema.parts.head, ":db.part/user")
-    } else {
-      val part = nsFull.split('_')(0)
-      nsData(metaSchema.parts.find(_.name == part).get, s":$part")
+        (nsFull, refAttr, refCard, refNs, valueAttrs)
     }
   }
 
   def create(
-    part: String,
     nsFull: String,
     refAttr: String,
     refCard: Int,
@@ -77,7 +64,6 @@ case class GroupJoin(colIndex: Int, nsFull: String)(implicit val ctx: Ctx.Owner)
     queryWire().createJoins(
       db,
       eids,
-      part,
       nsFull,
       refAttr,
       refCard,

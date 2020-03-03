@@ -47,8 +47,8 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
     }
   }
 
-  type NsData = (String, String, String, Int, String, Seq[(String, String, Boolean, String)])
-  type JoinMaker = (String, String, String, Int, String, String, String, Boolean, String) => Unit
+  type NsData = (String, String, Int, String, Seq[(String, String, Boolean, String)])
+  type JoinMaker = (String, String, Int, String, String, String, Boolean, String) => Unit
 
   private def refMenu(
     joinAttrs: Seq[NsData],
@@ -58,7 +58,7 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
       Nil
     } else {
       val nss = joinAttrs.map {
-        case (part, nsFull, refAttr, refCard, refNs, attrs) =>
+        case (nsFull, refAttr, refCard, refNs, attrs) =>
           div(
             cls := "dropdown-submenu",
             a(href := "#", cls := "dropdown-item", s"$refAttr ($refNs)"),
@@ -85,7 +85,7 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
                         checkValue(value, attrType) match {
                           case Success(_)         =>
                             println(s"Creating `$fullRefAttr` joins to attribute `$fullValueAttr` with value `$value`...")
-                            joinMaker(part, nsFull, refAttr, refCard, refNs, attrName, attrType, isEnum, value)
+                            joinMaker(nsFull, refAttr, refCard, refNs, attrName, attrType, isEnum, value)
                           case Failure(exception) =>
                             window.alert(s"Invalid input for attribute `$fullValueAttr`:\n" + exception)
                             joinInput.select()
