@@ -128,7 +128,7 @@ abstract class Cell(
 
       // card one --------------------------------------------------------------
 
-      case "string" if cellType == "aggr" =>
+      case _ if cellType == "aggr" =>
         val array = qr.num(arrayIndex)
         (rowIndex: Int) =>
           array(rowIndex).fold(_tdNoAggrEdit)(
@@ -307,10 +307,6 @@ abstract class Cell(
                   (eid: Long) => () => curEntity() = eid
                 )
               )
-
-          case "aggr" =>
-            (rowIndex: Int) =>
-              array(rowIndex).fold(_tdNoAggrEdit)(_tdOneNumNoAggrEdit(_))
 
           case "t"  => tLambda(arrayIndex, colIndex)
           case "tx" => txLambda(arrayIndex, colIndex)

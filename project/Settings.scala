@@ -40,7 +40,7 @@ object Settings {
     ),
     libraryDependencies ++= Seq(
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-      "org.scalamolecule" %% "molecule" % "0.21.1",
+      "org.scalamolecule" %% "molecule" % "0.21.1-SNAPSHOT",
       "com.lihaoyi" %% "ammonite-ops" % "2.0.4",
       "com.datomic" % "datomic-free" % "0.9.5697",
       "org.webjars" % "jquery" % "3.3.1",
@@ -63,7 +63,7 @@ object Settings {
       "com.lihaoyi" %%% "autowire" % "0.2.6",
       "com.lihaoyi" %%% "utest" % "0.7.4",
       "io.suzaku" %%% "boopickle" % "1.3.1",
-      ("org.scalamolecule" %%% "molecule" % "0.21.1")
+      ("org.scalamolecule" %%% "molecule" % "0.21.1-SNAPSHOT")
         .exclude("com.datomic", "datomic-free")
     ),
     testFrameworks += new TestFramework("utest.runner.Framework")

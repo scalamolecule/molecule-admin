@@ -45,8 +45,11 @@ object Adhoc extends TestSuite
       //      implicit val conn = recreateDbFrom(CoreTestSchema, "localhost:4334/CoreTest", protocol)
       //    implicit val conn = Conn(base + "/MoleculeAdmin")
       //    implicit val conn = Conn(base + "/mbrainz-1968-1973")
-//      implicit val conn = Conn(base + "/CoreTest")
+      implicit val conn = Conn(base + "/CoreTest")
 
+
+      Ns.ints(count).get
+      Ns.e.int$.ints_.ints(count).debugGet
     }
   }
 }
