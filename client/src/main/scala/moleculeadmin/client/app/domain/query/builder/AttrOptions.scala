@@ -1,10 +1,11 @@
 package moleculeadmin.client.app.domain.query.builder
-import moleculeadmin.client.app.element.query.AttrOptElements
+
+import molecule.ast.model._
 import moleculeadmin.client.app.domain.query.QueryState._
+import moleculeadmin.client.app.element.query.AttrOptElements
 import moleculeadmin.client.jsdom.DropdownMenu
 import moleculeadmin.client.rxstuff.RxBindings
 import moleculeadmin.shared.ast.schema._
-import molecule.ast.model._
 import moleculeadmin.shared.ops.query.attr.{AttrOps, ModeOps}
 import org.scalajs.dom.html.{Div, Input, LI, Select}
 import org.scalajs.dom.raw.{Event, HTMLElement}
@@ -108,18 +109,22 @@ case class AttrOptions(
       case op                => option(op)
     }
 
-    _operandSelector(marked("op", attrValue), id_("operand"), attrType, options, { () =>
-      keepSettingsOpen
-      inputValue.select()
-    })
+    _operandSelector(
+      marked("op", attrValue), id_("operand"), attrType, options, { () =>
+        keepSettingsOpen
+        inputValue.select()
+      }
+    )
   }
 
 
-  // Actions -----------------------------------------------------------------------------
+  // Actions -------------------------------------------------------------------
 
   def update(): Unit = {
     def updateInput(fn: String, input: Input): Unit =
-      upsertAttr(modelElements.now, path, attr, attrType, car, enums, fn, input.value) match {
+      upsertAttr(
+        modelElements.now, path, attr, attrType, car, enums, fn, input.value
+      ) match {
         case Left(err)           => window.alert(err); input.select()
         case Right(updatedModel) => modelElements() = updatedModel
       }
@@ -141,12 +146,13 @@ case class AttrOptions(
   }
 
 
-  // Validation -----------------------------------------------------------------------------
+  // Validation ----------------------------------------------------------------
 
   inputValue.onkeyup = { e: Event =>
     curFn = "value"
     if (document.getElementById(id_("mode-none")).asInstanceOf[Input].checked) {
-      document.getElementById(id_("mode-mandatory")).asInstanceOf[Input].checked = true
+      document.getElementById(id_("mode-mandatory"))
+        .asInstanceOf[Input].checked = true
     }
     if (inputValue.value.nonEmpty) {
       validInput =
@@ -157,21 +163,35 @@ case class AttrOptions(
     }
   }
 
-  def validateAggrNum(fn: String, msg: String, input: Input): Event => Unit = { e: Event =>
+  def validateAggrNum(
+    fn: String,
+    msg: String,
+    input: Input
+  ): Event => Unit = { e: Event =>
     curFn = fn
     if (input.value.nonEmpty && !input.value.isInt) {
       input.value = ""
-      window.alert(s"Please enter the number of rows to fetch $msg values of attribute `$attr`")
+      window.alert(
+        s"Please enter the number of rows to fetch $msg values of attribute `$attr`"
+      )
       input.focus()
     }
   }
-  inputMin.onkeyup = validateAggrNum("min", "having the lowest", inputMin)
-  inputMax.onkeyup = validateAggrNum("max", "having the highest", inputMax)
-  inputRandom.onkeyup = validateAggrNum("rand", "with possibly duplicate random", inputRandom)
-  inputSample.onkeyup = validateAggrNum("sample", "with unique sample", inputSample)
+
+  inputMin.onkeyup =
+    validateAggrNum("min", "having the lowest", inputMin)
+
+  inputMax.onkeyup =
+    validateAggrNum("max", "having the highest", inputMax)
+
+  inputRandom.onkeyup =
+    validateAggrNum("rand", "with possibly duplicate random", inputRandom)
+
+  inputSample.onkeyup =
+    validateAggrNum("sample", "with unique sample", inputSample)
 
 
-  // Input sections -----------------------------------------------------------------------------
+  // Input sections ------------------------------------------------------------
 
   def modes(): TypedTag[Div] = {
     def mode(m: String, label: String, actions: () => Unit): TypedTag[Div] = {
@@ -204,7 +224,8 @@ case class AttrOptions(
           href := "##",
           "(Tacit)",
           onclick := { () =>
-            window.alert("Tacit entity id(s) only allowed if one or more entity ids are applied.")
+            window.alert("Tacit entity id(s) only allowed if one or more " +
+              "entity ids are applied.")
             keepSettingsOpen
             inputValue.select()
           }
@@ -242,8 +263,10 @@ case class AttrOptions(
   }
 
   def compareValue(): TypedTag[Div] = div(_hr, attrType match {
-    case "datom" | "UUID" | "URI" => _inputGroup(id_("operand"), id_("value"), inputValue)
-    case _                        => _inputGroupMb3(operandSelector, inputValue)
+    case "datom" | "UUID" | "URI" =>
+      _inputGroup(id_("operand"), id_("value"), inputValue)
+    case _                        =>
+      _inputGroupMb3(operandSelector, inputValue)
   })
 
   def top25(): TypedTag[Div] = div(
@@ -279,7 +302,9 @@ case class AttrOptions(
               case _ => v
             }
             modelElements() =
-              upsertAttr(modelElements.now, path, attr, attrType, car, enums, "=", newValues) match {
+              upsertAttr(
+                modelElements.now, path, attr, attrType, car, enums, "=", newValues
+              ) match {
                 case Right(updatedModel) => updatedModel
                 case Left(err)           => throw new RuntimeException("auch! " + err)
 
@@ -297,26 +322,43 @@ case class AttrOptions(
 
   def toggleFn(fn: String, input: Option[Input] = None): () => Unit = { () =>
     attrValue match {
-      case Fn(`fn`, _) => modelElements() = upsertAttr(modelElements.now, path, attr, attrType, car, enums, "", "").right.get
-      case Distinct    => modelElements() = upsertAttr(modelElements.now, path, attr, attrType, car, enums, "", "").right.get
-      case _           => upsertAttr(modelElements.now, path, attr, attrType, car, enums, fn, "") match {
-        case Left(err)           => window.alert(err)
-        case Right(updatedModel) => modelElements() = updatedModel
-      }
+      case Fn(`fn`, _) => modelElements() =
+        upsertAttr(
+          modelElements.now, path, attr, attrType, car, enums, "", ""
+        ).right.get
+      case Distinct    => modelElements() =
+        upsertAttr(
+          modelElements.now, path, attr, attrType, car, enums, "", ""
+        ).right.get
+      case _           =>
+        upsertAttr(
+          modelElements.now, path, attr, attrType, car, enums, fn, ""
+        ) match {
+          case Left(err)           => window.alert(err)
+          case Right(updatedModel) => modelElements() = updatedModel
+        }
     }
     keepSettingsOpen
     if (input.nonEmpty) input.get.select()
   }
 
-  def button2(label: String, fn: String): TypedTag[Div] = _btn2(label, id_(fn), marked(fn, attrValue), toggleFn(fn))
+  def button2(label: String, fn: String): TypedTag[Div] =
+    _btn2(label, id_(fn), marked(fn, attrValue), toggleFn(fn))
 
   def checkBox(show: String, fn: String): TypedTag[Div] = div(
     cls := "form-check",
     paddingRight := 15,
-    input(tpe := "checkbox", cls := "form-check-input", id := id_(fn), value := fn,
+    input(
+      tpe := "checkbox",
+      cls := "form-check-input",
+      id := id_(fn),
+      value := fn,
       if (additives contains fn) checked := true else (),
       onchange := { () =>
-        modelElements() = upsertAttr(modelElements.now, path, attr, attrType, car, enums, fn, "").right.get
+        modelElements() =
+          upsertAttr(
+            modelElements.now, path, attr, attrType, car, enums, fn, ""
+          ).right.get
       }
     ),
     label(
@@ -327,7 +369,7 @@ case class AttrOptions(
     )
   )
 
-  def aggregates(): TypedTag[Div] = {
+  def aggrInputs(): TypedTag[Div] = {
     def aggrButton(label: String, fn: String, input: Input): TypedTag[Div] =
       _aggrButton(label, id_(fn), input, marked(fn, attrValue), toggleFn(fn))
     div(
@@ -340,7 +382,10 @@ case class AttrOptions(
       _row(
         _rowColAuto(aggrButton("Random", "rand", inputRandom), paddingRight := "0"),
         _rowColAuto(aggrButton("Sample", "sample", inputSample), paddingRight := "0"),
-        if (car == 1) _rowColAuto(button2("Distinct", "distinct"), paddingRight := "0") else (),
+        if (car == 1)
+          _rowColAuto(button2("Distinct", "distinct"), paddingRight := "0")
+        else
+          (),
         marginBottom := "-15px"
       )
     )
@@ -351,7 +396,7 @@ case class AttrOptions(
     button2("Count", "count")
   )
 
-  def counts(): TypedTag[Div] = div(
+  def aggrCounts(): TypedTag[Div] = div(
     _hr,
     span(
       display.flex,
@@ -360,7 +405,7 @@ case class AttrOptions(
     )
   )
 
-  def aggregatesNumbers(): TypedTag[Div] = div(
+  def aggrNumbers(): TypedTag[Div] = div(
     span(
       display.flex,
       marginTop := 8,
@@ -383,7 +428,7 @@ case class AttrOptions(
   )
 
 
-  // Build variations of input dropdown depending on attr type -------------------------------------------------
+  // Build variations of input dropdown depending on attr type -----------------
 
   val inputs: TypedTag[Div] = div(id := id_("inputs"))
 
@@ -408,20 +453,50 @@ case class AttrOptions(
         modes(),
         if (doc.isDefined) _doc(doc.get) else (),
         attrType match {
-          case _ if car == 3 && topValues.nonEmpty               => inputs(compareValue(), top25(), txGenerics())
-          case _ if car == 3                                     => inputs(compareValue(), txGenerics())
-          case "datom" if attrClass == "attr-tacit"              => inputs(compareValue())
-          case "datom"                                           => inputs(compareValue(), count())
-          case "UUID"                                            => inputs(compareValue(), counts(), txGenerics())
-          case "URI"                                             => inputs(counts(), txGenerics())
-          case "Boolean" if topValues.nonEmpty                   => inputs(hr, top25(), counts(), txGenerics())
-          case "Boolean"                                         => inputs(counts(), txGenerics())
-          case n if isNumber(n) && topValues.nonEmpty            => inputs(compareValue(), top25(), aggregates(), counts(), aggregatesNumbers(), txGenerics())
-          case n if isNumber(n)                                  => inputs(compareValue(), aggregates(), counts(), aggregatesNumbers(), txGenerics())
-          case "String" if enums.isDefined && topValues.nonEmpty => inputs(hr, top25(), counts(), txGenerics())
-          case "String" if enums.isDefined                       => inputs(counts(), txGenerics())
-          case _ if topValues.nonEmpty                           => inputs(compareValue(), top25(), aggregates(), counts(), txGenerics())
-          case _                                                 => inputs(compareValue(), aggregates(), counts(), txGenerics())
+          case _ if car == 3 && topValues.nonEmpty =>
+            inputs(compareValue(), top25(), txGenerics())
+
+          case _ if car == 3 =>
+            inputs(compareValue(), txGenerics())
+
+          case "datom" if attrClass == "attr-tacit" =>
+            inputs(compareValue())
+
+          case "datom" =>
+            inputs(compareValue(), count())
+
+          case "UUID" =>
+            inputs(compareValue(), aggrCounts(), txGenerics())
+
+          case "URI" =>
+            inputs(aggrCounts(), txGenerics())
+
+          case "Boolean" if topValues.nonEmpty =>
+            inputs(hr, top25(), aggrCounts(), txGenerics())
+
+          case "Boolean" =>
+            inputs(aggrCounts(), txGenerics())
+
+          case n if isNumber(n) && topValues.nonEmpty =>
+            inputs(compareValue(), top25(), aggrInputs(), aggrCounts(),
+              aggrNumbers(), txGenerics())
+
+          case n if isNumber(n) =>
+            inputs(compareValue(), aggrInputs(), aggrCounts(),
+              aggrNumbers(), txGenerics())
+
+          case "String" if enums.isDefined && topValues.nonEmpty =>
+            inputs(hr, top25(), aggrCounts(), txGenerics())
+
+          case "String" if enums.isDefined =>
+            inputs(aggrCounts(), txGenerics())
+
+          case _ if topValues.nonEmpty =>
+            inputs(compareValue(), top25(), aggrInputs(), aggrCounts(), txGenerics())
+
+          case _ =>
+            inputs(compareValue(), aggrInputs(), aggrCounts(), txGenerics())
+
         }
       )
     )

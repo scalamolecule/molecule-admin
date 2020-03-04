@@ -17,7 +17,14 @@ trait AttrOptElements extends AppElements {
     marginBottom := 10,
   )
 
-  def _radio(name1: String, id1: String, value1: String, label1: String, onclick1: () => Unit, checked1: Boolean = false): JsDom.TypedTag[Div] = div(
+  def _radio(
+    name1: String,
+    id1: String,
+    value1: String,
+    label1: String,
+    onclick1: () => Unit,
+    checked1: Boolean = false
+  ): JsDom.TypedTag[Div] = div(
     cls := "form-check form-check-inline",
     marginBottom := 0,
     input(
@@ -33,7 +40,10 @@ trait AttrOptElements extends AppElements {
     label(cls := "form-check-label", `for` := s"$id1", s"$label1")
   )
 
-  def _inputValue(id1: String, valueOrPlaceholder: scalatags.generic.AttrPair[Element, String]): JsDom.TypedTag[Input] = input(
+  def _inputValue(
+    id1: String,
+    valueOrPlaceholder: scalatags.generic.AttrPair[Element, String]
+  ): JsDom.TypedTag[Input] = input(
     tpe := "text",
     cls := "form-control",
     id := id1,
@@ -63,7 +73,13 @@ trait AttrOptElements extends AppElements {
   ).render
 
 
-  def _aggrButton(labelStr: String, id1: String, input: Input, marked: String, onclick1: () => Unit): JsDom.TypedTag[Div] = div(
+  def _aggrButton(
+    labelStr: String,
+    id1: String,
+    input: Input,
+    marked: String,
+    onclick1: () => Unit
+  ): JsDom.TypedTag[Div] = div(
     cls := "input-group mb-3",
     div(
       cls := "input-group-prepend",
@@ -82,7 +98,13 @@ trait AttrOptElements extends AppElements {
     input
   )
 
-  def _operandSelector(op: String, id1: String, attrType: String, options1: Seq[JsDom.TypedTag[html.Option]], onchange1: () => Unit) = select(
+  def _operandSelector(
+    op: String,
+    id1: String,
+    attrType: String,
+    options1: Seq[JsDom.TypedTag[html.Option]],
+    onchange1: () => Unit
+  ): Select = select(
     cls := "custom-select prepend" + op,
     id := id1,
     padding := "0.175rem 1.75rem 0.175rem 0.75rem",
@@ -95,7 +117,11 @@ trait AttrOptElements extends AppElements {
   ).render
 
 
-  def _inputGroup(opId: String, valueId: String, inputValue: html.Input): JsDom.TypedTag[Div] = div(
+  def _inputGroup(
+    opId: String,
+    valueId: String,
+    inputValue: html.Input
+  ): JsDom.TypedTag[Div] = div(
     cls := "input-group",
     div(
       cls := "input-group-prepend",
@@ -111,13 +137,20 @@ trait AttrOptElements extends AppElements {
     inputValue
   )
 
-  def _inputGroupMb3(operandSelector: Select, inputValue: html.Input): JsDom.TypedTag[Div] = div(
+  def _inputGroupMb3(
+    operandSelector: Select,
+    inputValue: html.Input
+  ): JsDom.TypedTag[Div] = div(
     cls := "input-group mb-3",
     operandSelector,
     inputValue
   )
 
-  def _topValueCheckBox(id1: String, attrValue: Value, value1: String): JsDom.TypedTag[Input] = input(
+  def _topValueCheckBox(
+    id1: String,
+    attrValue: Value,
+    value1: String
+  ): JsDom.TypedTag[Input] = input(
     tpe := "checkbox",
     cls := s"form-check-input",
     id := id1,
@@ -128,7 +161,13 @@ trait AttrOptElements extends AppElements {
     }
   )
 
-  def _topValue(checkBox: JsDom.TypedTag[Input], value1: String, display1: String, count: String, onclick1: () => Unit): JsDom.TypedTag[Div] = div(
+  def _topValue(
+    checkBox: JsDom.TypedTag[Input],
+    value1: String,
+    display1: String,
+    count: String,
+    onclick1: () => Unit
+  ): JsDom.TypedTag[Div] = div(
     cls := s"form-check",
     margin := 0,
     checkBox,
