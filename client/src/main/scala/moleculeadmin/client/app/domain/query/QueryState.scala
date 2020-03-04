@@ -13,6 +13,8 @@ object QueryState extends QueryApi {
 
   var db = ""
 
+  var pushUrlOntoHistoryStack = true
+
   // Db settings id so that we can avoid looking it up on each marker toggle
   var dbSettingsIdOpt = Option.empty[Long]
 
