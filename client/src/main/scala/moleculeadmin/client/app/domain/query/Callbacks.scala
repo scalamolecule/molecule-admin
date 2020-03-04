@@ -140,6 +140,9 @@ class Callbacks(implicit ctx: Ctx.Owner)
   def useQuery(query: QueryDTO): Rx.Dynamic[Unit] = Rx {
     Molecule2Model(query.molecule) match {
       case Right(elements) =>
+
+        //        println("useQuery " + elements)
+
         modelElements() = elements
         setColumns(query)
 
