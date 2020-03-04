@@ -55,6 +55,8 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
     tableBody: TableSection,
     tableFoot: TableSection
   ): Unit = {
+    //    println("fetchAndPopulate")
+
     val (query, _)   = Model2Query(Model(modelElements.now))
     val datalogQuery = molecule.transform.Query2String(query).toMap
     val resolve      = (expr: QueryExpr) => Query2String(query).p(expr)
@@ -63,14 +65,19 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
     val (l, ll, lll) = encodeInputs(query)
     groupableCols = getGroupableCols(columns.now)
 
+    //    println("A")
     resetTableBodyFoot("Fetching data...")
+    //    println("B " + datalogQuery)
+
+    pushUrl()
+    //    println("C")
 
     // Fetch data from db asynchronously
     queryWire()
       .query(db, datalogQuery, rules, l, ll, lll, maxRows.now, columns.now)
       .call().foreach {
       case Right(queryResult) =>
-        pushUrl()
+
         rowCountAll = queryResult.rowCountAll
         rowCount = queryResult.rowCount
 
@@ -92,6 +99,8 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
 
         recentQueries =
           curQuery +: recentQueries.filterNot(_.molecule == curMolecule.now)
+
+      //        println("XXX")
 
 
       case Left(Nil) =>
@@ -137,6 +146,7 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
     try {
       modelElements() match {
         case Nil =>
+          //          println("Nil...")
           if (querySelection().isEmpty)
             _buildQueryClosed("Open query builder by pressing ´q´")
           else
@@ -163,6 +173,8 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
         }
 
         case elements =>
+          //          println("elements... " + elements)
+
           val elements1 = VerifyRawModel(elements)
           tree() = mkTree(mkModelTree(elements1))
           curMolecule() = model2molecule(elements1)
@@ -181,6 +193,7 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
           registerKeyEvents
           DataTableHead(tableBody).populate(tableHead)
           fetchAndPopulate(tableBody, tableFoot)
+          //          println("D")
           tableContainer
       }
     } catch {

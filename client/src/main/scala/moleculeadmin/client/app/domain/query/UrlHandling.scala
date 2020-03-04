@@ -5,8 +5,9 @@ import moleculeadmin.client.app.domain.query.QueryState.{curMolecule, pushUrlOnt
 import org.scalajs.dom.{PopStateEvent, window}
 import scala.scalajs.js.URIUtils
 import moleculeadmin.client.app.domain.query.QueryState._
+import moleculeadmin.shared.ast.tree.Tree
 import moleculeadmin.shared.ops.transform.Molecule2Model
-import rx.Ctx
+import rx.{Ctx, Var}
 import scalatags.JsDom.all.s
 
 trait UrlHandling extends RegexMatching {
@@ -19,10 +20,13 @@ trait UrlHandling extends RegexMatching {
         "?db=" + db +
         "&m=" + URIUtils.encodeURI(curMolecule.now)
 
-    if (pushUrlOntoHistoryStack)
+    if (pushUrlOntoHistoryStack) {
+      //      println("pushUrl")
       window.history.pushState(null, "MoleculeAdmin", newUrl)
-    else
+    } else {
+      //      println("pushUrl next time")
       pushUrlOntoHistoryStack = true
+    }
   }
 
 
@@ -39,27 +43,52 @@ trait UrlHandling extends RegexMatching {
 
   def prepareBrowserHistory(implicit ctx: Ctx.Owner): Unit = {
     window.addEventListener("popstate", (_: PopStateEvent) => {
-      urlParams.get("m").fold(modelElements() = Nil) { m =>
-        pushUrlOntoHistoryStack = false
-        savedQueries.find(_.molecule == m) match {
-          case Some(q) => new Callbacks().useQuery(q)
-          case None    => Molecule2Model(m) match {
-            case Right(elements) => modelElements() = elements
-            case Left(err)       => window.alert(s"Error using query: $err")
+
+      urlParams.get("m").fold {
+        //        println("No m...")
+        curMolecule() = ""
+        tree() = Tree(Nil, Nil, Nil, Nil, Nil, Nil)
+        modelElements() = Nil
+      } { m =>
+
+        //        println("m2: " + m)
+        if (m != curMolecule.now) {
+
+          //          println("curMolecule: " + curMolecule.now)
+
+          pushUrlOntoHistoryStack = false
+          savedQueries.find(_.molecule == m) match {
+            case Some(q) => new Callbacks().useQuery(q)
+            case None    => Molecule2Model(m) match {
+              case Right(elements) => modelElements() = elements
+              case Left(err)       => window.alert(s"Error using query: $err")
+            }
           }
         }
+
+
       }
     })
   }
 
   def loadOptionalMolecule(implicit ctx: Ctx.Owner): Unit = {
     urlParams.get("m").foreach { m =>
-      pushUrlOntoHistoryStack = false
+
+      //      println("m1: " + m)
+
+      //      pushUrlOntoHistoryStack = true
       savedQueries.find(_.molecule == m) match {
-        case Some(q) => new Callbacks().useQuery(q)
-        case None    =>
+        case Some(q) =>
+          //          println("q: " + q)
+          new Callbacks().useQuery(q)
+
+        case None =>
           Molecule2Model(m) match {
-            case Right(elements) => modelElements() = elements
+            case Right(elements) =>
+
+              //              elements foreach println
+
+              modelElements() = elements
             case Left(err)       => window.alert(s"Error using query: $err")
           }
       }
