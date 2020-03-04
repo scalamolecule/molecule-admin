@@ -312,7 +312,7 @@ trait TreeOps extends BaseQuery with DebugBranches {
     selAttrs.collect {
       case Atom(nsFull, attr, _, _, _, _, _, additives)
         if additives.nonEmpty && additives.head != "edit"
-      => s"$nsFull-$attr" -> additives
+      => s"$nsFull-${clean(attr)}" -> additives
     }.toMap
   }
 
