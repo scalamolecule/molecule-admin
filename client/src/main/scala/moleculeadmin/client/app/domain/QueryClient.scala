@@ -4,8 +4,8 @@ import autowire._
 import boopickle.Default._
 import moleculeadmin.client.app.domain.common.TopMenu
 import moleculeadmin.client.app.domain.query.QueryState._
-import moleculeadmin.client.app.domain.query.{RenderGrouped, RenderQueryBuilder, RenderSubMenu, RenderViews, _}
 import moleculeadmin.client.app.domain.query.data.DataTable
+import moleculeadmin.client.app.domain.query.{RenderGrouped, RenderQueryBuilder, RenderSubMenu, RenderViews, _}
 import moleculeadmin.client.app.element.AppElements
 import moleculeadmin.client.autowire.queryWire
 import moleculeadmin.client.rxstuff.RxBindings
@@ -22,12 +22,14 @@ import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 @JSExportTopLevel("QueryClient")
 object QueryClient
   extends RxBindings with TreeOps with SchemaOps with ColOps
-    with Model2Molecule with AppElements with KeyEvents {
+    with Model2Molecule with AppElements with KeyEvents with UrlHandling {
 
   type keepBooPickleImport_QueryClient = PickleState
 
   // Single Rx context to be passed around wherever needed
   implicit val ctx: Ctx.Owner = rx.Ctx.Owner.safe()
+
+  prepareBrowserHistory
 
   @JSExport
   def load(db0: String): Unit = queryWire().loadMetaData(db0).call().map {
@@ -82,6 +84,8 @@ object QueryClient
         curStars = stars
         curFlags = flags
         curChecks = checks
+
+        loadOptionalMolecule
       }
 
       // Render page

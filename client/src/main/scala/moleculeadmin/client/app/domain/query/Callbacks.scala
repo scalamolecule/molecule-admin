@@ -1,4 +1,5 @@
 package moleculeadmin.client.app.domain.query
+
 import autowire._
 import boopickle.Default._
 import moleculeadmin.client.app.domain.query.QueryState._
@@ -41,6 +42,7 @@ class Callbacks(implicit ctx: Ctx.Owner)
       column.copy(sortDir = sort, sortPos = sortPos)
     }
   }
+
   private def updateQueryCaches(query: QueryDTO) = {
     val m = query.molecule
     savedQueries = savedQueries.map {
@@ -56,7 +58,6 @@ class Callbacks(implicit ctx: Ctx.Owner)
   def upsertQuery(query: QueryDTO, refreshSubmenu: Boolean = false): Unit = Rx {
     queryWire().upsertQuery(db, query).call().foreach {
       case Right("Successfully inserted query") =>
-        //        println("Inserted query: " + query)
         savedQueries = savedQueries :+ query
         setColumns(query)
         if (refreshSubmenu) {
@@ -65,7 +66,6 @@ class Callbacks(implicit ctx: Ctx.Owner)
         }
 
       case Right("Successfully updated query") =>
-        //        println("Updated query: " + query)
         updateQueryCaches(query)
         setColumns(query)
         if (refreshSubmenu) {
@@ -96,8 +96,7 @@ class Callbacks(implicit ctx: Ctx.Owner)
   protected val retractQueryCallback: QueryDTO => () => Unit =
     (query: QueryDTO) => () => Rx {
       queryWire().retractQuery(db, query).call().foreach {
-        case Right(_) =>
-        //          println("Removed query: " + query)
+        case Right(_)    =>
         case Left(error) => window.alert(s"Error retracting query: $error")
       }
       savedQueries = savedQueries.filterNot(_.molecule == query.molecule)
@@ -152,12 +151,6 @@ class Callbacks(implicit ctx: Ctx.Owner)
   protected val useQueryCallback: QueryDTO => () => Unit =
     (query: QueryDTO) => () => useQuery(query)
 
-
-  // Undo ------------------------------
-
-//  def toggleUndo(): Rx.Dynamic[Unit] = Rx{
-//    showUndo() = !showUndo.now
-//  }
 
   // Grouped ------------------------------
 

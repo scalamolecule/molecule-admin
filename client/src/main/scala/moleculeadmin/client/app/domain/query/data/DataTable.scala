@@ -1,4 +1,5 @@
 package moleculeadmin.client.app.domain.query.data
+
 import autowire._
 import boopickle.Default._
 import molecule.ast.model.{Atom, Model}
@@ -7,7 +8,7 @@ import molecule.ops.VerifyRawModel
 import molecule.transform.{Model2Query, Query2String}
 import moleculeadmin.client.app.domain.QueryClient._
 import moleculeadmin.client.app.domain.query.QueryState._
-import moleculeadmin.client.app.domain.query.{Callbacks, KeyEvents}
+import moleculeadmin.client.app.domain.query.{Callbacks, KeyEvents, UrlHandling}
 import moleculeadmin.client.app.element.query.datatable.TableElements
 import moleculeadmin.client.autowire.queryWire
 import moleculeadmin.shared.ast.query.Filter
@@ -22,7 +23,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 
 case class DataTable()(implicit val ctx: Ctx.Owner)
-  extends Callbacks with KeyEvents with ModelOps with TableElements {
+  extends Callbacks
+    with KeyEvents with ModelOps with TableElements with UrlHandling {
 
   type keepBooPickleImport_DataTable = PickleState
 
@@ -68,6 +70,7 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
       .query(db, datalogQuery, rules, l, ll, lll, maxRows.now, columns.now)
       .call().foreach {
       case Right(queryResult) =>
+        pushUrl()
         rowCountAll = queryResult.rowCountAll
         rowCount = queryResult.rowCount
 
@@ -98,7 +101,7 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
 
 
       case Left(msgs) =>
-        val datalogQuery = molecule.transform.Query2String(query).multiLine()
+        val datalogQuery       = molecule.transform.Query2String(query).multiLine()
         val dataTableContainer = document.getElementById("dataTableContainer")
         dataTableContainer.innerHTML = ""
         dataTableContainer.appendChild(
@@ -133,7 +136,11 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
 
     try {
       modelElements() match {
-        case Nil => span()
+        case Nil =>
+          if (querySelection().isEmpty)
+            _buildQueryClosed("Open query builder by pressing ´q´")
+          else
+            _buildQueryOpen("<-- Build query by choosing attributes")
 
         case elements if emptyNamespaces(elements).nonEmpty => {
           tree() = mkTree(mkModelTree(elements))
@@ -184,7 +191,7 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
           p(), p(b("Model")), pre(modelElements.now.mkString("\n")),
           p(), p(b("Cols")), pre(columns.now.mkString("\n")),
           p(), p(b("Stacktrace")), ul(
-            for (l <- e.getStackTrace) yield li(l.toString)
+            for (l <- e.getStackTrace.toSeq) yield li(l.toString)
           )
         )
       }
