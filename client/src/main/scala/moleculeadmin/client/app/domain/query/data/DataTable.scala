@@ -2,7 +2,7 @@ package moleculeadmin.client.app.domain.query.data
 
 import autowire._
 import boopickle.Default._
-import molecule.ast.model.{Atom, Model}
+import molecule.ast.model.Model
 import molecule.ast.query.QueryExpr
 import molecule.ops.VerifyRawModel
 import molecule.transform.{Model2Query, Query2String}
@@ -55,6 +55,8 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
     tableBody: TableSection,
     tableFoot: TableSection
   ): Unit = {
+    //    println("fetchAndPopulate...")
+
     val (query, _)   = Model2Query(Model(modelElements.now))
     val datalogQuery = molecule.transform.Query2String(query).multiLine(60)
     val resolve      = (expr: QueryExpr) => Query2String(query).p(expr)
@@ -80,16 +82,19 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
         // Render data table
         DataTableBodyFoot().populate(tableBody, tableFoot, queryResult)
 
+        //        println("QUERY return...")
+
         // Render grouped
-        savedQueries.find(_.molecule == curMolecule.now).fold {
-          showGrouped = false
-          groupedColIndexes() = Set.empty[Int]
-        } { query =>
-          showGrouped = query.showGrouped
-          if (groupedColIndexes.now == query.groupedColIndexes)
-            groupedColIndexes.recalc()
-          else
-            groupedColIndexes() = query.groupedColIndexes
+        savedQueries.find(_.molecule == curMolecule.now) match {
+          case None        =>
+            showGrouped = false
+            groupedColIndexes() = Set.empty[Int]
+          case Some(query) =>
+            showGrouped = query.showGrouped
+            if (groupedColIndexes.now == query.groupedColIndexes)
+              groupedColIndexes.recalc()
+            else
+              groupedColIndexes() = query.groupedColIndexes
         }
         renderSubMenu.recalc()
 
@@ -154,55 +159,45 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
             span()
 
         case elements if emptyNamespaces(elements).nonEmpty => {
-//          println("Empty nss " + elements)
-//          tree() = mkTree(mkModelTree(elements))
-//          columns() = getCols(elements)
-//          curEntity() = 0L
-//          pushUrlOntoHistoryStack = true
-//          pushUrl()
-//          curViews.recalc()
           curMolecule() = ""
           reset()
           _rowCol1(
-            "Please select non-generic attr/ref in empty namespaces:",
+            "Please add non-generic attr/ref in empty namespaces:",
             ul(emptyNamespaces(elements).map(li(_)))
           )
         }
 
-        case (a: Atom) :: Nil if !mandatory(a.attr) =>
-//          tree() = mkTree(mkModelTree(modelElements.now))
-//          columns() = getCols(modelElements.now)
-//          pushUrlOntoHistoryStack = true
-//          pushUrl()
-//          curViews.recalc()
-          curMolecule() = model2molecule(modelElements.now)
-
-
-          reset()
-          _rowCol1("Please select at least one mandatory attribute")
-
         case elements if hasIncompleteBranches(elements) => {
-//          tree() = mkTree(mkModelTree(elements))
-//          columns() = getCols(elements)
-//          pushUrlOntoHistoryStack = true
-//          pushUrl()
-//          curViews.recalc()
           curMolecule() = model2molecule(modelElements.now)
-
           reset()
-          _rowCol1(
-            "Please add mandatory non-generic attr/ref too."
-          )
+          _rowCol1("Please add at least one mandatory attribute")
         }
 
         case elements =>
-          //          println("elements... " + elements)
-
+          //          println("modelElements... " + elements)
           val elements1 = VerifyRawModel(elements)
           tree() = mkTree(mkModelTree(elements1))
           curMolecule() = model2molecule(elements1)
           curEntityLocked = false
+
           columns() = getCols(elements1)
+
+          //          println("  recentQueries " + recentQueries)
+          //          println("  savedQueries  " + savedQueries)
+
+          // See if we have a matching sorting from before
+          recentQueries.find(_.molecule == curMolecule.now) match {
+            case Some(q) =>
+              //              println("  modelElements - setCols from recent q: " + q)
+              setColumns(q)
+            case None    =>
+              savedQueries.find(_.molecule == curMolecule.now).foreach { q =>
+                //                println("  modelElements - setCols from saved q: " + q)
+                setColumns(q)
+              }
+          }
+
+
           eidCols = getEidTableColIndexes(columns.now)
           filters() = Map.empty[Int, Filter[_]]
           offset() = 0
@@ -216,7 +211,6 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
           registerKeyEvents
           DataTableHead(tableBody).populate(tableHead)
           fetchAndPopulate(tableBody, tableFoot)
-          //          println("D")
           tableContainer
       }
     } catch {

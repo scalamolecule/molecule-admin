@@ -35,8 +35,9 @@ class Callbacks(implicit ctx: Ctx.Owner)
   private def sorted(query: QueryDTO): QueryDTO = query.copy(
     colSettings = columns.now.map(c => (c.colIndex, c.sortDir, c.sortPos)))
 
-  private def setColumns(query: QueryDTO): Unit = {
+  def setColumns(query: QueryDTO): Unit = {
     val colSettings = query.colSettings.map(cs => cs._1 -> cs).toMap
+    //    println("setColumns " + columns.now)
     columns() = columns.now.map { column =>
       val (_, sort, sortPos) = colSettings(column.colIndex)
       column.copy(sortDir = sort, sortPos = sortPos)
@@ -84,8 +85,7 @@ class Callbacks(implicit ctx: Ctx.Owner)
   private def updateQuery(query: QueryDTO): Rx.Dynamic[Unit] = Rx {
     updateQueryCaches(query)
     queryWire().updateQuery(db, query).call().foreach {
-      case Right(_) =>
-      //        println("Updated query: " + query)
+      case Right(_)    =>
       case Left(error) => window.alert(s"Error updating query: $error")
     }
   }
@@ -140,6 +140,7 @@ class Callbacks(implicit ctx: Ctx.Owner)
   def useQuery(query: QueryDTO): Rx.Dynamic[Unit] = Rx {
     Molecule2Model(query.molecule) match {
       case Right(elements) =>
+        //        println("useQuery " + modelElements.now)
         //        println("useQuery " + elements)
         modelElements() = elements
         setColumns(query)

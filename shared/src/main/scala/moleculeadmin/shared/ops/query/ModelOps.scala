@@ -13,7 +13,6 @@ trait ModelOps extends BaseQuery with HelpersAdmin {
 
   def hasIncompleteBranches(elements: Seq[Element]): Boolean = {
     elements.foldLeft(true) {
-      case (_, _: Bond)                      => false
       case (res, _: Generic)                 => res
       case (res, _: ReBond)                  => res
       case (_, a: Atom) if mandatory(a.attr) => false

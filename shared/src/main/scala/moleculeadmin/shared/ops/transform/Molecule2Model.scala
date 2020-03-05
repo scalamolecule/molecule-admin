@@ -103,14 +103,6 @@ class Molecule2Model(molecule0: String, nsMap: Map[String, Ns])
 
       // Recursively resolve tokens from start to end
       resolve()
-
-      val molecule1 = model2moleculeServer(elements)
-      if (molecule0 != molecule1) {
-        println("----------------------------------------")
-        println(molecule0)
-        println(molecule1)
-      }
-
       Right(elements.toList)
     } catch {
       case t: Throwable =>
