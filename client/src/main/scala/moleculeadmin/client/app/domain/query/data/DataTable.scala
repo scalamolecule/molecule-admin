@@ -55,29 +55,25 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
     tableBody: TableSection,
     tableFoot: TableSection
   ): Unit = {
-    //    println("fetchAndPopulate")
-
     val (query, _)   = Model2Query(Model(modelElements.now))
-    val datalogQuery = molecule.transform.Query2String(query).toMap
+    val datalogQuery = molecule.transform.Query2String(query).multiLine(60)
     val resolve      = (expr: QueryExpr) => Query2String(query).p(expr)
     val rules        = if (query.i.rules.nonEmpty)
       Some("[" + (query.i.rules map resolve mkString " ") + "]") else None
     val (l, ll, lll) = encodeInputs(query)
     groupableCols = getGroupableCols(columns.now)
 
-    //    println("A")
+    // Temporary showing
     resetTableBodyFoot("Fetching data...")
-    //    println("B " + datalogQuery)
 
+    // Push url with new query onto browser history
     pushUrl()
-    //    println("C")
 
     // Fetch data from db asynchronously
     queryWire()
       .query(db, datalogQuery, rules, l, ll, lll, maxRows.now, columns.now)
       .call().foreach {
       case Right(queryResult) =>
-
         rowCountAll = queryResult.rowCountAll
         rowCount = queryResult.rowCount
 
@@ -100,14 +96,10 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
         recentQueries =
           curQuery +: recentQueries.filterNot(_.molecule == curMolecule.now)
 
-      //        println("XXX")
-
-
       case Left(Nil) =>
         resetTableBodyFoot("Empty result set...")
         rowCountAll = 0
         renderSubMenu.recalc()
-
 
       case Left(msgs) =>
         val datalogQuery       = molecule.transform.Query2String(query).multiLine()
@@ -124,6 +116,15 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
           ).render
         )
     }
+  }
+
+  def reset() = {
+    tree() = mkTree(mkModelTree(modelElements.now))
+    columns() = getCols(modelElements.now)
+    curEntity() = 0L
+    pushUrlOntoHistoryStack = true
+    pushUrl()
+    curViews.recalc()
   }
 
   def dynRender: Rx.Dynamic[JsDom.TypedTag[HTMLElement]] = Rx {
@@ -150,11 +151,18 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
           if (querySelection().isEmpty)
             _buildQueryClosed("Open query builder by pressing ´q´")
           else
-            _buildQueryOpen("<-- Build query by choosing attributes")
+            span()
 
         case elements if emptyNamespaces(elements).nonEmpty => {
-          tree() = mkTree(mkModelTree(elements))
-          columns() = getCols(elements)
+//          println("Empty nss " + elements)
+//          tree() = mkTree(mkModelTree(elements))
+//          columns() = getCols(elements)
+//          curEntity() = 0L
+//          pushUrlOntoHistoryStack = true
+//          pushUrl()
+//          curViews.recalc()
+          curMolecule() = ""
+          reset()
           _rowCol1(
             "Please select non-generic attr/ref in empty namespaces:",
             ul(emptyNamespaces(elements).map(li(_)))
@@ -162,13 +170,28 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
         }
 
         case (a: Atom) :: Nil if !mandatory(a.attr) =>
+//          tree() = mkTree(mkModelTree(modelElements.now))
+//          columns() = getCols(modelElements.now)
+//          pushUrlOntoHistoryStack = true
+//          pushUrl()
+//          curViews.recalc()
+          curMolecule() = model2molecule(modelElements.now)
+
+
+          reset()
           _rowCol1("Please select at least one mandatory attribute")
 
         case elements if hasIncompleteBranches(elements) => {
-          tree() = mkTree(mkModelTree(elements))
-          columns() = getCols(elements)
+//          tree() = mkTree(mkModelTree(elements))
+//          columns() = getCols(elements)
+//          pushUrlOntoHistoryStack = true
+//          pushUrl()
+//          curViews.recalc()
+          curMolecule() = model2molecule(modelElements.now)
+
+          reset()
           _rowCol1(
-            "Please add non-generic attr/ref too."
+            "Please add mandatory non-generic attr/ref too."
           )
         }
 
@@ -179,7 +202,7 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
           tree() = mkTree(mkModelTree(elements1))
           curMolecule() = model2molecule(elements1)
           curEntityLocked = false
-          columns() = getCols(elements)
+          columns() = getCols(elements1)
           eidCols = getEidTableColIndexes(columns.now)
           filters() = Map.empty[Int, Filter[_]]
           offset() = 0

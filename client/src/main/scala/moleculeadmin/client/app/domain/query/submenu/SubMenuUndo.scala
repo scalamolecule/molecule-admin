@@ -15,6 +15,7 @@ case class SubMenuUndo()(implicit val ctx: Ctx.Owner)
   def render: LI =
     li(
       paddingLeft := 12,
+      cursor.pointer,
       _shortcut("U", "ndo"),
       onclick := { () =>
         toggleUndo()

@@ -23,7 +23,8 @@ case class SchemaDropDown(metaSchema: MetaSchema, selection: String)
   ): JsDom.TypedTag[UList] = dropdownType(
     for (Ns(_, ns, nsFull, _, _, attrs0) <- nss) yield {
       // Add entity id
-      val attrs = Attr(0, "e", 1, "datom", None, None, None, None, None, None, None, None, Nil) +: attrs0
+      val attrs = Attr(0, "e", 1, "datom",
+        None, None, None, None, None, None, None, None, Nil) +: attrs0
       _submenu(
         a(href := "#", ns,
           onclick := { () =>
