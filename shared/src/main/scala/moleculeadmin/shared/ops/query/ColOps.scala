@@ -2,7 +2,7 @@ package moleculeadmin.shared.ops.query
 
 import molecule.ast.model._
 import molecule.transform.Model2Query.coalesce
-import moleculeadmin.shared.ast.query.{Col, QueryResult}
+import moleculeadmin.shared.ast.query.{Col, QueryDTO, QueryResult}
 import moleculeadmin.shared.ast.schema.{Attr, Ns}
 import moleculeadmin.shared.util.HelpersAdmin
 import scala.collection.mutable

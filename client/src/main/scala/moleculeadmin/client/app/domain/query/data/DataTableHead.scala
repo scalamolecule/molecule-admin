@@ -7,7 +7,7 @@ import moleculeadmin.client.app.domain.query.marker.{Toggle, ToggleOffAll}
 import moleculeadmin.client.app.element.AppElements
 import moleculeadmin.client.app.element.query.datatable.HeadElements
 import moleculeadmin.client.rxstuff.RxBindings
-import moleculeadmin.shared.ast.query.{Col, QueryResult}
+import moleculeadmin.shared.ast.query.{Col, QueryDTO, QueryResult}
 import moleculeadmin.shared.ops.query.data.FilterFactory
 import moleculeadmin.shared.ops.query.{ColOps, ModelOps}
 import org.scalajs.dom.html.{TableCell, TableSection}
@@ -38,7 +38,7 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
         !columns.now.exists(_.colIndex == colIndex)) {
         window.alert("Can sort maximum 5 columns.")
       } else {
-        //            println("------------ sort ------------")
+        //        println("------------ sort ------------")
         // Let only columns() propagate change
         offset.kill()
         // Show first page with each new sort
@@ -46,6 +46,14 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
         columns() = getSortedColumns(
           columns.now, colIndex, e.getModifierState("Shift")
         )
+        // update sorting for matching recent if any
+        recentQueries = recentQueries.map {
+          case q if q.molecule == curMolecule.now =>
+            q.copy(colSettings = colSettings(columns.now))
+          case q                                  => q
+        }
+        //        println("  SORT: " + columns.now)
+        //        println("  SORT: " + recentQueries)
       }
     }
     val editable        = isEditable(columns.now, colIndex, nsAlias, nsFull)
@@ -217,7 +225,7 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
     val attrResolver = ResolveAttrs(columns.now)
     var nss          = Seq.empty[(String, String, Int)]
     val attrCells    = new Array[JsDom.TypedTag[TableCell]](1 + colCount)
-    val inputCells  = new Array[JsDom.TypedTag[TableCell]](1 + colCount)
+    val inputCells   = new Array[JsDom.TypedTag[TableCell]](1 + colCount)
 
     // Row number column
     attrCells(0) = _rowNumberCell

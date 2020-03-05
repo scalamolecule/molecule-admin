@@ -157,11 +157,11 @@ case class GroupRetract(col: Col)(implicit val ctx: Ctx.Owner)
 
     call.foreach {
       case Right(_) =>
-        println(s"Retracted $count entities ")
+        println(s"Retracted `$attrFull` values for $count entities")
         modelElements.recalc()
 
       case Left(err) =>
-        val msg = s"Error retracting entities:\n" + err
+        val msg = s"Error retracting `$attrFull` values:\n" + err
         println(msg)
         window.alert(msg)
     }
