@@ -742,7 +742,7 @@ class QueryBackend extends ToggleBackend {
   override def retractEntities(db: String, eids: Array[Long]): Either[String, Long] = {
     implicit val conn = Conn(base + "/" + db)
     val stmtss = Seq(eids.toSeq.map(RetractEntity))
-    println("retractEntities:\n  " + stmtss.mkString("\n  "))
+    //    println("retractEntities:\n  " + stmtss.mkString("\n  "))
     withTransactor {
       try {
         val txR: TxReport = conn.transact(stmtss)
@@ -785,7 +785,7 @@ class QueryBackend extends ToggleBackend {
         if (eligibleEids.isEmpty) {
           Left("All entities already have card-one joins to attribute ``")
         } else {
-          val part        = if (nsFull.contains('_'))
+          val part = if (nsFull.contains('_'))
             ":" + nsFull.split('_')(0)
           else
             ":db.part/user"
@@ -795,7 +795,7 @@ class QueryBackend extends ToggleBackend {
           else
             getCaster(attrType, "")(value)
 
-          val stmtss      = eligibleEids.map { eid =>
+          val stmtss = eligibleEids.map { eid =>
             val refId = Peer.tempid(part)
             Seq(
               Add(eid, refAttrFull, refId, NoValue),

@@ -1,34 +1,34 @@
 package moleculeadmin.client.app.domain.query
 
+import molecule.ast.model.Atom
 import molecule.util.RegexMatching
-import moleculeadmin.client.app.domain.query.QueryState.{curMolecule, pushUrlOntoHistoryStack}
-import org.scalajs.dom.{PopStateEvent, window}
-import scala.scalajs.js.URIUtils
-import moleculeadmin.client.app.domain.query.QueryState._
+import moleculeadmin.client.app.domain.query.QueryState.{curMolecule, pushUrlOntoHistoryStack, _}
 import moleculeadmin.shared.ast.tree.Tree
 import moleculeadmin.shared.ops.transform.Molecule2Model
-import rx.{Ctx, Var}
-import scalatags.JsDom.all.s
+import org.scalajs.dom.{PopStateEvent, window}
+import rx.Ctx
+import scala.scalajs.js.URIUtils
 
 trait UrlHandling extends RegexMatching {
 
   def pushUrl(): Unit = {
+    val m = if (curMolecule.now.isEmpty)
+      "" else "&m=" + URIUtils.encodeURI(curMolecule.now)
+
     val newUrl =
       window.location.protocol + "//" +
         window.location.host +
         window.location.pathname +
-        "?db=" + db +
-        "&m=" + URIUtils.encodeURI(curMolecule.now)
+        "?db=" + db + m
 
     if (pushUrlOntoHistoryStack) {
-      //      println("pushUrl")
+      println("pushUrl - " + curMolecule.now)
       window.history.pushState(null, "MoleculeAdmin", newUrl)
     } else {
-      //      println("pushUrl next time")
+      println("pushUrl next time - " + curMolecule.now)
       pushUrlOntoHistoryStack = true
     }
   }
-
 
   def urlParams: Map[String, String] = {
     window.location.search.tail.split("&")
@@ -43,19 +43,23 @@ trait UrlHandling extends RegexMatching {
 
   def prepareBrowserHistory(implicit ctx: Ctx.Owner): Unit = {
     window.addEventListener("popstate", (_: PopStateEvent) => {
-
+      //      println("POPSTATE -----")
       urlParams.get("m").fold {
-        //        println("No m...")
-        curMolecule() = ""
-        tree() = Tree(Nil, Nil, Nil, Nil, Nil, Nil)
-        modelElements() = Nil
+        //        println("No m... " + modelElements.now)
+        if (!modelElements.now.exists {
+          case Atom(_, "Dummy to keep ns open", _, _, _, _, _, _) => true
+          case _                                                  => false
+        }) {
+          //          println("dummy")
+          curMolecule() = ""
+          tree() = Tree(Nil, Nil, Nil, Nil, Nil, Nil)
+          modelElements() = Nil
+        }
       } { m =>
-
-        //        println("m2: " + m)
+        //        println("m2           : " + m)
+        //        println("curMolecule  : " + curMolecule.now)
+        //        println("modelElements: " + modelElements.now)
         if (m != curMolecule.now) {
-
-          //          println("curMolecule: " + curMolecule.now)
-
           pushUrlOntoHistoryStack = false
           savedQueries.find(_.molecule == m) match {
             case Some(q) => new Callbacks().useQuery(q)
@@ -73,10 +77,7 @@ trait UrlHandling extends RegexMatching {
 
   def loadOptionalMolecule(implicit ctx: Ctx.Owner): Unit = {
     urlParams.get("m").foreach { m =>
-
       //      println("m1: " + m)
-
-      //      pushUrlOntoHistoryStack = true
       savedQueries.find(_.molecule == m) match {
         case Some(q) =>
           //          println("q: " + q)
@@ -85,9 +86,7 @@ trait UrlHandling extends RegexMatching {
         case None =>
           Molecule2Model(m) match {
             case Right(elements) =>
-
               //              elements foreach println
-
               modelElements() = elements
             case Left(err)       => window.alert(s"Error using query: $err")
           }

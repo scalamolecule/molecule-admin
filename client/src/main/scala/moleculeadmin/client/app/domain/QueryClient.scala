@@ -39,8 +39,6 @@ object QueryClient
       // import moleculeadmin.client.app.domain.query.data.groupedit.compileTest.TestScalaFiddle
       // TestScalaFiddle
 
-//      println("LOAD " + db0)
-
       // Base settings
       db = db0
       metaSchema = metaSchema0
@@ -87,7 +85,6 @@ object QueryClient
         curFlags = flags
         curChecks = checks
 
-//        println("loadOptionalMolecule...")
         loadOptionalMolecule
       }
 

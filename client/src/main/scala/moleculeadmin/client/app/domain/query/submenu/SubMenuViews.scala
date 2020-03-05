@@ -1,9 +1,10 @@
 package moleculeadmin.client.app.domain.query.submenu
+
 import moleculeadmin.client.app.domain.query.Callbacks
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.element.query.SubMenuElements
 import org.scalajs.dom.html.LI
-import rx.Ctx
+import rx.{Ctx, Rx}
 import scalatags.JsDom.all._
 
 
@@ -28,7 +29,12 @@ case class SubMenuViews()(implicit val ctx: Ctx.Owner)
       Seq(
         _cb(
           "view-showViews",
-          _cbLabel("␣", "Show Views"),
+          Rx(
+            if (modelElements().isEmpty)
+              _cbLabel("␣", "Show Views (when query is built)")
+            else
+              _cbLabel("␣", "Show Views")
+          ),
           showViews,
           () => toggleShowViews()
         ),
