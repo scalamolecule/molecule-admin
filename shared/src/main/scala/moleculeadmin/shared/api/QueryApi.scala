@@ -36,7 +36,7 @@ trait QueryApi extends BaseApi {
     db: String,
     tx: Long,
     enumAttrs: Seq[String]
-  ): Array[DatomTuple] = ???
+  ): (String, List[DatomTuple], List[DatomTuple]) = ???
 
   def getLastTxs(
     db: String,
