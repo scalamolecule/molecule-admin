@@ -1,4 +1,5 @@
 package moleculeadmin.client.app.element.query
+
 import moleculeadmin.shared.styles.Color
 import org.scalajs.dom.html.{Div, Element}
 import org.scalajs.dom.window
@@ -77,11 +78,47 @@ trait ViewElements extends SubMenuElements {
       _cardHeader(h5("Entity")),
       _cardBody(
         table(
+//          cls := "tableEntityX",
+//          id := "entityViewTableBackRef",
+          width := "100%",
+          color := Color.link,
+//          cursor.pointer,
+//          tr(
+//            onclick := { () => window.alert("yeah") },
+//            td(":Ns.int"),
+//            td(
+//              fontFamily := "Courier",
+//              textAlign.right,
+//              "208371"
+//            ),
+//          ),
+          tr(
+            //            cursor.pointer,
+            td(":Ns.ref1"),
+            td(
+//            onclick := { () => window.alert("yeah") },
+              fontFamily := "Courier",
+              textAlign.right,
+              a(href:="#", "5288")
+            ),
+          ),
+          tr(td("hej")),
+          tr(td("don")),
+        ),
+        hr(margin := "4px -3px"),
+        table(
           cls := "tableEntity",
           id := "entityViewTable",
           tr(td(msg))
         )
-      )
+      ),
+      //      _cardBody(
+      //        table(
+      //          cls := "tableEntity",
+      //          id := "entityViewTable2",
+      //          tr(td("hejhej"))
+      //        )
+      //      )
     )
 
   def _entityHistoryView(msg: String): TypedTag[Element] =
@@ -100,9 +137,7 @@ trait ViewElements extends SubMenuElements {
       )
     )
 
-  def _urlView(
-    url: String
-  ): TypedTag[Element] =
+  def _urlView(url: String): TypedTag[Element] =
     _card(
       _cardHeader(
         h5("Url"),

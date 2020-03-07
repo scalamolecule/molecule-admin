@@ -6,7 +6,6 @@ lazy val client = (project in file("client"))
   .settings(Settings.client)
   .dependsOn(sharedJs)
   .enablePlugins(ScalaJSWeb, TzdbPlugin)
-//  .enablePlugins(ScalaJSPlugin, ScalaJSWeb, TzdbPlugin)
 
 
 lazy val server = (project in file("server"))

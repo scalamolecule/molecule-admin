@@ -29,7 +29,7 @@ object Values extends SchemaBase with Base {
         updateAttrCountsAndValues(dbConn, part, ns, attrE, attr, tpe, enums, refNs, descrAttr, max)
       }
 
-      println("------- Attribute attribute entity counts --------------")
+      println("------- Namespace attribute entity counts --------------")
 
       schema.groupBy(_._4).values.toSeq.sortBy(r => (r.head._2, r.head._5)).foreach { nsAttrs =>
         val (part, nsE, ns0) = (nsAttrs.head._3, nsAttrs.head._4, nsAttrs.head._6.capitalize)

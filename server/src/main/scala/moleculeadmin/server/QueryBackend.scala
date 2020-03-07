@@ -138,14 +138,13 @@ class QueryBackend extends ToggleBackend {
     case v                                    => formatEmpty(v)
   }
 
-
   override def getTxData(
     db: String,
     tx: Long,
     enumAttrs: Seq[String]
-  ): Array[(Long, String, String, Boolean)] = {
-    val conn   = Conn(base + "/" + db)
-    val result = datomic.Peer.q(
+  ): (String, List[DatomTuple], List[DatomTuple]) = {
+    val conn               = Conn(base + "/" + db)
+    val result             = datomic.Peer.q(
       """[:find ?e ?aStr ?v ?op
         |:in $ ?log ?tx
         |:where [(tx-data ?log ?tx) [[?e ?a ?v _ ?op]]]
@@ -156,40 +155,50 @@ class QueryBackend extends ToggleBackend {
       conn.datomicConn.log(),
       tx.asInstanceOf[Object]
     )
-    val it     = result.iterator()
-    val rows   = new Array[(Long, String, String, Boolean)](result.size)
-    var attr   = ""
-    var i      = 0
+    var txInst             = ""
+    var txMetaData         = List.empty[DatomTuple]
+    var txData             = List.empty[DatomTuple]
+    val it                 = result.iterator()
+    var row: jList[AnyRef] = null
+    var e                  = 0L
+    var attr               = ""
+    var tpl: DatomTuple    = null
     while (it.hasNext) {
-      val row = it.next()
+      row = it.next()
+      e = row.get(0).asInstanceOf[Long]
       attr = row.get(1).asInstanceOf[String]
-      rows(i) = (
-        row.get(0).asInstanceOf[Long],
+      tpl = (
+        e,
         attr,
         formatValue(conn, attr, row.get(2), enumAttrs),
         row.get(3).asInstanceOf[Boolean]
       )
-      i += 1
+      if (e == tx) {
+        if (attr == ":db/txInstant") {
+          txInst = tpl._3
+        } else {
+          txMetaData = tpl :: txMetaData
+        }
+      } else {
+        txData = tpl :: txData
+      }
     }
-    rows.sortBy(t => (t._1, t._2, t._4, t._3))
+    (
+      txInst,
+      txMetaData.sortBy(t => (t._1, t._2, t._4, t._3)),
+      txData.sortBy(t => (t._1, t._2, t._4, t._3))
+    )
   }
-
 
   override def getLastTxs(
     db: String,
     prevFirstT0: Long,
     enumAttrs: Seq[String]
   ): Either[String, Array[TxData]] = {
-    val conn       = Conn(base + "/" + db)
-    val datomicDb  = conn.db
-    val prevFirstT = if (prevFirstT0 == 0L) datomicDb.basisT() else prevFirstT0
-    val firstT     = if (prevFirstT > 1100) prevFirstT - 100 else 1001
-    //    val firstT       = 1001
-
-    //    println("prevFirstT0 " + prevFirstT0)
-    //    println("basisT " + datomicDb.basisT())
-    //    println("firstT " + firstT)
-
+    val conn         = Conn(base + "/" + db)
+    val datomicDb    = conn.db
+    val prevFirstT   = if (prevFirstT0 == 0L) datomicDb.basisT() else prevFirstT0
+    val firstT       = if (prevFirstT > 1100) prevFirstT - 100 else 1001
     val txs          = conn.datomicConn.log.txRange(firstT, null).asScala
     val txData       = new Array[TxData](txs.size)
     var txIndex      = 0
@@ -241,10 +250,6 @@ class QueryBackend extends ToggleBackend {
               }
             }.sortBy(d => (d._1, d._2, d._4, d._3))
 
-          //          println(t)
-          //          datoms0 foreach println
-          //          println("------")
-
           val datomCount   = datoms0.length
           val txMetaDatoms = new ListBuffer[DatomTuple]
           val datoms       = new ListBuffer[DatomTuple]
@@ -273,7 +278,6 @@ class QueryBackend extends ToggleBackend {
 
               case datom@(e, _, _, _) if e == metaE =>
                 txMetaDatoms += datom
-
 
               // Datoms
 
@@ -440,19 +444,6 @@ class QueryBackend extends ToggleBackend {
     val row     = result.iterator().next()
     (row.get(0).asInstanceOf[Long], row.get(1).asInstanceOf[Long])
   }
-
-  //  def withTransactor[T](
-  //    body: => Either[String, T]
-  //  )(implicit conn: Conn): Either[String, T] = try {
-  //    // Check if transactor responds by sending a Future back
-  //    conn.datomicConn.sync()
-  //    // Execute body of work
-  //    body
-  //  } catch {
-  //    case _: Throwable => Left(
-  //      "Datomic Transactor unavailable. Please restart it and try the operation again.")
-  //  }
-
 
   override def upsertQuery(db: String, query: QueryDTO): Either[String, String] = {
     implicit val conn = Conn(base + "/MoleculeAdmin")
