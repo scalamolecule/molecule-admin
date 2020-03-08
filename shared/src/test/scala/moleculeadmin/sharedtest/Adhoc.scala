@@ -14,6 +14,7 @@ import scala.languageFeature.implicitConversions._
 object Adhoc extends TestSuite
   with TreeSchema with TreeOps {
 
+
   val tests = Tests {
 
     test("Adhoc") {

@@ -18,7 +18,7 @@ case class EntityHistory()(implicit ctx: Ctx.Owner) extends Base {
     (curEntity(), entityHistorySort()) match {
       case (0, _) => // no entity id marked yet
 
-      case (eid, sort) if curViews.now.contains("view04_EntityHistory") =>
+      case (eid, sort) =>
         val view = document.getElementById("entityHistoryEid")
         if (view == null) {
           // Start fresh
@@ -30,6 +30,7 @@ case class EntityHistory()(implicit ctx: Ctx.Owner) extends Base {
             span("tx")
           else
             a(href := "#", "tx", onclick := { () =>
+              saveSetting("entityHistorySort" -> "tx")
               entityHistorySort() = "tx"
             })
 
@@ -37,6 +38,7 @@ case class EntityHistory()(implicit ctx: Ctx.Owner) extends Base {
             span("attr", paddingRight := 20)
           else
             a(href := "#", "attr", paddingRight := 20, onclick := { () =>
+              saveSetting("entityHistorySort" -> "attr")
               entityHistorySort() = "attr"
             })
 
@@ -45,8 +47,6 @@ case class EntityHistory()(implicit ctx: Ctx.Owner) extends Base {
           )
           addEntityHistoryRows("entityHistoryViewTable", eid, sort)
         }
-
-      case _ => // don't update non-present entityView
     }
     _entityHistoryView("Point on entity id...")
   }

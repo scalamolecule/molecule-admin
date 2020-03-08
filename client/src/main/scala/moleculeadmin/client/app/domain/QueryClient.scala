@@ -65,6 +65,9 @@ object QueryClient
           queryBaseSelection = "a"
         }
         showViews = settings.getOrElse("showViews", "false").toBoolean
+        showEntityViewBackRefs =
+          settings.getOrElse("showEntityViewBackRefs", "false").toBoolean
+        entityHistorySort() = settings.getOrElse("entityHistorySort", "tx")
 
         curViews() = settings.collect {
           case (k, "true") if k.startsWith("view") => k

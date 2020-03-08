@@ -36,6 +36,7 @@ trait SubMenuToggling extends BaseKeyEvents with RegexMatching {
 
   def toggleOffAll(): Unit = {
     curEntity() = 0L
+    curViews.recalc()
     toggleOffElement("query-list")
     toggleOffElement("views")
     toggleOffElement("grouped")

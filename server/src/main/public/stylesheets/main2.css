@@ -159,14 +159,6 @@ table.tableRowLink tr.other:hover {
     cursor: pointer;
     background-color: #eee;
 }
-/*table.tableRowLink tr:nth-child(1) {
-    font-weight: bold;
-}
-table.tableRowLink tr:nth-child(1n+2):hover {
-    color: #00A0D6;
-    cursor: pointer;
-    background-color: #eee;
-}*/
 table.tableRowLink th {
     text-align: right;
     vertical-align: top;
@@ -281,6 +273,21 @@ table.tableEntity ul {
     padding-inline-start: 15px;
     margin-bottom: 0;
     cursor: pointer;
+}
+
+.tableEntityBackRefs div {
+    width: 100%;
+    padding-left: 2px;
+    padding-right: 5px;
+}
+.tableEntityBackRefs div:hover {
+    background-color: #eee;
+}
+.tableEntityBackRefs span {
+    float: right;
+    margin-left: 10px;
+    color: grey;
+    font-family: "courier";
 }
 
 
