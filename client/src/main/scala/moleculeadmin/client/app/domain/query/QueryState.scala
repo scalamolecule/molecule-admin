@@ -97,10 +97,11 @@ object QueryState extends QueryApi {
 
 
   // Entities
-  val curEntity        : Var[Long]   = Var(0L)
-  var curEntityLocked  : Boolean     = false
-  var curAttrs         : Seq[String] = Seq.empty
-  val entityHistorySort: Var[String] = Var("tx")
+  val curEntity               = Var(0L)
+  var curEntityLocked         = false
+  var showEntityViewBackRefs  = false
+  var curAttrs                = Seq.empty[String]
+  val entityHistorySort       = Var("tx")
 
   // tableCol = colIndex + 1
   // tableCol -> (eid -> array indexes)

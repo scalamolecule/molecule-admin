@@ -22,8 +22,14 @@ class Callbacks(implicit ctx: Ctx.Owner)
 
   def saveSettings2(pairs: Seq[(String, String)]): Unit =
     queryWire().saveSettings(pairs).call().foreach {
-      case Right(_) =>
-      //        println(s"Saved settings: " + pairs.mkString(", "))
+      case Right(_)  =>
+        if (pairs.length == 1) {
+          val pair = pairs.head
+          println(s"Saved setting: ${pair._1} -> ${pair._2}")
+        } else {
+          println(s"Saved settings:")
+          pairs.foreach { case (k, v) => println(s"  $k -> $v") }
+        }
       case Left(err) => window.alert(err)
     }
 

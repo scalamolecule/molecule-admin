@@ -1,7 +1,7 @@
 package moleculeadmin.client.app.element.query
 
 import moleculeadmin.shared.styles.Color
-import org.scalajs.dom.html.{Div, Element}
+import org.scalajs.dom.html.{Element, HR, Span, Table}
 import org.scalajs.dom.window
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
@@ -73,53 +73,66 @@ trait ViewElements extends SubMenuElements {
       )
     )
 
-  def _entityView(msg: String): TypedTag[Element] =
+
+  // Entity view -----------------------
+
+  def _entityView(
+    showBackRefsLink: Frag,
+    backRefsSpan: Frag,
+    entityData: Frag
+  ): TypedTag[Element] =
     _card(
-      _cardHeader(h5("Entity")),
-      _cardBody(
-        table(
-//          cls := "tableEntityX",
-//          id := "entityViewTableBackRef",
-          width := "100%",
-          color := Color.link,
-//          cursor.pointer,
-//          tr(
-//            onclick := { () => window.alert("yeah") },
-//            td(":Ns.int"),
-//            td(
-//              fontFamily := "Courier",
-//              textAlign.right,
-//              "208371"
-//            ),
-//          ),
-          tr(
-            //            cursor.pointer,
-            td(":Ns.ref1"),
-            td(
-//            onclick := { () => window.alert("yeah") },
-              fontFamily := "Courier",
-              textAlign.right,
-              a(href:="#", "5288")
-            ),
-          ),
-          tr(td("hej")),
-          tr(td("don")),
-        ),
-        hr(margin := "4px -3px"),
-        table(
-          cls := "tableEntity",
-          id := "entityViewTable",
-          tr(td(msg))
-        )
+      minWidth := 200,
+      _cardHeader(
+        height := 23,
+        h5("Entity", display.`inline-block`),
+        showBackRefsLink
       ),
-      //      _cardBody(
-      //        table(
-      //          cls := "tableEntity",
-      //          id := "entityViewTable2",
-      //          tr(td("hejhej"))
-      //        )
-      //      )
+      _cardBody(
+        backRefsSpan,
+        entityData
+      )
     )
+
+  def _entityShowBackRefs(
+    toggleBackRefs: () => Unit,
+    show: String
+  ) =
+    a(
+      href := "#",
+      paddingLeft := 30,
+      float.right,
+      onclick := toggleBackRefs,
+      show + " back-refs"
+    )
+
+  def _backRefLink(attrFull: String, count: Int, url: String) =
+    a(
+      href := url,
+      target := "_blank",
+      rel := "noopener noreferrer",
+      div(
+        attrFull,
+        span(count)
+      )
+    ).render
+
+  def _backRefSeparator: HR = hr(margin := "4px -3px").render
+
+  def _entityBackRefs: Span =
+    span(
+      cls := "tableEntityBackRefs",
+    ).render
+
+  def _entityDatoms(msg: String): TypedTag[Table] =
+    table(
+      cls := "tableEntity",
+      id := "entityViewTable",
+      tr(td(msg))
+    )
+
+
+  // Entity History view -----------------------
 
   def _entityHistoryView(msg: String): TypedTag[Element] =
     _card(
@@ -136,6 +149,9 @@ trait ViewElements extends SubMenuElements {
         )
       )
     )
+
+
+  // Live URL view -----------------------
 
   def _urlView(url: String): TypedTag[Element] =
     _card(

@@ -10,6 +10,7 @@ import scala.languageFeature.implicitConversions._
 
 object Molecule2ModelTest extends TestSuite with TreeSchema with Helpers with ExampleData {
 
+
   val tests = Tests {
 
     test("Basic") {
@@ -41,8 +42,10 @@ object Molecule2ModelTest extends TestSuite with TreeSchema with Helpers with Ex
       Molecule2Model(".") ==> Left("Can't extract token from empty molecule")
       Molecule2Model("Xx.int") ==> Left("Unrecognized initial namespace name `Xx` in molecule: Xx.int")
       Molecule2Model("Ns.xx") ==> Left("Unrecognized attribute name `xx` in molecule: Ns.xx")
+    }
 
-      // Entity id
+
+    test("e") {
       Molecule2Model("Ns.e") ==> Right(Seq(
         Generic("Ns", "e", "datom", EntValue)
       ))
@@ -54,12 +57,25 @@ object Molecule2ModelTest extends TestSuite with TreeSchema with Helpers with Ex
         Atom("Ns", "str", "String", 1, VarValue, None, List(), List()),
         Generic("Ns", "e", "datom", EntValue)
       ))
+    }
 
-      // enum
+
+    test("Enum") {
       Molecule2Model("Ns.enum") ==> Right(Seq(
         Atom("Ns", "enum", "String", 1, EnumVal, Some(":Ns.enum/"), List(), List())
       ))
 
+    }
+
+
+    test("Ref attr") {
+      Molecule2Model("Ns.ref1") ==> Right(Seq(
+        Atom("Ns", "ref1", "ref", 1, VarValue, None, List(), List())
+      ))
+
+      Molecule2Model("Ns.refs1") ==> Right(Seq(
+        Atom("Ns", "refs1", "ref", 2, VarValue, None, List(), List())
+      ))
     }
 
 
@@ -208,6 +224,10 @@ object Molecule2ModelTest extends TestSuite with TreeSchema with Helpers with Ex
       Molecule2Model("Ns.long(1L or 2L)") ==> Right(Seq(Atom("Ns", "long", "Long", 1, Eq(Seq(1L, 2L)))))
       Molecule2Model("Ns.long(Seq(1L, 2))") ==> Right(Seq(Atom("Ns", "long", "Long", 1, Eq(Seq(1L, 2L)))))
 
+      // Refs have their own type "ref"
+      Molecule2Model("Ns.ref1(42)") ==> Right(Seq(Atom("Ns", "ref1", "ref", 1, Eq(Seq(42L)), None, List(), List())))
+      Molecule2Model("Ns.refs1(42)") ==> Right(Seq(Atom("Ns", "refs1", "ref", 2, Eq(Seq(42L)), None, List(), List())))
+
       Molecule2Model("Ns.float(1.1, 2f)") ==> Right(Seq(Atom("Ns", "float", "Float", 1, Eq(Seq(1.1f, 2f)))))
       Molecule2Model("Ns.float(1.1 or 2f)") ==> Right(Seq(Atom("Ns", "float", "Float", 1, Eq(Seq(1.1f, 2f)))))
       Molecule2Model("Ns.float(Seq(1.1f, 2.0))") ==> Right(Seq(Atom("Ns", "float", "Float", 1, Eq(Seq(1.1f, 2.0f)))))
@@ -225,7 +245,6 @@ object Molecule2ModelTest extends TestSuite with TreeSchema with Helpers with Ex
       Molecule2Model("""Ns.str(Seq("a", "b"), Seq("c"), Seq("d"))""") ==> Right(Seq(Atom("Ns", "str", "String", 1, Eq(Seq("a", "b", "c", "d")))))
       Molecule2Model("""Ns.str(Seq("a", "b"), Seq("c, d"))""") ==> Right(Seq(Atom("Ns", "str", "String", 1, Eq(Seq("a", "b", "c, d")))))
 
-      Molecule2Model("Ns.ref1(42)") ==> Right(Seq(Atom("Ns", "ref1", "Long", 1, Eq(Seq(42)))))
 
       // Punctuations inside text strings ok
       Molecule2Model("""Ns.str("...")""") ==> Right(Seq(Atom("Ns", "str", "String", 1, Eq(Seq("...")))))
@@ -265,6 +284,7 @@ object Molecule2ModelTest extends TestSuite with TreeSchema with Helpers with Ex
       Molecule2Model(s"Ns.bigDec($bigDec1, $bigDec2)") ==> Right(Seq(Atom("Ns", "bigDec", "BigDecimal", 1, Eq(Seq(bigDec1, bigDec2)))))
       Molecule2Model(s"Ns.bigDec($bigDec1 or $bigDec2)") ==> Right(Seq(Atom("Ns", "bigDec", "BigDecimal", 1, Eq(Seq(bigDec1, bigDec2)))))
       Molecule2Model(s"Ns.bigDec(Seq($bigDec1, $bigDec2))") ==> Right(Seq(Atom("Ns", "bigDec", "BigDecimal", 1, Eq(Seq(bigDec1, bigDec2)))))
+
     }
 
 

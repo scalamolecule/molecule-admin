@@ -107,4 +107,9 @@ trait QueryApi extends BaseApi {
     isEnum: Boolean,
     value: String
   ): Either[String, Int] = ???
+
+  def getBackRefsData(
+    db: String,
+    eid: Long
+  ): Either[String, ListBuffer[(String, Int)]] = ???
 }

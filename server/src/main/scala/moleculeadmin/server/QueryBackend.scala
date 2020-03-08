@@ -209,7 +209,7 @@ class QueryBackend extends ToggleBackend {
     var e            = 0L
     var a            = ""
     var v            = ""
-    var eStrs        = new ListBuffer[String]
+    val eStrs        = new ListBuffer[String]
     var metaRefDatom = null: DatomTuple
     var refDatom     = null: DatomTuple
     var metaRefE     = 0L
@@ -802,6 +802,33 @@ class QueryBackend extends ToggleBackend {
       } catch {
         case t: Throwable => Left(t.getMessage)
       }
+    }
+  }
+
+
+  override def getBackRefsData(
+    db: String,
+    eid: Long
+  ): Either[String, ListBuffer[(String, Int)]] = {
+    try {
+      val raw  = Peer.q(
+        s"""[:find  ?attrName (count ?backRef)
+           | :in $$ ?eid
+           | :where [?backRef ?attrId ?eid]
+           |        [?attrId :db/ident ?attrIdent]
+           |        [(str ?attrIdent) ?attrName]]""".stripMargin,
+        Conn(base + "/" + db).db,
+        eid.asInstanceOf[Object]
+      )
+      val data = new ListBuffer[(String, Int)]
+      val it   = raw.iterator()
+      while (it.hasNext) {
+        val row = it.next
+        data.+=((row.get(0).toString, row.get(1).toString.toInt))
+      }
+      Right(data)
+    } catch {
+      case t: Throwable => Left(t.getMessage)
     }
   }
 }
