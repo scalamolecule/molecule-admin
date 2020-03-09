@@ -5,7 +5,9 @@ import moleculeadmin.shared.ast.schema.{MetaSchema, _}
 
 trait BaseApi {
 
-  def base() = "datomic:free://localhost:4334"
+  val dbProtocol = "free"
+  val dbHost     = "localhost:4334"
+  def base() = s"datomic:$dbProtocol://$dbHost"
 
   def dbNames(): Seq[String] = ???
 

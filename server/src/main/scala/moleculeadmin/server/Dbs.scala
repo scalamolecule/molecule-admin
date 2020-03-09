@@ -48,6 +48,7 @@ UC1: Choose action on db
 
 class Dbs extends DbsApi {
 
+  def moleculeAdminConn = Conn(base + "/MoleculeAdmin")
 
   def dbs(): Dbs = {
     implicit val conn = moleculeAdminConn
@@ -58,21 +59,21 @@ class Dbs extends DbsApi {
     meta_Db.name.isMolecular$.defFilePath$.get.sortBy(_._1)
   }
 
-  def moleculeAdminConn = Conn(base + "/MoleculeAdmin")
-
 
   def dbList(): Either[List[String], List[(String, Option[Boolean], Option[String])]] = try {
 
-//    recreateDbFrom(MoleculeAdminSchema, "localhost:4334/MoleculeAdmin", "free")
-
-
     // 2. Prepare sync - get connection
-    implicit val conn = try {
+    implicit val conn: Conn = try {
       moleculeAdminConn
     } catch { // 2a
-      case e: RuntimeException if e.toString.contains(s"Could not find meta in catalog") =>
-        // Create meta database if absent
-        recreateDbFrom(MoleculeAdminSchema, "localhost:4334/MoleculeAdmin", "free")
+      case e: RuntimeException =>
+        if (e.toString.contains(s"Could not find MoleculeAdmin in catalog")) {
+          // Create meta database if absent
+          println("Creating MoleculeAdmin database...")
+          recreateDbFrom(MoleculeAdminSchema, s"$dbHost/MoleculeAdmin", dbProtocol)
+        } else {
+          throw new RuntimeException("Couldn't connect to MoleculeAdmin meta database:\n" + e)
+        }
     }
 
     // 2. Sync meta/live dbs
@@ -89,7 +90,7 @@ class Dbs extends DbsApi {
     // Include all live dbs
     for (liveDb <- liveDbs) {
       if (!metaDbs.contains(liveDb)) // 2c
-        meta_Db.name(liveDb).save // 2c.1
+      meta_Db.name(liveDb).save // 2c.1
     }
 
     // 3. Show list of databases in client

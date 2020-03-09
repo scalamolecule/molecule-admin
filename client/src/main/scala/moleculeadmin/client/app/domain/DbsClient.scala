@@ -29,8 +29,11 @@ object DbsClient extends RxBindings with DbsElements {
 
   def init(dbs0: DbsApi#Dbs): Unit = {
     dbs() = dbs0.zipWithIndex.foldLeft(Seq.empty[Data], true) {
-      case ((acc, first), ((db, None, path), i)) if first => (acc :+ (i, db, None, path, Var(""), Var(true)), false)
-      case ((acc, first), ((db, isM, path), i))           => (acc :+ (i, db, isM, path, Var(""), Var(false)), first)
+      case ((acc, first), ((db, None, path), i)) if first =>
+        (acc :+ (i, db, None, path, Var(""), Var(true)), false)
+
+      case ((acc, first), ((db, isM, path), i))           =>
+        (acc :+ (i, db, isM, path, Var(""), Var(false)), first)
     }._1
   }
   def reload2(dbs0: Future[DbsApi#Dbs]) = dbs0 map init
@@ -56,7 +59,13 @@ object DbsClient extends RxBindings with DbsElements {
   }
 
 
-  def actions(db: String, isMolecular: sOption[Boolean], defFilePath: sOption[String], msg: Var[String], first: Var[Boolean]): Seq[JsDom.Modifier] = {
+  def actions(
+    db: String,
+    isMolecular: sOption[Boolean],
+    defFilePath: sOption[String],
+    msg: Var[String],
+    first: Var[Boolean]
+  ): Seq[JsDom.Modifier] = {
 
     (isMolecular, defFilePath) match {
       case (Some(false), _)         => Seq("(Non-molecule database)")

@@ -1,4 +1,4 @@
-package moleculeadmin.sharedtest.ops.transform
+package moleculeadmin.sharedtest.transform
 
 import molecule.ast.model._
 import molecule.util.Helpers

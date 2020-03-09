@@ -30,7 +30,7 @@ import utest._
 
 object ResetDbs extends TestSuite with ExampleData with Settings {
   val protocol = "free"
-  val base = "datomic:free://localhost:4334"
+  val base     = "datomic:free://localhost:4334"
 
 
   val tests = Tests {
@@ -38,12 +38,12 @@ object ResetDbs extends TestSuite with ExampleData with Settings {
     //      resetDbs()
     //    }
 
-//    test("Reset all and poplulate") {
-//      //              resetDbs()
-//      populateCoreTest(Conn("datomic:free://localhost:4334/CoreTest"))
-//      populatePartition(Conn("datomic:free://localhost:4334/Partition"))
-//      populateTree(Conn("datomic:free://localhost:4334/Tree"))
-//    }
+    //    test("Reset all and poplulate") {
+    //      //              resetDbs()
+    //      populateCoreTest(Conn("datomic:free://localhost:4334/CoreTest"))
+    //      populatePartition(Conn("datomic:free://localhost:4334/Partition"))
+    //      populateTree(Conn("datomic:free://localhost:4334/Tree"))
+    //    }
 
     test("Reset CoreTest") {
       resetDbs(Seq("CoreTest"))
