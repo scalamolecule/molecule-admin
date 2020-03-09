@@ -285,7 +285,7 @@ abstract class Cell(
                 e,
                 array(rowIndex),
                 curEntity,
-                (ref: Long) => () => curEntity() = ref,
+                (ref: Long) => () => if (ref > 0) curEntity() = ref,
                 update(origArray, array, rowIndex, "num")
               )
 
@@ -426,11 +426,10 @@ abstract class Cell(
                 id(rowIndex),
                 e,
                 curEntity,
-                (ref: Long) => () => {
-                  if (!curEntityLocked)
-                    curEntity() = ref
+                (ref: Long) => () => if (ref > 0 && !curEntityLocked) {
+                  curEntity() = ref
                 },
-                (ref: Long) => () => {
+                (ref: Long) => () => if (ref > 0) {
                   if (curEntityLocked) {
                     if (ref == curEntity.now)
                       curEntityLocked = false
