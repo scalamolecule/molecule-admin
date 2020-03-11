@@ -244,6 +244,9 @@ table.tableGrouped td:nth-child(3) {
 
 
 
+table.tableEntity {
+    cursor: default;
+}
 table.tableEntity th {
     font-weight: normal;
     color: #8e8e8e;
@@ -327,6 +330,7 @@ table.tableTx td.retracted {
 }
 table.tableTx td.eid a {
     color: #2b7dbe;
+    /*cursor: pointer;*/
 }
 table.tableTx td.num {
     color: #49a523;
@@ -380,7 +384,13 @@ table.undoTxs tr.txMetaData td {
     font-weight: normal;
 }
 
-
+table.undoTxs th {
+    font-weight: normal;
+    color: #8e8e8e;
+    vertical-align: top;
+    padding-top: 0px;
+    padding-right: 10px;
+}
 table.undoTxs td {
     padding: 0px 5px 0px 5px;
     vertical-align: top;
@@ -397,6 +407,9 @@ table.undoTxs td.eid {
     vertical-align: top;
     padding-top: 0px;
     padding-right: 10px;
+}
+table.undoTxs td.eid a {
+    cursor: default;
 }
 table.undoTxs td.eid.chosen {
     color: #2400ff;

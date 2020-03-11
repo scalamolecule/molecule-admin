@@ -1,32 +1,18 @@
 package moleculeadmin.servertest
 
-import ammonite.ops.read
-import db.admin.dsl.moleculeAdmin.{meta_Db, user_ColSetting}
+import java.util
+import datomic.Util
 import db.core.dsl.coreTest._
-import molecule.api.out10._
-import molecule.facade.Conn
-import moleculeadmin.servertest.schema.withPartitions.PartitionSetup
-import moleculeadmin.shared.testdata.{CoreSchema, ExampleData, mBrainzSchema}
-import moleculeadmin.shared.util.HelpersAdmin
-import org.specs2.mutable._
-import scala.languageFeature.implicitConversions._
-import ammonite.ops._
-import datomic.Peer
 import db.core.schema.CoreTestSchema
-import molecule.api.core.recreateDbFrom
-import molecule.ast.model.{Atom, Bond, Fn, NoValue, VarValue}
-import molecule.ast.query.{Funct, NoBinding}
-import molecule.ast.transactionModel.Add
-import moleculeadmin.server.QueryBackend
+import molecule.facade.Conn
+import molecule.api.out10._
 import moleculeadmin.server.utils.DateStrLocal
-import moleculeadmin.servertest.ResetDbs.protocol
-import moleculeadmin.shared.ast.query.Col
 import moleculeadmin.shared.ops.query.{ColOps, ModelOps}
-import moleculeadmin.shared.ops.transform.Molecule2Model
-import scala.collection.mutable.ListBuffer
+import moleculeadmin.shared.testdata.{CoreSchema, ExampleData}
+import moleculeadmin.shared.util.HelpersAdmin
 import utest._
-import scala.collection.immutable
-import scala.util.Random
+import scala.languageFeature.implicitConversions._
+import datomic.{Peer, Util}
 
 
 object Adhoc extends TestSuite

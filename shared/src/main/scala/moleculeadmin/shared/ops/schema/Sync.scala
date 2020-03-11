@@ -1,4 +1,5 @@
 package moleculeadmin.shared.ops.schema
+
 import moleculeadmin.shared.api.SchemaApi
 import moleculeadmin.shared.ast.schema.FlatAttr
 
@@ -45,17 +46,17 @@ case class Sync(baseSchema: Seq[FlatAttr], testSchema: Seq[FlatAttr]) extends Sc
       val testPartitions = testSchema.map(_.part).distinct
       val basePartitions = baseSchema.map(_.part).distinct
 
-      println("baseSchema")
-      baseSchema foreach println
-      println("---------------------------------")
-      println("testSchema")
-      testSchema foreach println
-      println("========================================")
-      println("basePartitions")
-      basePartitions foreach println
-      println("---------------------------------")
-      println("testPartitions")
-      testPartitions foreach println
+      //      println("baseSchema")
+      //      baseSchema foreach println
+      //      println("---------------------------------")
+      //      println("testSchema")
+      //      testSchema foreach println
+      //      println("========================================")
+      //      println("basePartitions")
+      //      basePartitions foreach println
+      //      println("---------------------------------")
+      //      println("testPartitions")
+      //      testPartitions foreach println
 
       if (testPartitions.diff(basePartitions).nonEmpty)
         throw new RuntimeException(
@@ -98,9 +99,9 @@ case class Sync(baseSchema: Seq[FlatAttr], testSchema: Seq[FlatAttr]) extends Sc
   def attr: Seq[(String, String, Seq[(String, Boolean)], Seq[(String, Boolean)])] = {
 
     val testAttrs: Seq[(String, (String, String, Seq[String]))] = testSchema.groupBy(_.nsFull).toSeq.sortBy(_._2.head.pos).map { g =>
-      val firstAttr     = g._2.head
-      val (part, nsAlias)    = (firstAttr.part, firstAttr.ns)
-      val testAttrNames = g._2.map(_.attr).distinct.sorted
+      val firstAttr       = g._2.head
+      val (part, nsAlias) = (firstAttr.part, firstAttr.ns)
+      val testAttrNames   = g._2.map(_.attr).distinct.sorted
       g._1 -> (part, nsAlias, testAttrNames)
     }
 

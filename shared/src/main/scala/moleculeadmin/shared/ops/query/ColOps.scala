@@ -92,9 +92,9 @@ trait ColOps extends HelpersAdmin {
       case (Col(`colIndex`, _, _, _, _, _, _, _, _, _, _, _, _, _, _),
       (0, false)) => (1, false)
 
-      // We have en entity id in namespace
-      case (Col(_, _, `nsAlias`, `nsFull`, "e", _, _, _, _, _, _, _, _, _, _),
-      (1, false)) => (1, true)
+      // Entity id in namespace - can't be aggr
+      case (Col(_, _, `nsAlias`, `nsFull`, "e", _, _, _, _, _, _, attrExpr, _, _, _),
+      (1, false)) => (1, !nonMenuExprs.contains(attrExpr))
 
       // Other cols before asking col - still no entity id - continue checking
       case (Col(_, _, `nsAlias`, `nsFull`, _, _, _, _, _, _, _, _, _, _, _),
