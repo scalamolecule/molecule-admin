@@ -57,11 +57,10 @@ object QueryClient
       Rx {
         maxRows() = settings.getOrElse("maxRows", "-1").toInt
         limit() = settings.getOrElse("limit", "20").toInt
+        querySelection() = settings.getOrElse("querySelection", "a")
         if (valuesCounted) {
-          querySelection() = settings.getOrElse("querySelection", "a")
           queryBaseSelection = settings.getOrElse("queryBaseSelection", "a")
         } else {
-          querySelection() = "a"
           queryBaseSelection = "a"
         }
         showViews = settings.getOrElse("showViews", "false").toBoolean

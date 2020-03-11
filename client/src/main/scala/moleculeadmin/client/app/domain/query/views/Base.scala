@@ -80,11 +80,19 @@ class Base(implicit val ctx: Ctx.Owner)
     case "ref" => td(
       cls := (if (asserted) "eid" else "eid retracted"),
       id := valueCellId,
-      a(href := "#", v,
-        onmouseover := { () =>
-          // Recursively open entity
-          addEntityRows(valueCellId, v.toLong, txs, level + 1)
-        })
+      a(href := "#",
+        v,
+        if (txs) {
+          onmouseover := { () =>
+            if (!curEntityLocked) curEntity() = v.toLong
+          }
+        } else {
+          onmouseover := { () =>
+            // Recursively open entity
+            addEntityRows(valueCellId, v.toLong, txs, level + 1)
+          }
+        }
+      )
     )
 
     case "enum" => td(
@@ -125,24 +133,35 @@ class Base(implicit val ctx: Ctx.Owner)
 
 
     case "refSet" => {
-      val valueElement = if (txs && level == 0) {
-        // Separate row for each value returned from tx lookup
-        a(href := "#", v, onmouseover := { () =>
-          // Recursively open entity
-          addEntityRows(valueCellId, v.toLong, txs, level + 1)
-        })
-      } else {
-        table(
-          v.split("__~~__").toSeq.zipWithIndex.map {
-            case (eid, i) =>
-              val eidElementId = valueCellId + "-" + i
-              tr(td(id := eidElementId, cls := "eid",
-                a(href := "#", eid, onmouseover := { () =>
-                  addEntityRows(eidElementId, eid.toLong, txs, level + 1)
-                })))
-          }
-        )
-      }
+      val valueElement =
+        if (txs && level == 0) {
+          // Separate row for each value returned from tx lookup
+          a(href := "#", v, onmouseover := { () =>
+            if (!curEntityLocked) curEntity() = v.toLong
+          })
+        } else {
+          table(
+            v.split("__~~__").toSeq.zipWithIndex.map {
+              case (eid, i) =>
+                val eidElementId = valueCellId + "-" + i
+                tr(td(id := eidElementId, cls := "eid",
+                  a(
+                    href := "#",
+                    eid,
+                    if (txs) {
+                      onmouseover := { () =>
+                        if (!curEntityLocked) curEntity() = v.toLong
+                      }
+                    } else {
+                      onmouseover := { () =>
+                        // Recursively open entity
+                        addEntityRows(eidElementId, eid.toLong, txs, level + 1)
+                      }
+                    }
+                  )))
+            }
+          )
+        }
       td(
         id := valueCellId,
         cls := (if (asserted) "eid" else "retracted"),

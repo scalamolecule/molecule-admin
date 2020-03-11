@@ -6,7 +6,7 @@ import molecule.util.RegexMatching
 import moleculeadmin.client.app.domain.query.QueryState.{curEntity, _}
 import moleculeadmin.client.app.element.query.SubMenuElements
 import moleculeadmin.client.autowire.queryWire
-import org.scalajs.dom.html.{Anchor, Element, Span}
+import org.scalajs.dom.html.{Anchor, Element, Span, Table}
 import org.scalajs.dom.{document, window}
 import rx.{Ctx, Rx}
 import scalatags.JsDom.TypedTag
@@ -88,7 +88,7 @@ case class Entity()(implicit ctx: Ctx.Owner) extends Base
     }
   }
 
-  val entityData = Rx {
+  val entityData: Rx.Dynamic[TypedTag[Table]] = Rx {
     curEntity() match {
       case 0 => // no entity id marked yet
       case eid =>

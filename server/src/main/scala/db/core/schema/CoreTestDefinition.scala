@@ -34,7 +34,7 @@ object CoreTestDefinition {
     val uris     = manyURI
     val enums    = manyEnum("enum0", "enum1", "enum2", "enum3", "enum4", "enum5", "enum6", "enum7", "enum8", "enum9")
     val parents  = many[Ns]
-    val refs1    = many[Ref1]
+    val refs1c   = many[Ref1]
     val refsSub1 = many[Ref1].isComponent
 
     val strMap    = mapString.fulltext

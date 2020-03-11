@@ -14,8 +14,13 @@ trait ByteRouter extends InjectedController with Tags {
 
   /** Instantiate router in inheriting Controller with
     * {{{
-    *   val router = AutoWireServer.route[QueryApi](api) // (or other Api)
+    *   val router = AutoWireServer.route[YourApi](api)
     * }}}
+   *
+   *  OBS: YourApi will only be available to the Router (compile) if it has
+   *  - no `val` declarations
+   *  - no parameterless `def` definitions
+   *    (`def myDef = 7` should be `def myDef() = 7` instead)
     */
   val router: Router
 

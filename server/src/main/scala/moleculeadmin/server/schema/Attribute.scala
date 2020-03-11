@@ -17,7 +17,7 @@ object Attribute extends SchemaBase with Base {
 
 
   def create(schema: MetaSchema, db: String, part: String, nsOnly: String, attr: String, card: Int, tpe: String, enums: Seq[String] = Nil,
-    optRefNs: Option[String] = None, options: Seq[String] = Nil, doc: Option[String] = None, pos0: Int = 0): Either[String, MetaSchema] = {
+             optRefNs: Option[String] = None, options: Seq[String] = Nil, doc: Option[String] = None, pos0: Int = 0): Either[String, MetaSchema] = {
     if (db.isEmpty) {
       Left(s"Empty db name.")
     } else if (part.isEmpty) {
@@ -141,8 +141,22 @@ object Attribute extends SchemaBase with Base {
   }
 
 
-  def update(schema0: MetaSchema, db: String, part: String, nsOnly: String, curAttr: String, newAttr: String, card: Int, tpe: String, enums: Seq[String],
-    optRefNs: Option[String], options: Seq[String], doc: Option[String], pos0: Int, attrGroup: Option[String]): Either[String, MetaSchema] = {
+  def update(
+    schema0: MetaSchema,
+    db: String,
+    part: String,
+    nsOnly: String,
+    curAttr: String,
+    newAttr: String,
+    card: Int,
+    tpe: String,
+    enums: Seq[String],
+    optRefNs: Option[String],
+    options: Seq[String],
+    doc: Option[String],
+    pos0: Int,
+    attrGroup: Option[String]
+  ): Either[String, MetaSchema] = {
     if (db.isEmpty) {
       Left(s"Empty db name.")
     } else if (part.isEmpty) {
@@ -284,8 +298,6 @@ object Attribute extends SchemaBase with Base {
                     // attribute card .............................................................................
 
                     if (curCard != card) {
-
-
 
                       def stripKeys(): Unit = {
                         // strip keys from all values (!)
@@ -638,10 +650,12 @@ object Attribute extends SchemaBase with Base {
                     // attribute name .............................................................................
 
                     if (curAttr != newAttr) {
+                      val newAttrFull = s":$nsFull/$newAttr"
+
                       // live
-                      rollbackAttrStmtsMap.add(Util.map(":db/id", s":$nsFull/$newAttr", ":db/ident", s":$nsFull/$curAttr"))
+                      rollbackAttrStmtsMap.add(Util.map(":db/id", newAttrFull, ":db/ident", curAttrFull))
                       liveConn.transact(Util.list(
-                        Util.map(":db/id", s":$nsFull/$curAttr", ":db/ident", s":$nsFull/$newAttr")
+                        Util.map(":db/id", curAttrFull, ":db/ident", newAttrFull)
                       ).asInstanceOf[util.List[AnyRef]])
 
                       // meta
