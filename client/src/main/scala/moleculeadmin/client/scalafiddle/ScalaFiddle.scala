@@ -1,4 +1,5 @@
 package moleculeadmin.client.scalafiddle
+
 import org.scalajs.dom
 import org.scalajs.dom.ext.Ajax
 import moleculeadmin.client.scalafiddle.ast._
@@ -20,17 +21,14 @@ import scala.scalajs.js.annotation.JSExportTopLevel
  * we can then cast to the expected type in Scala and apply to the values of
  * the group edit column values. Voila!
  *
- * ScalaFiddle router and core must be started first in separate processes,
- * each from the ScalaFiddle-core project dir:
+ * ScalaFiddle must be started first in separate processes from the
+ * ScalaFiddle-core project dir:
  *
- * $ sbt
- * $ router/reStart
- *
- * $ sbt
- * $ compilerServer/reStart
+ * $ sbt "router/reStart; compilerServer/reStart"
  *
  * test local compiler server:
- * http://localhost:8880/embed?layout=v70&source=%0Aimport%20fiddle.Fiddle%2C%20Fiddle.println%0Aimport%20scalajs.js%0A%0A%40js.annotation.JSExportTopLevel%28%22ScalaFiddle%22%29%0Aobject%20ScalaFiddle%20%7B%0A%20%20val%20greeting%20%3D%20%22Hello%20World%21%22%0A%20%20println%28greeting%29%0A%7D%0A%2F%2F%20%24FiddleDependency%20org.scala-js%20%25%25%25%20scalajs-dom%20%25%200.9.5%0A%2F%2F%20%24FiddleDependency%20com.lihaoyi%20%25%25%25%20scalatags%20%25%200.6.7%0A%2F%2F%20%24FiddleDependency%20com.lihaoyi%20%25%25%25%20sourcecode%20%25%200.1.4%0A
+ * http://localhost:8880/embed?layout=v70&source=%0Aimport%20fiddle.Fiddle%2C%20Fiddle.println%0Aimport%20scalajs.js%0A%0A%40js.annotation.JSExportTopLevel%28%22ScalaFiddle%22%29%0Aobject%20ScalaFiddle%20%7B%0A%20%20val%20greeting%20%3D%20%22Hello%20World%21%22%0A%20%20println%28greeting%29%0A%7D%0A%2F%2F%20%24FiddleDependency%20org.scala-js%20%25%25%25%20scalajs-dom%20%25%200.9.8%0A%2F%2F%20%24FiddleDependency%20com.lihaoyi%20%25%25%25%20scalatags%20%25%200.6.7%0A%2F%2F%20%24FiddleDependency%20com.lihaoyi%20%25%25%25%20sourcecode%20%25%200.1.4%0A
+ * http://localhost:8880/embed?layout=v70&source=%0Aimport%20fiddle.Fiddle%2C%20Fiddle.println%0Aimport%20scalajs.js%0A%0A%40js.annotation.JSExportTopLevel%28%22ScalaFiddle%22%29%0Aobject%20ScalaFiddle%20%7B%0A%20%20val%20greeting%20%3D%20%22Hello%20World%21%22%0A%20%20println%28greeting%29%0A%7D%0A%2F%2F%20%24ScalaVersion%20%202.12%0A%2F%2F%20%24FiddleDependency%20org.scala-js%20%25%25%25%20scalajs-dom%20%25%200.9.8%0A%2F%2F%20%24FiddleDependency%20com.lihaoyi%20%25%25%25%20scalatags%20%25%200.6.7%0A
  *
  * @param scalaCode Scala source code for JS object
  * @tparam TransferType Lambda result type.
@@ -83,22 +81,17 @@ case class ScalaFiddle[TransferType](scalaCode: String) {
       data = scalaCode
     ).map { res =>
       val compileTime = System.currentTimeMillis() - startTime
-      println(s"Compilation took $compileTime ms -------------------------------")
+      println(s"Compilation took $compileTime ms")
+      println(s"----- Scala code: -----")
+      println(numbered(scalaCode))
+
       val compResponse = readCompilationResponse(res.responseText)
       val jsCode       = compResponse.jsCode.getOrElse("No js code...")
-
       //      println(s"jsCode --------------\n" + jsCode)
-
       if (compResponse.annotations.nonEmpty) {
         val EditorAnnotation(row, _, text, _) = compResponse.annotations.head
-
-        val scalaCodeNumbered = scalaCode.split("\n").zipWithIndex.map {
-          case (c, i) if i < 9 => s" ${i + 1}  " + c
-          case (c, i)          => s"${i + 1}  " + c
-        }.mkString("\n")
         println(s"----- Scala code: -----")
-        //        println(scalaCode)
-        println(scalaCodeNumbered)
+        println(numbered(scalaCode))
         println(s"----- Compile error in line ${row + 1} -----")
         println(text.mkString("\n"))
         throw JavaScriptException("Compilation error")
@@ -158,4 +151,9 @@ case class ScalaFiddle[TransferType](scalaCode: String) {
       r.log
     )
   }
+
+  private def numbered(code: String): String = code.split("\n").zipWithIndex.map {
+    case (c, i) if i < 9 => s" ${i + 1}  " + c
+    case (c, i)          => s"${i + 1}  " + c
+  }.mkString("\n")
 }

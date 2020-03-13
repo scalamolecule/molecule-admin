@@ -60,13 +60,15 @@ trait Editing {
   }
 
   def multilineSoftNewLine(e: KeyboardEvent): Unit = {
-    val curCell = document.activeElement
-    val card    = curCell.getAttribute("card")
-    val cls     = curCell.getAttribute("class")
-    if (!(
-      card != null && (card == "2" || card == "3") ||
-        cls != null && (cls == "str" || cls == "filter" || cls == "edit"))
-    ) {
+    val curCell         = document.activeElement
+    val card            = curCell.getAttribute("card")
+    val isCardMany      = card != null && (card == "2" || card == "3")
+    val cls             = curCell.getAttribute("class")
+    val clss            = if (cls != null) cls.split(" ").toSeq else Seq.empty[String]
+    val acceptMultiLine = clss.intersect(Seq("str", "input")).nonEmpty
+    if (isCardMany || acceptMultiLine) {
+      // Allow soft new line within cell
+    } else {
       // Prevent internal line shifts in non-String cells
       e.preventDefault()
       window.alert(
@@ -74,8 +76,6 @@ trait Editing {
           |- Cardinality-many attributes
           |- Cardinality-one String attributes
           |""".stripMargin)
-    } else {
-      // Otherwise allow soft new line within cell
     }
   }
 
@@ -94,7 +94,7 @@ trait Editing {
         // Remove empty unordered list in empty cell
         curCell.removeChild(curCell.lastElementChild)
         // Place text in unordered list and add new empty item to continue editing
-        val curVs  = curCell.innerHTML.split("<br>").toList
+        val curVs    = curCell.innerHTML.split("<br>").toList
         val newUList = ul(
           li(curVs.flatMap(v => Seq(v: Frag, br)).init),
           li()
