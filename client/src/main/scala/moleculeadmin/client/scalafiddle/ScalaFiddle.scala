@@ -24,11 +24,8 @@ import scala.scalajs.js.annotation.JSExportTopLevel
  * ScalaFiddle must be started first in separate processes from the
  * ScalaFiddle-core project dir:
  *
- * $ sbt "router/reStart; compilerServer/reStart"
- *
- * test local compiler server:
- * http://localhost:8880/embed?layout=v70&source=%0Aimport%20fiddle.Fiddle%2C%20Fiddle.println%0Aimport%20scalajs.js%0A%0A%40js.annotation.JSExportTopLevel%28%22ScalaFiddle%22%29%0Aobject%20ScalaFiddle%20%7B%0A%20%20val%20greeting%20%3D%20%22Hello%20World%21%22%0A%20%20println%28greeting%29%0A%7D%0A%2F%2F%20%24FiddleDependency%20org.scala-js%20%25%25%25%20scalajs-dom%20%25%200.9.8%0A%2F%2F%20%24FiddleDependency%20com.lihaoyi%20%25%25%25%20scalatags%20%25%200.6.7%0A%2F%2F%20%24FiddleDependency%20com.lihaoyi%20%25%25%25%20sourcecode%20%25%200.1.4%0A
- * http://localhost:8880/embed?layout=v70&source=%0Aimport%20fiddle.Fiddle%2C%20Fiddle.println%0Aimport%20scalajs.js%0A%0A%40js.annotation.JSExportTopLevel%28%22ScalaFiddle%22%29%0Aobject%20ScalaFiddle%20%7B%0A%20%20val%20greeting%20%3D%20%22Hello%20World%21%22%0A%20%20println%28greeting%29%0A%7D%0A%2F%2F%20%24ScalaVersion%20%202.12%0A%2F%2F%20%24FiddleDependency%20org.scala-js%20%25%25%25%20scalajs-dom%20%25%200.9.8%0A%2F%2F%20%24FiddleDependency%20com.lihaoyi%20%25%25%25%20scalatags%20%25%200.6.7%0A
+ * $ cd <..>/scalafiddle-core
+ * $ sbt "~; router/reStart; compilerServer/reStart"
  *
  * @param scalaCode Scala source code for JS object
  * @tparam TransferType Lambda result type.
