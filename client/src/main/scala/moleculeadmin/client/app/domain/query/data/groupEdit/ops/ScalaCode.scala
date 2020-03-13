@@ -61,6 +61,10 @@ case class ScalaCode(col: Col, rhs0: String)
       |import java.net.URI
       |""".stripMargin
 
+  val versions: String =
+    """// $ScalaVersion 2.12
+      |// $ScalaJSVersion 0.6""".stripMargin
+
 
   def card1: String = {
     val implicits = attrType match {
@@ -107,7 +111,8 @@ case class ScalaCode(col: Col, rhs0: String)
        |      $rhs
        |    }
        |  }
-       |}""".stripMargin.trim
+       |}
+       |$versions""".stripMargin.trim
   }
 
 
@@ -159,7 +164,8 @@ case class ScalaCode(col: Col, rhs0: String)
        |      $rhs
        |    }
        |  }
-       |}""".stripMargin.trim
+       |}
+       |$versions""".stripMargin.trim
   }
 
 
@@ -212,6 +218,7 @@ case class ScalaCode(col: Col, rhs0: String)
        |      $rhs
        |    }
        |  }
-       |}""".stripMargin
+       |}
+       |$versions""".stripMargin
   }
 }
