@@ -61,6 +61,15 @@ trait HelpersAdmin extends Helpers with SpecialNames {
     var time1 = time0
     //    println("timer start ---------------------------------")
 
+    def delta: Long = {
+      val time2 = System.currentTimeMillis - time1
+      time1 = System.currentTimeMillis()
+      time2
+    }
+
+    def ms: String = thousands(delta) + " ms"
+    def msTotal: String = thousands(System.currentTimeMillis() - time0) + " ms"
+
     def log(n: Int): Unit = {
       val time2 = System.currentTimeMillis - time1
       if (on) println(s"$txt $n: " + "%10d".format(time2))

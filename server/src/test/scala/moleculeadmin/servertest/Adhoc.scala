@@ -1,18 +1,14 @@
 package moleculeadmin.servertest
 
-import java.util
-import datomic.Util
 import db.core.dsl.coreTest._
-import db.core.schema.CoreTestSchema
-import molecule.facade.Conn
 import molecule.api.out10._
+import molecule.facade.Conn
 import moleculeadmin.server.utils.DateStrLocal
 import moleculeadmin.shared.ops.query.{ColOps, ModelOps}
 import moleculeadmin.shared.testdata.{CoreSchema, ExampleData}
 import moleculeadmin.shared.util.HelpersAdmin
 import utest._
 import scala.languageFeature.implicitConversions._
-import datomic.{Peer, Util}
 
 
 object Adhoc extends TestSuite
@@ -38,10 +34,15 @@ object Adhoc extends TestSuite
       //      implicit val conn = Conn("datomic:free://localhost:4334/Clazzig")
 
 
-      //      // in-memory db
-      implicit val conn = recreateDbFrom(CoreTestSchema)
-      //      implicit val conn = Conn(base + "/CoreTest")
 
+
+      //      // in-memory db
+      //      implicit val conn = recreateDbFrom(CoreTestSchema)
+      implicit val conn = Conn(base + "/CoreTest")
+      val datomicDb  = conn.db
+      val prevFirstT = datomicDb.basisT() - 1
+
+      Ns.e.a.v.op.t(prevFirstT).debugGet
 
     }
   }
