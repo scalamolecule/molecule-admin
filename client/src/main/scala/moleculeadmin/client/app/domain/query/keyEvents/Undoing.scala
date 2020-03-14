@@ -31,10 +31,10 @@ trait Undoing extends UndoElements with QueryApi {
   }
 
   def undoLastClean(implicit ctx: Ctx.Owner): Unit = {
-    curLastTxs.reverse.find(tx =>
-      tx._5.nonEmpty && // has datoms to undo
-        !undone2new.contains(tx._1) && // not already undone
-        !new2undone.contains(tx._1) // not an undoing tx
+    curLastTxResults.reverse.find(txResult =>
+      txResult._5.nonEmpty && // has datoms to undo
+        !undone2new.contains(txResult._1) && // not already undone
+        !new2undone.contains(txResult._1) // not an undoing tx
     ).fold {
       window.alert("No clean txs to undo - please load more to undo further back.")
     } { cleanTx =>
@@ -44,12 +44,12 @@ trait Undoing extends UndoElements with QueryApi {
 
   def undoTxs(ts: Seq[Long])(implicit ctx: Ctx.Owner): Unit = {
     queryWire().undoTxs(db, ts, enumAttrs).call().foreach {
-      case Right(newTxs) =>
+      case Right(newTxResults) =>
         // Log
-        println(s"Undid ${newTxs.length} txs:")
+        println(s"Undid ${newTxResults.length} txs:")
 
         // Update local undone t pair caches
-        ts.reverse.zip(newTxs).foreach {
+        ts.reverse.zip(newTxResults).foreach {
           case (oldT, newTx) =>
             undone2new += oldT -> newTx._1
             new2undone += newTx._1 -> oldT
@@ -58,42 +58,43 @@ trait Undoing extends UndoElements with QueryApi {
             println(s"  $oldT -> ${newTx._1}")
         }
 
-        curLastTxs = curLastTxs ++ newTxs
+        curLastTxResults = curLastTxResults ++ newTxResults
 
         // Update dataTable + undo txs
         modelElements.recalc()
-      case Left(err)     => window.alert(err)
+
+      case Left(err) => window.alert(err)
     }
   }
 
   def populateUndoRows(err: String = "")(implicit ctx: Ctx.Owner): Unit = {
     def allNext(t: Long): Seq[Long] =
-      curLastTxs.collect {
-        case tx
-          if tx._1 >= t && // including/after this tx
-            tx._5.nonEmpty && // has datoms to undo
-            !undone2new.contains(tx._1) // not already undone
-        => tx._1
+      curLastTxResults.collect {
+        case txResult
+          if txResult._1 >= t && // including/after this tx
+            txResult._5.nonEmpty && // has datoms to undo
+            !undone2new.contains(txResult._1) // not already undone
+        => txResult._1
       }.sorted
 
     def cleanNext(t: Long): Seq[Long] =
-      curLastTxs.collect {
-        case tx
-          if tx._1 >= t && // including/after this tx
-            tx._5.nonEmpty && // has datoms to undo
-            !undone2new.contains(tx._1) && // not already undone
-            !new2undone.contains(tx._1) // not an undoing tx
-        => tx._1
+      curLastTxResults.collect {
+        case txResult
+          if txResult._1 >= t && // including/after this tx
+            txResult._5.nonEmpty && // has datoms to undo
+            !undone2new.contains(txResult._1) && // not already undone
+            !new2undone.contains(txResult._1) // not an undoing tx
+        => txResult._1
       }.sorted
 
-    var countDown = curLastTxs.length
+    var countDown = curLastTxResults.length
     var ePrev     = 0L
     var aPrev     = ""
 
     // Map t to tx/txInstant
-    curLastTxs.foreach { tx =>
-      t2tx = t2tx + (tx._1 -> tx._2)
-      t2txInstant = t2txInstant + (tx._1 -> tx._3)
+    curLastTxResults.foreach { txResult =>
+      t2tx = t2tx + (txResult._1 -> txResult._2)
+      t2txInstant = t2txInstant + (txResult._1 -> txResult._3)
     }
 
     // Fill datomTable
@@ -111,8 +112,8 @@ trait Undoing extends UndoElements with QueryApi {
       })
     )
 
-    curLastTxs.foreach {
-      case (t, tx, txInstant, txMetaDatoms, datoms) =>
+    curLastTxResults.foreach {
+      case (t, tx, txInstant, txMetaDatoms, dataDatoms) =>
         val setTx            = { () =>
           if (cleanMouseover) {
             curT() = t
@@ -140,7 +141,7 @@ trait Undoing extends UndoElements with QueryApi {
         }
 
         val isUndone      = undone2new.contains(t)
-        val canUndo       = !(datoms.isEmpty || isUndone)
+        val canUndo       = !(dataDatoms.isEmpty || isUndone)
         val notLast       = countDown > 1
         val undoAllNext   = { () => undoTxs(allNext(t)) }
         val undoCleanNext = { () => undoTxs(cleanNext(t)) }
@@ -161,10 +162,6 @@ trait Undoing extends UndoElements with QueryApi {
           )
         )
 
-        datomTable1.appendChild(
-          _txInstantRow(tx, txInstant, isUndone, setTx)
-        )
-
         txMetaDatoms.foreach { case (e, a, v, _) =>
           datomTable1.appendChild(
             _txMetaDataRow(tx, e, a, v, isUndone, setTx)
@@ -177,12 +174,12 @@ trait Undoing extends UndoElements with QueryApi {
         var visible = true
         var eCount  = 0
         var i       = 0
-        datoms.foreach { case (e, a, v, op) =>
+        dataDatoms.foreach { case (e, a, v, op) =>
           i += 1
           if (visible) {
             val showEntity = e != ePrev
             if (showEntity && eCount == maxVisibleEntities) {
-              val more = datoms.length - i + 1
+              val more = dataDatoms.length - i + 1
               datomTable1.appendChild(
                 _txDataMoreRow(tx, isUndone,
                   more + " more datoms in tx... (see all in Transaction view)"

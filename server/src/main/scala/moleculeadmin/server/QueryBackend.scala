@@ -66,6 +66,7 @@ class QueryBackend extends ToggleBackend {
     maxRows: Int,
     cols: Seq[Col]
   ): Either[Seq[String], QueryResult] = try {
+    log.info("-------------------")
     log.info("Querying datomic...\n" + datalogQuery)
     val conn        = Conn(base + "/" + db)
     val allInputs   = if (rules.isEmpty)
@@ -190,140 +191,72 @@ class QueryBackend extends ToggleBackend {
     db: String,
     prevFirstT0: Long,
     enumAttrs: Seq[String]
-  ): Either[String, Array[TxData]] = {
+  ): Either[String, Array[TxResult]] = {
     try {
+      log.info("----------------------------")
       log.info("Fetching log transactions...")
       val timer      = Timer()
       val conn       = Conn(base + "/" + db)
       val datomicDb  = conn.db
       val prevFirstT = if (prevFirstT0 == 0L) datomicDb.basisT() else prevFirstT0
       val firstT     = if (prevFirstT > 1100) prevFirstT - 100 else 1001
-
-
-
-
       log.info("Fetching from t " + firstT)
-      val txs = conn.datomicConn.log.txRange(firstT, null).asScala
-      log.info("Fetched " + txs.size + " txs in " + timer.ms)
-      val txData       = new Array[TxData](txs.size)
-      var txIndex      = 0
-      var metaE        = 0L
-      var t            = 0L
-      var tx           = 0L
-      var txInstantStr = ""
-      var e            = 0L
-      var a            = ""
-      var v            = ""
-      val eStrs        = new ListBuffer[String]
-      var metaRefDatom = null: DatomTuple
-      var refDatom     = null: DatomTuple
-      var metaRefE     = 0L
-      var refE         = 0L
-      txs.foreach { txMap =>
-        eStrs.clear()
-        metaRefE = 0L
-        refE = 0L
-        metaRefDatom = null: DatomTuple
-        refDatom = null: DatomTuple
+      val txMaps = conn.datomicConn.log.txRange(firstT, null).asScala
+      log.info("Fetched last " + txMaps.size + " txs from log in " + timer.ms)
+      val txData        = new Array[TxResult](txMaps.size)
+      var txIndex       = 0
+      var t             = 0L
+      var tx            = 0L
+      var txInstant     = ""
+      var txRaw: AnyRef = null
+      var eRaw : AnyRef = null
+      var e             = 0L
+      var a             = ""
+      var v             = ""
+      var op            = true
+      var first         = true
+      var isData        = true
+      var valid         = true
 
+      txMaps.foreach { txMap =>
         t = txMap.get(datomic.Log.T).asInstanceOf[Long]
-        val datoms0: Seq[DatomTuple] =
-          txMap.get(datomic.Log.DATA)
-            .asInstanceOf[jList[Datom]].asScala
-            .toList.flatMap { d =>
-            e = d.e.asInstanceOf[Long]
-            a = datomicDb.ident(d.a).toString
-            v = formatValue(conn, a, d.v, enumAttrs)
-            //              log.info(s"$e   $a   $v")
-            if (t == 1000) {
-              None
-            } else if (a == ":db/txInstant") {
-              tx = e
-              txInstantStr = v
-              eStrs += tx.toString
-              metaE = tx
-              // Skip txInstant datom to isolate remaining tx meta data
-              None
-            } else if (a.startsWith(":db.") || a.startsWith(":db/")) {
-              None
-            } else {
-              eStrs += e.toString
-              Some((e, a, v, d.added))
-            }
-          }.sortBy(d => (d._1, d._2, d._4, d._3))
-
-        val datomCount   = datoms0.length
         val txMetaDatoms = new ListBuffer[DatomTuple]
-        val datoms       = new ListBuffer[DatomTuple]
+        val dataDatoms   = new ListBuffer[DatomTuple]
+        first = true
+        isData = true
+        valid = true
 
-        if (datomCount > 0) {
-          datoms0.foreach {
-
-            // Meta datoms
-
-            case datom@(e, _, v, _) if e == metaE && eStrs.contains(v) =>
-              metaRefDatom = datom
-              metaRefE = v.toLong
-
-            case datom@(e, _, v, _) if e == metaRefE && eStrs.contains(v) =>
-              if (metaRefDatom != null)
-                txMetaDatoms += metaRefDatom
-              metaRefDatom = datom
-              metaE = e
-              metaRefE = v.toLong
-
-            case datom@(e, _, _, _) if e == metaRefE =>
-              txMetaDatoms += metaRefDatom
-              txMetaDatoms += datom
-              metaRefE = 0L
-              metaE = e
-
-            case datom@(e, _, _, _) if e == metaE =>
-              txMetaDatoms += datom
-
-            // Datoms
-
-            case datom@(_, _, v, _) if eStrs.contains(v) =>
-              refDatom = datom
-              refE = v.toLong
-
-            case datom@(e, _, v, _) if e == refE && eStrs.contains(v) =>
-              if (refDatom != null)
-                datoms += refDatom
-              refDatom = datom
-              refE = v.toLong
-
-            case datom@(e, _, _, _) if e == refE =>
-              datoms += refDatom
-              datoms += datom
-              refE = 0L
-
-            case datom =>
-              datoms += datom
+        txMap.get(datomic.Log.DATA).asInstanceOf[jList[Datom]].forEach { d =>
+          eRaw = d.e
+          e = eRaw.asInstanceOf[Long]
+          a = datomicDb.ident(d.a).toString
+          v = formatValue(conn, a, d.v, enumAttrs)
+          op = d.added
+          if (first) {
+            txRaw = eRaw
+            tx = e
+            txInstant = v
+            txMetaDatoms.+=((e, a, v, op))
+            first = false
+          } else if (isData && eRaw == txRaw) {
+            txMetaDatoms.+=((e, a, v, op))
+            isData = false
+          } else if (isData) {
+            if (a.startsWith(":db.") || a.startsWith(":db/"))
+              valid = false
+            dataDatoms.+=((e, a, v, op))
+          } else {
+            txMetaDatoms.+=((e, a, v, op))
           }
+        }
 
-          //            txMetaDatoms foreach println
-          //            log.info("---")
-          //            datoms foreach println
-          //            log.info("=========================")
-
-          //            // Check split
-          //            if ((txMetaDatoms ++ datoms).sortBy(d => (d._1, d._2, d._4, d._3)) !=
-          //              datoms0.sortBy(d => (d._1, d._2, d._4, d._3)))
-          //              throw new RuntimeException(
-          //                "Unexpected divergence between datoms0 and txMetaDatoms/datoms in QueryBackend.getLastTxs:" +
-          //                  "\ndatoms0:\n  " + datoms0.mkString(",\n  ") +
-          //                  "\n-------------" +
-          //                  "\ntxMetaDatoms:\n  " + txMetaDatoms.mkString(",\n  ") +
-          //                  "\ndatoms:\n  " + datoms.mkString(",\n  ")
-          //              )
-
-          txData(txIndex) = (t, tx, txInstantStr, txMetaDatoms, datoms)
+        if (valid && dataDatoms.nonEmpty) {
+          txData(txIndex) = (t, tx, txInstant, txMetaDatoms, dataDatoms)
           txIndex += 1
         }
       }
-      // Return data transactions (without schema txs)
-      val txData1 = new Array[TxData](txIndex)
+      // Return data transactions (without empty txs)
+      val txData1 = new Array[TxResult](txIndex)
       System.arraycopy(txData, 0, txData1, 0, txIndex)
       log.info("Organized tx data in " + timer.ms)
       log.info("Sending tx data to client...")
@@ -337,7 +270,7 @@ class QueryBackend extends ToggleBackend {
     db: String,
     ts: Seq[Long],
     enumAttrs: Seq[String]
-  ): Either[String, Array[TxData]] = {
+  ): Either[String, Array[TxResult]] = {
     log.info(s"Undoing txs from t ${ts.head}...")
     val timer     = Timer()
     val conn      = Conn(base + "/" + db)
@@ -360,7 +293,7 @@ class QueryBackend extends ToggleBackend {
               .reverse // Undo transactions backwards
           }
         log.info("Fetched targeted " + txMaps.length + " txs in " + timer.ms)
-        val newTxs = new Array[TxData](txMaps.size)
+        val newTxs = new Array[TxResult](txMaps.size)
         txMaps.foreach { txMap =>
           val undoneT   = txMap.get(datomic.Log.T).asInstanceOf[Long]
           val tx        = Peer.toTx(undoneT).asInstanceOf[Long]

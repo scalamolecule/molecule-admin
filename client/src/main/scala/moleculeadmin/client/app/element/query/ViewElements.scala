@@ -1,12 +1,15 @@
 package moleculeadmin.client.app.element.query
 
+import moleculeadmin.client.rxstuff.RxBindings
 import moleculeadmin.shared.styles.Color
 import org.scalajs.dom.html.{Element, HR, Span, Table}
-import org.scalajs.dom.window
+import org.scalajs.dom.{document, window}
 import scalatags.JsDom.TypedTag
-import scalatags.JsDom.all._
+import scalatags.JsDom.all.{height, _}
+import org.scalajs.dom.raw.{Element => RawElement}
 
-trait ViewElements extends SubMenuElements {
+
+trait ViewElements extends SubMenuElements with RxBindings {
 
   def _moleculeView(
     rows1: Int,
@@ -61,9 +64,16 @@ trait ViewElements extends SubMenuElements {
       )
     )
 
-  def _txView(msg: String): TypedTag[Element] =
+
+  // Transaction view -----------------------
+
+  def _txView(msg: Frag): TypedTag[Element] =
     _card(
-      _cardHeader(h5("Transaction")),
+      _cardHeader(
+        height := 23,
+        h5("Transaction", display.`inline-block`),
+        span(id := "txViewEid", paddingLeft := 30, float.right)
+      ),
       _cardBody(
         table(
           cls := "tableTx",
@@ -72,6 +82,13 @@ trait ViewElements extends SubMenuElements {
         )
       )
     )
+
+  def _spinTxView(view: RawElement, msg: String): Unit = {
+    view.innerHTML = ""
+    view.appendChild(
+      tr(td(span(msg, _sync(10)))).render
+    )
+  }
 
 
   // Entity view -----------------------

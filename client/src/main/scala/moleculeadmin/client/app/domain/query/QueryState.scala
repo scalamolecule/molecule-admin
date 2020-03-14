@@ -97,11 +97,11 @@ object QueryState extends QueryApi {
 
 
   // Entities
-  val curEntity               = Var(0L)
-  var curEntityLocked         = false
-  var showEntityViewBackRefs  = false
-  var curAttrs                = Seq.empty[String]
-  val entityHistorySort       = Var("tx")
+  val curEntity              = Var(0L)
+  var curEntityLocked        = false
+  var showEntityViewBackRefs = false
+  var curAttrs               = Seq.empty[String]
+  val entityHistorySort      = Var("tx")
 
   // tableCol = colIndex + 1
   // tableCol -> (eid -> array indexes)
@@ -120,9 +120,9 @@ object QueryState extends QueryApi {
   var curChecks: Set[Long] = Set.empty
 
   // Undo coordinates
-  var curLastTxs: Array[TxData]           = Array.empty
-  val undone2new: mutable.Map[Long, Long] = mutable.Map.empty
-  val new2undone: mutable.Map[Long, Long] = mutable.Map.empty
+  var curLastTxResults: Array[TxResult]         = Array.empty
+  val undone2new      : mutable.Map[Long, Long] = mutable.Map.empty
+  val new2undone      : mutable.Map[Long, Long] = mutable.Map.empty
 
   // Transactions
   val curTxD      : Var[(Long, Long, String)] = Var((0L, 0L, ""))
