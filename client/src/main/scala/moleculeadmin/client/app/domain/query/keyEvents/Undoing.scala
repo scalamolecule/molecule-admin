@@ -171,7 +171,7 @@ trait Undoing extends UndoElements with QueryApi {
           )
         }
 
-        val maxVisible = 3
+        val maxVisibleEntities = 10
         ePrev = 0L
         aPrev = ""
         var visible = true
@@ -181,7 +181,7 @@ trait Undoing extends UndoElements with QueryApi {
           i += 1
           if (visible) {
             val showEntity = e != ePrev
-            if (showEntity && eCount == maxVisible) {
+            if (showEntity && eCount == maxVisibleEntities) {
               val more = datoms.length - i + 1
               datomTable1.appendChild(
                 _txDataMoreRow(tx, isUndone,
