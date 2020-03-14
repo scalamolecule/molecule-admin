@@ -6,43 +6,52 @@ import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.autowire.queryWire
 import org.scalajs.dom.document
 import org.scalajs.dom.html.Element
+import org.scalajs.dom.raw.{Element => RawElement}
 import rx.{Ctx, Rx}
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all.{td, tr, _}
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.scalajs.js.timers.setTimeout
 
 
 case class Transaction()(implicit ctx: Ctx.Owner) extends Base {
   type keepBooPickleImport_Transaction = PickleState
 
+  val txViewTable = "txViewTable"
+
   def view: Rx.Dynamic[TypedTag[Element]] = Rx {
     curTx() match {
-      case 0 => // no entity id marked yet
-
-      case tx if curViews.now.contains("view05_Transaction") =>
-        val view = document.getElementById("txViewTable")
+      case 0  => // render "Point on tx id..."
+      case tx => setTimeout(1) {
+        // Placeholder view should be available by now
+        val view = document.getElementById(txViewTable)
         if (view == null) {
-          // Start fresh
-          curTx() = 0
+          // Re-try if render isn't finished yet
+          curTx.recalc()
         } else {
-          addTxRows("txViewTable", tx, 0)
+          val eidSpan = document.getElementById("txViewEid")
+          eidSpan.innerHTML = ""
+          eidSpan.appendChild(
+            s"${curT.now} / ${curTx.now}".render
+          )
+          addTxRows(view, tx, 0)
         }
-
-      case _ => // don't update non-present txView
+      }
     }
     _txView("Point on tx id...")
   }
 
 
-  def addTxRows(parentElementId: String, tx: Long, level: Int): Unit = {
-    val viewElement = document.getElementById(parentElementId)
-    if (viewElement != null) {
+  def addTxRows(view: RawElement, tx: Long, level: Int): Unit = {
+    _spinTxView(view, "Fetching tx data...")
+
+    if (view != null) {
       queryWire().getTxData(db, tx, enumAttrs).call().foreach {
         case (txInst, txMetaData, txData) =>
-          viewElement.innerHTML = ""
+          view.innerHTML = ""
 
           // :db/txInstant
-          viewElement.appendChild(
+          view.appendChild(
             tr(
               cls := "first",
               td(s"${curT.now} / $tx", cls := "txChosen"),
@@ -52,13 +61,13 @@ case class Transaction()(implicit ctx: Ctx.Owner) extends Base {
           )
 
           // tx meta data
-          var i      = 1
+          var i = 1
           txMetaData.foreach { case (_, a, v, op) =>
             val cellType   = viewCellTypes(a)
-            val vElementId = s"$parentElementId $a $i"
+            val vElementId = s"$txViewTable $a $i"
             val valueCell  = getValueCell(cellType, vElementId, v, true, level, op)
             val attrCell   = getAttrCell(a, cellType, vElementId, valueCell, true)
-            viewElement.appendChild(
+            view.appendChild(
               tr(
                 td(),
                 attrCell,
@@ -77,11 +86,11 @@ case class Transaction()(implicit ctx: Ctx.Owner) extends Base {
               eCount += 1
             }
             val cellType   = viewCellTypes(a)
-            val vElementId = s"$parentElementId $a $i"
+            val vElementId = s"$txViewTable $a $i"
             val attr1      = if (e != ePrev || a != aPrev) a else ""
             val valueCell  = getValueCell(cellType, vElementId, v, true, level, op)
             val attrCell   = getAttrCell(attr1, cellType, vElementId, valueCell, true)
-            viewElement.appendChild(
+            view.appendChild(
               tr(
                 if (eCount % 2 == 0) cls := "even" else (),
                 if (e != ePrev)

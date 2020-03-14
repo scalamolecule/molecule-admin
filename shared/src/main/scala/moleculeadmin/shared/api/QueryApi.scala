@@ -8,10 +8,10 @@ import scala.collection.mutable.ListBuffer
 trait QueryApi extends BaseApi {
 
   type DatomTuple = (Long, String, String, Boolean) // e a v op
-  type TxData = (
+  type TxResult = (
     Long, Long, String, // t, tx, txInstant (as String)
-      ListBuffer[DatomTuple], // Tx meta datoms
-      ListBuffer[DatomTuple] // datoms
+      ListBuffer[DatomTuple], // tx meta datoms
+      ListBuffer[DatomTuple] // data datoms
     )
 
   def query(
@@ -42,13 +42,13 @@ trait QueryApi extends BaseApi {
     db: String,
     prevFirstT: Long,
     enumAttrs: Seq[String]
-  ): Either[String, Array[TxData]] = ???
+  ): Either[String, Array[TxResult]] = ???
 
   def undoTxs(
     db: String,
     ts: Seq[Long],
     enumAttrs: Seq[String]
-  ): Either[String, Array[TxData]] = ???
+  ): Either[String, Array[TxResult]] = ???
 
   def getEntityHistory(
     db: String,

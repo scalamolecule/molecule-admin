@@ -34,15 +34,11 @@ object Adhoc extends TestSuite
       //      implicit val conn = Conn("datomic:free://localhost:4334/Clazzig")
 
 
-
-
-      //      // in-memory db
+      // in-memory db
       //      implicit val conn = recreateDbFrom(CoreTestSchema)
       implicit val conn = Conn(base + "/CoreTest")
-      val datomicDb  = conn.db
-      val prevFirstT = datomicDb.basisT() - 1
 
-      Ns.e.a.v.op.t(prevFirstT).debugGet
+
 
     }
   }

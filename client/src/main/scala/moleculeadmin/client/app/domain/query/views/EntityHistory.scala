@@ -1,4 +1,5 @@
 package moleculeadmin.client.app.domain.query.views
+
 import autowire._
 import boopickle.Default._
 import moleculeadmin.client.app.domain.query.QueryState._
@@ -9,7 +10,7 @@ import rx.{Ctx, Rx}
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
 import scala.concurrent.ExecutionContext.Implicits.global
-
+import scala.scalajs.js.timers.setTimeout
 
 case class EntityHistory()(implicit ctx: Ctx.Owner) extends Base {
   type keepBooPickleImport_EntityHistory = PickleState
@@ -18,13 +19,14 @@ case class EntityHistory()(implicit ctx: Ctx.Owner) extends Base {
     (curEntity(), entityHistorySort()) match {
       case (0, _) => // no entity id marked yet
 
-      case (eid, sort) =>
-        val view = document.getElementById("entityHistoryEid")
-        if (view == null) {
-          // Start fresh
-          curEntity() = 0
+      case (eid, sort) => setTimeout(1) {
+        // Placeholder view should be available by now
+        val eidSpan = document.getElementById("entityHistoryEid")
+        if (eidSpan == null) {
+          // Re-try if render isn't finished yet
+          curEntity.recalc()
         } else {
-          view.innerHTML = ""
+          eidSpan.innerHTML = ""
 
           val byTx = if (sort == "tx")
             span("tx")
@@ -42,11 +44,12 @@ case class EntityHistory()(implicit ctx: Ctx.Owner) extends Base {
               entityHistorySort() = "attr"
             })
 
-          view.appendChild(
+          eidSpan.appendChild(
             span(byTx, " | ", byAttr, eid.toString).render
           )
           addEntityHistoryRows("entityHistoryViewTable", eid, sort)
         }
+      }
     }
     _entityHistoryView("Point on entity id...")
   }

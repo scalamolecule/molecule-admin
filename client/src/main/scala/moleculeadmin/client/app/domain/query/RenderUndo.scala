@@ -23,13 +23,13 @@ case class RenderUndo()(implicit ctx: Ctx.Owner) extends Undoing {
       queryWire().getLastTxs(
         db, curFirstT, enumAttrs
       ).call().foreach {
-        case Right(txs) =>
+        case Right(txResult) =>
           // caching txs to be accessible by cmd-z undoing shortcut too
-          curLastTxs = txs
-          curFirstT = txs.headOption.fold(0L)(_._1) // could be empty db
+          curLastTxResults = txResult
+          curFirstT = txResult.headOption.fold(0L)(_._1) // could be empty db
           populateUndoRows()
-        case Left(err)  =>
-          curLastTxs = Array.empty[TxData]
+        case Left(err)       =>
+          curLastTxResults = Array.empty[TxResult]
           curFirstT = 0L
           populateUndoRows(err)
       }
