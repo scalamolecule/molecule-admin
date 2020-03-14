@@ -294,6 +294,13 @@ table.tableEntity ul {
 }
 
 
+
+table.tableTx {
+    display: block;
+    max-height: 600px;
+    overflow-y: scroll;
+    padding-bottom: 5px;
+}
 table.tableTx tr.first {
     background-color: #173eff2e;
 }
