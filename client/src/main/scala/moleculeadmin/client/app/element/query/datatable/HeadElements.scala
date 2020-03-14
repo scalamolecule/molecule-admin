@@ -324,8 +324,7 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
         paddingLeft := 6,
         paddingRight := 6,
         attribute,
-        if (postfix.isEmpty) () else _pf(postfix),
-        noEdit
+        if (postfix.isEmpty) () else _pf(postfix)
       )
     } else {
       td(

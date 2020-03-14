@@ -124,8 +124,8 @@ trait AppElements extends Bootstrap {
       ul(items.take(max)).render
     else
       ul(
-        //        listStyleType.none,
-        style := "list-style-type: none; padding-inline-start: 0;",
+        listStyleType.none,
+        attr("padding-inline-start") := 0,
         items.take(max)
       ).render
 
@@ -157,12 +157,6 @@ trait AppElements extends Bootstrap {
     val flagOff  = "far fa-flag flagOff"
     val checkOn  = "fas fa-check-circle checkOn"
     val checkOff = "fas fa-check checkOff"
-  }
-
-  val noEdit = onclick := { () =>
-//    window.alert(
-//      "Namespace must have an entity id `e` column first to allow editing."
-//    )
   }
 
   val noAggrEdit = onclick := { () =>

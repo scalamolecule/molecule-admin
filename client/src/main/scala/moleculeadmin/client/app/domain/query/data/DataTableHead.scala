@@ -161,14 +161,14 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
     def editCell(): JsDom.TypedTag[TableCell] = {
       def s(i: Int) = "\u00a0" * i
       val lambdaRaw = card match {
-        case 1 if opt =>
-          s"""$attr match {
-             |${s(2)}case Some(v) => Some(v)
-             |${s(2)}case None${s(3)} => None
-             |}""".stripMargin
-        case 1        => s"Some($attr)"
-        case 2        => s"$attr.map(v => v)"
-        case 3        =>
+        case 1 if opt => attr
+        //          s"""$attr match {
+        //             |${s(2)}case Some(v) => Some(v)
+        //             |${s(2)}case None${s(3)} => None
+        //             |}""".stripMargin
+        case 1 => s"Some($attr)"
+        case 2 => s"$attr.map(v => v)"
+        case 3 =>
           s"""$attr.map {
              |${s(2)}case (k, v) => (k, v)
              |}""".stripMargin
