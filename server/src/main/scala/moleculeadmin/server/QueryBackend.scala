@@ -15,12 +15,15 @@ import molecule.transform.Model2Transaction
 import moleculeadmin.server.query.{Rows2QueryResult, ToggleBackend}
 import moleculeadmin.shared.ast.query.{Col, QueryDTO, QueryResult}
 import moleculeadmin.shared.ops.transform.Molecule2Model
+import org.slf4j.LoggerFactory
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
 import scala.util.Try
 
 
 class QueryBackend extends ToggleBackend {
+
+  val log = LoggerFactory.getLogger(getClass)
 
   // Todo: this works but seems like a hack that would be nice to avoid although the impact of
   // a few input variables is negible.
@@ -63,39 +66,32 @@ class QueryBackend extends ToggleBackend {
     maxRows: Int,
     cols: Seq[Col]
   ): Either[Seq[String], QueryResult] = try {
-
-    val conn      = Conn(base + "/" + db)
-    val allInputs = if (rules.isEmpty)
+    log.info("Querying datomic...\n" + datalogQuery)
+    val conn        = Conn(base + "/" + db)
+    val allInputs   = if (rules.isEmpty)
       conn.db +: inputs(l ++ ll ++ lll)
     else
       conn.db +: rules.get +: inputs(l ++ ll ++ lll)
-
-    println("--------------------")
-    println(datalogQuery)
-
-    //    val t         = Timer("Query")
-    val t0        = System.currentTimeMillis
-    val allRows   = Peer.q(datalogQuery, allInputs: _*)
-    val queryTime = System.currentTimeMillis - t0
-    //    t.log(1)
-
+    val t           = Timer("Query")
+    val allRows     = Peer.q(datalogQuery, allInputs: _*)
+    val queryTime   = t.delta
     val rowCountAll = allRows.size
     val rowCount    = if (maxRows == -1 || rowCountAll < maxRows) rowCountAll else maxRows
-
-    println("rowCountAll: " + rowCountAll +
-      " (query time, all rows: " + thousands(queryTime) + " ms)")
-    println("maxRows    : " + (if (maxRows == -1) "all" else maxRows))
-    println("rowCount   : " + rowCount)
-    //    println("cols       : " + cols)
-    allRows.asScala.take(10) foreach println
-    //    t.log(2)
+    log.info("Query time : " + thousands(queryTime) + " ms")
+    log.info("rowCountAll: " + rowCountAll)
+    log.info("maxRows    : " + (if (maxRows == -1) "all" else maxRows))
+    log.info("rowCount   : " + rowCount)
+    //    log.info("First 10 records:")
+    allRows.asScala.take(10).foreach(row => log.info(row.toString))
+    //    log.info("cols       : " + cols)
 
     if (rowCount == 0)
       Left(Nil)
     else {
       val queryResult = Rows2QueryResult(
         allRows, rowCountAll, rowCount, cols, queryTime).get
-      //      t.log(3)
+      log.info("Rows2QueryResult took " + t.ms)
+      log.info("Sending data to client... Total server time: " + t.msTotal)
       Right(queryResult)
     }
   } catch {
@@ -195,139 +191,146 @@ class QueryBackend extends ToggleBackend {
     prevFirstT0: Long,
     enumAttrs: Seq[String]
   ): Either[String, Array[TxData]] = {
-    val conn         = Conn(base + "/" + db)
-    val datomicDb    = conn.db
-    val prevFirstT   = if (prevFirstT0 == 0L) datomicDb.basisT() else prevFirstT0
-    val firstT       = if (prevFirstT > 1100) prevFirstT - 100 else 1001
-    val txs          = conn.datomicConn.log.txRange(firstT, null).asScala
-    val txData       = new Array[TxData](txs.size)
-    var txIndex      = 0
-    var metaE        = 0L
-    var t            = 0L
-    var tx           = 0L
-    var txInstantStr = ""
-    var e            = 0L
-    var a            = ""
-    var v            = ""
-    val eStrs        = new ListBuffer[String]
-    var metaRefDatom = null: DatomTuple
-    var refDatom     = null: DatomTuple
-    var metaRefE     = 0L
-    var refE         = 0L
+    try {
+      log.info("Fetching log transactions...")
+      val timer      = Timer()
+      val conn       = Conn(base + "/" + db)
+      val datomicDb  = conn.db
+      val prevFirstT = if (prevFirstT0 == 0L) datomicDb.basisT() else prevFirstT0
+      val firstT     = if (prevFirstT > 1100) prevFirstT - 100 else 1001
 
-    withTransactor {
-      try {
-        txs.foreach { txMap =>
-          eStrs.clear()
-          metaRefE = 0L
-          refE = 0L
-          metaRefDatom = null: DatomTuple
-          refDatom = null: DatomTuple
 
-          t = txMap.get(datomic.Log.T).asInstanceOf[Long]
-          val datoms0: Seq[DatomTuple] =
-            txMap.get(datomic.Log.DATA)
-              .asInstanceOf[jList[Datom]].asScala
-              .toList.flatMap { d =>
-              e = d.e.asInstanceOf[Long]
-              a = datomicDb.ident(d.a).toString
-              v = formatValue(conn, a, d.v, enumAttrs)
-              //              println(s"$e   $a   $v")
-              if (t == 1000) {
-                None
-              } else if (a == ":db/txInstant") {
-                tx = e
-                txInstantStr = v
-                eStrs += tx.toString
-                metaE = tx
-                // Skip txInstant datom to isolate remaining tx meta data
-                None
-              } else if (a.startsWith(":db.") || a.startsWith(":db/")) {
-                None
-              } else {
-                eStrs += e.toString
-                Some((e, a, v, d.added))
-              }
-            }.sortBy(d => (d._1, d._2, d._4, d._3))
 
-          val datomCount   = datoms0.length
-          val txMetaDatoms = new ListBuffer[DatomTuple]
-          val datoms       = new ListBuffer[DatomTuple]
 
-          if (datomCount > 0) {
-            datoms0.foreach {
+      log.info("Fetching from t " + firstT)
+      val txs = conn.datomicConn.log.txRange(firstT, null).asScala
+      log.info("Fetched " + txs.size + " txs in " + timer.ms)
+      val txData       = new Array[TxData](txs.size)
+      var txIndex      = 0
+      var metaE        = 0L
+      var t            = 0L
+      var tx           = 0L
+      var txInstantStr = ""
+      var e            = 0L
+      var a            = ""
+      var v            = ""
+      val eStrs        = new ListBuffer[String]
+      var metaRefDatom = null: DatomTuple
+      var refDatom     = null: DatomTuple
+      var metaRefE     = 0L
+      var refE         = 0L
+      txs.foreach { txMap =>
+        eStrs.clear()
+        metaRefE = 0L
+        refE = 0L
+        metaRefDatom = null: DatomTuple
+        refDatom = null: DatomTuple
 
-              // Meta datoms
-
-              case datom@(e, _, v, _) if e == metaE && eStrs.contains(v) =>
-                metaRefDatom = datom
-                metaRefE = v.toLong
-
-              case datom@(e, _, v, _) if e == metaRefE && eStrs.contains(v) =>
-                if (metaRefDatom != null)
-                  txMetaDatoms += metaRefDatom
-                metaRefDatom = datom
-                metaE = e
-                metaRefE = v.toLong
-
-              case datom@(e, _, _, _) if e == metaRefE =>
-                txMetaDatoms += metaRefDatom
-                txMetaDatoms += datom
-                metaRefE = 0L
-                metaE = e
-
-              case datom@(e, _, _, _) if e == metaE =>
-                txMetaDatoms += datom
-
-              // Datoms
-
-              case datom@(_, _, v, _) if eStrs.contains(v) =>
-                refDatom = datom
-                refE = v.toLong
-
-              case datom@(e, _, v, _) if e == refE && eStrs.contains(v) =>
-                if (refDatom != null)
-                  datoms += refDatom
-                refDatom = datom
-                refE = v.toLong
-
-              case datom@(e, _, _, _) if e == refE =>
-                datoms += refDatom
-                datoms += datom
-                refE = 0L
-
-              case datom =>
-                datoms += datom
+        t = txMap.get(datomic.Log.T).asInstanceOf[Long]
+        val datoms0: Seq[DatomTuple] =
+          txMap.get(datomic.Log.DATA)
+            .asInstanceOf[jList[Datom]].asScala
+            .toList.flatMap { d =>
+            e = d.e.asInstanceOf[Long]
+            a = datomicDb.ident(d.a).toString
+            v = formatValue(conn, a, d.v, enumAttrs)
+            //              log.info(s"$e   $a   $v")
+            if (t == 1000) {
+              None
+            } else if (a == ":db/txInstant") {
+              tx = e
+              txInstantStr = v
+              eStrs += tx.toString
+              metaE = tx
+              // Skip txInstant datom to isolate remaining tx meta data
+              None
+            } else if (a.startsWith(":db.") || a.startsWith(":db/")) {
+              None
+            } else {
+              eStrs += e.toString
+              Some((e, a, v, d.added))
             }
+          }.sortBy(d => (d._1, d._2, d._4, d._3))
 
-            //            txMetaDatoms foreach println
-            //            println("---")
-            //            datoms foreach println
-            //            println("=========================")
+        val datomCount   = datoms0.length
+        val txMetaDatoms = new ListBuffer[DatomTuple]
+        val datoms       = new ListBuffer[DatomTuple]
 
-            //            // Check split
-            //            if ((txMetaDatoms ++ datoms).sortBy(d => (d._1, d._2, d._4, d._3)) !=
-            //              datoms0.sortBy(d => (d._1, d._2, d._4, d._3)))
-            //              throw new RuntimeException(
-            //                "Unexpected divergence between datoms0 and txMetaDatoms/datoms in QueryBackend.getLastTxs:" +
-            //                  "\ndatoms0:\n  " + datoms0.mkString(",\n  ") +
-            //                  "\n-------------" +
-            //                  "\ntxMetaDatoms:\n  " + txMetaDatoms.mkString(",\n  ") +
-            //                  "\ndatoms:\n  " + datoms.mkString(",\n  ")
-            //              )
+        if (datomCount > 0) {
+          datoms0.foreach {
 
-            txData(txIndex) = (t, tx, txInstantStr, txMetaDatoms, datoms)
-            txIndex += 1
+            // Meta datoms
+
+            case datom@(e, _, v, _) if e == metaE && eStrs.contains(v) =>
+              metaRefDatom = datom
+              metaRefE = v.toLong
+
+            case datom@(e, _, v, _) if e == metaRefE && eStrs.contains(v) =>
+              if (metaRefDatom != null)
+                txMetaDatoms += metaRefDatom
+              metaRefDatom = datom
+              metaE = e
+              metaRefE = v.toLong
+
+            case datom@(e, _, _, _) if e == metaRefE =>
+              txMetaDatoms += metaRefDatom
+              txMetaDatoms += datom
+              metaRefE = 0L
+              metaE = e
+
+            case datom@(e, _, _, _) if e == metaE =>
+              txMetaDatoms += datom
+
+            // Datoms
+
+            case datom@(_, _, v, _) if eStrs.contains(v) =>
+              refDatom = datom
+              refE = v.toLong
+
+            case datom@(e, _, v, _) if e == refE && eStrs.contains(v) =>
+              if (refDatom != null)
+                datoms += refDatom
+              refDatom = datom
+              refE = v.toLong
+
+            case datom@(e, _, _, _) if e == refE =>
+              datoms += refDatom
+              datoms += datom
+              refE = 0L
+
+            case datom =>
+              datoms += datom
           }
+
+          //            txMetaDatoms foreach println
+          //            log.info("---")
+          //            datoms foreach println
+          //            log.info("=========================")
+
+          //            // Check split
+          //            if ((txMetaDatoms ++ datoms).sortBy(d => (d._1, d._2, d._4, d._3)) !=
+          //              datoms0.sortBy(d => (d._1, d._2, d._4, d._3)))
+          //              throw new RuntimeException(
+          //                "Unexpected divergence between datoms0 and txMetaDatoms/datoms in QueryBackend.getLastTxs:" +
+          //                  "\ndatoms0:\n  " + datoms0.mkString(",\n  ") +
+          //                  "\n-------------" +
+          //                  "\ntxMetaDatoms:\n  " + txMetaDatoms.mkString(",\n  ") +
+          //                  "\ndatoms:\n  " + datoms.mkString(",\n  ")
+          //              )
+
+          txData(txIndex) = (t, tx, txInstantStr, txMetaDatoms, datoms)
+          txIndex += 1
         }
-        // Return data transactions (without schema txs)
-        val txData1 = new Array[TxData](txIndex)
-        System.arraycopy(txData, 0, txData1, 0, txIndex)
-        Right(txData1)
-      } catch {
-        case t: Throwable => Left(t.getMessage)
       }
-    }(conn)
+      // Return data transactions (without schema txs)
+      val txData1 = new Array[TxData](txIndex)
+      System.arraycopy(txData, 0, txData1, 0, txIndex)
+      log.info("Organized tx data in " + timer.ms)
+      log.info("Sending tx data to client...")
+      Right(txData1)
+    } catch {
+      case t: Throwable => Left(t.getMessage)
+    }
   }
 
   override def undoTxs(
@@ -335,16 +338,9 @@ class QueryBackend extends ToggleBackend {
     ts: Seq[Long],
     enumAttrs: Seq[String]
   ): Either[String, Array[TxData]] = {
+    log.info(s"Undoing txs from t ${ts.head}...")
+    val timer     = Timer()
     val conn      = Conn(base + "/" + db)
-    val txMaps    =
-      if (ts.length == 1)
-        conn.datomicConn.log.txRange(ts.head, ts.head + 1).asScala.toList
-      else
-        conn.datomicConn.log.txRange(ts.head, null).asScala.toList
-          .filter(txMap =>
-            ts.contains(txMap.get(datomic.Log.T).asInstanceOf[Long]))
-          .reverse // Undo transactions backwards
-    val newTxs    = new Array[TxData](txMaps.size)
     val datoms    = new ListBuffer[DatomTuple]
     val undoneTs  = new ListBuffer[Long]
     var txIndex   = 0
@@ -354,6 +350,17 @@ class QueryBackend extends ToggleBackend {
     var prevValue = ""
     withTransactor {
       try {
+        val txMaps =
+          if (ts.length == 1) {
+            conn.datomicConn.log.txRange(ts.head, ts.head + 1).asScala.toList
+          } else {
+            conn.datomicConn.log.txRange(ts.head, null).asScala.toList
+              .filter(txMap =>
+                ts.contains(txMap.get(datomic.Log.T).asInstanceOf[Long]))
+              .reverse // Undo transactions backwards
+          }
+        log.info("Fetched targeted " + txMaps.length + " txs in " + timer.ms)
+        val newTxs = new Array[TxData](txMaps.size)
         txMaps.foreach { txMap =>
           val undoneT   = txMap.get(datomic.Log.T).asInstanceOf[Long]
           val tx        = Peer.toTx(undoneT).asInstanceOf[Long]
@@ -366,9 +373,10 @@ class QueryBackend extends ToggleBackend {
             a = conn.db.ident(d.a).toString
             v = formatValue(conn, a, d.v, enumAttrs)
             val stmt: Option[Statement] =
-              if (a == ":db/txInstant" ||
-                e == tx ||
-                Try(prevValue.toLong).isSuccess && e == prevValue.toLong) {
+              if (
+                a == ":db/txInstant" || e == tx ||
+                  Try(prevValue.toLong).isSuccess && e == prevValue.toLong
+              ) {
                 // metadata - todo: do we catch all this way?
                 None
               } else {
@@ -393,6 +401,7 @@ class QueryBackend extends ToggleBackend {
           undoneTs += newT << 32 | undoneT
           txIndex += 1
         }
+        log.info("Saved reversing txs in " + timer.ms)
 
         // Add newT/undoneT pairs to meta db
         val moleculeAdminConn = Conn(base + "/MoleculeAdmin")
@@ -400,6 +409,8 @@ class QueryBackend extends ToggleBackend {
           .DbSettings.e.Db.name_(db).get(moleculeAdminConn)
         user_DbSettings(dbSettingsId).undoneTs.assert(undoneTs).update(moleculeAdminConn)
 
+        log.info("Saved internal meta data in " + timer.ms)
+        log.info("Sending reversing txs to client...")
         Right(newTxs)
       } catch {
         case t: Throwable => Left(t.getMessage)
@@ -648,7 +659,7 @@ class QueryBackend extends ToggleBackend {
         retracts.map(v => Retract(eid, attrFull, cast(v), NoValue)) ++
           asserts.map(v => Add(eid, attrFull, cast(v), NoValue))
     }
-    //    println("------------- SAVE STMTSS ---------------")
+    //    log.info("------------- SAVE STMTSS ---------------")
     //    stmtss foreach println
 
     withTransactor {
@@ -694,7 +705,7 @@ class QueryBackend extends ToggleBackend {
       case a: Atom => a
       case b: Bond => b
     }
-    //    println(rowValues)
+    //    log.info(rowValues)
     //    elements foreach println
     implicit val conn = Conn(base + "/" + db)
     var i              = 0
@@ -719,8 +730,9 @@ class QueryBackend extends ToggleBackend {
     }
 
     val stmtss = Model2Transaction(conn, Model(elements)).insertStmts(Seq(data))
-    println(data)
-    stmtss.head foreach println
+    log.info(data.toString)
+    stmtss.head.foreach(smts => log.info(smts.toString))
+    //    stmtss.head foreach println
     withTransactor {
       try {
         Right(conn.transact(stmtss).eid)
@@ -733,7 +745,7 @@ class QueryBackend extends ToggleBackend {
   override def retractEntities(db: String, eids: Array[Long]): Either[String, Long] = {
     implicit val conn = Conn(base + "/" + db)
     val stmtss = Seq(eids.toSeq.map(RetractEntity))
-    //    println("retractEntities:\n  " + stmtss.mkString("\n  "))
+    //    log.info("retractEntities:\n  " + stmtss.mkString("\n  "))
     withTransactor {
       try {
         val txR: TxReport = conn.transact(stmtss)
@@ -793,7 +805,7 @@ class QueryBackend extends ToggleBackend {
               Add(refId, s":$refNs/$valueAttr", castedValue, NoValue)
             )
           }
-          //          println("------------- SAVE STMTSS ---------------")
+          //          log.info("------------- SAVE STMTSS ---------------")
           //          stmtss foreach println
           conn.transact(stmtss)
           Right(stmtss.length)
