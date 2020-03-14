@@ -51,12 +51,12 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
 
   // Card one ======================================================
 
-  def _tdNoEdit: TypedTag[TableCell] = td(noEdit, cursor.default)
-  def _tdNoEditItems: TypedTag[TableCell] = td(noEdit, cursor.default)(ul(li()), contenteditable := true, cls := "items")
+  def _tdNoEdit: TypedTag[TableCell] = td(cursor.default)
+  def _tdNoEditItems: TypedTag[TableCell] = td(cursor.default)(ul(li()), contenteditable := true, cls := "items")
   def _tdNoAggrEdit: TypedTag[TableCell] = td(noAggrEdit)
-  def _tdOneNumNoEdit: TypedTag[TableCell] = td(cls := "num", noEdit)
+  def _tdOneNumNoEdit: TypedTag[TableCell] = td(cls := "num")
   def _tdOneNumNoAggrEdit: TypedTag[TableCell] = td(cls := "num", noAggrEdit)
-  def _tdOneDate: TypedTag[TableCell] = td(cls := "date", noEdit)
+  def _tdOneDate: TypedTag[TableCell] = td(cls := "date")
   def _tdOneEid(
     eid: Long,
     curEntity: rx.Var[Long],
@@ -89,8 +89,7 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     cls := Rx(if (ref == curEntity()) "eidChosen" else "eid"),
     attr("card") := 1,
     ref,
-    onmouseover := mouseover(ref),
-    noEdit
+    onmouseover := mouseover(ref)
   )
 
   def _tdOneStrEdit(
@@ -503,19 +502,16 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
 
 
   def _tdMapStr(vs: Map[String, String]): TypedTag[TableCell] =
-    mapCell(vs.toSeq.sortBy(_._1), (v: String) => td(_str2frags(v)))(noEdit)
+    mapCell(vs.toSeq.sortBy(_._1), (v: String) => td(_str2frags(v)))
 
   def _tdMapDate(vs: Map[String, String]): TypedTag[TableCell] =
-    mapCell(vs.toSeq.sortBy(_._1), (v: String) => td(
-      truncateDateStr(v)
-      //      v
-    ))(noEdit)
+    mapCell(vs.toSeq.sortBy(_._1), (v: String) => td(truncateDateStr(v)))
 
   def _tdMapStrOther(vs: Map[String, String]): TypedTag[TableCell] =
-    mapCell(vs.toSeq.sortBy(_._1), (v: String) => td(v))(noEdit)
+    mapCell(vs.toSeq.sortBy(_._1), (v: String) => td(v))
 
   def _tdMapDouble(vs: Map[String, Double]): TypedTag[TableCell] =
-    mapCell(vs.toSeq.sortBy(_._1), (v: Double) => td(v))(noEdit)
+    mapCell(vs.toSeq.sortBy(_._1), (v: Double) => td(v))
 
 
   // Hard-coding each combination to make row rendering as fast as possible
