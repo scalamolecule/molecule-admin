@@ -1,4 +1,5 @@
 package moleculeadmin.client.app.domain.query.keyEvents
+
 import autowire._
 import boopickle.Default._
 import moleculeadmin.client.app.domain.query.QueryState._
@@ -6,10 +7,9 @@ import moleculeadmin.client.app.domain.query.views.Base
 import moleculeadmin.client.app.element.query.UndoElements
 import moleculeadmin.client.autowire.queryWire
 import moleculeadmin.shared.api.QueryApi
-import org.scalajs.dom.window
+import org.scalajs.dom.{document, window}
 import rx.Ctx
 import scala.concurrent.ExecutionContext.Implicits.global
-import org.scalajs.dom.document
 
 
 // https://stackoverflow.com/questions/25389807/how-do-i-undo-or-reverse-a-transaction-in-datomic
@@ -171,26 +171,42 @@ trait Undoing extends UndoElements with QueryApi {
           )
         }
 
+        val maxVisible = 3
         ePrev = 0L
         aPrev = ""
-        var i = 1
-        datoms.take(3).foreach { case (e, a, v, op) =>
-          val cellType        = viewCellTypes(a)
-          val vElementId      = s"undoTxs $countDown $t $i $a"
-          val showEntity      = e != ePrev
-          val attr1           = if (showEntity || a != aPrev) a else ""
-          val highlightEntity = { () => curEntity() = e }
-          val base            = new Base
-          val valueCell       = base.getValueCell(cellType, vElementId, v, true, 0, op)
-          val attrCell        = base.getAttrCell(attr1, cellType, vElementId, valueCell, true)
-          ePrev = e
-          aPrev = a
-          datomTable1.appendChild(
-            _txDataRow(
-              tx, e, isUndone, setTx,
-              showEntity, highlightEntity, attrCell, valueCell)
-          )
+        var visible = true
+        var eCount  = 0
+        var i       = 0
+        datoms.foreach { case (e, a, v, op) =>
           i += 1
+          if (visible) {
+            val showEntity = e != ePrev
+            if (showEntity && eCount == maxVisible) {
+              val more = datoms.length - i + 1
+              datomTable1.appendChild(
+                _txDataMoreRow(tx, isUndone,
+                  more + " more datoms in tx... (see all in Transaction view)"
+                )
+              )
+              visible = false
+            } else {
+              if (showEntity) eCount += 1
+              val cellType        = viewCellTypes(a)
+              val vElementId      = s"undoTxs $countDown $t $i $a"
+              val attr1           = if (showEntity || a != aPrev) a else ""
+              val highlightEntity = { () => curEntity() = e }
+              val base            = new Base
+              val valueCell       = base.getValueCell(cellType, vElementId, v, true, 0, op)
+              val attrCell        = base.getAttrCell(attr1, cellType, vElementId, valueCell, true)
+              ePrev = e
+              aPrev = a
+              datomTable1.appendChild(
+                _txDataRow(
+                  tx, e, isUndone, setTx,
+                  showEntity, highlightEntity, attrCell, valueCell)
+              )
+            }
+          }
         }
 
         countDown -= 1

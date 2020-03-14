@@ -14,7 +14,8 @@ trait UndoElements extends AppElements with RxBindings {
   val datomTable =
     table(
       cls := "undoTxs",
-      id := "undoTxs"
+      id := "undoTxs",
+      tr(td("Fetching tx data from Log..."))
     ).render
 
   val container =
@@ -109,7 +110,6 @@ trait UndoElements extends AppElements with RxBindings {
     ).render
   }
 
-
   def _txMetaDataRow(
     tx: Long,
     e: Long,
@@ -127,7 +127,6 @@ trait UndoElements extends AppElements with RxBindings {
       td(v),
     ).render
   }
-
 
   def _txDataRow(
     tx: Long,
@@ -153,6 +152,22 @@ trait UndoElements extends AppElements with RxBindings {
         td(),
       attrCell,
       valueCell
+    ).render
+  }
+
+  def _txDataMoreRow(
+    tx: Long,
+    isUndone: Boolean,
+    more: String
+  )(implicit ctx: Ctx.Owner): TableRow = {
+    val undone = if(isUndone) " undone" else ""
+    tr(
+      cls := Rx(if (tx == curTx()) "chosen" else undone),
+      td(
+        colspan := 3,
+        fontStyle.italic,
+        more
+      )
     ).render
   }
 }
