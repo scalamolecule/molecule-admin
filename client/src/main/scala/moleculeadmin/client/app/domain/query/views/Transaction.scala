@@ -9,7 +9,7 @@ import org.scalajs.dom.html.Element
 import org.scalajs.dom.raw.{Element => RawElement}
 import rx.{Ctx, Rx}
 import scalatags.JsDom.TypedTag
-import scalatags.JsDom.all.{td, tr, _}
+import scalatags.JsDom.all.{onclick, td, tr, _}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js.timers.setTimeout
 
@@ -65,8 +65,8 @@ case class Transaction()(implicit ctx: Ctx.Owner) extends Base {
           txMetaData.foreach { case (_, a, v, op) =>
             val cellType   = viewCellTypes(a)
             val vElementId = s"$txViewTable $a $i"
-            val valueCell  = getValueCell(cellType, vElementId, v, true, level, op)
-            val attrCell   = getAttrCell(a, cellType, vElementId, valueCell, true)
+            val valueCell  = getValueCell(cellType, vElementId, v, false, level, op)
+            val attrCell   = getAttrCell(a, cellType, vElementId, valueCell, false)
             view.appendChild(
               tr(
                 td(),
@@ -88,14 +88,18 @@ case class Transaction()(implicit ctx: Ctx.Owner) extends Base {
             val cellType   = viewCellTypes(a)
             val vElementId = s"$txViewTable $a $i"
             val attr1      = if (e != ePrev || a != aPrev) a else ""
-            val valueCell  = getValueCell(cellType, vElementId, v, true, level, op)
-            val attrCell   = getAttrCell(attr1, cellType, vElementId, valueCell, true)
+            val valueCell  = getValueCell(cellType, vElementId, v, false, level, op)
+            val attrCell   = getAttrCell(attr1, cellType, vElementId, valueCell, false)
             view.appendChild(
               tr(
                 if (eCount % 2 == 0) cls := "even" else (),
                 if (e != ePrev)
-                  th(e, cls := Rx(if (e == curEntity()) "eidChosen" else "eid"),
-                    onmouseover := { () => curEntity() = e })
+                  th(
+                    cls := Rx(if (e == curEntity()) "eidChosen" else "eid"),
+                    e,
+                    onmouseover := setCurEid(false)(e),
+                    onclick := lockCurEid(false)(e)
+                  )
                 else
                   td(),
                 attrCell,

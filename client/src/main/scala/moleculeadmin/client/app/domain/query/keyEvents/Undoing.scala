@@ -191,10 +191,10 @@ trait Undoing extends UndoElements with QueryApi {
               val cellType        = viewCellTypes(a)
               val vElementId      = s"undoTxs $countDown $t $i $a"
               val attr1           = if (showEntity || a != aPrev) a else ""
-              val highlightEntity = { () => curEntity() = e }
+              val highlightEntity = { () => if (!curEntityLocked) curEntity() = e }
               val base            = new Base
-              val valueCell       = base.getValueCell(cellType, vElementId, v, true, 0, op)
-              val attrCell        = base.getAttrCell(attr1, cellType, vElementId, valueCell, true)
+              val valueCell       = base.getValueCell(cellType, vElementId, v, false, 0, op)
+              val attrCell        = base.getAttrCell(attr1, cellType, vElementId, valueCell, false)
               ePrev = e
               aPrev = a
               datomTable1.appendChild(

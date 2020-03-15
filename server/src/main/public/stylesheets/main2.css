@@ -322,7 +322,6 @@ table.tableTx th {
     cursor: default;
 }
 table.tableTx th.eidChosen {
-    color: #2400ff;
     background-color: #3cb7ff4f;
 }
 table.tableTx td {
