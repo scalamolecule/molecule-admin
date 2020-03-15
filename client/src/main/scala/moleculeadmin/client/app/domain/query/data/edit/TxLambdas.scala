@@ -1,8 +1,10 @@
 package moleculeadmin.client.app.domain.query.data.edit
+
 import autowire._
 import boopickle.Default._
 import molecule.util.DateHandling
 import moleculeadmin.client.app.domain.query.QueryState.{curT, curTx, curTxInstant, db}
+import moleculeadmin.client.app.domain.query.views.Base
 import moleculeadmin.client.app.element.query.datatable.BodyElements
 import moleculeadmin.client.autowire.queryWire
 import moleculeadmin.shared.ast.query.{Col, QueryResult}
@@ -15,8 +17,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 abstract class TxLambdas(
   cols: Seq[Col],
   qr: QueryResult,
-)(implicit val ctx: Ctx.Owner)
-  extends BodyElements with DateHandling {
+)(implicit ctx: Ctx.Owner)
+  extends Base
+    with BodyElements with DateHandling {
 
   type keepBooPickleImport_TxLambdas = PickleState
 
@@ -33,7 +36,7 @@ abstract class TxLambdas(
       // t
       case (false, false) =>
         (rowIndex: Int) =>
-          arrayT(rowIndex).fold(_tdNoEdit){t =>
+          arrayT(rowIndex).fold(_tdNoEdit) { t =>
             _tdOneT(
               t.toLong,
               curT,
@@ -42,7 +45,8 @@ abstract class TxLambdas(
                 curT() = t1
                 queryWire().getTxFromT(t1).call().foreach(curTx() = _)
               }
-            )}
+            )
+          }
 
       // t + tx
       case (true, false) =>

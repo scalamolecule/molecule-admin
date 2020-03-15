@@ -60,8 +60,8 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
   def _tdOneEid(
     eid: Long,
     curEntity: rx.Var[Long],
-    mouseover: () => Unit,
-    click: () => Unit,
+    setCurEid: () => Unit,
+    lockCurEid: () => Unit,
     starCls: String,
     flagCls: String,
     checkCls: String,
@@ -77,19 +77,21 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
       i(cls := starCls, onclick := starToggle),
       i(cls := flagCls, onclick := flagToggle),
       i(cls := checkCls, onclick := checkToggle),
-      onmouseover := mouseover,
-      onclick := click
+      onmouseover := setCurEid,
+      onclick := lockCurEid
     )
   }
   def _tdOneRef(
     ref: Long,
     curEntity: rx.Var[Long],
-    mouseover: Long => () => Unit
+    setCurEid: Long => () => Unit,
+    lockCurEid: Long => () => Unit,
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = td(
     cls := Rx(if (ref == curEntity()) "eidChosen" else "eid"),
     attr("card") := 1,
     ref,
-    onmouseover := mouseover(ref)
+    onmouseover := setCurEid(ref),
+    onclick := lockCurEid(ref)
   )
 
   def _tdOneStrEdit(
@@ -147,7 +149,8 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     eid: Long,
     optValue: Option[Double],
     curEntity: rx.Var[Long],
-    onMouseover: Long => () => Unit,
+    setCurEid: Long => () => Unit,
+    lockCurEid: Long => () => Unit,
     update: () => Unit
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = {
     val refStr = optValue.fold("")(_.toString)
@@ -155,7 +158,8 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     td(
       cls := Rx(if (ref > 0L && ref == curEntity()) "eidChosen" else "eid"),
       refStr,
-      onmouseover := onMouseover(ref),
+      onmouseover := setCurEid(ref),
+      onclick := lockCurEid(ref),
       id := cellId,
       attr("card") := 1,
       attr("eid") := eid,
@@ -259,7 +263,8 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
   def _tdManyRef(
     vs: List[Double],
     curEntity: rx.Var[Long],
-    mouseovers: Long => () => Unit,
+    setCurEid: Long => () => Unit,
+    lockCurEid: Long => () => Unit,
     showAll: Boolean = false,
     max: Int = defaultSize
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = {
@@ -269,7 +274,8 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
       li(
         cls := Rx(if (ref == curEntity()) "eidChosen" else "eid"),
         ref,
-        onmouseover := mouseovers(ref)
+        onmouseover := setCurEid(ref),
+        onclick := lockCurEid(ref)
       ).render
     )
     if (showAll || vs.size <= max) {
@@ -382,8 +388,8 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     cellId: String,
     eid: Long,
     curEntity: rx.Var[Long],
-    mouseover: Long => () => Unit,
-    click: Long => () => Unit,
+    setCurEid: Long => () => Unit,
+    lockCurEid: Long => () => Unit,
     update: () => Unit
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = {
     td(
@@ -397,8 +403,8 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
           li(
             cls := Rx(if (ref == curEntity()) "eidChosen" else "eid"),
             ref,
-            onmouseover := mouseover(ref),
-            onclick := click(ref)
+            onmouseover := setCurEid(ref),
+            onclick := lockCurEid(ref)
           )
         )
       )
@@ -410,9 +416,9 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     cellClass: String,
     cellId: String,
     eid: Long,
-    mouseovers: Long => () => Unit,
+    setCurEid: Long => () => Unit,
     update: () => Unit
-  )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = {
+  ): TypedTag[TableCell] = {
     td(
       cls := cellClass,
       id := cellId,
@@ -425,7 +431,7 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
           li(
             cls := "num",
             ref,
-            onmouseover := mouseovers(ref)
+            onmouseover := setCurEid(ref)
           )
         )
       )
