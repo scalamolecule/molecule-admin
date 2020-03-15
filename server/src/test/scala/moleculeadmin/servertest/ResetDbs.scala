@@ -20,7 +20,7 @@ import moleculeadmin.server.utils.DefFile
 import utest._
 
 /*
-  /Users/mg/clazzig/clazzig/clazzig/server/app/db/schema/ClazzigDefinition.scala
+  /Users/mg/clazzig-code/clazzig/server/app/db/schema/ClazzigDefinition.scala
   /Users/mg/molecule/molecule-admin/molecule-admin/server/src/main/scala/db/core/schema/CoreTestDefinition.scala
   /Users/mg/molecule/molecule-admin/molecule-admin/server/src/main/scala/db/migration/schema/PartitionDefinition.scala
   /Users/mg/molecule/molecule-admin/molecule-admin/server/src/main/scala/db/migration/schema/Partition1Definition.scala
@@ -30,12 +30,13 @@ import utest._
 
 object ResetDbs extends TestSuite with ExampleData with Settings {
   val protocol = "free"
-  val base     = "datomic:free://localhost:4334"
+  val base = "datomic:free://localhost:4334"
 
 
   val tests = Tests {
     //    test("Reset all") {
     //      resetDbs()
+    //      populateCoreTest(Conn("datomic:free://localhost:4334/CoreTest"))
     //    }
 
     //    test("Reset all and poplulate") {

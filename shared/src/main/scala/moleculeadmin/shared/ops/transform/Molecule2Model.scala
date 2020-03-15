@@ -254,7 +254,7 @@ class Molecule2Model(molecule0: String, nsMap: Map[String, Ns])
       attr match {
         case "e" | "e_" => fn match {
           case "apply" => expr.trim match {
-            case r"([1-9][0-9]*)${number}L?" => elements += Generic(curNsFull, attr, "datom", Eq(Seq(number.toInt)))
+            case r"([1-9][0-9]*)${number}L?" => elements += Generic(curNsFull, attr, "datom", Eq(Seq(number.toLong)))
             case "count"                     => elements += Generic(curNsFull, attr, "datom", Fn("count"))
             case _                           => throw new IllegalArgumentException(
               s"Unrecognized expression value `$expr` for entity id attribute `$attr` in molecule: $molecule0")

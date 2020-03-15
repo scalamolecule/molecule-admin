@@ -56,11 +56,11 @@ trait Model2Molecule extends QueryApi with BaseQuery with DateHandling {
 
     def model2molecule(elements: Seq[Element]): String = elements.foldLeft(0, "") {
       case ((_, ""), Atom(ns, `dummy`, _, _, _, _, _, _))    => (0, c(ns))
-      case ((_, ""), Generic(ns, "e" | "e_", _, value))      => (0, c(ns) + ".e" + v("Long", value))
+      case ((_, ""), Generic(ns, e@("e" | "e_"), _, value))  => (0, c(ns) + "." + e + v("Long", value))
       case ((_, ""), Atom(ns, attr, tpe, _, value, _, _, _)) => (0, c(ns) + "." + attr + v(tpe, value))
       case ((_, ""), Bond(ns, refAttr, _, _, _))             => (0, c(ns) + "." + c(refAttr))
       case ((_, m), Atom(_, `dummy`, _, _, _, _, _, _))      => (0, m)
-      case ((_, m), Generic(_, "e" | "e_", _, value))        => (0, m + ".e" + v("Long", value))
+      case ((_, m), Generic(_, e@("e" | "e_"), _, value))    => (0, m + "." + e + v("Long", value))
       case ((_, m), Generic(_, attr, _, _))                  => (0, m + "." + attr)
       case ((_, m), Atom(_, attr, tpe, _, value, _, _, _))   => (0, m + "." + attr + v(tpe, value))
       case ((_, m), ReBond(backRef))                         => (1, m + "._" + c(backRef))
@@ -69,4 +69,5 @@ trait Model2Molecule extends QueryApi with BaseQuery with DateHandling {
       case ((rebonding, m), e)                               => (rebonding, m + " ### Unexpected element: " + e)
     }._2
   }
+
 }
