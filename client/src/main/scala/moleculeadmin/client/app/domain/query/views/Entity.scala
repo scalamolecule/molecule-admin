@@ -97,7 +97,7 @@ case class Entity()(implicit ctx: Ctx.Owner) extends Base
           // Deselect curEntity (and re-render) if entity view is not rendered yet
           curEntity() = 0L
         } else {
-          addEntityRows("entityViewTable", eid, false, 0)
+          addEntityRows("entityViewTable", eid, true, 0)
         }
     }
     _entityDatoms("Point on entity id...")

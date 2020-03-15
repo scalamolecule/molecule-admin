@@ -84,8 +84,8 @@ case class EntityHistory()(implicit ctx: Ctx.Owner) extends Base {
               )
               val cellType   = viewCellTypes(a)
               val vElementId = parentElementId + " " + a + " " + i
-              val valueCell  = getValueCell(cellType, vElementId, v, true, 0, op)
-              val attrCell   = getAttrCell(a, cellType, vElementId, valueCell, true)
+              val valueCell  = getValueCell(cellType, vElementId, v, false, 0, op)
+              val attrCell   = getAttrCell(a, cellType, vElementId, valueCell, false)
               viewElement.appendChild(
                 tr(
                   if (txCount % 2 == 0) cls := "even" else (),
@@ -119,8 +119,8 @@ case class EntityHistory()(implicit ctx: Ctx.Owner) extends Base {
               )
               val cellType   = viewCellTypes(a)
               val vElementId = parentElementId + " " + a + " " + i
-              val valueCell  = getValueCell(cellType, vElementId, v, true, 0, asserted)
-              val attrCell   = getAttrCell(a, cellType, vElementId, valueCell, true)
+              val valueCell  = getValueCell(cellType, vElementId, v, false, 0, asserted)
+              val attrCell   = getAttrCell(a, cellType, vElementId, valueCell, false)
               viewElement.appendChild(
                 tr(
                   if (attrCount % 2 == 0) cls := "even" else (),

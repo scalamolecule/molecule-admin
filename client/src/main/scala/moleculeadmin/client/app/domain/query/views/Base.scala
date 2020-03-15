@@ -10,7 +10,7 @@ import moleculeadmin.client.rxstuff.RxBindings
 import moleculeadmin.shared.ops.query.ModelOps
 import moleculeadmin.shared.ops.query.builder.TreeOps
 import org.scalajs.dom.document
-import org.scalajs.dom.html.TableCell
+import org.scalajs.dom.html.{Span, TableCell}
 import rx.{Ctx, Rx}
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
@@ -65,7 +65,7 @@ class Base(implicit ctx: Ctx.Owner)
   }
 
   // Recursively add entity row to view
-  def addEntityRows(parentElementId: String, eid: Long, txs: Boolean, level: Int): Unit = {
+  def addEntityRows(parentElementId: String, eid: Long, expand: Boolean, level: Int): Unit = {
     val viewElement = document.getElementById(parentElementId)
     if (viewElement != null) {
       queryWire().touchEntity(db, eid).call().foreach { data =>
@@ -75,8 +75,8 @@ class Base(implicit ctx: Ctx.Owner)
           case (attr, v)        =>
             val cellType   = viewCellTypes(attr)
             val vElementId = parentElementId + attr + level
-            val valueCell  = getValueCell(cellType, vElementId, v, txs, level)
-            val attrCell   = getAttrCell(attr, cellType, vElementId, valueCell, txs)
+            val valueCell  = getValueCell(cellType, vElementId, v, expand, level)
+            val attrCell   = getAttrCell(attr, cellType, vElementId, valueCell, expand)
             viewElement.appendChild(
               tr(
                 attrCell,
@@ -88,11 +88,18 @@ class Base(implicit ctx: Ctx.Owner)
     }
   }
 
+  def openTriangle: TypedTag[Span] = span(
+    cls := s"oi oi-caret-right",
+    fontSize := "10px",
+    color := "#8a8a8a",
+    paddingRight := 2
+  )
+
   def getValueCell(
     cellType: String,
     valueCellId: String,
     v: String,
-    txs: Boolean,
+    expanding: Boolean,
     level: Int,
     asserted: Boolean = true
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = cellType match {
@@ -122,28 +129,39 @@ class Base(implicit ctx: Ctx.Owner)
 
     case "ref" => {
       val ref = v.toLong
-      td(
-        cls := Rx(
-          if (ref == curEntity())
-            "eidChosen" + (if (asserted) "" else " retracted")
-          else
-            "eid" + (if (asserted) "" else " retracted")
-        ),
-        id := valueCellId,
-        a(href := "#",
-          ref,
-          if (txs) {
-            onmouseover := setCurEid(false)(ref)
-          } else {
+      if (expanding) {
+        td(
+          cls := Rx(
+            if (ref == curEntity())
+              "eidChosen" + (if (asserted) "" else " retracted")
+            else
+              "eid" + (if (asserted) "" else " retracted")
+          ),
+          id := valueCellId,
+          a(href := "#",
+            openTriangle,
+            color := "#444",
+            ref,
             onmouseover := { () =>
               // Recursively open entity
-              addEntityRows(valueCellId, ref, txs, level + 1)
+              addEntityRows(valueCellId, ref, expanding, level + 1)
             }
-          },
-          if (txs)
-            onclick := lockCurEid(false)(ref) else ()
+          )
         )
-      )
+      } else {
+        td(
+          cls := Rx(
+            if (ref == curEntity())
+              "eidChosen" + (if (asserted) "" else " retracted")
+            else
+              "eid" + (if (asserted) "" else " retracted")
+          ),
+          id := valueCellId,
+          ref
+        )
+      }
+
+
     }
 
     case "enum" => td(
@@ -175,35 +193,14 @@ class Base(implicit ctx: Ctx.Owner)
       )
     )
 
-    case "numSet" =>
-      td(
-        cls := (if (asserted) "num" else "num retracted"),
-        expandingList(
-          v.split("__~~__").toSeq.map(_.toDouble).sorted.map(n => li(n)))
-      )
-
+    case "numSet" => td(
+      cls := (if (asserted) "num" else "num retracted"),
+      expandingList(
+        v.split("__~~__").toSeq.map(_.toDouble).sorted.map(n => li(n)))
+    )
 
     case "refSet" => {
-      if (txs && level == 0) {
-        val ref = v.toLong
-        // Separate row for each value returned from tx lookup
-        td(
-          id := valueCellId,
-          cls := Rx(
-            if (ref == curEntity())
-              "eidChosen" + (if (asserted) "" else " retracted")
-            else
-              "eid" + (if (asserted) "" else " retracted")
-          ),
-          a(
-            href := "#",
-            ref,
-            onmouseover := setCurEid(false)(ref),
-            if (txs)
-              onclick := lockCurEid(false)(ref) else ()
-          )
-        )
-      } else {
+      if (expanding) {
         td(
           id := valueCellId,
           cls := (if (asserted) "eid" else "retracted"),
@@ -223,21 +220,32 @@ class Base(implicit ctx: Ctx.Owner)
                     ),
                     a(
                       href := "#",
+                      openTriangle,
+                      color := "#444",
                       ref,
-                      if (txs) {
-                        onmouseover := setCurEid(false)(ref)
-                      } else {
-                        // Recursively open entity
-                        onmouseover := { () =>
-                          addEntityRows(eidElementId, ref, txs, level + 1)
-                        }
-                      },
-                      if (txs) onclick := lockCurEid(false)(ref) else ()
+                      // Recursively open entity
+                      onmouseover := { () =>
+                        addEntityRows(eidElementId, ref, expanding, level + 1)
+                      }
                     )
                   )
                 )
             }
           )
+        )
+
+      } else {
+        val ref = v.toLong
+        // Separate row for each value returned from tx lookup
+        td(
+          id := valueCellId,
+          cls := Rx(
+            if (ref == curEntity())
+              "eidChosen" + (if (asserted) "" else " retracted")
+            else
+              "eid" + (if (asserted) "" else " retracted")
+          ),
+          ref
         )
       }
     }
@@ -251,50 +259,34 @@ class Base(implicit ctx: Ctx.Owner)
       )
 
     case "enumSet" =>
-      if (txs && level == 0) {
-        td(
-          if (asserted) () else cls := "retracted",
-          v.split('/')(1)
-        )
-      } else {
+      if (expanding)
         td(
           if (asserted) () else cls := "retracted",
           v.split("__~~__").toSeq.sorted
             .flatMap(enumAttr => Seq(span(enumAttr.split('/')(1)), br)).init
         )
-      }
-
-    case "otherSet" => // Boolean, UUID, URI
-      if (txs && level == 0)
+      else
         td(
           if (asserted) () else cls := "retracted",
-          v
+          v.split('/')(1)
         )
-      else
+
+    case "otherSet" => // Boolean, UUID, URI
+      if (expanding)
         td(
           if (asserted) () else cls := "retracted",
           expandingList(
             v.split("__~~__").toSeq.sorted.map(s => li(s))
           )
         )
-
-    case map if map.endsWith("Map") =>
-      if (txs && level == 0) {
-        val List(k, v1) = v.split("@", 2).toList
+      else
         td(
           if (asserted) () else cls := "retracted",
-          table(cls := "mapPairs",
-            cellType match {
-              case "dateMap"                         => mapRow(k, td(truncateDateStr(v1)))
-              case "strMap" if v1.startsWith("http") => mapRow(k, td(
-                a(href := s"$v", target := "_blank", rel := "noopener noreferrer", v1)
-              ))
-              case "strMap"                          => mapRow(k, td(_str2frags(v1)))
-              case _                                 => mapRow(k, td(v1))
-            }
-          )
+          v
         )
-      } else {
+
+    case map if map.endsWith("Map") =>
+      if (expanding) {
         val rawPairs = v.split("__~~__").toSeq
           .map { pair =>
             val List(k, v) = pair.split("@", 2).toList
@@ -309,8 +301,22 @@ class Base(implicit ctx: Ctx.Owner)
             (v1: String) => td(truncateDateStr(v1)), asserted)
 
           case _ => mapCell(rawPairs, (v1: String) => td(v1), asserted)
-
         }
+      } else {
+        val List(k, v1) = v.split("@", 2).toList
+        td(
+          if (asserted) () else cls := "retracted",
+          table(cls := "mapPairs",
+            cellType match {
+              case "dateMap"                         => mapRow(k, td(truncateDateStr(v1)))
+              case "strMap" if v1.startsWith("http") => mapRow(k, td(
+                a(href := s"$v", target := "_blank", rel := "noopener noreferrer", v1)
+              ))
+              case "strMap"                          => mapRow(k, td(_str2frags(v1)))
+              case _                                 => mapRow(k, td(v1))
+            }
+          )
+        )
       }
 
     case _ => td(v)
@@ -321,9 +327,9 @@ class Base(implicit ctx: Ctx.Owner)
                   cellType: String,
                   valueCellId: String,
                   unexpandedValueCell: TypedTag[TableCell],
-                  txs: Boolean
+                  expand: Boolean
                  ): TypedTag[TableCell] = {
-    (if (txs) td() else th()) (
+    (if (expand) th() else td()) (
       attr,
       if (curAttrs.contains(attr)) cls := "selectedAttr" else (),
       cellType match {
