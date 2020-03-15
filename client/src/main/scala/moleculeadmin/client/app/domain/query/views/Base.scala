@@ -11,15 +11,58 @@ import moleculeadmin.shared.ops.query.ModelOps
 import moleculeadmin.shared.ops.query.builder.TreeOps
 import org.scalajs.dom.document
 import org.scalajs.dom.html.TableCell
-import rx.Ctx
+import rx.{Ctx, Rx}
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 
-class Base(implicit val ctx: Ctx.Owner)
+class Base(implicit ctx: Ctx.Owner)
   extends Callbacks with ViewElements with ModelOps with TreeOps {
   type keepBooPickleImport_Base = PickleState
+
+  def setCurEid(opt: Boolean): Long => () => Unit = {
+    if (opt) {
+      (eid: Long) =>
+        () => {
+          if (eid > 0 && !curEntityLocked)
+            curEntity() = eid
+        }
+    } else {
+      (eid: Long) =>
+        () => {
+          if (!curEntityLocked)
+            curEntity() = eid
+        }
+    }
+  }
+
+  def lockCurEid(opt: Boolean): Long => () => Unit = {
+    if (opt) {
+      (eid: Long) =>
+        () =>
+          if (eid > 0) {
+            if (curEntityLocked) {
+              if (eid == curEntity.now)
+                curEntityLocked = false
+              curEntity() = eid
+            } else {
+              curEntityLocked = true
+            }
+          }
+    } else {
+      (eid: Long) =>
+        () => {
+          if (curEntityLocked) {
+            if (eid == curEntity.now)
+              curEntityLocked = false
+            curEntity() = eid
+          } else {
+            curEntityLocked = true
+          }
+        }
+    }
+  }
 
   // Recursively add entity row to view
   def addEntityRows(parentElementId: String, eid: Long, txs: Boolean, level: Int): Unit = {
@@ -77,23 +120,31 @@ class Base(implicit val ctx: Ctx.Owner)
       truncateDateStr(v)
     )
 
-    case "ref" => td(
-      cls := (if (asserted) "eid" else "eid retracted"),
-      id := valueCellId,
-      a(href := "#",
-        v,
-        if (txs) {
-          onmouseover := { () =>
-            if (!curEntityLocked) curEntity() = v.toLong
-          }
-        } else {
-          onmouseover := { () =>
-            // Recursively open entity
-            addEntityRows(valueCellId, v.toLong, txs, level + 1)
-          }
-        }
+    case "ref" => {
+      val ref = v.toLong
+      td(
+        cls := Rx(
+          if (ref == curEntity())
+            "eidChosen" + (if (asserted) "" else " retracted")
+          else
+            "eid" + (if (asserted) "" else " retracted")
+        ),
+        id := valueCellId,
+        a(href := "#",
+          ref,
+          if (txs) {
+            onmouseover := setCurEid(false)(ref)
+          } else {
+            onmouseover := { () =>
+              // Recursively open entity
+              addEntityRows(valueCellId, ref, txs, level + 1)
+            }
+          },
+          if (txs)
+            onclick := lockCurEid(false)(ref) else ()
+        )
       )
-    )
+    }
 
     case "enum" => td(
       if (asserted) () else cls := "retracted",
@@ -133,40 +184,62 @@ class Base(implicit val ctx: Ctx.Owner)
 
 
     case "refSet" => {
-      val valueElement =
-        if (txs && level == 0) {
-          // Separate row for each value returned from tx lookup
-          a(href := "#", v, onmouseover := { () =>
-            if (!curEntityLocked) curEntity() = v.toLong
-          })
-        } else {
+      if (txs && level == 0) {
+        val ref = v.toLong
+        // Separate row for each value returned from tx lookup
+        td(
+          id := valueCellId,
+          cls := Rx(
+            if (ref == curEntity())
+              "eidChosen" + (if (asserted) "" else " retracted")
+            else
+              "eid" + (if (asserted) "" else " retracted")
+          ),
+          a(
+            href := "#",
+            ref,
+            onmouseover := setCurEid(false)(ref),
+            if (txs)
+              onclick := lockCurEid(false)(ref) else ()
+          )
+        )
+      } else {
+        td(
+          id := valueCellId,
+          cls := (if (asserted) "eid" else "retracted"),
           table(
             v.split("__~~__").toSeq.zipWithIndex.map {
-              case (eid, i) =>
+              case (v1, i) =>
+                val ref          = v1.toLong
                 val eidElementId = valueCellId + "-" + i
-                tr(td(id := eidElementId, cls := "eid",
-                  a(
-                    href := "#",
-                    eid,
-                    if (txs) {
-                      onmouseover := { () =>
-                        if (!curEntityLocked) curEntity() = v.toLong
-                      }
-                    } else {
-                      onmouseover := { () =>
+                tr(
+                  td(
+                    id := eidElementId,
+                    cls := Rx(
+                      if (ref == curEntity())
+                        "eidChosen" + (if (asserted) "" else " retracted")
+                      else
+                        "eid" + (if (asserted) "" else " retracted")
+                    ),
+                    a(
+                      href := "#",
+                      ref,
+                      if (txs) {
+                        onmouseover := setCurEid(false)(ref)
+                      } else {
                         // Recursively open entity
-                        addEntityRows(eidElementId, eid.toLong, txs, level + 1)
-                      }
-                    }
-                  )))
+                        onmouseover := { () =>
+                          addEntityRows(eidElementId, ref, txs, level + 1)
+                        }
+                      },
+                      if (txs) onclick := lockCurEid(false)(ref) else ()
+                    )
+                  )
+                )
             }
           )
-        }
-      td(
-        id := valueCellId,
-        cls := (if (asserted) "eid" else "retracted"),
-        valueElement
-      )
+        )
+      }
     }
 
     case "dateSet" =>

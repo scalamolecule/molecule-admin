@@ -121,11 +121,12 @@ trait AppElements extends Bootstrap {
     max: Int = defaultSize
   ): UList = {
     val list = if (showDisc)
-      ul(items.take(max)).render
+      ul(
+        style := "list-style-type: disc; padding-inline-start: 15px;",
+        items.take(max),
+      ).render
     else
       ul(
-        listStyleType.none,
-        attr("padding-inline-start") := 0,
         items.take(max)
       ).render
 

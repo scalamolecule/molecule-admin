@@ -3,6 +3,7 @@ package moleculeadmin.client.app.domain.query.data
 import moleculeadmin.client.app.domain.query.QueryState._
 import moleculeadmin.client.app.domain.query.data.edit.{RetractEid, _}
 import moleculeadmin.client.app.domain.query.marker.Toggle
+import moleculeadmin.client.app.domain.query.views.Base
 import moleculeadmin.client.app.element.query.datatable.BodyElements
 import moleculeadmin.shared.ast.query.{QueryResult, _}
 import moleculeadmin.shared.ops.query.ColOps
@@ -19,7 +20,11 @@ abstract class Cell(
   cols: Seq[Col],
   qr: QueryResult
 )(implicit ctx: Ctx.Owner)
-  extends TxLambdas(cols, qr) with TypeValidation with BodyElements with ColOps {
+  extends TxLambdas(cols, qr)
+    with TypeValidation
+    with BodyElements
+    with ColOps
+{
 
   // current entity id for updates of subsequent attributes on each row
   var e = 0L
@@ -247,19 +252,8 @@ abstract class Cell(
               _tdOneEid(
                 eid,
                 curEntity,
-                () => {
-                  if (!curEntityLocked)
-                    curEntity() = eid
-                },
-                () => {
-                  if (curEntityLocked) {
-                    if (eid == curEntity.now)
-                      curEntityLocked = false
-                    curEntity() = eid
-                  } else {
-                    curEntityLocked = true
-                  }
-                },
+                setCurEid(false)(eid),
+                lockCurEid(false)(eid),
                 if (starIndex(rowIndex)) mark.starOn else mark.starOff,
                 if (flagIndex(rowIndex)) mark.flagOn else mark.flagOff,
                 if (checkIndex(rowIndex)) mark.checkOn else mark.checkOff,
@@ -285,7 +279,8 @@ abstract class Cell(
                 e,
                 array(rowIndex),
                 curEntity,
-                (ref: Long) => () => if (ref > 0) curEntity() = ref,
+                setCurEid(true),
+                lockCurEid(true),
                 update(origArray, array, rowIndex, "num")
               )
 
@@ -304,7 +299,8 @@ abstract class Cell(
                 _tdOneRef(
                   v.toLong,
                   curEntity,
-                  (eid: Long) => () => curEntity() = eid
+                  setCurEid(false),
+                  lockCurEid(false),
                 )
               )
 
@@ -402,8 +398,12 @@ abstract class Cell(
           case "eid" =>
             (rowIndex: Int) =>
               array(rowIndex).fold(_tdNoEdit)(vs =>
-                _tdManyRef(vs, curEntity,
-                  (eid: Long) => () => curEntity() = eid))
+                _tdManyRef(
+                  vs,
+                  curEntity,
+                  setCurEid(false),
+                  lockCurEid(false),
+                ))
 
           case "ref" if groupEdit =>
             val getCls = getClassLambda(origArray, array)
@@ -426,26 +426,21 @@ abstract class Cell(
                 id(rowIndex),
                 e,
                 curEntity,
-                (ref: Long) => () => if (ref > 0 && !curEntityLocked) {
-                  curEntity() = ref
-                },
-                (ref: Long) => () => if (ref > 0) {
-                  if (curEntityLocked) {
-                    if (ref == curEntity.now)
-                      curEntityLocked = false
-                    curEntity() = ref
-                  } else {
-                    curEntityLocked = true
-                  }
-                },
+                setCurEid(false),
+                lockCurEid(false),
                 update(origArray, array, rowIndex, "")
               )
 
           case "ref" =>
             (rowIndex: Int) =>
               array(rowIndex).fold(_tdNoEdit)(vs =>
-                _tdManyRef(vs.sorted, curEntity,
-                  (eid: Long) => () => curEntity() = eid, true))
+                _tdManyRef(
+                  vs.sorted,
+                  curEntity,
+                  setCurEid(false),
+                  lockCurEid(false),
+                  true
+                ))
 
           case _ if editable =>
             val getCls = getClassLambda(origArray, array)
