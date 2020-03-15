@@ -43,7 +43,8 @@ class Callbacks(implicit ctx: Ctx.Owner)
 
   def setColumns(query: QueryDTO): Unit = {
     val colSettings = query.colSettings.map(cs => cs._1 -> cs).toMap
-    //    println("setColumns " + columns.now)
+    //    colSettings foreach println
+    //    columns.now foreach println
     columns() = columns.now.map { column =>
       val (_, sort, sortPos) = colSettings(column.colIndex)
       column.copy(sortDir = sort, sortPos = sortPos)

@@ -79,5 +79,15 @@ object Model2MoleculeTest extends TestSuite with TreeSchema with Model2Molecule 
         Bond("ind_Person", "nationality", "loc_Country", 1, Seq()),
         Atom("loc_Country", "name", "String", 1, VarValue, None, Seq(), Seq()))) ==> "ind_Person.Nationality.name"
     }
+
+    test("ref.e(eid)") {
+      model2molecule(List(
+        Generic("Ns", "e", "datom", EntValue),
+        Bond("Ns", "ref1", "Ref1", 1, Seq()),
+        Generic("Ref1", "e_", "datom", Eq(Seq(42L))),
+        Atom("Ref1", "int1", "Int", 1, VarValue, None, Seq(), Seq())
+      )) ==> "Ns.e.Ref1.e_(42L).int1"
+
+    }
   }
 }

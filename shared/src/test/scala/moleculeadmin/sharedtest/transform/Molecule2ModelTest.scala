@@ -309,21 +309,21 @@ object Molecule2ModelTest extends TestSuite with TreeSchema with Helpers with Ex
       )
 
 
-      Molecule2Model("""Ns.e.apply(1).int""") ==> Right(Seq(
-        Generic("Ns", "e", "datom", Eq(Seq(1))),
+      Molecule2Model("""Ns.e.apply(123).int""") ==> Right(Seq(
+        Generic("Ns", "e", "datom", Eq(Seq(123))),
         Atom("Ns", "int", "Int", 1, VarValue, None, List(), List())
       ))
-      Molecule2Model("""Ns.e.apply(1L).int""") ==> Right(Seq(
-        Generic("Ns", "e", "datom", Eq(Seq(1))),
-        Atom("Ns", "int", "Int", 1, VarValue, None, List(), List())
-      ))
-
-      Molecule2Model("""Ns.e(1).int""") ==> Right(Seq(
-        Generic("Ns", "e", "datom", Eq(Seq(1))),
+      Molecule2Model("""Ns.e.apply(123L).int""") ==> Right(Seq(
+        Generic("Ns", "e", "datom", Eq(Seq(123))),
         Atom("Ns", "int", "Int", 1, VarValue, None, List(), List())
       ))
       Molecule2Model("""Ns.e(123).int""") ==> Right(Seq(
         Generic("Ns", "e", "datom", Eq(Seq(123))),
+        Atom("Ns", "int", "Int", 1, VarValue, None, List(), List())
+      ))
+
+      Molecule2Model("""Ns.e_(123).int""") ==> Right(Seq(
+        Generic("Ns", "e_", "datom", Eq(Seq(123))),
         Atom("Ns", "int", "Int", 1, VarValue, None, List(), List())
       ))
     }

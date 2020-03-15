@@ -12,9 +12,11 @@ import scala.scalajs.js.URIUtils
 trait UrlHandling extends RegexMatching {
 
   def pushUrl(): Unit = {
-    val m = if (curMolecule.now.isEmpty)
-      "" else "&m=" + URIUtils.encodeURI(curMolecule.now)
-
+    val m = if (curMolecule.now.isEmpty) "" else {
+      "&m=" + URIUtils.encodeURI(
+        curMolecule.now.replaceAllLiterally("\n", "")
+      )
+    }
     val newUrl =
       window.location.protocol + "//" +
         window.location.host +
