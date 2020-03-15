@@ -1,21 +1,20 @@
 package moleculeadmin.client.app.domain.query.data.groupEdit.ops
-import moleculeadmin.client.app.domain.query.QueryState.columns
+
 import moleculeadmin.shared.ast.query.Col
-import moleculeadmin.shared.ops.query.ColOps
-import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 
-case class ScalaCode(col: Col, rhs0: String)
-  extends ScalaCodeImplicits(col, rhs0) {
+case class ScalaCode(cols: Seq[Col], col: Col, scalaExpr: String)
+  extends ScalaCodeImplicits(cols, col, scalaExpr) {
 
-  val maxAttrLength = columns.now.map(_.attr.length).max
+  val maxAttrLength = cols.map(_.attr.length).max
 
   def get: String = card match {
     case 1 => card1
     case 2 => card2
     case 3 => card3
   }
+
   def pad(attr: String): String = attr + " " * (maxAttrLength - attr.length)
 
   // Build scala code elements for ScalaFiddle compilation
@@ -25,7 +24,7 @@ case class ScalaCode(col: Col, rhs0: String)
   val processTypes0   = new ListBuffer[String]
   val processParams0  = new ListBuffer[String]
 
-  columns.now.collect {
+  cols.collect {
     case col@Col(_, _, _, _, _, tpe, _, card, opt, _, _, attrExpr, _, _, _)
       if attrExpr != "edit" =>
 
@@ -50,7 +49,7 @@ case class ScalaCode(col: Col, rhs0: String)
   val conversions   : String = conversions0.mkString(",\n          ")
   val processTypes  : String = processTypes0.mkString(", ")
   val processParams : String = processParams0.mkString(", ")
-  val n = transferTypes0.length
+  val n                      = transferTypes0.length
 
   val imports: String =
     """import scalajs.js
@@ -76,11 +75,12 @@ case class ScalaCode(col: Col, rhs0: String)
         bigInt2bigDec,
         double2bigDec,
         // blacklist
-        float2bigDecErr).mkString("\n  ")
+        float2bigDecErr).mkString("  ", "\n  ", "")
 
-      case "Date" => dateImplicits
-      case "UUID" => str2uuid
-      case "URI"  => str2uri
+      // indenting here so that we can test empty imports
+      case "Date" => "  " + dateImplicits
+      case "UUID" => "  " + str2uuid
+      case "URI"  => "  " + str2uri
       case _      => "" // no conversions
     }
 
@@ -92,7 +92,7 @@ case class ScalaCode(col: Col, rhs0: String)
     s"""$imports
        |@JSExportTopLevel("ScalaFiddle")
        |object ScalaFiddle {
-       |  $implicits
+       |$implicits
        |  @JSExport
        |  val lambda: js.Tuple$n[$transferTypes] => js.Tuple2[js.UndefOr[String], String] = {
        |    case js.Tuple$n($transferParams) =>
@@ -106,7 +106,7 @@ case class ScalaCode(col: Col, rhs0: String)
        |      }
        |  }
        |
-       |  val process: ($processTypes) => Option[$processType] = {
+       |  val process: ($processTypes) => Option[$processType] = {$shared
        |    ($processParams) => {
        |      $rhs
        |    }
@@ -139,12 +139,12 @@ case class ScalaCode(col: Col, rhs0: String)
       case "Date"                   => Seq(iterLDT2arr, dateImplicits, iterAnyLDT2iterLDT)
       case "UUID"                   => Seq(iter2arr, str2uuid, iterAny2iterUUID)
       case "URI"                    => Seq(iter2arr, str2uri, iterAny2iterURI)
-    }).mkString("\n  ")
+    }).mkString("  ", "\n  ", "")
 
     s"""$imports
        |@JSExportTopLevel("ScalaFiddle")
        |object ScalaFiddle {
-       |  $implicits
+       |$implicits
        |  @JSExport
        |  val lambda: js.Tuple$n[$transferTypes] => js.Tuple2[js.Array[String], String] = {
        |    case js.Tuple$n($transferParams) =>
@@ -159,7 +159,7 @@ case class ScalaCode(col: Col, rhs0: String)
        |      }
        |  }
        |
-       |  val process: ($processTypes) => Iterable[$processType] = {
+       |  val process: ($processTypes) => Iterable[$processType] = {$shared
        |    ($processParams) => {
        |      $rhs
        |    }
@@ -192,13 +192,13 @@ case class ScalaCode(col: Col, rhs0: String)
       case "Date"                   => Seq(mapLDT2dict, dateImplicits, mapAnyLDT2mapLDT)
       case "UUID"                   => Seq(map2dict, str2uuid, mapAny2mapUUID)
       case "URI"                    => Seq(map2dict, str2uri, mapAny2mapURI)
-    }).mkString("\n  ")
+    }).mkString("  ", "\n  ", "")
 
     // Empty Option is simply treated as an empty Map.
     s"""$imports
        |@JSExportTopLevel("ScalaFiddle")
        |object ScalaFiddle {
-       |  $implicits
+       |$implicits
        |  @JSExport
        |  val lambda: js.Tuple$n[$transferTypes] => js.Tuple2[js.Dictionary[String], String] = {
        |    case js.Tuple$n($transferParams) =>
@@ -213,7 +213,7 @@ case class ScalaCode(col: Col, rhs0: String)
        |      }
        |  }
        |
-       |  val process: ($processTypes) => Map[String, $processType] = {
+       |  val process: ($processTypes) => Map[String, $processType] = {$shared
        |    ($processParams) => {
        |      $rhs
        |    }

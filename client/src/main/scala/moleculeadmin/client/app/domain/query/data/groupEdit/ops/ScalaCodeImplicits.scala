@@ -1,12 +1,9 @@
 package moleculeadmin.client.app.domain.query.data.groupEdit.ops
-
-import moleculeadmin.client.app.domain.query.QueryState.columns
 import moleculeadmin.shared.ast.query.Col
 import moleculeadmin.shared.ops.query.ColOps
-import scala.collection.mutable.ListBuffer
 
 
-abstract class ScalaCodeImplicits(col: Col, rhs0: String)
+abstract class ScalaCodeImplicits(cols: Seq[Col], col: Col, scalaExpr: String)
   extends TypeMappings with ColOps {
 
   val Col(_, _, nsAlias, nsFull, attr, attrType, _, card, _, _, _, _, _, _, _) = col
@@ -23,7 +20,7 @@ abstract class ScalaCodeImplicits(col: Col, rhs0: String)
     case _                        => attrType // Boolean, UUID, URI
   }
 
-  val attrResolver = ResolveAttrs(columns.now)
+  val attrResolver = ResolveAttrs(cols)
 
   val transferType: String = {
     val convertedTypes = Seq("Long", "datom", "ref", "Float", "Double", "BigInt", "BigDecimal")
@@ -35,23 +32,31 @@ abstract class ScalaCodeImplicits(col: Col, rhs0: String)
       attrType // Int, Boolean, UUID, URI
   }
 
-  val rhs = card match {
-    case 1 =>
-      if (rhs0.isEmpty || rhs0 == "None")
-        s"Option.empty[$processType]"
-      else
-        rhs0.replaceAllLiterally("\n", "\n      ")
-
-    case _ =>
-      if (rhs0.isEmpty || rhs0 == "Nil")
-        if (card == 2)
-          s"List.empty[$processType]"
+  val (shared, rhs) = {
+    val (shared0, rhs0) = scalaExpr.split("\n---\n").toList match {
+      case List(a, b) => ("\n    " + a.replaceAllLiterally("\n", "\n    "), b)
+      case List(b)    => ("", b)
+      case _          => ("", "")
+    }
+    val rhs1 = card match {
+      case 1 =>
+        if (rhs0.isEmpty || rhs0 == "None")
+          s"Option.empty[$processType]"
         else
-          s"Map.empty[String, $processType]"
-      else if (opt && card > 1)
-        rhs0.replaceAllLiterally("\n", "\n      ").replace(attr, attr.init)
-      else
-        rhs0.replaceAllLiterally("\n", "\n      ")
+          rhs0.replaceAllLiterally("\n", "\n      ")
+
+      case _ =>
+        if (rhs0.isEmpty || rhs0 == "Nil")
+          if (card == 2)
+            s"List.empty[$processType]"
+          else
+            s"Map.empty[String, $processType]"
+        else if (opt && card > 1)
+          rhs0.replaceAllLiterally("\n", "\n      ").replace(attr, attr.init)
+        else
+          rhs0.replaceAllLiterally("\n", "\n      ")
+    }
+    (shared0, rhs1)
   }
 
   val tpe: String = attrType match {

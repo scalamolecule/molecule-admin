@@ -41,8 +41,8 @@ case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
     case col if col.attrExpr != "edit" => col.colIndex
   }
 
-  // Get input for scala right hand side code (before processing adds spinner!)
-  val rhs: String = _html2str(document.getElementById(filterId).innerHTML).trim
+  // Scala expression to be applied
+  val scalaExpr: String = _html2str(document.getElementById(filterId).innerHTML).trim
 
   // Start spinner since compilation can take some seconds
   processing() = filterId
@@ -61,7 +61,7 @@ case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
     toColType: TransferType => ColType,
     updateCell: (Int, Option[ColType], Option[ColType]) => Unit
   ): Unit = {
-    val scalaCode           = ScalaCode(col, rhs).get
+    val scalaCode           = ScalaCode(columns.now, col, scalaExpr).get
     val scalaFiddle         = ScalaFiddle[TransferType](scalaCode)
     val arrayIndexes        = qr.arrayIndexes
     val origArray           = arrays(arrayIndexes(colIndex - 1))
