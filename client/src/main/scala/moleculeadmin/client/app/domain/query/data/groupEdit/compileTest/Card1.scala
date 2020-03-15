@@ -19,7 +19,9 @@ object Card1 extends TestScalaFiddle with ColOps {
   ) extends BaseTestGroupEdit(col) {
     val mandatory = !optional
     val attrOpt   = if (optional) attr else attr + "$"
+
     def rhsIsOpt(rhs: String): Boolean = rhs.contains(attrOpt)
+
     val attrResolver = ResolveAttrs(columns.now)
 
 
@@ -40,7 +42,6 @@ object Card1 extends TestScalaFiddle with ColOps {
             case optRhs if rhsIsOpt(optRhs)      => optRhs
             case optRhs if transferValue.isEmpty => optRhs
             case someRhs                         =>
-//              val attrClean  = attr.init
               val attrClean  = attrResolver.postfixed(col)
               val cleanSpace = " " * (attrClean.length + 1)
               s"""$attr match {
@@ -52,8 +53,8 @@ object Card1 extends TestScalaFiddle with ColOps {
           rhs0
         }
 
-        val scalaCode: String = ScalaCode(col, rhs).get
-                println(scalaCode)
+        val scalaCode: String = ScalaCode(columns.now, col, rhs).get
+        println(scalaCode)
 
         ScalaFiddle[js.UndefOr[String]](scalaCode).lambda2.foreach { lambda =>
           def process[T](input: T): (Option[String], String) = {
