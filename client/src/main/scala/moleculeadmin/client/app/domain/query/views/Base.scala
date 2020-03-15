@@ -65,7 +65,12 @@ class Base(implicit ctx: Ctx.Owner)
   }
 
   // Recursively add entity row to view
-  def addEntityRows(parentElementId: String, eid: Long, expand: Boolean, level: Int): Unit = {
+  def addEntityRows(
+    parentElementId: String,
+    eid: Long,
+    expand: Boolean,
+    level: Int
+  ): Unit = {
     val viewElement = document.getElementById(parentElementId)
     if (viewElement != null) {
       queryWire().touchEntity(db, eid).call().foreach { data =>
@@ -92,7 +97,7 @@ class Base(implicit ctx: Ctx.Owner)
     cls := s"oi oi-caret-right",
     fontSize := "10px",
     color := "#8a8a8a",
-    paddingRight := 2
+    paddingRight := 4
   )
 
   def getValueCell(
@@ -157,11 +162,10 @@ class Base(implicit ctx: Ctx.Owner)
               "eid" + (if (asserted) "" else " retracted")
           ),
           id := valueCellId,
+          color := "#444",
           ref
         )
       }
-
-
     }
 
     case "enum" => td(
@@ -245,6 +249,7 @@ class Base(implicit ctx: Ctx.Owner)
             else
               "eid" + (if (asserted) "" else " retracted")
           ),
+          color := "#444",
           ref
         )
       }
