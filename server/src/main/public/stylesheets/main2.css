@@ -366,11 +366,9 @@ table.undoTxs {
 table.undoTxs tr.chosen {
     background-color: #173eff2e;
 }
-
 table.undoTxs tr.undone {
     background-color: #eee;
 }
-
 table.undoTxs tr.header td {
     border-top-style: solid;
     border-top-width: 1px;
@@ -385,14 +383,12 @@ table.undoTxs tr.header a {
 table.undoTxs tr.header.chosen a:hover {
     text-decoration: underline;
 }
-
 table.undoTxs tr.txMetaData {
     color: #888;
 }
 table.undoTxs tr.txMetaData td {
-    font-weight: normal;
+    font-style: italic;
 }
-
 table.undoTxs th {
     font-weight: normal;
     color: #8e8e8e;
@@ -409,7 +405,6 @@ table.undoTxs td:nth-child(3) {
     padding: 0px 15px 0px 5px;
     max-width: 250px;
 }
-
 table.undoTxs td.eid {
     font-weight: normal;
     color: #2b7dbe;
@@ -426,9 +421,6 @@ table.undoTxs td.eidChosen a {
     background-color: #3cb7ff4f;
     cursor: default;
 }
-
-
-
 table.undoTxs td.eid.chosen {
     color: #2400ff;
     background-color: #3cb7ff4f;
@@ -436,12 +428,6 @@ table.undoTxs td.eid.chosen {
 }
 table.undoTxs td.retracted {
     background-color: #ffcbcb;
-}
-table.undoTxs td:nth-child(2) {
-    font-weight: bold;
-}
-table.undoTxs td.selectedAttrX {
-    font-weight: bold;
 }
 table.undoTxs td.num {
     color: #49a523;
