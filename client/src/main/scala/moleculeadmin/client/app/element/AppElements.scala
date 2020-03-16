@@ -54,6 +54,7 @@ trait AppElements extends Bootstrap {
       .replaceFirst("</span>", "")
       .replaceAllLiterally("<span></span>", "")
       .replaceAllLiterally("&nbsp;", " ")
+      .replaceAllLiterally("&amp;", "&")
       .replaceAllLiterally("&lt;", "<")
       .replaceAllLiterally("&gt;", ">")
       .replaceAllLiterally("<br>", "\n")
