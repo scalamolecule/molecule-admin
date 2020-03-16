@@ -7,8 +7,9 @@ import moleculeadmin.client.app.element.query.SchemaDropdownElements
 import moleculeadmin.client.rxstuff.RxBindings
 import moleculeadmin.shared.ops.query.ColOps
 import moleculeadmin.shared.styles.Color
+import org.scalajs.dom
 import org.scalajs.dom.html._
-import org.scalajs.dom.{MouseEvent, window}
+import org.scalajs.dom.{ClipboardEvent, Event, MouseEvent, window}
 import rx.{Ctx, Rx}
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all.{span, _}
@@ -369,6 +370,12 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
       lambdaHtml,
       onblur := applyLambda,
       onfocus := skipSpin,
+      onpaste := { e: ClipboardEvent =>
+        // Paste raw text and no html soup
+        e.preventDefault()
+        dom.document.getElementById(filterId).innerHTML =
+          e.clipboardData.getData("text/plain").replace("\n", "<br>")
+      },
       Rx(if (processing() == filterId) _sync(15) else span())
     )
   }

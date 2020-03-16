@@ -14,7 +14,8 @@ trait UrlHandling extends RegexMatching {
   def pushUrl(): Unit = {
     val m = if (curMolecule.now.isEmpty) "" else {
       "&m=" + URIUtils.encodeURI(
-        curMolecule.now.replaceAllLiterally("\n", "")
+        curMolecule.now
+          .replaceAllLiterally("\n", "")
       )
     }
     val newUrl =
@@ -37,6 +38,7 @@ trait UrlHandling extends RegexMatching {
       .map(URIUtils.decodeURIComponent).map {
       case r"db=(.*)$db" => "db" -> db
       case r"m=(.*)$m"   => "m" -> m
+        .replaceAllLiterally("%20", " ")
       case other         => throw new IllegalArgumentException(
         "Unexpected URL parameter/value pair: " + other)
     }.toMap
