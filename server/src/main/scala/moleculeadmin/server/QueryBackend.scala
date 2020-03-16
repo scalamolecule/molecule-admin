@@ -592,13 +592,25 @@ class QueryBackend extends ToggleBackend {
         retracts.map(v => Retract(eid, attrFull, cast(v), NoValue)) ++
           asserts.map(v => Add(eid, attrFull, cast(v), NoValue))
     }
-    //    log.info("------------- SAVE STMTSS ---------------")
-    //    stmtss foreach println
 
     withTransactor {
       try {
-        val txR: TxReport = conn.transact(stmtss)
-        Right((txR.t, txR.tx, date2strLocal(txR.inst)))
+        if (stmtss.length < 1000) {
+          val txR: TxReport = conn.transact(stmtss)
+          Right((txR.t, txR.tx, date2strLocal(txR.inst)))
+        } else {
+          var first             = 1
+          var last              = 1
+          var lastTxR: TxReport = null
+          log.info("Transacting " + stmtss.length + " statements:")
+          stmtss.grouped(1000).foreach { stmtGroup =>
+            lastTxR = conn.transact(stmtGroup)
+            last = first + stmtGroup.length - 1
+            log.info(s"$first - $last")
+            first = last + 1
+          }
+          Right((lastTxR.t, lastTxR.tx, date2strLocal(lastTxR.inst)))
+        }
       } catch {
         case t: Throwable => Left(t.getMessage)
       }
