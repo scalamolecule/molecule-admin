@@ -14,13 +14,15 @@ case class SubMenuEntityLock()(implicit val ctx: Ctx.Owner)
     if (curEntityLocked() && curEntity() != 0) {
       li(
         paddingLeft := 40,
-        color := "#888",
+        cursor.pointer,
         i(
           cls := "fas fa-lock",
-          color := "#aaa",
+          color := "#999",
           paddingRight := 5
         ),
-        curEntity.now
+        color := "#888",
+        curEntity.now,
+        onclick := { () => curEntityLocked() = false }
       )
     } else li()
   }
