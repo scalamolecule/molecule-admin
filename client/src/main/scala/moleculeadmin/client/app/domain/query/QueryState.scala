@@ -98,7 +98,7 @@ object QueryState extends QueryApi {
 
   // Entities
   val curEntity              = Var(0L)
-  var curEntityLocked        = false
+  val curEntityLocked        = Var(false)
   var showEntityViewBackRefs = false
   var curAttrs               = Seq.empty[String]
   val entityHistorySort      = Var("tx")

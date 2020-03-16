@@ -25,13 +25,13 @@ class Base(implicit ctx: Ctx.Owner)
     if (opt) {
       (eid: Long) =>
         () => {
-          if (eid > 0 && !curEntityLocked)
+          if (eid > 0 && !curEntityLocked.now)
             curEntity() = eid
         }
     } else {
       (eid: Long) =>
         () => {
-          if (!curEntityLocked)
+          if (!curEntityLocked.now)
             curEntity() = eid
         }
     }
@@ -42,23 +42,23 @@ class Base(implicit ctx: Ctx.Owner)
       (eid: Long) =>
         () =>
           if (eid > 0) {
-            if (curEntityLocked) {
+            if (curEntityLocked.now) {
               if (eid == curEntity.now)
-                curEntityLocked = false
+                curEntityLocked() = false
               curEntity() = eid
             } else {
-              curEntityLocked = true
+              curEntityLocked() = true
             }
           }
     } else {
       (eid: Long) =>
         () => {
-          if (curEntityLocked) {
+          if (curEntityLocked.now) {
             if (eid == curEntity.now)
-              curEntityLocked = false
+              curEntityLocked() = false
             curEntity() = eid
           } else {
-            curEntityLocked = true
+            curEntityLocked() = true
           }
         }
     }
