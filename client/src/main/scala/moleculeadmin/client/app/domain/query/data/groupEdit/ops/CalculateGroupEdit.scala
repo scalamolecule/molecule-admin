@@ -46,8 +46,8 @@ object CalculateGroupEdit {
 
       case 5 =>
         val Seq(v1, v2, v3, v4, v5) = colType2StringLambdas
-        scalafiddle.lambda5.foreach { fnz1 =>
-          val applyFn = (j: Int) => fnz1(js.Tuple5(v1(j), v2(j), v3(j), v4(j), v5(j)))
+        scalafiddle.lambda5.foreach { fn =>
+          val applyFn = (j: Int) => fn(js.Tuple5(v1(j), v2(j), v3(j), v4(j), v5(j)))
           while (i < lastRow) {
             resolve(i, applyFn)
             i += 1
@@ -67,7 +67,7 @@ object CalculateGroupEdit {
       case 7 =>
         val Seq(v1, v2, v3, v4, v5, v6, v7) = colType2StringLambdas
         scalafiddle.lambda7.foreach { fn =>
-          val applyFn = (j: Int) => fn(js.Tuple7((j), v2(j), v3(j), v4(j), v5(j), v6(j), v7(j)))
+          val applyFn = (j: Int) => fn(js.Tuple7(v1(j), v2(j), v3(j), v4(j), v5(j), v6(j), v7(j)))
           while (i < lastRow) {
             resolve(i, applyFn)
             i += 1
