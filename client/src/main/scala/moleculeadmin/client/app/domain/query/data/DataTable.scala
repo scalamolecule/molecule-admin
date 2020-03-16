@@ -178,7 +178,7 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
           val elements1 = VerifyRawModel(elements)
           tree() = mkTree(mkModelTree(elements1))
           curMolecule() = model2molecule(elements1)
-          curEntityLocked = false
+          curEntityLocked() = false
 
           columns() = getCols(elements1)
 
