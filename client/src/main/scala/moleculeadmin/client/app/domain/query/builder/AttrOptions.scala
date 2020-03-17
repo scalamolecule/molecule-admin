@@ -91,10 +91,12 @@ case class AttrOptions(
   val inputSample: Input = _inputNum(id_("sample"), "sample", attrValue)
 
   val operandSelector: Select = {
-    val ops0 = Seq("=", "!=", "<", ">", "<=", ">=")
-    val ops  = if (fulltext) "Word =" +: ops0 else ops0
-
-    val selectedOperand                     = attrValue match {
+    val ops0            = if (attrType == "datom")
+      Seq("=", "!=")
+    else
+      Seq("=", "!=", "<", ">", "<=", ">=")
+    val ops             = if (fulltext) "Word =" +: ops0 else ops0
+    val selectedOperand = attrValue match {
       case Fulltext(_) => "Word ="
       case Eq(_)       => "="
       case Neq(_)      => "!="
@@ -104,15 +106,22 @@ case class AttrOptions(
       case Ge(_)       => ">="
       case _           => if (fulltext) "Word =" else "="
     }
-    val options: Seq[TypedTag[html.Option]] = ops.map {
+    val options         = ops.map {
       case `selectedOperand` => option(selectedOperand, selected := true)
       case op                => option(op)
     }
+    val operandId       = id_("operand")
 
     _operandSelector(
-      marked("op", attrValue), id_("operand"), attrType, options, { () =>
-        keepSettingsOpen
-        inputValue.select()
+      marked("op", attrValue),
+      operandId,
+      attrType,
+      options,
+      { () =>
+        if (inputValue.value.nonEmpty)
+          updateInput(operandSelector.value, inputValue)
+        else
+          inputValue.select()
       }
     )
   }
@@ -120,21 +129,20 @@ case class AttrOptions(
 
   // Actions -------------------------------------------------------------------
 
+  def updateInput(fn: String, input: Input): Unit = upsertAttr(
+    modelElements.now, path, attr, attrType, car, enums, fn, input.value
+  ) match {
+    case Left(err)           => window.alert(err); input.select()
+    case Right(updatedModel) => modelElements() = updatedModel
+  }
+
   def update(): Unit = {
-    def updateInput(fn: String, input: Input): Unit =
-      upsertAttr(
-        modelElements.now, path, attr, attrType, car, enums, fn, input.value
-      ) match {
-        case Left(err)           => window.alert(err); input.select()
-        case Right(updatedModel) => modelElements() = updatedModel
-      }
-    val op = operandSelector.value
     curFn match {
       case "min"    => updateInput("min", inputMin)
       case "max"    => updateInput("max", inputMax)
       case "rand"   => updateInput("rand", inputRandom)
       case "sample" => updateInput("sample", inputSample)
-      case "value"  => updateInput(op, inputValue)
+      case "value"  => updateInput(operandSelector.value, inputValue)
       case _        => ()
     }
   }
@@ -263,9 +271,10 @@ case class AttrOptions(
   }
 
   def compareValue(): TypedTag[Div] = div(_hr, attrType match {
-    case "datom" | "UUID" | "URI" =>
+    //    case "datom" | "UUID" | "URI" =>
+    case "UUID" | "URI" =>
       _inputGroup(id_("operand"), id_("value"), inputValue)
-    case _                        =>
+    case _              =>
       _inputGroupMb3(operandSelector, inputValue)
   })
 
@@ -287,7 +296,7 @@ case class AttrOptions(
 
           val topValueCheckBox0 = _topValueCheckBox(id_("top25-" + j), attrValue, v)
 
-          def updateTopValue() = { () =>
+          def updateTopValue(): () => Unit = { () =>
             val sep       = attrType match {
               case "String" => "||"
               case _        => ","
@@ -432,6 +441,65 @@ case class AttrOptions(
 
   val inputs: TypedTag[Div] = div(id := id_("inputs"))
 
+  val selectionForm = form(
+    onsubmit := { () => false },
+    onchange := { () =>
+      if (validInput) {
+        update()
+        keepSettingsOpen
+      }
+    },
+    modes(),
+    if (doc.isDefined) _doc(doc.get) else (),
+    attrType match {
+      case _ if car == 3 && topValues.nonEmpty =>
+        inputs(compareValue(), top25(), txGenerics())
+
+      case _ if car == 3 =>
+        inputs(compareValue(), txGenerics())
+
+      case "datom" if attrClass == "attr-tacit" =>
+        inputs(compareValue())
+
+      case "datom" =>
+        inputs(compareValue(), count())
+
+      case "UUID" =>
+        inputs(compareValue(), aggrCounts(), txGenerics())
+
+      case "URI" =>
+        inputs(aggrCounts(), txGenerics())
+
+      case "Boolean" if topValues.nonEmpty =>
+        inputs(hr, top25(), aggrCounts(), txGenerics())
+
+      case "Boolean" =>
+        inputs(aggrCounts(), txGenerics())
+
+      case n if isNumber(n) && topValues.nonEmpty =>
+        inputs(compareValue(), top25(), aggrInputs(), aggrCounts(),
+          aggrNumbers(), txGenerics())
+
+      case n if isNumber(n) =>
+        inputs(compareValue(), aggrInputs(), aggrCounts(),
+          aggrNumbers(), txGenerics())
+
+      case "String" if enums.isDefined && topValues.nonEmpty =>
+        inputs(hr, top25(), aggrCounts(), txGenerics())
+
+      case "String" if enums.isDefined =>
+        inputs(aggrCounts(), txGenerics())
+
+      case _ if topValues.nonEmpty =>
+        inputs(compareValue(), top25(), aggrInputs(), aggrCounts(), txGenerics())
+
+      case _ =>
+        inputs(compareValue(), aggrInputs(), aggrCounts(), txGenerics())
+
+    }
+  ).render
+
+
   def render: TypedTag[LI] = _submenu(attrClass)(
     a(
       href := "#",
@@ -442,63 +510,7 @@ case class AttrOptions(
     ),
     _menu("settings")(
       id := id_("settings"),
-      form(
-        onsubmit := { () => false },
-        onchange := { () =>
-          if (validInput) {
-            update()
-            keepSettingsOpen
-          }
-        },
-        modes(),
-        if (doc.isDefined) _doc(doc.get) else (),
-        attrType match {
-          case _ if car == 3 && topValues.nonEmpty =>
-            inputs(compareValue(), top25(), txGenerics())
-
-          case _ if car == 3 =>
-            inputs(compareValue(), txGenerics())
-
-          case "datom" if attrClass == "attr-tacit" =>
-            inputs(compareValue())
-
-          case "datom" =>
-            inputs(compareValue(), count())
-
-          case "UUID" =>
-            inputs(compareValue(), aggrCounts(), txGenerics())
-
-          case "URI" =>
-            inputs(aggrCounts(), txGenerics())
-
-          case "Boolean" if topValues.nonEmpty =>
-            inputs(hr, top25(), aggrCounts(), txGenerics())
-
-          case "Boolean" =>
-            inputs(aggrCounts(), txGenerics())
-
-          case n if isNumber(n) && topValues.nonEmpty =>
-            inputs(compareValue(), top25(), aggrInputs(), aggrCounts(),
-              aggrNumbers(), txGenerics())
-
-          case n if isNumber(n) =>
-            inputs(compareValue(), aggrInputs(), aggrCounts(),
-              aggrNumbers(), txGenerics())
-
-          case "String" if enums.isDefined && topValues.nonEmpty =>
-            inputs(hr, top25(), aggrCounts(), txGenerics())
-
-          case "String" if enums.isDefined =>
-            inputs(aggrCounts(), txGenerics())
-
-          case _ if topValues.nonEmpty =>
-            inputs(compareValue(), top25(), aggrInputs(), aggrCounts(), txGenerics())
-
-          case _ =>
-            inputs(compareValue(), aggrInputs(), aggrCounts(), txGenerics())
-
-        }
-      )
+      selectionForm
     )
   )
 }
