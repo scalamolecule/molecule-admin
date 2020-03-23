@@ -55,6 +55,9 @@ class QueryBackend extends ToggleBackend {
     case _                           => sys.error("Unexpected input values")
   }
 
+  override def testStr(s: String): String = s.toUpperCase()
+
+  override def testInt(i: Int): Int = i * 10
 
   override def query(
     db: String,

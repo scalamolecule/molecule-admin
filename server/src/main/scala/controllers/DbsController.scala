@@ -1,6 +1,6 @@
 package controllers
 
-import autowireImpl.{AutoWireByteServer, ByteRouter}
+import util.server.autowire._
 import boopickle.Default._
 import com.google.inject.Inject
 import javax.inject._
@@ -13,10 +13,9 @@ import scala.concurrent.ExecutionContext
 
 @Singleton
 class DbsController @Inject()(api: Dbs)
-  (implicit ec: ExecutionContext) extends ByteRouter {
+  (implicit ec: ExecutionContext) extends AutowireRouter {
 
-  val router = AutoWireByteServer.route[DbsApi](api)
-  type keepBooPickleImport_DbsController = PickleState
+  val autowireRouter = AutowireServer.route[DbsApi](api)
 
   // Actions
   def index: Action[AnyContent] = Action(Ok(DbsPage()))
