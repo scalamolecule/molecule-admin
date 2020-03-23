@@ -1,7 +1,7 @@
 package moleculeadmin.clienttest
 
-import moleculeadmin.client.app.domain.query.data.groupEdit.ops.ScalaCode
-import moleculeadmin.client.app.element.AppElements
+import moleculeadmin.client.app.logic.query.data.groupEdit.ops.ScalaCode
+import moleculeadmin.client.app.html.AppElements
 import moleculeadmin.shared.ast.query.Col
 import scalatags.JsDom.all._
 import utest._

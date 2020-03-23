@@ -14,7 +14,7 @@ Scala-js:
 
 Autowire:
 - passing `None` results in `InvalidInput: null`
-- default arguments only in interface, NOT in implementation! Otherwise causes weird compiler errors. 
+- default arguments only in interface, NOT in implementation! Otherwise you'll get weird compiler errors. 
 
 Molecule:
 - forgetting to add `update` after `assert(someValue)`

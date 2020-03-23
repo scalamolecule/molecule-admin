@@ -1,6 +1,6 @@
 package moleculeadmin.clienttest
 
-import moleculeadmin.client.app.element.AppElements
+import moleculeadmin.client.app.html.AppElements
 import scalatags.JsDom.all._
 import utest._
 

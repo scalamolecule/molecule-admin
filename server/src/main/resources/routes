@@ -1,14 +1,14 @@
 
 # Pages
 GET     /                   controllers.DbsController.index
-POST    /dbs/*path          controllers.DbsController.autowireRaw(path: String)
+POST    /dbs/*path          controllers.DbsController.autowireAjax(path: String)
 
 GET     /query              controllers.QueryController.query(db: String)
-#+ nocsrf
-POST    /query/*path        controllers.QueryController.autowireRaw(path: String)
+GET     /query/ws           controllers.QueryController.autowireWebSocket
+POST    /query/*path        controllers.QueryController.autowireAjax(path: String)
 
 GET     /schema             controllers.SchemaController.schema(db: String)
-POST    /schema/*path       controllers.SchemaController.autowireRaw(path: String)
+POST    /schema/*path       controllers.SchemaController.autowireAjax(path: String)
 
 # Assets
 GET     /assets/*file       controllers.Assets.at(path="/public", file)

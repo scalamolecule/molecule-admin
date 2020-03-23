@@ -1,8 +1,8 @@
 package moleculeadmin.clienttest
+import util.client.rx.RxBindings
 import molecule.util.DateHandling
-import moleculeadmin.client.app.domain.query.QueryState._
-import moleculeadmin.client.app.domain.query.data.groupEdit.ops.ScalaCode
-import moleculeadmin.client.rxstuff.RxBindings
+import moleculeadmin.client.app.logic.query.QueryState._
+import moleculeadmin.client.app.logic.query.data.groupEdit.ops.ScalaCode
 import moleculeadmin.client.scalafiddle.ScalaFiddle
 import moleculeadmin.shared.ast.query.Col
 import org.scalajs.dom.ext.Ajax
