@@ -17,14 +17,7 @@ trait Base extends BaseApi with HelpersAdmin {
     meta_Db.name.isMolecular_(true).get.sorted
   }
 
-  def settings(db: String): (
-    Map[String, String],
-      Set[Long],
-      Set[Long],
-      Set[Long],
-      Set[Long],
-      Seq[QueryDTO]
-    ) = {
+  def settings(db: String): SettingsMetaData = {
     implicit val conn = Conn(base + "/MoleculeAdmin")
 
     // Use "admin" for now. Todo: users
@@ -74,18 +67,8 @@ trait Base extends BaseApi with HelpersAdmin {
     }
   }
 
-  override def loadMetaData(db: String): (
-    Seq[String],
-      MetaSchema,
-      (
-        Map[String, String],
-          Set[Long],
-          Set[Long],
-          Set[Long],
-          Set[Long],
-          Seq[QueryDTO]
-        )
-    ) = (dbNames(), getMetaSchema(db), settings(db))
+  override def loadMetaData(db: String): PageMetaData =
+    (dbNames(), getMetaSchema(db), settings(db))
 
   override def getMetaSchema(db: String): MetaSchema = {
     implicit val conn = Conn(base + "/MoleculeAdmin")

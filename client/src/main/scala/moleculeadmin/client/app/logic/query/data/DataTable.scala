@@ -45,6 +45,8 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
     maxRows()
 
     try {
+      // modelElements is the main trigger
+      // Whenever the model changes, re-render
       modelElements() match {
         case Nil =>
           if (querySelection().isEmpty)
@@ -85,12 +87,21 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
   }
 
 
+  def reset(): Unit = {
+    tree() = mkTree(mkModelTree(modelElements.now))
+    columns() = getCols(modelElements.now)
+    curEntity() = 0L
+    pushUrlOntoHistoryStack = true
+    pushUrl()
+    curViews.recalc()
+  }
+
+
   def renderDataTable(elements: Seq[Element]): JsDom.TypedTag[Div] = {
     val elements1 = VerifyRawModel(elements)
     tree() = mkTree(mkModelTree(elements1))
     curMolecule() = model2molecule(elements1)
     curEntityLocked() = false
-
     columns() = getCols(elements1)
 
     // See if we have a matching sorting from before
@@ -117,27 +128,6 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
     tableContainer
   }
 
-  lazy val tableContainer = _dataTableContainer(
-    _dataTable(
-      tableHead,
-      tableBody,
-      tableFoot
-    )
-  )
-  lazy val tableHead: TableSection = thead().render
-  lazy val tableBody: TableSection = tbody(id := "tableBody",
-    tr(td(), td(colspan := columns.now.size, "fetching data..."))
-  ).render
-  lazy val tableFoot: TableSection = tfoot().render
-
-
-  def resetTableBodyFoot(msg: String): Node = {
-    tableBody.innerHTML = ""
-    tableFoot.innerHTML = ""
-    tableFoot.appendChild(
-      tr(td(colspan := columns.now.size + 1, msg)).render
-    )
-  }
 
   def fetchAndPopulate(
     tableBody: TableSection,
@@ -159,18 +149,16 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
     pushUrl()
 
     // Fetch data from db asynchronously
-    //    queryWireAjax()
     queryWireWS()
       .query(db, datalogQuery, rules, l, ll, lll, maxRows.now, columns.now)
       .call().foreach {
+
       case Right(queryResult) =>
         rowCountAll = queryResult.rowCountAll
         rowCount = queryResult.rowCount
 
         // Render data table
         DataTableBodyFoot().populate(tableBody, tableFoot, queryResult)
-
-        //        println("QUERY return...")
 
         // Render grouped
         savedQueries.find(_.molecule == curMolecule.now) match {
@@ -211,13 +199,27 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
     }
   }
 
-  def reset() = {
-    tree() = mkTree(mkModelTree(modelElements.now))
-    columns() = getCols(modelElements.now)
-    curEntity() = 0L
-    pushUrlOntoHistoryStack = true
-    pushUrl()
-    curViews.recalc()
+  // Render elements -----------------------------------------
+
+  lazy val tableContainer          = _dataTableContainer(
+    _dataTable(
+      tableHead,
+      tableBody,
+      tableFoot
+    )
+  )
+  lazy val tableHead: TableSection = thead().render
+  lazy val tableBody: TableSection = tbody(id := "tableBody",
+    tr(td(), td(colspan := columns.now.size, "fetching data..."))
+  ).render
+  lazy val tableFoot: TableSection = tfoot().render
+
+  def resetTableBodyFoot(msg: String): Node = {
+    tableBody.innerHTML = ""
+    tableFoot.innerHTML = ""
+    tableFoot.appendChild(
+      tr(td(colspan := columns.now.size + 1, msg)).render
+    )
   }
 
 }
