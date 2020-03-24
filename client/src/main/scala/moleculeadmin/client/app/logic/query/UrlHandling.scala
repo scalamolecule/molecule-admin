@@ -25,10 +25,8 @@ trait UrlHandling extends RegexMatching {
         "?db=" + db + m
 
     if (pushUrlOntoHistoryStack) {
-      //      println("pushUrl - " + curMolecule.now)
       window.history.pushState(null, "MoleculeAdmin", newUrl)
     } else {
-      //      println("pushUrl next time - " + curMolecule.now)
       pushUrlOntoHistoryStack = true
     }
   }
@@ -49,19 +47,13 @@ trait UrlHandling extends RegexMatching {
 
     // Try cached recent query first
     recentQueries.find(_.molecule == m) match {
-      case Some(q) =>
-        //        println("  modelElements - setCols from recent q: " + q)
-        new Callbacks().useQuery(q)
+      case Some(q) => new Callbacks().useQuery(q)
 
       case None =>
         // Then try saved query
         savedQueries.find(_.molecule == m) match {
-          case Some(q) =>
-            //            println("  modelElements - setCols from saved q: " + q)
-            new Callbacks().useQuery(q)
-
-          case None =>
-            //            println("  Make from m")
+          case Some(q) => new Callbacks().useQuery(q)
+          case None    =>
             // Finally created from molecule
             Molecule2Model(m) match {
               case Right(elements) => modelElements() = elements
@@ -73,20 +65,16 @@ trait UrlHandling extends RegexMatching {
 
   def prepareBrowserHistory(implicit ctx: Ctx.Owner): Unit = {
     window.addEventListener("popstate", (_: PopStateEvent) => {
-      //      println("POPSTATE -----")
       urlParams.get("m").fold {
-        //        println("  No m... " + modelElements.now)
         if (!modelElements.now.exists {
           case Atom(_, "Dummy to keep ns open", _, _, _, _, _, _) => true
           case _                                                  => false
         }) {
-          //          println("  dummy")
           curMolecule() = ""
           tree() = Tree(Nil, Nil, Nil, Nil, Nil, Nil)
           modelElements() = Nil
         }
       } { m =>
-        //        println("  m2           : " + m)
         if (m != curMolecule.now) {
           setQuery(m)
         }
@@ -94,11 +82,8 @@ trait UrlHandling extends RegexMatching {
     })
   }
 
-  def loadOptionalMolecule(implicit ctx: Ctx.Owner): Unit = {
-    urlParams.get("m").foreach { m =>
-      //      println("m1: " + m)
-      setQuery(m)
-    }
+  def loadOptionalMoleculeFromUrl(implicit ctx: Ctx.Owner): Unit = {
+    urlParams.get("m").foreach(setQuery)
   }
 }
 
