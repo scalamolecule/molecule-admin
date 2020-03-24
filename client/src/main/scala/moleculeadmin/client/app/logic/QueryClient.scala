@@ -33,8 +33,9 @@ object QueryClient
 
   @JSExport
   def load(db0: String): Unit = queryWireWS().loadMetaData(db0).call().map {
-    case (dbs, metaSchema0, (settings, stars, flags, checks, undoneTs, queries)) =>
-      init(db0, metaSchema0, settings, stars, flags, checks, undoneTs, queries)
+    pageMetaData =>
+
+      val dbs = init(db0, pageMetaData)
 
       document.body.appendChild(
         TopMenu(dbs, db, "query", RenderSubMenu().dynRender).render
@@ -55,16 +56,9 @@ object QueryClient
   }
 
 
-  def init(
-    db0: String,
-    metaSchema0: MetaSchema,
-    settings: Map[String, String],
-    stars: Set[Long],
-    flags: Set[Long],
-    checks: Set[Long],
-    undoneTs: Set[Long],
-    queries: Seq[QueryDTO]
-  ): Rx.Dynamic[Unit] = {
+  def init(db0: String, pageMetaData: PageMetaData): Seq[String] = {
+    val (dbs, metaSchema0,
+    (settings, stars, flags, checks, undoneTs, queries)) = pageMetaData
 
     prepareBrowserHistory
 
@@ -117,13 +111,12 @@ object QueryClient
 
       loadOptionalMoleculeFromUrl
     }
+    dbs
   }
 
   def post(): Unit = {
-
     // make saved queries available via key command
     registerKeyEvents
-
     // make dropdowns forgiving
     _reloadMenuAim()
   }
