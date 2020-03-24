@@ -5,11 +5,12 @@ import akka.stream.scaladsl.Flow
 import akka.util.ByteString
 import boopickle.Default._
 import moleculeadmin.server.utils.Tags
-import play.api.http.websocket.{BinaryMessage, Message}
+import play.api.http.websocket.{BinaryMessage, Message, TextMessage}
 import play.api.mvc._
 import util.server.autowire.AutowireServer.Router
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.concurrent.duration._
 
 
 trait AutowireRouter extends InjectedController with Tags {
@@ -22,7 +23,7 @@ trait AutowireRouter extends InjectedController with Tags {
    * OBS: Some hints to make autowire happy:
    *  - no `val` declarations in api
    *  - no parameterless `def` definitions in api:
-   *      `def myDef() = 7` instead of `def myDef = 7`
+   * `def myDef() = 7` instead of `def myDef = 7`
    * - passing `None` results in `InvalidInput: null`
    * - default arguments only in interface, NOT in implementation!
    *
@@ -77,17 +78,19 @@ trait AutowireRouter extends InjectedController with Tags {
   // Type safe receiving end of websocket messages from client
   def autowireWebSocket: WebSocket = {
     WebSocket.accept[Message, Message] { requestHeader =>
-      Flow[Message].mapAsync(1) {
-        case BinaryMessage(byteString) =>
-          val pickler       = Unpickle.apply[(Seq[String], Map[String, ByteBuffer])]
-          val (path, args)  = pickler.fromBytes(byteString.asByteBuffer)
-          val methodRequest = autowire.Core.Request(path, args)
-          val futResult     = autowireRouter.apply(methodRequest)
-          futResult.map(result => BinaryMessage(ByteString(result)))
+      Flow[Message]
+        .mapAsync(1) {
+          case BinaryMessage(byteString) =>
+            val pickler       = Unpickle.apply[(Seq[String], Map[String, ByteBuffer])]
+            val (path, args)  = pickler.fromBytes(byteString.asByteBuffer)
+            val methodRequest = autowire.Core.Request(path, args)
+            val futResult     = autowireRouter.apply(methodRequest)
+            futResult.map(result => BinaryMessage(ByteString(result)))
 
-        case other =>
-          throw new IllegalArgumentException("Unexpected Websocket Message: " + other)
-      }
+          case other =>
+            throw new IllegalArgumentException("Unexpected Websocket Message: " + other)
+        }
+        .keepAlive(20.seconds, () => TextMessage("keepalive"))
     }
   }
 }
