@@ -10,7 +10,7 @@ import moleculeadmin.client.app.html.query.datatable.TableElements
 import moleculeadmin.client.app.logic.QueryClient._
 import moleculeadmin.client.app.logic.query.QueryState._
 import moleculeadmin.client.app.logic.query.{Callbacks, KeyEvents, UrlHandling}
-import moleculeadmin.client.queryWireWS
+import moleculeadmin.client.{queryWireAjax, queryWireWS}
 import moleculeadmin.shared.ast.query.Filter
 import moleculeadmin.shared.ops.query.ModelOps
 import org.scalajs.dom.document
@@ -148,12 +148,21 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
     // Push url with new query onto browser history
     pushUrl()
 
+    //    val t = Timer()
+    //    val t0 = t.time0
+
     // Fetch data from db asynchronously
     queryWireWS()
+      //    queryWireAjax()
       .query(db, datalogQuery, rules, l, ll, lll, maxRows.now, columns.now)
       .call().foreach {
 
       case Right(queryResult) =>
+        //        t.delta
+        //        val t1 = t.time1
+        //        val tt = t1 - t0
+        //        println(s"$tt   ${tt - queryResult.queryMs}")
+
         rowCountAll = queryResult.rowCountAll
         rowCount = queryResult.rowCount
 

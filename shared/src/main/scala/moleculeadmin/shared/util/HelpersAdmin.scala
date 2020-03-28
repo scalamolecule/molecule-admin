@@ -55,7 +55,6 @@ trait HelpersAdmin extends Helpers with SpecialNames {
     def isBoolean = scala.util.Try(str.toBoolean).isSuccess
   }
 
-
   case class Timer(txt: String = "time", on: Boolean = true) {
     val time0 = System.currentTimeMillis
     var time1 = time0

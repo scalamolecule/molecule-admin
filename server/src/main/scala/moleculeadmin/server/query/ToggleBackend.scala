@@ -5,7 +5,7 @@ import molecule.api.out10._
 import molecule.facade.{Conn, TxReport}
 
 
-trait ToggleBackend extends QueryBase {
+trait ToggleBackend extends QueryHelpers {
 
   private def save[A, B](
     action: String,

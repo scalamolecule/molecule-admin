@@ -13,7 +13,7 @@ import scala.concurrent.ExecutionContext
 
 @Singleton
 class SchemaController @Inject()(api: Schema)
-  (implicit ec: ExecutionContext) extends AutowireRouter {
+  (implicit ec: ExecutionContext) extends AutowireController {
 
   val autowireRouter = AutowireServer.route[SchemaApi](api)
 

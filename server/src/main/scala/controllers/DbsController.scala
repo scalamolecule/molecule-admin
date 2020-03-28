@@ -13,7 +13,7 @@ import scala.concurrent.ExecutionContext
 
 @Singleton
 class DbsController @Inject()(api: Dbs)
-  (implicit ec: ExecutionContext) extends AutowireRouter {
+  (implicit ec: ExecutionContext) extends AutowireController {
 
   val autowireRouter = AutowireServer.route[DbsApi](api)
 

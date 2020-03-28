@@ -11,8 +11,8 @@ import play.api.mvc.{Action, AnyContent}
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class QueryController @Inject()(api: QueryBackend)
-  (implicit ec: ExecutionContext) extends AutowireRouter {
+class QueryController @Inject()(api: QueryBackend)(implicit ec: ExecutionContext)
+  extends AutowireController {
 
   // Auto-wired actions
   val autowireRouter = AutowireServer.route[QueryApi](api)

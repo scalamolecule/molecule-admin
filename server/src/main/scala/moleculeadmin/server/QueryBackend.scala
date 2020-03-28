@@ -1,9 +1,7 @@
 package moleculeadmin.server
 
-import java.lang.{Long => jLong}
-import java.net.URI
-import java.util.{Date, UUID, List => jList}
-import datomic.{Datom, Peer, Util}
+import java.util.{Date, List => jList}
+import datomic.{Datom, Peer}
 import db.admin.dsl.moleculeAdmin._
 import db.core.dsl.coreTest.Ns
 import molecule.api.Entity
@@ -25,51 +23,6 @@ class QueryBackend extends ToggleBackend {
 
   val log = LoggerFactory.getLogger(getClass)
 
-  // Todo: this works but seems like a hack that would be nice to avoid although
-  //  the impact of a few input variables is negible.
-  // To avoid type combination explosions from multiple inputs of various types
-  // to be transferred with autowire/boopickle, we cast all input variable values
-  // as String on the client and then cast them back to their original type here
-  // and pass them as Object's to Datomic.
-  def cast(pair: (String, String)): Object = pair match {
-    case ("String", v)     => v.asInstanceOf[Object]
-    case ("Int", v)        => v.toInt.asInstanceOf[Object]
-    case ("Long", v)       => v.toLong.asInstanceOf[Object]
-    case ("Float", v)      => v.toDouble.asInstanceOf[Object]
-    case ("Double", v)     => v.toDouble.asInstanceOf[Object]
-    case ("BigInt", v)     => BigInt.apply(v).asInstanceOf[Object]
-    case ("BigDecimal", v) => BigDecimal(v).asInstanceOf[Object]
-    case ("Boolean", v)    => v.toBoolean.asInstanceOf[Object]
-    case ("Date", v)       => str2date(v).asInstanceOf[Object]
-    case ("UUID", v)       => java.util.UUID.fromString(v).asInstanceOf[Object]
-    case ("URI", v)        => new java.net.URI(v).asInstanceOf[Object]
-    case _                 => sys.error("Unexpected input pair to cast")
-  }
-
-  def inputs(lists: Seq[(Int, AnyRef)]): Seq[Object] = {
-    lists.sortBy(_._1).map(_._2).map {
-      case l: Seq[_] => Util.list(l.map {
-        case l2: Seq[_] =>
-          Util.list(l2.map(v => cast(v.asInstanceOf[(String, String)])): _*)
-
-        case pair@(_: String, _: String) =>
-          cast(pair.asInstanceOf[(String, String)])
-
-        case _ => sys.error("Unexpected input values")
-      }: _*)
-
-      case pair@(_: String, _: String) =>
-        cast(pair.asInstanceOf[(String, String)])
-
-      case _ =>
-        sys.error("Unexpected input values")
-    }
-  }
-
-  override def testStr(s: String): String = s.toUpperCase()
-
-  override def testInt(i: Int): Int = i * 10
-
   override def query(
     db: String,
     datalogQuery: String,
@@ -82,6 +35,7 @@ class QueryBackend extends ToggleBackend {
   ): Either[Seq[String], QueryResult] = try {
     log.info("-------------------")
     log.info("Querying datomic...\n" + datalogQuery)
+
     val conn = Conn(base + "/" + db)
     val allInputs = if (rules.isEmpty)
       conn.db +: inputs(l ++ ll ++ lll)
@@ -91,31 +45,31 @@ class QueryBackend extends ToggleBackend {
     val allRows = Peer.q(datalogQuery, allInputs: _*)
     val queryTime = t.delta
     val rowCountAll = allRows.size
-    val rowCount =
-      if (maxRows == -1 || rowCountAll < maxRows) rowCountAll
-      else
-        maxRows
+    val rowCount = if (maxRows == -1 || rowCountAll < maxRows)
+      rowCountAll else maxRows
+
     log.info("Query time : " + thousands(queryTime) + " ms")
     log.info("rowCountAll: " + rowCountAll)
     log.info("maxRows    : " + (if (maxRows == -1) "all" else maxRows))
     log.info("rowCount   : " + rowCount)
-    //    log.info("First 10 records:")
     allRows.asScala.take(10).foreach(row => log.info(row.toString))
-    //    log.info("cols       : " + cols)
 
     if (rowCount == 0)
       Left(Nil)
     else {
       val queryResult = Rows2QueryResult(
         allRows, rowCountAll, rowCount, cols, queryTime).get
+
       log.info("Rows2QueryResult took " + t.ms)
       log.info("Sending data to client... Total server time: " + t.msTotal)
+
       Right(queryResult)
     }
   } catch {
     case t: Throwable =>
       Left(t.getMessage +: t.getStackTrace.toSeq.map(_.toString))
   }
+
 
   override def touchEntity(db: String, eid: Long): List[(String, String)] = {
     val conn = Conn(base + "/" + db)
@@ -133,25 +87,6 @@ class QueryBackend extends ToggleBackend {
       }
   }
 
-  private def formatEmpty(v: Any): String = {
-    val s = v.toString
-    if (s.trim.isEmpty) s"{$s}" else s
-  }
-
-  private def ident(conn: Conn, e: jLong): String =
-    conn.db.entity(e).get(":db/ident").toString
-
-  private def formatValue(
-    conn: Conn,
-    attr: String,
-    v: Any,
-    enumAttrs: Seq[String]
-  ): String = v match {
-    case s: String                            => formatEmpty(s)
-    case e: jLong if enumAttrs.contains(attr) => ident(conn, e)
-    case d: Date                              => date2strLocal(d)
-    case v                                    => formatEmpty(v)
-  }
 
   override def getTxData(
     db: String,
@@ -573,38 +508,6 @@ class QueryBackend extends ToggleBackend {
     }
   }
 
-  def getCaster(tpe: String, enumPrefix: String): String => Any = {
-    tpe match {
-      case "String"               => (v: String) => enumPrefix + v
-      case "Int" | "Long" | "ref" => (v: String) => v.toLong
-      case "Float" | "Double"     => (v: String) => v.toDouble
-      case "Boolean"              => (v: String) => v.toBoolean
-      case "Date"                 => (v: String) => str2date(v)
-      case "UUID"                 => (v: String) => UUID.fromString(v)
-      case "URI"                  => (v: String) => new URI(v)
-      case "BigInt"               => (v: String) => BigInt(v)
-      case "BigDecimal"           => (v: String) => BigDecimal(v)
-    }
-  }
-
-  def getStrCaster(tpe: String, enumPrefix: String): String => Any = {
-    tpe match {
-      case "String"     => (v: String) => enumPrefix + v
-      case "Boolean"    => (v: String) => v.toBoolean
-      case "Date"       => (v: String) => str2date(v)
-      case "UUID"       => (v: String) => UUID.fromString(v)
-      case "URI"        => (v: String) => new URI(v)
-      case "BigInt"     => (v: String) => BigInt(v)
-      case "BigDecimal" => (v: String) => BigDecimal(v)
-    }
-  }
-
-  def getNumCaster(tpe: String): Double => Any = {
-    tpe match {
-      case "Int" | "Long" | "ref" => (v: Double) => v.toLong
-      case "Float" | "Double"     => (v: Double) => v
-    }
-  }
 
   def update[T](
     db: String,
