@@ -25,7 +25,7 @@ object Settings {
     name := "client",
     libraryDependencies ++= Seq(
       "org.scala-js" %%% "scalajs-dom" % "0.9.8",
-      "com.lihaoyi" %%% "scalarx" % "0.4.0",
+      "com.lihaoyi" %%% "scalarx" % "0.4.1",
       "io.github.cquiroz" %%% "scala-java-time" % "2.0.0-RC3"
     )
   )

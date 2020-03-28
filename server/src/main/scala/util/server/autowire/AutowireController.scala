@@ -13,7 +13,7 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 
 
-trait AutowireRouter extends InjectedController with Tags {
+trait AutowireController extends InjectedController with Tags {
 
   /** Instantiate router in inheriting Controller with
    * {{{

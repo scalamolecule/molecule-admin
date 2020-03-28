@@ -14,9 +14,6 @@ trait QueryApi extends BaseApi {
       ListBuffer[DatomTuple] // data datoms
     )
 
-  def testStr(s: String): String = ???
-  def testInt(i: Int): Int = ???
-
   def query(
     db: String,
     datalogQuery: String,
