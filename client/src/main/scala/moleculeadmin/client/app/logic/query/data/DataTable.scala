@@ -152,8 +152,7 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
     //    val t0 = t.time0
 
     // Fetch data from db asynchronously
-    queryWireWS()
-      //    queryWireAjax()
+    queryWireAjax()
       .query(db, datalogQuery, rules, l, ll, lll, maxRows.now, columns.now)
       .call().foreach {
 
@@ -227,7 +226,13 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
     tableBody.innerHTML = ""
     tableFoot.innerHTML = ""
     tableFoot.appendChild(
-      tr(td(colspan := columns.now.size + 1, msg)).render
+      tr(
+        td(
+          colspan := columns.now.size + 1,
+          _sync(0, 6),
+          msg
+        )
+      ).render
     )
   }
 

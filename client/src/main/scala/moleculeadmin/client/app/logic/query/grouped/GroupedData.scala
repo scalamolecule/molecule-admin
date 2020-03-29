@@ -31,6 +31,7 @@ abstract class GroupedData[T](col: Col)(implicit ctx: Ctx.Owner)
 
 
   def rowId(rowIndex: Int) = s"grouped-row-$colIndex-$rowIndex"
+
   def cellId(rowIndex: Int) = s"grouped-cell-$colIndex-$rowIndex"
 
   def sortData(ordering: Int): Unit = {
@@ -67,49 +68,61 @@ abstract class GroupedData[T](col: Col)(implicit ctx: Ctx.Owner)
         val valueArray = qr.str(qr.arrayIndexes(colIndex))
         var rowIndex   = 0
         val lastRow    = actualRowCount
-        val vs1        = new Array[String](lastRow)
+        val vs         = new Array[String](lastRow)
         while (rowIndex < lastRow) {
-          vs1(rowIndex) = valueArray(indexBridge(rowIndex)).get match {
+          vs(rowIndex) = valueArray(indexBridge(rowIndex)).get match {
             case v if v.trim.isEmpty => s"{$v}"
             case v                   => v
           }
           rowIndex += 1
         }
-        vs1.groupBy(identity).mapValues(_.length).toSeq
+        vs.groupBy(identity).mapValues(_.length).toSeq
 
       case "double" if mandatory =>
         val valueArray = qr.num(qr.arrayIndexes(colIndex))
         var rowIndex   = 0
         val lastRow    = actualRowCount
-        val vs1        = new Array[Double](lastRow)
+        val vs         = new Array[Double](lastRow)
         while (rowIndex < lastRow) {
-          vs1(rowIndex) = valueArray(indexBridge(rowIndex)).get
+          vs(rowIndex) = valueArray(indexBridge(rowIndex)).get
           rowIndex += 1
         }
-        vs1.groupBy(identity).mapValues(_.length).toSeq
+        vs.groupBy(identity).mapValues(_.length).toSeq
 
 
       case "string" =>
-        val (nil, vs) = qr.str(qr.arrayIndexes(colIndex)).toList.foldLeft(
-          List.empty[Int], List.empty[String]
-        ) {
-          case ((nil, vs), None) => (nil :+ 1, vs)
-          // todo: format empty string/line shifts
-          case ((nil, vs), Some(v)) if v.trim.isEmpty => (nil, vs :+ s"{$v}")
-          case ((nil, vs), Some(v))                   => (nil, vs :+ v)
+        val valueArray = qr.str(qr.arrayIndexes(colIndex))
+        var empty      = 0
+        var vs         = List.empty[String]
+        var rowIndex   = 0
+        val lastRow    = actualRowCount
+        while (rowIndex < lastRow) {
+          valueArray(indexBridge(rowIndex)) match {
+            case None                      => empty += 1
+            case Some(v) if v.trim.isEmpty => vs = s"{$v}" :: vs
+            case Some(v)                   => vs = v :: vs
+          }
+          rowIndex += 1
         }
-        ("-", nil.length) +: vs.groupBy(identity).mapValues(_.length).toSeq
+        ("-", empty) +: vs.groupBy(identity).mapValues(_.length).toSeq
 
       case "double" =>
-        val (nil, vs) = qr.num(qr.arrayIndexes(colIndex)).toList.foldLeft(
-          List.empty[Int], List.empty[Double]
-        ) {
-          case ((nil, vs), None)    => (nil :+ 1, vs)
-          case ((nil, vs), Some(v)) => (nil, vs :+ v)
+        val valueArray = qr.num(qr.arrayIndexes(colIndex))
+        var empty      = 0
+        var vs         = List.empty[Double]
+        var rowIndex   = 0
+        val lastRow    = actualRowCount
+        while (rowIndex < lastRow) {
+          valueArray(indexBridge(rowIndex)) match {
+            case None    => empty += 1
+            case Some(v) => vs = v :: vs
+          }
+          rowIndex += 1
         }
-        ("-", nil.length) +: vs.groupBy(identity).mapValues(_.length).toSeq
+        ("-", empty) +: vs.groupBy(identity).mapValues(_.length).toSeq
 
-      case _ => Nil
+      case tpe =>
+        throw new IllegalStateException("Unsupported type: " + tpe)
     }).asInstanceOf[Seq[(T, Int)]]
   }
 }

@@ -183,9 +183,13 @@ trait AppElements {
     )
   }
 
-  def _sync(leftMarg: Int = 0): JsDom.TypedTag[Element] =
-    i(cls := "fa fa-sync fa-spin", color := "#ff8137",
-      if (leftMarg > 0) marginLeft := leftMarg else ())
+  def _sync(leftMargin: Int = 0, rightMargin: Int = 0): JsDom.TypedTag[Element] =
+    i(
+      cls := "fa fa-sync fa-spin",
+      color := "#ff8137",
+      if (leftMargin > 0) marginLeft := leftMargin else (),
+      if (rightMargin > 0) marginRight := rightMargin else (),
+    )
 
   def _btn2(labelStr: String, id1: String, marked: String, onclick1: () => Unit): JsDom.TypedTag[Div] = div(
     cls := "btn btn-light btn-sm no2" + marked,
