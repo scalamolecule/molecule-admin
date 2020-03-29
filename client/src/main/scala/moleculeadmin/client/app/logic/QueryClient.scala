@@ -32,7 +32,7 @@ object QueryClient
 
 
   @JSExport
-  def load(db0: String): Unit = queryWireWS().loadMetaData(db0).call().map {
+  def load(db0: String): Unit = queryWireAjax().loadMetaData(db0).call().map {
     pageMetaData =>
 
       val dbs = init(db0, pageMetaData)

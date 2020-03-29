@@ -36,9 +36,6 @@ case class AutowireWebSocket[Api](ctx: String) {
     }
     socket.onclose = { (e: CloseEvent) =>
       println("WebSocket closed")
-      //      println("WebSocket closed. Reason   : " + e.reason)
-      //      println("WebSocket closed. Was clean: " + e.wasClean)
-      //      println("WebSocket closed. Code     : " + e.code)
     }
     socket
   }
