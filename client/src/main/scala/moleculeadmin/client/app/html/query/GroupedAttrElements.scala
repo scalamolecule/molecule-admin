@@ -92,8 +92,7 @@ trait GroupedAttrElements extends SubMenuElements with HeadElements {
 
   def _sort(colType: String, dir: String): TypedTag[Span] =
     span(
-      if (colType == "double") float.right else float.left,
-      marginTop := -1,
+      if (colType == "double") float.right else (),
       span(cls := s"oi oi-caret-$dir", verticalAlign.middle,
         paddingLeft := 0,
       ),
@@ -107,7 +106,7 @@ trait GroupedAttrElements extends SubMenuElements with HeadElements {
       cls := s"oi oi-elevator",
       if (colType == "double") float.right else (),
       color := "#bbbbbb",
-      marginTop := 2,
+      marginTop := 1,
     )
 
   def _rowStr(
