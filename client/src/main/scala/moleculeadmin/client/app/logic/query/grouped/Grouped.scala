@@ -15,13 +15,13 @@ import scala.scalajs.js.timers.setTimeout
 
 
 case class Grouped[T](col: Col)
-  (implicit ctx: Ctx.Owner) extends GroupedUpdate[T](col)
+                     (implicit ctx: Ctx.Owner) extends GroupedUpdate[T](col)
   with GroupedAttrElements with KeyEvents with FilterFactory with TypeValidation {
 
   // Local caches
 
   // Selected triples of rowIndex/value/count
-  var selected = Seq.empty[(Int, String, Int)]
+  var selected = Seq.empty[(Int, Option[T], Int)]
 
   // Current ordering of grouped data
   var curOrdering = 1
@@ -59,7 +59,8 @@ case class Grouped[T](col: Col)
 
   def populate(ordering: Int): Unit = {
     curOrdering = ordering
-    sortData(ordering)
+    //    sortData(ordering)
+    sortData2(ordering)
     val count   = groupedData.length
     val headRow = _headRow(colType, count, sort, ordering)
 
@@ -85,6 +86,10 @@ case class Grouped[T](col: Col)
     last: Int
   ): Unit = {
     var rowIndex = first
+
+    println("---------- groupedData")
+    groupedData foreach println
+
     while (rowIndex < last) {
       groupedTableBody.appendChild(
         rowMaker(rowIndex, groupedData(rowIndex))
@@ -99,53 +104,45 @@ case class Grouped[T](col: Col)
   }
 
   def setFilter(): Unit = {
-    val filterExpr = if (attrType == "String") {
-      if (selected.length == 1 && selected.head._2 == "-")
-        "-"
-      else
-        "/" + selected.map(_._2).mkString("\n/")
-    } else {
-      selected.map(_._2).mkString("\n")
-    }
+    println("--- selected: " + selected)
+    //    val filterExpr = (if (colType == "string") {
+    //      selected.map {
+    //        case (_, None, _)                    => "-"
+    //        case (_, Some(v), _) if attrType == "String" => s"/$v" // regex
+    //        case (_, Some(v), _)                         => v
+    ////        case (_, `none`, _)                    => "-"
+    ////        case (_, v, _) if attrType == "String" => s"/$v" // regex
+    ////        case (_, v, _)                         => v
+    //      }
+    //    } else {
+    //      selected.map(_._2)
+    //    }).mkString("\n")
+
+    val filterExpr = selected.map {
+      case (_, None, _)                            => "-"
+      case (_, Some(v), _) if attrType == "String" => s"/$v" // regex
+      case (_, Some(v), _)                         => v
+    }.mkString("\n")
+
+    println("filterExpr:\n" + filterExpr)
+    println("-------")
 
     val filter = createFilter(col, filterExpr, splitComma = false).get
     filters() = filters.now.filterNot(_._1 == colIndex) + (colIndex -> filter)
   }
 
-  def toggleOn(rowIndex: Int, curV: String, count: Int): Unit = {
-    document.getElementById(rowId(rowIndex))
-      .setAttribute("class", "selected")
+  def toggleOn(rowIndex: Int, curVopt: Option[T], count: Int): Unit = {
+    document.getElementById(rowId(rowIndex)).setAttribute("class", "selected")
     spanOfSelected.innerHTML = ""
-    if (selected.map(_._2).contains("-")) {
-      selected = selected.flatMap {
-        case (rowIndex1, "-", _) =>
-          // Un-mark grouped value for None value
-          document.getElementById(rowId(rowIndex1))
-            .removeAttribute("class")
-          None
-        case s                   => Some(s)
-      } :+ (rowIndex, curV, count)
-    } else if (curV == "-" && selected.nonEmpty) {
-      // Un-mark previous grouped when applying None
-      selected.foreach {
-        case (rowIndex1, _, _) =>
-          document.getElementById(rowId(rowIndex1))
-            .removeAttribute("class")
-      }
-      // Mark None only
-      selected = Seq((rowIndex, curV, count))
-    } else {
-      selected = selected :+ (rowIndex, curV, count)
-    }
+    selected = selected :+ (rowIndex, curVopt, count)
     showGrouped()
     setFilter()
   }
 
-  def toggleOff(rowIndex: Int, curV: String, count: Int): Unit = {
-    document.getElementById(rowId(rowIndex))
-      .removeAttribute("class")
+  def toggleOff(rowIndex: Int, curVopt: Option[T], count: Int): Unit = {
+    document.getElementById(rowId(rowIndex)).removeAttribute("class")
     spanOfSelected.innerHTML = ""
-    selected = selected.filterNot(_ == (rowIndex, curV, count))
+    selected = selected.filterNot(_ == (rowIndex, curVopt, count))
     if (selected.isEmpty) {
       filters() = filters.now - colIndex
     } else {
@@ -154,32 +151,50 @@ case class Grouped[T](col: Col)
     }
   }
 
-  val toggle = (rowIndex: Int, curV: String, count: Int) => () =>
-    if (selected.contains((rowIndex, curV, count)))
-      toggleOff(rowIndex, curV, count)
+  val toggle = (rowIndex: Int, curVopt: Option[T], count: Int) => () =>
+    if (selected.contains((rowIndex, curVopt, count)))
+      toggleOff(rowIndex, curVopt, count)
     else
-      toggleOn(rowIndex, curV, count)
+      toggleOn(rowIndex, curVopt, count)
 
 
   val update = updateLambda(document.getElementById("tableBody").childNodes)
 
-  val rowMaker: (Int, (String, Int)) => TableRow = {
+  val rowMaker: (Int, (Option[T], Int)) => TableRow = {
     if (colType == "double") {
-      (rowIndex: Int, vc: (String, Int)) =>
-        _rowNum(rowId(rowIndex), cellId(rowIndex), rowIndex, vc._1, vc._2,
-          update(rowIndex), toggle(rowIndex, vc._1, vc._2))
+      (rowIndex: Int, vc: (Option[T], Int)) =>
+        _rowNum(
+          rowId(rowIndex),
+          cellId(rowIndex),
+          rowIndex,
+          vc._1.fold("__none__")(_.toString),
+          vc._2,
+          update(rowIndex),
+          toggle(rowIndex, vc._1, vc._2)
+        )
     } else {
-      attrType match {
-        case "String" =>
-          (rowIndex: Int, vc: (String, Int)) =>
-            _rowStr(rowId(rowIndex), cellId(rowIndex), rowIndex, vc._1, vc._2,
-              update(rowIndex), toggle(rowIndex, vc._1, vc._2))
-
-        case "Date" =>
-          (rowIndex: Int, vc: (String, Int)) =>
-            _rowStr(rowId(rowIndex), cellId(rowIndex), rowIndex, vc._1, vc._2,
-              update(rowIndex), toggle(rowIndex, vc._1, vc._2))
-      }
+      // todo special case for Date and other types?
+      (rowIndex: Int, vc: (Option[T], Int)) =>
+        _rowStr(
+          rowId(rowIndex),
+          cellId(rowIndex),
+          rowIndex,
+          vc._1.fold("__none__")(_.toString),
+          vc._2,
+          update(rowIndex),
+          toggle(rowIndex, vc._1, vc._2)
+        )
+      //      attrType match {
+      //        case "String" =>
+      //          (rowIndex: Int, vc: (String, Int)) =>
+      //            _rowStr(rowId(rowIndex), cellId(rowIndex), rowIndex, vc._1, vc._2,
+      //              update(rowIndex), toggle(rowIndex, vc._1, vc._2))
+      //
+      //        case "Date" =>
+      //          (rowIndex: Int, vc: (String, Int)) =>
+      //            _rowStr(rowId(rowIndex), cellId(rowIndex), rowIndex, vc._1, vc._2,
+      //              update(rowIndex), toggle(rowIndex, vc._1, vc._2))
+      //      }
     }
   }
 }

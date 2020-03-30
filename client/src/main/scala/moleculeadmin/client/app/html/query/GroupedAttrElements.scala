@@ -23,10 +23,10 @@ trait GroupedAttrElements extends SubMenuElements with HeadElements {
       )
     )
 
-  def _groupedSelected(
+  def _groupedSelected[T](
     colType: String,
-    vs: Seq[(Int, String, Int)],
-    toggleOff: (Int, String, Int) => Unit
+    vs: Seq[(Int, scala.Option[T], Int)],
+    toggleOff: (Int, scala.Option[T], Int) => Unit
   ): Table = {
     table(
       cls := "tableGroupedSelected",
@@ -45,7 +45,7 @@ trait GroupedAttrElements extends SubMenuElements with HeadElements {
           ),
           td(
             if (colType == "double") color := "#49a523" else (),
-            v
+            v.fold("__none__")(_.toString)
           ),
           td(c)
         )
