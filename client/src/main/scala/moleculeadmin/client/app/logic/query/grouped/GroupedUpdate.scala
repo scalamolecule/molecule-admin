@@ -23,14 +23,11 @@ abstract class GroupedUpdate[T](col: Col)(implicit ctx: Ctx.Owner)
   def updateLambda(tableRows: NodeList): Int => () => Unit = {
     rowIndex: Int =>
       () => {
-        //        val (oldStr, count) = groupedData(rowIndex)
         val (oldVopt, count) = groupedData(rowIndex)
         val groupedCell      = document.getElementById(cellId(rowIndex))
           .asInstanceOf[HTMLInputElement]
         val newStr: String   = _html2str(groupedCell.innerHTML)
         val newVopt          = getNewVopt(newStr: String)
-        //        val oldVopt         = getOldVopt(newStr: String)
-        //        val oldStr         = oldVopt.fold("")(_.toString) // todo?
         val oldStr           = oldVopt.fold(none)(_.toString) // todo?
 
         if (editCellId.nonEmpty

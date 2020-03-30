@@ -105,23 +105,9 @@ case class Grouped[T](col: Col)
 
   def setFilter(): Unit = {
     println("--- selected: " + selected)
-    //    val filterExpr = (if (colType == "string") {
-    //      selected.map {
-    //        case (_, None, _)                    => "-"
-    //        case (_, Some(v), _) if attrType == "String" => s"/$v" // regex
-    //        case (_, Some(v), _)                         => v
-    ////        case (_, `none`, _)                    => "-"
-    ////        case (_, v, _) if attrType == "String" => s"/$v" // regex
-    ////        case (_, v, _)                         => v
-    //      }
-    //    } else {
-    //      selected.map(_._2)
-    //    }).mkString("\n")
-
     val filterExpr = selected.map {
-      case (_, None, _)                            => "-"
-      case (_, Some(v), _) if attrType == "String" => s"/$v" // regex
-      case (_, Some(v), _)                         => v
+      case (_, None, _)    => "-"
+      case (_, Some(v), _) => v
     }.mkString("\n")
 
     println("filterExpr:\n" + filterExpr)
@@ -184,17 +170,6 @@ case class Grouped[T](col: Col)
           update(rowIndex),
           toggle(rowIndex, vc._1, vc._2)
         )
-      //      attrType match {
-      //        case "String" =>
-      //          (rowIndex: Int, vc: (String, Int)) =>
-      //            _rowStr(rowId(rowIndex), cellId(rowIndex), rowIndex, vc._1, vc._2,
-      //              update(rowIndex), toggle(rowIndex, vc._1, vc._2))
-      //
-      //        case "Date" =>
-      //          (rowIndex: Int, vc: (String, Int)) =>
-      //            _rowStr(rowId(rowIndex), cellId(rowIndex), rowIndex, vc._1, vc._2,
-      //              update(rowIndex), toggle(rowIndex, vc._1, vc._2))
-      //      }
     }
   }
 }
