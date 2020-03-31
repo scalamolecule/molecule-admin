@@ -5,20 +5,6 @@ import moleculeadmin.shared.ops.query.data.FilterFactory
 import utest._
 
 
-/*
-  match
-  /regex
-  i/regex case insensitive
-  !inverted
-  !/inverted regex
-  !i/inverted case insensitive regex
-  v => // syntax indicating this is a Scala expression to be compiled!
-  v => v match {
-    case "asc"  => 42
-    case "desc" => 43
-  }
-*/
-
 object FilterCreate extends TestSuite with FilterFactory {
 
   def mkFilter(
@@ -118,10 +104,12 @@ object FilterCreate extends TestSuite with FilterFactory {
       string("p\n-") ==> Seq(Some("Apple"), None)
       string("!p\n-") ==> Seq(Some("Banana"), Some("Citrus"), None)
 
-      // Empty spaces
+
+      // Empty spaces ................
+
       val strings2 = Seq(Some("a"), Some(""), Some(" "), Some("\n"), Some(" \n "), Some("a\nb"))
       def string2(filterExpr: String) = testStringExpr(strings2, filterExpr, "String")
-      val noFilter = strings2
+      val noFilter2 = strings2
 
       // Needle matches multiple lines (OR logic)
       string2("a") ==> Seq(Some("a"), Some("a\nb"))
@@ -139,8 +127,9 @@ object FilterCreate extends TestSuite with FilterFactory {
       string2("{ }") ==> Seq(Some(" "))
 
       // Matching newline not supported
-      string2("\n") ==> noFilter
+      string2("\n") ==> noFilter2
     }
+
 
     test("Date") {
       val a        = Some("2001-01-01")
@@ -248,6 +237,7 @@ object FilterCreate extends TestSuite with FilterFactory {
       date("2002-02-01--2002-02-02 02:02:02") ==> Seq(c, d, e, f, g)
     }
 
+
     test("Boolean") {
       val bools    = Seq(Some("true"), Some("false"), None)
       val noFilter = bools
@@ -271,6 +261,7 @@ object FilterCreate extends TestSuite with FilterFactory {
       boolean("f") ==> Seq(Some("false"))
       boolean("0") ==> Seq(Some("false"))
     }
+
 
     test("Int, Long, ref") {
       val numbers  = Seq[Double](-10, -3, -2, -1, 0, 1, 2, 3, 10).map(Some(_))
@@ -333,6 +324,7 @@ object FilterCreate extends TestSuite with FilterFactory {
       number("-3--1") ==> Seq(Some(-3), Some(-2), Some(-1))
     }
 
+
     test("Float, Double") {
       val decimals = Seq[Double](-10.1, -3.1, -2.1, -1.1, 0, 1.1, 2.1, 3.1, 10.1).map(Some(_))
       val noFilter = decimals
@@ -380,6 +372,7 @@ object FilterCreate extends TestSuite with FilterFactory {
       decimal("-3.1--1.1") ==> Seq(Some(-3.1), Some(-2.1), Some(-1.1))
     }
 
+
     test("BigInt") {
       val a = Some("-10")
       val b = Some("-3")
@@ -423,6 +416,7 @@ object FilterCreate extends TestSuite with FilterFactory {
       bigInt("-3 - -1") ==> Seq(b, c, d)
       bigInt("-3--1") ==> Seq(b, c, d)
     }
+
 
     test("BigDecimal") {
       val a = Some("-10.1")
