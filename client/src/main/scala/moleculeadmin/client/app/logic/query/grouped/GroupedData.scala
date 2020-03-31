@@ -41,7 +41,7 @@ abstract class GroupedData[T](col: Col)(implicit ctx: Ctx.Owner)
 
   def cellId(rowIndex: Int) = s"grouped-cell-$colIndex-$rowIndex"
 
-  def sortData2(ordering: Int): Unit = {
+  def sortData(ordering: Int): Unit = {
     groupedData = (if (colType == "double") {
       val vs = if (countEmpty > 0) (None, countEmpty) +: doubles else doubles
       ordering match {
