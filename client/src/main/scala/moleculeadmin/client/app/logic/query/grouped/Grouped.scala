@@ -59,8 +59,7 @@ case class Grouped[T](col: Col)
 
   def populate(ordering: Int): Unit = {
     curOrdering = ordering
-    //    sortData(ordering)
-    sortData2(ordering)
+    sortData(ordering)
     val count   = groupedData.length
     val headRow = _headRow(colType, count, sort, ordering)
 
@@ -86,10 +85,6 @@ case class Grouped[T](col: Col)
     last: Int
   ): Unit = {
     var rowIndex = first
-
-    println("---------- groupedData")
-    groupedData foreach println
-
     while (rowIndex < last) {
       groupedTableBody.appendChild(
         rowMaker(rowIndex, groupedData(rowIndex))
@@ -104,15 +99,10 @@ case class Grouped[T](col: Col)
   }
 
   def setFilter(): Unit = {
-    println("--- selected: " + selected)
     val filterExpr = selected.map {
       case (_, None, _)    => "-"
       case (_, Some(v), _) => v
     }.mkString("\n")
-
-    println("filterExpr:\n" + filterExpr)
-    println("-------")
-
     val filter = createFilter(col, filterExpr, splitComma = false).get
     filters() = filters.now.filterNot(_._1 == colIndex) + (colIndex -> filter)
   }

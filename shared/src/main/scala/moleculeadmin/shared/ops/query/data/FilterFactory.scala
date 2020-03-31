@@ -14,6 +14,7 @@ trait FilterFactory extends RegexMatching with DateHandling {
       case ""                  => None // no filter
       case "-"                 => Some(_.isEmpty)
       case "+"                 => Some(_.isDefined)
+      case r"\{( *)$spaces\}"  => Some(_.fold(false)(s => s.matches(spaces)))
       case r"/(.*?)$regex/?"   => Some(_.fold(false)(s => s.matches(regex)))
       case r"i/(.*?)$regex/?"  => Some(_.fold(false)(s =>
         Pattern.compile(regex, Pattern.CASE_INSENSITIVE).matcher(s).matches()
@@ -231,17 +232,18 @@ trait FilterFactory extends RegexMatching with DateHandling {
     predicateFactory: String => Option[Option[T] => Boolean],
     splitComma: Boolean
   ): Option[Option[T] => Boolean] = {
-    val predicates: Seq[Option[T] => Boolean] = if (splitComma)
-      (for {
-        lines <- filterExpr.split('\n')
-        token <- lines.split(',')
-        predicate <- predicateFactory(token)
-      } yield predicate).toList
-    else
-      (for {
-        token <- filterExpr.split('\n')
-        predicate <- predicateFactory(token)
-      } yield predicate).toList
+    val predicates: Seq[Option[T] => Boolean] =
+      if (splitComma)
+        (for {
+          lines <- filterExpr.split('\n')
+          token <- lines.split(',')
+          predicate <- predicateFactory(token)
+        } yield predicate).toList
+      else
+        (for {
+          token <- filterExpr.split('\n')
+          predicate <- predicateFactory(token)
+        } yield predicate).toList
 
     predicates.length match {
       case 0 => None
@@ -268,10 +270,12 @@ trait FilterFactory extends RegexMatching with DateHandling {
       predicateFactory: String => Option[Option[T] => Boolean]
     ): Option[Filter[T]] = {
       mergedPredicate(filterExpr, predicateFactory, splitComma) match {
-        case None             => Option.empty[Filter[T]]
-        case Some(mergedPred) => Some(
-          Filter[T](colIndex, colType, aggrType.nonEmpty, filterExpr, mergedPred)
-        )
+        case None             =>
+          Option.empty[Filter[T]]
+        case Some(mergedPred) =>
+          Some(
+            Filter[T](colIndex, colType, aggrType.nonEmpty, filterExpr, mergedPred)
+          )
       }
     }
 
@@ -282,7 +286,8 @@ trait FilterFactory extends RegexMatching with DateHandling {
           case "Boolean"    => filter[String](predBoolean)
           case "BigInt"     => filter[String](predBigInt)
           case "BigDecimal" => filter[String](predBigDecimal)
-          case _            => filter[String](predString)
+          case _            =>
+            filter[String](predString)
         }
         case "double" | "listDouble" => attrType match {
           case "datom"                =>

@@ -48,7 +48,8 @@ object FilterCreate extends TestSuite with FilterFactory {
     test("String") {
       val strings  = Seq(Some("Apple"), Some("Banana"), Some("Citrus"), None)
       val noFilter = strings
-      def string(filterExpr: String) = testStringExpr(strings, filterExpr, "String")
+      def string(filterExpr: String): Seq[Option[String]] =
+        testStringExpr(strings, filterExpr, "String")
 
       // No filtering
       string("") ==> noFilter
@@ -116,6 +117,29 @@ object FilterCreate extends TestSuite with FilterFactory {
       string("-\np") ==> Seq(Some("Apple"), None)
       string("p\n-") ==> Seq(Some("Apple"), None)
       string("!p\n-") ==> Seq(Some("Banana"), Some("Citrus"), None)
+
+      // Empty spaces
+      val strings2 = Seq(Some("a"), Some(""), Some(" "), Some("\n"), Some(" \n "), Some("a\nb"))
+      def string2(filterExpr: String) = testStringExpr(strings2, filterExpr, "String")
+      val noFilter = strings2
+
+      // Needle matches multiple lines (OR logic)
+      string2("a") ==> Seq(Some("a"), Some("a\nb"))
+
+      // Match with AND logic to enforce all lines matching needle
+      string2("/.*a.*/") ==> Seq(Some("a"))
+
+
+      // Likewise, multi-line needles match each newline value of needle
+      string2("a\nb") ==> Seq(Some("a"), Some("a\nb"))
+      // Empty "sub-needle" is discarded (only matching `a`)
+      string2("a\n") ==> Seq(Some("a"), Some("a\nb"))
+
+      string2("{}") ==> Seq(Some(""))
+      string2("{ }") ==> Seq(Some(" "))
+
+      // Matching newline not supported
+      string2("\n") ==> noFilter
     }
 
     test("Date") {
@@ -367,7 +391,7 @@ object FilterCreate extends TestSuite with FilterFactory {
       val h = Some("3")
       val i = Some("10")
 
-      val bigInts = Seq[Option[String]](a, b, c, d, e, f, g, h, i)
+      val bigInts  = Seq[Option[String]](a, b, c, d, e, f, g, h, i)
       val noFilter = bigInts
       def bigInt(filterExpr: String) = testStringExpr(bigInts, filterExpr, "BigInt")
 
@@ -412,7 +436,7 @@ object FilterCreate extends TestSuite with FilterFactory {
       val i = Some("10.1")
 
       val bigDecimals = Seq[Option[String]](a, b, c, d, e, f, g, h, i)
-      val noFilter = bigDecimals
+      val noFilter    = bigDecimals
       def bigDecimal(filterExpr: String) = testStringExpr(bigDecimals, filterExpr, "BigDecimal")
 
       bigDecimal(">2") ==> Seq(g, h, i)
