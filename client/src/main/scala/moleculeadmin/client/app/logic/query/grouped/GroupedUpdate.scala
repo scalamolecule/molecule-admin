@@ -30,10 +30,12 @@ abstract class GroupedUpdate[T](col: Col)(implicit ctx: Ctx.Owner)
   def updateLambda(tableRows: NodeList): Int => () => Unit = {
     rowIndex: Int =>
       () => {
-        val (oldTopt, count) = groupedData(rowIndex)
-        val groupedCell      = document.getElementById(cellId(rowIndex))
+        val (oldGroupedOpt, count) = groupedData(rowIndex)
+        val oldTopt                =
+          oldGroupedOpt.map(t => _html2str(t.toString)).asInstanceOf[Option[T]]
+        val groupedCell            = document.getElementById(cellId(rowIndex))
           .asInstanceOf[HTMLInputElement]
-        val newGroupedStrRaw = groupedCell.innerHTML.trim
+        val newGroupedStrRaw       = groupedCell.innerHTML.trim
 
         val (isValue, newGroupedStr, newTableStr) = newGroupedStrRaw match {
           case "" | `none` => (false, none, "")
@@ -43,7 +45,7 @@ abstract class GroupedUpdate[T](col: Col)(implicit ctx: Ctx.Owner)
         val newTopt                      = getNewTopt(!isValue, newGroupedStr)
         val (oldGroupedStr, oldTableStr) = oldTopt match {
           case None    => (none, "")
-          case Some(v) => (v.toString, v.toString)
+          case Some(v) => (v.toString, _html2str(v.toString))
         }
 
         if (editCellId.nonEmpty
