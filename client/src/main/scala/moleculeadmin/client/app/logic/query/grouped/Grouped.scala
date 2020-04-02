@@ -65,13 +65,14 @@ case class Grouped[T](col: Col)
 
     groupedTableBody.innerHTML = ""
     groupedTableBody.appendChild(headRow)
+    val previewCount = 20
 
-    if (count > 10) {
+    if (count > previewCount) {
       // Render first 10 immediately
-      appendRows(groupedTableBody, 0, 10)
+      appendRows(groupedTableBody, 0, previewCount)
       // Render the rest afterwards in the background
       setTimeout(200) {
-        appendRows(groupedTableBody, 10, count)
+        appendRows(groupedTableBody, previewCount, count)
       }
     } else {
       appendRows(groupedTableBody, 0, count)
