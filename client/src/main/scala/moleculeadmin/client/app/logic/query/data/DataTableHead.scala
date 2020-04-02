@@ -28,7 +28,7 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
     col: Col,
     attrResolver: ResolveAttrs
   ): JsDom.TypedTag[TableCell] = {
-    val Col(colIndex, _, nsAlias, nsFull, attr, _, colType, card, _, _,
+    val Col(colIndex, _, nsAlias, nsFull, attr, attrType, colType, card, _, _,
     aggrType, expr, sortDir, sortPos, _) = col
 
     val postfix         = attrResolver.postfix(col)
@@ -152,7 +152,7 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
     col: Col,
     attrResolver: ResolveAttrs
   ): JsDom.TypedTag[TableCell] = {
-    val Col(colIndex, _, _, _, _, _,
+    val Col(colIndex, _, _, _, _, attrType,
     colType, card, opt, _, _, attrExpr, _, _, _) = col
 
     val filterId = "filter-" + colIndex
@@ -201,7 +201,9 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
         if (filterExpr.isEmpty) {
           filters() = filters.now - colIndex
         } else {
-          createFilter(col, filterExpr, curStars, curFlags, curChecks) match {
+          createFilter(
+            col, filterExpr, curStars, curFlags, curChecks, attrType != "String"
+          ) match {
             case Some(filter) => filters() = filters.now + (colIndex -> filter)
             case None         => filters() = filters.now - colIndex
           }
