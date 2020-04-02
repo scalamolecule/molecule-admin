@@ -60,7 +60,9 @@ case class Grouped[T](col: Col)
   def populate(ordering: Int): Unit = {
     curOrdering = ordering
     sortData(ordering)
-    val count   = groupedData.length
+    val countAll   = groupedData.length
+    // Avoid out-of-memory rendering more than 25000 rows in group table
+    val count   = countAll.min(25000)
     val headRow = _headRow(colType, count, sort, ordering)
 
     groupedTableBody.innerHTML = ""

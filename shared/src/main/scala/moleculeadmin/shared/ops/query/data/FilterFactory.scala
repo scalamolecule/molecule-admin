@@ -15,9 +15,7 @@ trait FilterFactory extends RegexMatching with DateHandling {
       case "-"                 => Some(_.isEmpty)
       case "+"                 => Some(_.isDefined)
       case r"\{( *)$spaces\}"  => Some(_.fold(false)(s => s.matches(spaces)))
-      case r"/(.*)$regex"   =>
-        println(s"regex: `$regex`")
-        Some(_.fold(false)(s => s.matches(regex)))
+      case r"/(.*)$regex"   => Some(_.fold(false)(s => s.matches(regex)))
       case r"i/(.*)$regex"  => Some(_.fold(false)(s =>
         Pattern.compile(regex, Pattern.CASE_INSENSITIVE).matcher(s).matches()
       ))
@@ -33,9 +31,7 @@ trait FilterFactory extends RegexMatching with DateHandling {
       case r">(.*)$needle"     => Some(_.fold(false)(s => s > needle))
       case r"<=(.*)$needle"    => Some(_.fold(false)(s => s <= needle))
       case r"<(.*)$needle"     => Some(_.fold(false)(s => s < needle))
-      case needle              =>
-        println(s"needle: `$needle`")
-        Some(_.fold(false)(s => s.contains(needle)))
+      case needle              => Some(_.fold(false)(s => s.contains(needle)))
     }
   }
 
