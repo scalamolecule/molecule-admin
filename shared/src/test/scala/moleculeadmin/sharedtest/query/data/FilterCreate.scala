@@ -56,11 +56,8 @@ object FilterCreate extends TestSuite with FilterFactory {
       string("!a") ==> Seq(Some("Apple"), Some("Citrus"))
       string("!A") ==> Seq(Some("Banana"), Some("Citrus"))
 
-      // Regex (case-sensitive)
-      string("/.*a.*/") ==> Seq(Some("Banana")) // no Apple
-
-      // Last '/' can be omitted
-      string("/.*a.*") ==> Seq(Some("Banana"))
+      // Regex is case-sensitive and doesn't need to be closed with '/'
+      string("/.*a.*") ==> Seq(Some("Banana")) // no Apple
       string("/B.*") ==> Seq(Some("Banana"))
       string("/.*a") ==> Seq(Some("Banana"))
 
@@ -115,7 +112,7 @@ object FilterCreate extends TestSuite with FilterFactory {
       string2("a") ==> Seq(Some("a"), Some("a\nb"))
 
       // Match with AND logic to enforce all lines matching needle
-      string2("/.*a.*/") ==> Seq(Some("a"))
+      string2("/.*a.*") ==> Seq(Some("a"))
 
 
       // Likewise, multi-line needles match each newline value of needle
