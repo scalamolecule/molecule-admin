@@ -78,9 +78,9 @@ case class ScalaFiddle[TransferType](scalaCode: String) {
       data = scalaCode
     ).map { res =>
       val compileTime = System.currentTimeMillis() - startTime
-      println(s"Compilation took $compileTime ms")
       println(s"----- Scala code: -----")
       println(numbered(scalaCode))
+      println(s"Compilation took $compileTime ms")
 
       val compResponse = readCompilationResponse(res.responseText)
       val jsCode       = compResponse.jsCode.getOrElse("No js code...")

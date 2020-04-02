@@ -1,5 +1,6 @@
 package moleculeadmin.client.app.html
 
+import molecule.util.RegexMatching
 import org.scalajs.dom.{document, window}
 import org.scalajs.dom.html.{Div, Element, LI, Span, TableCell, TableRow, UList}
 import scalatags.JsDom
@@ -7,7 +8,7 @@ import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
 
 
-trait AppElements {
+trait AppElements extends RegexMatching {
 
   def _containerFluid: JsDom.TypedTag[Div] = div(cls := "container-fluid")
   def _containerFluid2: JsDom.TypedTag[Div] = _containerFluid(paddingLeft := 0)
@@ -28,8 +29,9 @@ trait AppElements {
 
   def _formatEmpty(s: String): String = if (s.trim.isEmpty) s"{$s}" else s
 
-  def _optStr2frags(optStr: Option[String]): Seq[Frag] =
+  def _optStr2frags(optStr: Option[String]): Seq[Frag] = {
     optStr.fold(Seq.empty[Frag])(_str2frags)
+  }
 
   def _str2frags(s0: String): Seq[Frag] = {
     // All extra spaces as &nbsp;
@@ -42,7 +44,12 @@ trait AppElements {
     } else if (s0.trim.isEmpty) {
       Seq(s"{$s}")
     } else {
-      Seq(s)
+      if (s.head == ' ') {
+        Seq(s match {
+          case r"^( +?)$sp(.*)$txt" => sp.replaceAllLiterally(" ", "\u00a0") + txt
+          case other                => other
+        })
+      } else Seq(s)
     }
   }
 
