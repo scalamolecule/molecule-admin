@@ -200,7 +200,7 @@ table.tableGrouped {
 }
 table.tableGrouped tbody {
     display: block;
-    max-height: 178px;
+    max-height: 335px;
     overflow-y: scroll;
 }
 table.tableGrouped tr.selected {
