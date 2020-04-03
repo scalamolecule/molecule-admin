@@ -106,29 +106,31 @@ case class UpdateCardMany[T](
 
     def redrawCell(): Node = {
       cell.innerHTML = ""
-      val items = if (cellType == "ref")
-        newStrs.map(_.toLong).sorted.map(ref =>
-          li(
+      val vs: Seq[Frag] = if (cellType == "ref")
+        newStrs.map(_.toLong).sorted.map { ref =>
+          span(
             cls := Rx(if (ref == curEntity()) "eidChosen" else "eid"),
             ref,
             onmouseover := { () => curEntity() = ref }
           )
-        )
+        }
       else if (isNum)
-        newStrs.map(_.toDouble).sorted.map(li(_))
+        newStrs.map(_.toDouble).sorted.map(n => n: Frag)
       else if (attrType == "String")
-        newStrs.sorted.map(s => li(_str2frags(s)))
+        newStrs.sorted.map { s =>
+          span(_str2frags(s))
+        }
       else
-        newStrs.sorted.map(li(_))
+        newStrs.sorted.map(n => n: Frag)
 
-      cell.appendChild(ul(items).render)
+      vs.foreach { v =>
+        cell.appendChild(v.render)
+        cell.appendChild(br.render)
+      }
+      cell
     }
 
-    if (editCellId.nonEmpty
-      && editCellId == cell.id
-      && eid > 0
-      && oldStrs != newStrs
-    ) {
+    if (editCellId.nonEmpty && editCellId == cell.id && eid > 0) {
       val (retracts, asserts) = (oldStrs.diff(newStrs), newStrs.diff(oldStrs))
 
       val retractsAsserts = (if (retracts.isEmpty) "" else
@@ -155,6 +157,19 @@ case class UpdateCardMany[T](
         if (related == 0) {
           editArray(rowIndex) = newVopt
           setCellEditMode(cell, newVopt)
+        } else {
+          val eArray = qr.num(qr.arrayIndexes(eIndex))
+          var i      = 0
+          val length = eArray.length
+          while (i < length) {
+            eArray(i) match {
+              case Some(`eid`) =>
+                editArray(i) = newVopt
+                setCellEditMode(cell, newVopt)
+              case _           =>
+            }
+            i += 1
+          }
         }
 
       } else {

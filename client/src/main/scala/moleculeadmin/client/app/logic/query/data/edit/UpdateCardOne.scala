@@ -65,11 +65,7 @@ case class UpdateCardOne[T](
       }
     }
 
-    if (editCellId.nonEmpty
-      && editCellId == cell.id
-      && eid > 0
-      && oldStr != newStr
-    ) {
+    if (editCellId.nonEmpty && editCellId == cell.id && eid > 0) {
       if (attrType != "String" && newStr.contains('\n')) {
         editCellId = ""
         window.alert(s"Can't save multiple $attrFull values of type `$attrType`:\n$newStr")
@@ -96,13 +92,14 @@ case class UpdateCardOne[T](
           setCellEditMode(cell, newVopt)
 
         } else {
-          // todo: should we allow group editing related values at all?
           val eArray = qr.num(qr.arrayIndexes(eIndex))
           var i      = 0
           val length = eArray.length
           while (i < length) {
             eArray(i) match {
-              case Some(`eid`) => editArray(i) = newVopt
+              case Some(`eid`) =>
+                editArray(i) = newVopt
+                setCellEditMode(cell, newVopt)
               case _           =>
             }
             i += 1
