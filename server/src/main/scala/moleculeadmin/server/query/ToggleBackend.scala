@@ -21,11 +21,10 @@ trait ToggleBackend extends QueryHelpers {
         update(eidsChunk)
         t.log(count)
       }
+      t.total
     } else {
-      println(action + "..")
       update(eids)
     }
-    t.total
   }
 
   override def saveToggle(

@@ -24,7 +24,6 @@ import scala.scalajs.js.UndefOr
   Long is treated as Double since it is opaque in ScalaJS
   see: https://stackoverflow.com/a/27823467/1211032
 
-
   To get precision correct, use BigDecimal and cast to Double (used for
   all number types except Int):
   floats.map(v => (v + BigDecimal(0.1)).toDouble)

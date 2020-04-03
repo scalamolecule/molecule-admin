@@ -72,7 +72,10 @@ case class GroupSave(col: Col)(implicit val ctx: Ctx.Owner)
         editCell = cells.item(editColIndex).asInstanceOf[TableCell]
         origCell.innerHTML = ""
         editCell.innerHTML = ""
-        newVopt.foreach { newV =>
+        newVopt.fold(
+          // turn of retracted
+          editCell.className = cellBaseClass
+        ) { newV =>
           origCell.appendChild(
             colValueToNodeOrig.fold(colValueToNode(newV))(_ (newV))
           )

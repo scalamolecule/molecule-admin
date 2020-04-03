@@ -115,26 +115,26 @@ case class UpdateCardMap[T](
 
     def redrawCell(): Node = {
       cell.innerHTML = ""
-      val items = if (attrType == "String")
+      val vs = if (attrType == "String")
         newPairs.sorted.map {
-          case (k, v) => li(_str2frags(k + " -> " + v))
+          case (k, v) => span(_str2frags(k + " -> " + v))
         }
       else
         newPairs.sorted.map {
-          case (k, v) => li(k + " -> " + v)
+          case (k, v) => span(k + " -> " + v)
         }
 
-      cell.appendChild(ul(items).render)
+      vs.foreach { v =>
+        cell.appendChild(v.render)
+        cell.appendChild(br.render)
+      }
+      cell
     }
 
     val retracts = oldPairs.diff(newPairs).map { case (k, v) => s"$k@$v" }
     val asserts  = newPairs.diff(oldPairs).map { case (k, v) => s"$k@$v" }
 
-    if (editCellId.nonEmpty
-      && editCellId == cell.id
-      && eid > 0
-      && oldPairs != newPairs
-    ) {
+    if (editCellId.nonEmpty && editCellId == cell.id && eid > 0) {
       val newKeys       = newPairs.map(_._1)
       val duplicateKeys = newKeys.length - newKeys.distinct.length
 
@@ -168,6 +168,19 @@ case class UpdateCardMap[T](
         if (related == 0) {
           editArray(rowIndex) = newVopt
           setCellEditMode(cell, newVopt)
+        } else {
+          val eArray = qr.num(qr.arrayIndexes(eIndex))
+          var i      = 0
+          val length = eArray.length
+          while (i < length) {
+            eArray(i) match {
+              case Some(`eid`) =>
+                editArray(i) = newVopt
+                setCellEditMode(cell, newVopt)
+              case _           =>
+            }
+            i += 1
+          }
         }
 
       } else {

@@ -512,11 +512,12 @@ abstract class Cell(
         val getCls    = getClassLambda(origArray, array)
         if (editable) {
           rowIndex: Int =>
-            array(rowIndex).fold(_tdNoEdit)(vs =>
-              _tdMapDoubleEdit(
-                vs, getCls("str", rowIndex), id(rowIndex), e,
-                update(origArray, array, rowIndex, "str")
-              )
+            _tdMapDoubleEdit(
+              array(rowIndex).getOrElse(Map.empty[String, Double]),
+              getCls("str", rowIndex),
+              id(rowIndex),
+              e,
+              update(origArray, array, rowIndex, "str")
             )
         } else {
           rowIndex: Int =>

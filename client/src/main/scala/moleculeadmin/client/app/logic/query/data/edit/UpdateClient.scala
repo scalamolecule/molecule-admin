@@ -6,6 +6,7 @@ import moleculeadmin.shared.ast.query.{Col, QueryResult}
 import moleculeadmin.shared.ops.query.ColOps
 import org.scalajs.dom.html.{TableCell, TableRow}
 import rx.Ctx
+import scalatags.JsDom.all.s
 
 abstract class UpdateClient[T](
   cols: Seq[Col],
