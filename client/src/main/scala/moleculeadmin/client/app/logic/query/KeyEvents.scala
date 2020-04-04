@@ -78,7 +78,9 @@ trait KeyEvents
           case "Backspace"         => deleteItem(e)
           case "Enter" if shift    => multilineSoftNewLine(e)
           case "Enter" if ctrl     => multilineAddItem(e)
-          case "Enter"             => saveEdit(e)
+          case "Enter"             => saveEditMoveDown(e)
+          case "Tab" if shift      => saveEditMoveBackwards(e)
+          case "Tab"               => saveEditMoveForward(e)
           case "z" if cmd          => undoLastClean
           case _                   => ()
         }

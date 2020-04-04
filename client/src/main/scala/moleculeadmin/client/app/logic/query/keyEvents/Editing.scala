@@ -1,7 +1,7 @@
 package moleculeadmin.client.app.logic.query.keyEvents
 
 import moleculeadmin.client.app.logic.query.QueryState.editCellId
-import org.scalajs.dom.raw.{HTMLInputElement, HTMLUListElement, KeyboardEvent}
+import org.scalajs.dom.raw.{Element, HTMLInputElement, HTMLUListElement, KeyboardEvent}
 import org.scalajs.dom.{Node, document, window}
 import scalatags.JsDom.all._
 
@@ -114,7 +114,7 @@ trait Editing {
     }
   }
 
-  def saveEdit(e: KeyboardEvent): Unit = {
+  def saveEditMoveDown(e: KeyboardEvent): Unit = {
     // prevent creating new line within cell
     e.preventDefault()
     val curCell = document.activeElement
@@ -133,6 +133,73 @@ trait Editing {
       }
     } else {
       curCell.asInstanceOf[HTMLInputElement].blur()
+    }
+    // reset current edit cell id
+    editCellId = ""
+  }
+
+  def saveEditMoveForward(e: KeyboardEvent): Unit = {
+    // prevent immediately moving to next cell
+    e.preventDefault()
+    val curCell = document.activeElement.asInstanceOf[HTMLInputElement]
+    editCellId = curCell.id
+
+    def nextEditableCell(testCell: HTMLInputElement): Option[HTMLInputElement] = {
+      val sibling = testCell.nextSibling.asInstanceOf[HTMLInputElement]
+      if (sibling == null)
+        None
+      else if (sibling.isContentEditable)
+        Some(sibling)
+      else
+        nextEditableCell(sibling)
+    }
+
+    nextEditableCell(curCell).fold {
+      // Trigger update with blur
+      curCell.blur()
+      // Re-select cell to stay in business
+      selectContent(curCell)
+    } { nextCell =>
+      // Select content of next editable cell
+      // Fires blur-callback (save) on current cell
+      selectContent(nextCell)
+      if (editCellId.isEmpty) {
+        // Re-select content in original cell if invalid data
+        selectContent(curCell)
+      }
+    }
+    editCellId = ""
+  }
+
+  def saveEditMoveBackwards(e: KeyboardEvent): Unit = {
+    // prevent immediately moving to next cell
+    e.preventDefault()
+    val curCell = document.activeElement.asInstanceOf[HTMLInputElement]
+    editCellId = curCell.id
+
+    def previousEditableCell(testCell: HTMLInputElement): Option[HTMLInputElement] = {
+      val sibling = testCell.previousSibling.asInstanceOf[HTMLInputElement]
+      if (sibling == null)
+        None
+      else if (sibling.isContentEditable)
+        Some(sibling)
+      else
+        previousEditableCell(sibling)
+    }
+
+    previousEditableCell(curCell).fold {
+      // Trigger update with blur
+      curCell.blur()
+      // Re-select cell to stay in business
+      selectContent(curCell)
+    } { nextCell =>
+      // Select content of previous editable cell
+      // Fires blur-callback (save) on current cell
+      selectContent(nextCell)
+      if (editCellId.isEmpty) {
+        // Re-select content in original cell if invalid data
+        selectContent(curCell)
+      }
     }
     editCellId = ""
   }
