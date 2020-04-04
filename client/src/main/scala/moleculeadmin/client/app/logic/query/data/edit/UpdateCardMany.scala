@@ -40,6 +40,7 @@ case class UpdateCardMany[T](
   ) {
 
   def update(
+    cellIdMaker: Int => String,
     cellId: String,
     cell: TableCell,
     row: TableRow,
@@ -178,16 +179,16 @@ case class UpdateCardMany[T](
         redrawCell()
 
         // update db
-        val update = if (colType == "listDouble") {
+        val dbUpdate = if (colType == "listDouble") {
           val data = Seq((eid, retracts.map(_.toDouble), asserts.map(_.toDouble)))
           queryWireAjax().updateNum(db, attrFull, attrType, data).call()
         } else {
           val data = Seq((eid, retracts, asserts))
           queryWireAjax().updateStr(db, attrFull, attrType, enumPrefix, data).call()
         }
-        update.foreach {
+        dbUpdate.foreach {
           case Right((t, tx, txInstant)) =>
-            updateClient(t, tx, txInstant, row, eid, newVopt)
+            updateClient(cellIdMaker, t, tx, txInstant, row, eid, newVopt)
             println(s"Updated $attrFull $retractsAsserts")
 
           case Left(err) =>

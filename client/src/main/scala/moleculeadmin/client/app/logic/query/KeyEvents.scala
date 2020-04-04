@@ -1,4 +1,5 @@
 package moleculeadmin.client.app.logic.query
+
 import moleculeadmin.client.app.logic.query.keyEvents._
 import moleculeadmin.shared.ast.schema.Ns
 import moleculeadmin.shared.ops.query.{ColOps, MoleculeOps}
@@ -6,11 +7,14 @@ import org.scalajs.dom.document
 import org.scalajs.dom.html.TableCell
 import org.scalajs.dom.raw.KeyboardEvent
 import rx.Ctx
+import moleculeadmin.client.app.logic.query.QueryState._
 
 
 trait KeyEvents
-  extends ColOps with MoleculeOps
+  extends ColOps
+    with MoleculeOps
     with Paging
+    with MarkerToggling
     with QueryBuilding
     with SubMenuToggling
     with Inserting
@@ -28,13 +32,17 @@ trait KeyEvents
       if (document.activeElement == document.body) {
         if (!mod) {
           e.key match {
-            case "Escape"              => toggleOffAll()
-            case "l"                   => toggleQueryListMenu()
-            case "n"                   => addInsertNewDataRow0(e)
-            case "u"                   => toggleUndo()
-            case "v"                   => toggleViewsMenu()
-            case "g"                   => toggleGroupedMenu()
-            case "q"                   => toggleQueryBuilder
+            case "Escape" => toggleOffAll()
+            case "l"      => toggleQueryListMenu()
+            case "n"      => addInsertNewDataRow0(e)
+            case "u"      => toggleUndo()
+            case "v"      => toggleViewsMenu()
+            case "g"      => toggleGroupedMenu()
+            case "q"      => toggleQueryBuilder
+            case "s"      => if (e.repeat) toggling = true else toggleStar()
+            case "f"      => if (e.repeat) toggling = true else toggleFlag()
+            case "c"      => if (e.repeat) toggling = true else toggleCheck()
+
             case k if queryListOpen    => queryList(e, k)
             case k if groupedOpen      => grouped(e, k)
             case k if viewsOpen        => views(e, k)
@@ -73,6 +81,15 @@ trait KeyEvents
           case "Enter"             => saveEdit(e)
           case "z" if cmd          => undoLastClean
           case _                   => ()
+        }
+      }
+    }
+
+    document.onkeyup = { e: KeyboardEvent =>
+      if (toggling && document.activeElement == document.body) {
+        e.key match {
+          case "s" | "f" | "c" => toggling = false
+          case _               =>
         }
       }
     }

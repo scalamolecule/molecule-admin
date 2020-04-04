@@ -2,9 +2,9 @@ package moleculeadmin.client.app.logic.query.keyEvents
 
 import autowire._
 import boopickle.Default._
+import moleculeadmin.client.app.html.query.UndoElements
 import moleculeadmin.client.app.logic.query.QueryState._
 import moleculeadmin.client.app.logic.query.views.Base
-import moleculeadmin.client.app.html.query.UndoElements
 import moleculeadmin.client.queryWireAjax
 import moleculeadmin.shared.api.QueryApi
 import org.scalajs.dom.{document, window}
@@ -29,14 +29,16 @@ trait Undoing extends UndoElements with QueryApi {
   }
 
   def undoLastClean(implicit ctx: Ctx.Owner): Unit = {
-    curLastTxResults.reverse.find(txResult =>
-      txResult._5.nonEmpty && // has datoms to undo
-        !undone2new.contains(txResult._1) && // not already undone
-        !new2undone.contains(txResult._1) // not an undoing tx
-    ).fold {
-      window.alert("No clean txs to undo - please load more to undo further back.")
-    } { cleanTx =>
-      undoTxs(Seq(cleanTx._1))
+    if (showUndo.now) {
+      curLastTxResults.reverse.find(txResult =>
+        txResult._5.nonEmpty && // has datoms to undo
+          !undone2new.contains(txResult._1) && // not already undone
+          !new2undone.contains(txResult._1) // not an undoing tx
+      ).fold(
+        window.alert("No clean txs to undo - please load more to undo further back.")
+      )(cleanTx =>
+        undoTxs(Seq(cleanTx._1))
+      )
     }
   }
 

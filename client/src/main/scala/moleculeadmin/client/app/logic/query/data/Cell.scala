@@ -23,11 +23,16 @@ abstract class Cell(
   extends TxLambdas(cols, qr)
     with TypeValidation
     with BodyElements
-    with ColOps
-{
+    with ColOps {
 
   // current entity id for updates of subsequent attributes on each row
-  var e = 0L
+  var e                           = 0L
+  var curStarToggler : () => Unit = _
+  var curFlagToggler : () => Unit = _
+  var curCheckToggler: () => Unit = _
+
+  // Avoid creating id variable for each cell
+  //  var id = ""
 
   protected def cellLambda(colIndex: Int): Int => JsDom.TypedTag[TableCell] = {
     val arrayIndex = qr.arrayIndexes(colIndex)
@@ -62,7 +67,14 @@ abstract class Cell(
     def idBase(colIndex: Int): Int => String =
       (rowIndex: Int) => s"col-${colIndex + 1} row-${rowIndex + 1}"
 
-    def id: Int => String = idBase(colIndex)
+    // Create cell id and assign togglers
+    val mkId: Int => String = (rowIndex: Int) => {
+      val id = idBase(colIndex)(rowIndex)
+      starTogglers = starTogglers + (id -> curStarToggler)
+      flagTogglers = flagTogglers + (id -> curFlagToggler)
+      checkTogglers = checkTogglers + (id -> curCheckToggler)
+      id
+    }
 
     /**
      * @tparam T cardinality 1: String / Double
@@ -97,7 +109,7 @@ abstract class Cell(
         val cell: TableCell = document.getElementById(cellId).asInstanceOf[TableCell]
         val row : TableRow  = cell.parentNode.asInstanceOf[TableRow]
         val eid : Long      = cell.getAttribute("eid").toLong
-        updater.update(cellId, cell, row, eid, oldVOpt, isNum)
+        updater.update(mkId, cellId, cell, row, eid, oldVOpt, isNum)
       }
     }
 
@@ -136,8 +148,11 @@ abstract class Cell(
       case _ if cellType == "aggr" =>
         val array = qr.num(arrayIndex)
         (rowIndex: Int) =>
-          array(rowIndex).fold(_tdNoAggrEdit)(
-            _tdOneNumNoAggrEdit(_))
+          array(rowIndex).fold(
+            _tdNoAggrEdit(mkId(rowIndex))
+          )(
+            _tdOneNumNoAggrEdit(mkId(rowIndex), _)
+          )
 
       case "string" =>
         val origArray = getOrigArray(qr.str)
@@ -149,8 +164,9 @@ abstract class Cell(
               (rowIndex: Int) =>
                 val s = array(rowIndex)
                 _tdOneStrEdit(
+                  mkId(rowIndex),
                   getCls("str", rowIndex),
-                  id(rowIndex), e,
+                  e,
                   if (s.getOrElse("").startsWith("http"))
                     _urlSpan(s.get, true)
                   else
@@ -161,24 +177,30 @@ abstract class Cell(
             case "date" =>
               (rowIndex: Int) =>
                 _tdOneDateEdit(
+                  mkId(rowIndex),
                   getCls("date", rowIndex),
-                  id(rowIndex), e, array(rowIndex),
+                  e,
+                  array(rowIndex),
                   update(origArray, array, rowIndex, "date")
                 )
 
             case "big" =>
               (rowIndex: Int) =>
                 _tdOneNumEdit(
+                  mkId(rowIndex),
                   getCls("num", rowIndex),
-                  id(rowIndex), e, array(rowIndex),
+                  e,
+                  array(rowIndex),
                   update(origArray, array, rowIndex, "num")
                 )
 
             case _ =>
               (rowIndex: Int) =>
                 _tdOneEdit(
+                  mkId(rowIndex),
                   getCls("", rowIndex),
-                  id(rowIndex), e, array(rowIndex),
+                  e,
+                  array(rowIndex),
                   update(origArray, array, rowIndex, "")
                 )
           }
@@ -186,32 +208,42 @@ abstract class Cell(
           cellType match {
             case "str" =>
               (rowIndex: Int) =>
-                array(rowIndex).fold(_tdNoEdit)(s =>
-                  _tdNoEdit {
+                array(rowIndex).fold(
+                  _tdNoEdit(mkId(rowIndex))
+                )(s =>
+                  _tdNoEdit(mkId(rowIndex))(
                     if (s.startsWith("http"))
                       _urlSpan(s, false)
                     else
                       _str2frags(s)
-                  }
+                  )
                 )
 
             case "date" =>
               (rowIndex: Int) =>
-                array(rowIndex).fold(_tdNoEdit)(d =>
-                  _tdOneDate(truncateDateStr(d)))
+                array(rowIndex).fold(
+                  _tdNoEdit(mkId(rowIndex))
+                )(d =>
+                  _tdOneDate(mkId(rowIndex), truncateDateStr(d))
+                )
 
             case "big" =>
               (rowIndex: Int) =>
-                array(rowIndex).fold(_tdNoEdit)(
-                  _tdOneNumNoEdit(_))
+                array(rowIndex).fold(
+                  _tdNoEdit(mkId(rowIndex))
+                )(
+                  _tdOneNumNoEdit(mkId(rowIndex), _)
+                )
 
-            case "txI" =>
-              txInstantLambda(arrayIndex, colIndex)
+            case "txI" => txInstantLambda(mkId, arrayIndex, colIndex)
 
             case _ =>
               (rowIndex: Int) =>
-                array(rowIndex).fold(_tdNoEdit)(
-                  _tdNoEdit(_))
+                array(rowIndex).fold(
+                  _tdNoEdit(mkId(rowIndex))
+                )(
+                  _tdNoEdit(mkId(rowIndex))(_)
+                )
           }
         }
 
@@ -249,7 +281,16 @@ abstract class Cell(
               // Set entity id for updates of subsequent attribute values
               e = array(rowIndex).fold(0L)(_.toLong)
               val eid = e
+
+              curStarToggler = () =>
+                Toggle(tableBody, "star", curStars.contains(eid), eid = eid)
+              curFlagToggler = () =>
+                Toggle(tableBody, "flag", curFlags.contains(eid), eid = eid)
+              curCheckToggler = () =>
+                Toggle(tableBody, "check", curChecks.contains(eid), eid = eid)
+
               _tdOneEid(
+                mkId(rowIndex),
                 eid,
                 curEntity,
                 setCurEid(false)(eid),
@@ -258,15 +299,15 @@ abstract class Cell(
                 if (flagIndex(rowIndex)) mark.flagOn else mark.flagOff,
                 if (checkIndex(rowIndex)) mark.checkOn else mark.checkOff,
                 () => RetractEid(eid),
-                () => Toggle(tableBody, "star", curStars.contains(eid), eid = eid),
-                () => Toggle(tableBody, "flag", curFlags.contains(eid), eid = eid),
-                () => Toggle(tableBody, "check", curChecks.contains(eid), eid = eid),
+                curStarToggler,
+                curFlagToggler,
+                curCheckToggler,
               )
 
           case "ref" if groupEdit =>
             (rowIndex: Int) =>
               _tdOneRefEdit2(
-                id(rowIndex),
+                mkId(rowIndex),
                 e,
                 array(rowIndex),
                 update(origArray, array, rowIndex, "num")
@@ -275,7 +316,7 @@ abstract class Cell(
           case "ref" if editable =>
             (rowIndex: Int) =>
               _tdOneRefEdit(
-                id(rowIndex),
+                mkId(rowIndex),
                 e,
                 array(rowIndex),
                 curEntity,
@@ -288,15 +329,18 @@ abstract class Cell(
             val getCls = getClassLambda(origArray, array)
             (rowIndex: Int) =>
               _tdOneNumEdit(
+                mkId(rowIndex),
                 getCls("num", rowIndex),
-                id(rowIndex), e, array(rowIndex),
+                e,
+                array(rowIndex),
                 update(origArray, array, rowIndex, "num")
               )
 
           case "ref" =>
             (rowIndex: Int) =>
-              array(rowIndex).fold(_tdNoEdit)(v =>
+              array(rowIndex).fold(_tdNoEdit(mkId(rowIndex)))(v =>
                 _tdOneRef(
+                  mkId(rowIndex),
                   v.toLong,
                   curEntity,
                   setCurEid(false),
@@ -304,12 +348,17 @@ abstract class Cell(
                 )
               )
 
-          case "t"  => tLambda(arrayIndex, colIndex)
-          case "tx" => txLambda(arrayIndex, colIndex)
+          case "t"  => tLambda(mkId, arrayIndex, colIndex)
+          case "tx" => txLambda(mkId, arrayIndex, colIndex)
 
           case _ =>
             (rowIndex: Int) =>
-              array(rowIndex).fold(_tdNoEdit)(_tdOneNumNoEdit(_))
+              mkId(rowIndex)
+              array(rowIndex).fold(
+                _tdNoEdit(mkId(rowIndex))
+              )(
+                _tdOneNumNoEdit(mkId(rowIndex), _)
+              )
         }
 
 
@@ -324,37 +373,45 @@ abstract class Cell(
             case "str" =>
               (rowIndex: Int) =>
                 _tdManyStringEdit(
+                  mkId(rowIndex),
+                  getCls("items", rowIndex),
+                  e,
                   array(rowIndex).getOrElse(List.empty[String]).sorted.map(s =>
                     if (s.startsWith("http"))
                       Seq(_urlSpan(s, true))
                     else
                       _str2frags(s)
                   ),
-                  getCls("items", rowIndex), id(rowIndex), e,
                   update(origArray, array, rowIndex, "items")
                 )
 
             case "date" =>
               (rowIndex: Int) =>
                 _tdManyDateEdit(
+                  mkId(rowIndex),
+                  getCls("str", rowIndex),
+                  e,
                   array(rowIndex).getOrElse(List.empty[String]).sorted,
-                  getCls("str", rowIndex), id(rowIndex), e,
                   update(origArray, array, rowIndex, "str")
                 )
 
             case "big" =>
               (rowIndex: Int) =>
                 _tdManyStringBigEdit(
+                  mkId(rowIndex),
+                  getCls("num", rowIndex),
+                  e,
                   array(rowIndex).getOrElse(List.empty[String]).sorted,
-                  getCls("num", rowIndex), id(rowIndex), e,
                   update(origArray, array, rowIndex, "num")
                 )
 
             case _ =>
               (rowIndex: Int) =>
                 _tdManyStringOtherEdit(
+                  mkId(rowIndex),
+                  getCls("str", rowIndex),
+                  e,
                   array(rowIndex).getOrElse(List.empty[String]).sorted,
-                  getCls("str", rowIndex), id(rowIndex), e,
                   update(origArray, array, rowIndex, "str")
                 )
           }
@@ -362,8 +419,9 @@ abstract class Cell(
           cellType match {
             case "str" =>
               (rowIndex: Int) =>
-                array(rowIndex).fold(_tdNoEdit)(vs =>
+                array(rowIndex).fold(_tdNoEdit(mkId(rowIndex)))(vs =>
                   _tdManyStringUrl(
+                    mkId(rowIndex),
                     vs.sorted.map { s =>
                       if (s.startsWith("http"))
                         Seq(_urlSpan(s, false))
@@ -376,18 +434,27 @@ abstract class Cell(
 
             case "date" =>
               (rowIndex: Int) =>
-                array(rowIndex).fold(_tdNoEdit)(vs =>
-                  _tdManyDate(vs.sorted, showAll))
+                array(rowIndex).fold(
+                  _tdNoEdit(mkId(rowIndex))
+                )(vs =>
+                  _tdManyDate(mkId(rowIndex), vs.sorted, showAll)
+                )
 
             case "big" =>
               (rowIndex: Int) =>
-                array(rowIndex).fold(_tdNoEdit)(vs =>
-                  _tdManyString(vs.sorted, "num", showAll))
+                array(rowIndex).fold(
+                  _tdNoEdit(mkId(rowIndex))
+                )(vs =>
+                  _tdManyString(mkId(rowIndex), vs.sorted, "num", showAll)
+                )
 
             case _ =>
               (rowIndex: Int) =>
-                array(rowIndex).fold(_tdNoEdit)(vs =>
-                  _tdManyString(vs.sorted, "str", showAll))
+                array(rowIndex).fold(
+                  _tdNoEdit(mkId(rowIndex))
+                )(vs =>
+                  _tdManyString(mkId(rowIndex), vs.sorted, "str", showAll)
+                )
           }
         }
 
@@ -397,23 +464,29 @@ abstract class Cell(
         cellType match {
           case "eid" =>
             (rowIndex: Int) =>
-              array(rowIndex).fold(_tdNoEdit)(vs =>
+              array(rowIndex).fold(
+                _tdNoEdit(mkId(rowIndex))
+              )(vs =>
                 _tdManyRef(
+                  mkId(rowIndex),
                   vs,
                   curEntity,
                   setCurEid(false),
                   lockCurEid(false),
-                ))
+                )
+              )
 
           case "ref" if groupEdit =>
             val getCls = getClassLambda(origArray, array)
             (rowIndex: Int) =>
-              array(rowIndex).fold(_tdNoEdit)(vs =>
+              array(rowIndex).fold(
+                _tdNoEdit(mkId(rowIndex))
+              )(vs =>
                 _tdManyRefGroupEdit(
-                  vs.map(_.toLong).sorted,
+                  mkId(rowIndex),
                   getCls("num", rowIndex),
-                  id(rowIndex),
                   e,
+                  vs.map(_.toLong).sorted,
                   (ref: Long) => () => curEntity() = ref,
                   update(origArray, array, rowIndex, "")
                 )
@@ -422,10 +495,10 @@ abstract class Cell(
           case "ref" if editable =>
             (rowIndex: Int) =>
               _tdManyRefEdit(
-                array(rowIndex).getOrElse(List.empty[Double]).map(_.toLong).sorted,
-                id(rowIndex),
+                mkId(rowIndex),
                 e,
                 curEntity,
+                array(rowIndex).getOrElse(List.empty[Double]).map(_.toLong).sorted,
                 setCurEid(false),
                 lockCurEid(false),
                 update(origArray, array, rowIndex, "")
@@ -433,28 +506,37 @@ abstract class Cell(
 
           case "ref" =>
             (rowIndex: Int) =>
-              array(rowIndex).fold(_tdNoEdit)(vs =>
+              array(rowIndex).fold(
+                _tdNoEdit(mkId(rowIndex))
+              )(vs =>
                 _tdManyRef(
+                  mkId(rowIndex),
                   vs.sorted,
                   curEntity,
                   setCurEid(false),
                   lockCurEid(false),
                   true
-                ))
+                )
+              )
 
           case _ if editable =>
             val getCls = getClassLambda(origArray, array)
             (rowIndex: Int) =>
               _tdManyDoubleEdit(
+                mkId(rowIndex),
+                getCls("num", rowIndex),
+                e,
                 array(rowIndex).getOrElse(List.empty[Double]).sorted,
-                getCls("num", rowIndex), id(rowIndex), e,
                 update(origArray, array, rowIndex, "num")
               )
 
           case _ =>
             (rowIndex: Int) =>
-              array(rowIndex).fold(_tdNoEdit)(vs =>
-                _tdManyDouble(vs.sorted, showAll))
+              array(rowIndex).fold(
+                _tdNoEdit(mkId(rowIndex))
+              )(vs =>
+                _tdManyDouble(mkId(rowIndex), vs.sorted, showAll)
+              )
         }
 
 
@@ -469,24 +551,30 @@ abstract class Cell(
             case "str" =>
               (rowIndex: Int) =>
                 _tdMapStrEdit(
+                  mkId(rowIndex),
+                  getCls("items", rowIndex),
+                  e,
                   array(rowIndex).getOrElse(Map.empty[String, String]),
-                  getCls("items", rowIndex), id(rowIndex), e,
                   update(origArray, array, rowIndex, "items")
                 )
 
             case "date" =>
               (rowIndex: Int) =>
                 _tdMapDateEdit(
+                  mkId(rowIndex),
+                  getCls("str", rowIndex),
+                  e,
                   array(rowIndex).getOrElse(Map.empty[String, String]),
-                  getCls("str", rowIndex), id(rowIndex), e,
                   update(origArray, array, rowIndex, "str")
                 )
 
             case _ =>
               (rowIndex: Int) =>
                 _tdMapStrOtherEdit(
+                  mkId(rowIndex),
+                  getCls("str", rowIndex),
+                  e,
                   array(rowIndex).getOrElse(Map.empty[String, String]),
-                  getCls("str", rowIndex), id(rowIndex), e,
                   update(origArray, array, rowIndex, "str")
                 )
           }
@@ -494,15 +582,27 @@ abstract class Cell(
           cellType match {
             case "date" =>
               (rowIndex: Int) =>
-                array(rowIndex).fold(_tdNoEdit)(_tdMapDate)
+                array(rowIndex).fold(
+                  _tdNoEdit(mkId(rowIndex))
+                )(
+                  _tdMapDate(mkId(rowIndex), _)
+                )
 
             case "str" =>
               (rowIndex: Int) =>
-                array(rowIndex).fold(_tdNoEdit)(_tdMapStr)
+                array(rowIndex).fold(
+                  _tdNoEdit(mkId(rowIndex))
+                )(
+                  _tdMapStr(mkId(rowIndex), _)
+                )
 
             case _ =>
               (rowIndex: Int) =>
-                array(rowIndex).fold(_tdNoEdit)(_tdMapStrOther)
+                array(rowIndex).fold(
+                  _tdNoEdit(mkId(rowIndex))
+                )(
+                  _tdMapStrOther(mkId(rowIndex), _)
+                )
           }
         }
 
@@ -513,15 +613,19 @@ abstract class Cell(
         if (editable) {
           rowIndex: Int =>
             _tdMapDoubleEdit(
-              array(rowIndex).getOrElse(Map.empty[String, Double]),
+              mkId(rowIndex),
               getCls("str", rowIndex),
-              id(rowIndex),
               e,
+              array(rowIndex).getOrElse(Map.empty[String, Double]),
               update(origArray, array, rowIndex, "str")
             )
         } else {
           rowIndex: Int =>
-            array(rowIndex).fold(_tdNoEdit)(_tdMapDouble)
+            array(rowIndex).fold(
+              _tdNoEdit(mkId(rowIndex))
+            )(
+              _tdMapDouble(mkId(rowIndex), _)
+            )
         }
     }
   }

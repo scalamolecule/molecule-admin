@@ -23,6 +23,7 @@ abstract class TxLambdas(
 
 
   def tLambda(
+    cellIdMaker: Int => String,
     arrayIndex: Int,
     colIndex: Int,
   )(implicit ctx: Ctx.Owner): Int => JsDom.TypedTag[TableCell] = {
@@ -34,8 +35,9 @@ abstract class TxLambdas(
       // t
       case (false, false) =>
         (rowIndex: Int) =>
-          arrayT(rowIndex).fold(_tdNoEdit) { t =>
+          arrayT(rowIndex).fold(_tdNoEdit(cellIdMaker(rowIndex))) { t =>
             _tdOneT(
+              cellIdMaker(rowIndex),
               t.toLong,
               curT,
               { () =>
@@ -50,8 +52,9 @@ abstract class TxLambdas(
       case (true, false) =>
         val arrayTx = qr.num(arrayIndex + 1) // tx is next
         (rowIndex: Int) =>
-          arrayT(rowIndex).fold(_tdNoEdit)(t =>
+          arrayT(rowIndex).fold(_tdNoEdit(cellIdMaker(rowIndex)))(t =>
             _tdOneT_tx(
+              cellIdMaker(rowIndex),
               t.toLong,
               arrayTx(rowIndex).get.toLong,
               curT,
@@ -65,8 +68,9 @@ abstract class TxLambdas(
         val arrayIndexTxInstant = qr.arrayIndexes(colIndex + j)
         val arrayTxInstant      = qr.str(arrayIndexTxInstant)
         (rowIndex: Int) =>
-          arrayT(rowIndex).fold(_tdNoEdit)(t =>
+          arrayT(rowIndex).fold(_tdNoEdit(cellIdMaker(rowIndex)))(t =>
             _tdOneT_inst(
+              cellIdMaker(rowIndex),
               t.toLong,
               arrayTxInstant(rowIndex).get,
               curT,
@@ -83,8 +87,9 @@ abstract class TxLambdas(
         val arrayIndexTxInstant = qr.arrayIndexes(colIndex + j)
         val arrayTxInstant      = qr.str(arrayIndexTxInstant)
         (rowIndex: Int) =>
-          arrayT(rowIndex).fold(_tdNoEdit)(t1 =>
+          arrayT(rowIndex).fold(_tdNoEdit(cellIdMaker(rowIndex)))(t1 =>
             _tdOneT_tx_inst(
+              cellIdMaker(rowIndex),
               t1.toLong,
               arrayTx(rowIndex).get.toLong,
               arrayTxInstant(rowIndex).get,
@@ -99,6 +104,7 @@ abstract class TxLambdas(
 
 
   def txLambda(
+    cellIdMaker: Int => String,
     arrayIndex: Int,
     colIndex: Int
   )(implicit ctx: Ctx.Owner): Int => JsDom.TypedTag[TableCell] = {
@@ -109,8 +115,9 @@ abstract class TxLambdas(
       // tx
       case (false, false) =>
         (rowIndex: Int) =>
-          arrayTx(rowIndex).fold(_tdNoEdit)(tx =>
+          arrayTx(rowIndex).fold(_tdNoEdit(cellIdMaker(rowIndex)))(tx =>
             _tdOneTx(
+              cellIdMaker(rowIndex),
               tx.toLong,
               curTx,
               { () =>
@@ -123,8 +130,9 @@ abstract class TxLambdas(
       case (true, false) =>
         val arrayT = qr.num(arrayIndex - 1)
         (rowIndex: Int) =>
-          arrayTx(rowIndex).fold(_tdNoEdit)(tx1 =>
+          arrayTx(rowIndex).fold(_tdNoEdit(cellIdMaker(rowIndex)))(tx1 =>
             _tdOneTx_t(
+              cellIdMaker(rowIndex),
               tx1.toLong,
               arrayT(rowIndex).get.toLong,
               curTx,
@@ -138,8 +146,9 @@ abstract class TxLambdas(
         val arrayIndexTxInstant = qr.arrayIndexes(colIndex + 1)
         val arrayTxInstant      = qr.str(arrayIndexTxInstant)
         (rowIndex: Int) =>
-          arrayTx(rowIndex).fold(_tdNoEdit)(tx =>
+          arrayTx(rowIndex).fold(_tdNoEdit(cellIdMaker(rowIndex)))(tx =>
             _tdOneTx_inst(
+              cellIdMaker(rowIndex),
               tx.toLong,
               arrayTxInstant(rowIndex).get,
               curTx,
@@ -156,8 +165,9 @@ abstract class TxLambdas(
         val arrayIndexTxInstant = qr.arrayIndexes(colIndex + 1)
         val arrayTxInstant      = qr.str(arrayIndexTxInstant)
         (rowIndex: Int) =>
-          arrayTx(rowIndex).fold(_tdNoEdit)(tx =>
+          arrayTx(rowIndex).fold(_tdNoEdit(cellIdMaker(rowIndex)))(tx =>
             _tdOneTx_t_inst(
+              cellIdMaker(rowIndex),
               tx.toLong,
               arrayT(rowIndex).get.toLong,
               arrayTxInstant(rowIndex).get,
@@ -172,6 +182,7 @@ abstract class TxLambdas(
 
 
   def txInstantLambda(
+    cellIdMaker: Int => String,
     arrayIndex: Int,
     colIndex: Int
   )(implicit ctx: Ctx.Owner): Int => JsDom.TypedTag[TableCell] = {
@@ -185,8 +196,9 @@ abstract class TxLambdas(
       // txInstant
       case (false, false) =>
         (rowIndex: Int) =>
-          arrayTxInstant(rowIndex).fold(_tdNoEdit)(d =>
+          arrayTxInstant(rowIndex).fold(_tdNoEdit(cellIdMaker(rowIndex)))(d =>
             _tdOneTxInstant(
+              cellIdMaker(rowIndex),
               d,
               curTxInstant,
               { () =>
@@ -204,8 +216,9 @@ abstract class TxLambdas(
         val arrayIndexT = qr.arrayIndexes(colIndex - j)
         val arrayT      = qr.num(arrayIndexT)
         (rowIndex: Int) =>
-          arrayTxInstant(rowIndex).fold(_tdNoEdit)(d =>
+          arrayTxInstant(rowIndex).fold(_tdNoEdit(cellIdMaker(rowIndex)))(d =>
             _tdOneTxInstant_t(
+              cellIdMaker(rowIndex),
               d,
               arrayT(rowIndex).get.toLong,
               curTxInstant,
@@ -223,8 +236,9 @@ abstract class TxLambdas(
         val arrayIndexTx = qr.arrayIndexes(colIndex - 1)
         val arrayTx      = qr.num(arrayIndexTx)
         (rowIndex: Int) =>
-          arrayTxInstant(rowIndex).fold(_tdNoEdit)(d =>
+          arrayTxInstant(rowIndex).fold(_tdNoEdit(cellIdMaker(rowIndex)))(d =>
             _tdOneTxInstant_tx(
+              cellIdMaker(rowIndex),
               d,
               arrayTx(rowIndex).get.toLong,
               curTxInstant,
@@ -244,8 +258,9 @@ abstract class TxLambdas(
         val arrayT       = qr.num(arrayIndexT)
         val arrayTx      = qr.num(arrayIndexTx)
         (rowIndex: Int) =>
-          arrayTxInstant(rowIndex).fold(_tdNoEdit)(d =>
+          arrayTxInstant(rowIndex).fold(_tdNoEdit(cellIdMaker(rowIndex)))(d =>
             _tdOneTxInstant_t_tx(
+              cellIdMaker(rowIndex),
               d,
               arrayT(rowIndex).get.toLong,
               arrayTx(rowIndex).get.toLong,

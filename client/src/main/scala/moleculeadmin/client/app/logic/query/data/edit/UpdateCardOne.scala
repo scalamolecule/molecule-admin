@@ -38,6 +38,7 @@ case class UpdateCardOne[T](
   ) {
 
   def update(
+    cellIdMaker: Int => String,
     cellId: String,
     cell: TableCell,
     row: TableRow,
@@ -119,9 +120,9 @@ case class UpdateCardOne[T](
             // assign new Rx to class name - wonder why...
             val ref     = value.toLong
             val newCell = td(
+              id := cellId,
               cls := Rx(if (ref == curEntity()) "eidChosen" else "eid"),
               ref,
-              id := cellId,
               attr("card") := 1,
               attr("eid") := eid,
               contenteditable := true,
@@ -138,7 +139,7 @@ case class UpdateCardOne[T](
         }
 
         // update db
-        val update = if (colType == "double") {
+        val dbUpdate = if (colType == "double") {
           val data = if (nonEmpty)
             Seq((eid, Nil, Seq(value.toDouble)))
           else
@@ -151,9 +152,9 @@ case class UpdateCardOne[T](
             Seq((eid, Seq(value), Nil))
           queryWireAjax().updateStr(db, attrFull, attrType, enumPrefix, data).call()
         }
-        update.foreach {
+        dbUpdate.foreach {
           case Right((t, tx, txInstant)) =>
-            updateClient(t, tx, txInstant, row, eid, newVopt)
+            updateClient(cellIdMaker, t, tx, txInstant, row, eid, newVopt)
             if (nonEmpty)
               println(s"$attrFull: `$oldStr` ==> `$newStr`")
             else
