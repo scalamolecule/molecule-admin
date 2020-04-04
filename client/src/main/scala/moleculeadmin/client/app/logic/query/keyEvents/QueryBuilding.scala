@@ -4,7 +4,6 @@ import moleculeadmin.client.app.logic.query.Callbacks
 import moleculeadmin.client.app.logic.query.QueryState._
 import org.scalajs.dom.window
 import rx.{Ctx, Rx}
-import scalatags.JsDom.all.{br, s}
 
 
 trait QueryBuilding {

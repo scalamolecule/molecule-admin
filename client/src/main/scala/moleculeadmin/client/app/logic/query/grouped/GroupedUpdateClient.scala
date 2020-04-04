@@ -23,6 +23,7 @@ case class GroupedUpdateClient[T](
 
   // Not used by GroupedData
   override def update(
+    cellIdMaker: Int => String,
     cellId: String,
     cell: TableCell,
     row: TableRow,
@@ -39,6 +40,7 @@ case class GroupedUpdateClient[T](
     affectedRows: List[Int],
     affectedIndexes: Array[Int]
   ): Unit = updateClient(
+    {(i: Int) => ""},
     t, tx, txInstant,
     tableRows.item(0).asInstanceOf[TableRow],
     0L,

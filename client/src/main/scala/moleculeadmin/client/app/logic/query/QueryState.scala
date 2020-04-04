@@ -109,7 +109,7 @@ object QueryState extends QueryApi {
     mutable.Map.empty
 
   // For fast render on page scrolling
-  // tableCol -> array of marker status
+  // tableCol -> array of marker statuses
   val curStarIndexes : mutable.Map[Int, Array[Boolean]] = mutable.Map.empty
   val curFlagIndexes : mutable.Map[Int, Array[Boolean]] = mutable.Map.empty
   val curCheckIndexes: mutable.Map[Int, Array[Boolean]] = mutable.Map.empty
@@ -118,6 +118,17 @@ object QueryState extends QueryApi {
   var curStars : Set[Long] = Set.empty
   var curFlags : Set[Long] = Set.empty
   var curChecks: Set[Long] = Set.empty
+
+  // Cell id -> marker toggler
+  var starTogglers = Map.empty[String, () => Unit]
+  var flagTogglers = Map.empty[String, () => Unit]
+  var checkTogglers = Map.empty[String, () => Unit]
+
+  // Are we toggling multiple rows while holding down toggle key?
+  var toggling = false
+
+  // Which kind of marker is being toggled (s/f/c)
+  var toggler = ""
 
   // Undo coordinates
   var curLastTxResults: Array[TxResult]         = Array.empty
@@ -132,4 +143,5 @@ object QueryState extends QueryApi {
 
   // Url
   val curUrl: Var[String] = Var("")
+
 }

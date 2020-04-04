@@ -176,11 +176,13 @@ trait AppElements extends RegexMatching {
     tr(td(k), td("➜"), vCell)
 
   def mapCell[T](
+    cellId: String,
     rawPairs: Seq[(String, T)],
     processValue: T => TypedTag[TableCell],
     asserted: Boolean = true
   ): TypedTag[TableCell] = {
     td(
+      id := cellId,
       if (asserted) () else cls := "retracted",
       table(cls := "mapPairs",
         rawPairs.map {

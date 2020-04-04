@@ -148,20 +148,12 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
     // Push url with new query onto browser history
     pushUrl()
 
-    //    val t = Timer()
-    //    val t0 = t.time0
-
     // Fetch data from db asynchronously
     queryWireAjax()
       .query(db, datalogQuery, rules, l, ll, lll, maxRows.now, columns.now)
       .call().foreach {
 
       case Right(queryResult) =>
-        //        t.delta
-        //        val t1 = t.time1
-        //        val tt = t1 - t0
-        //        println(s"$tt   ${tt - queryResult.queryMs}")
-
         rowCountAll = queryResult.rowCountAll
         rowCount = queryResult.rowCount
 

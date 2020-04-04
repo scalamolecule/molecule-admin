@@ -12,9 +12,15 @@ import scalatags.JsDom
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
 import org.scalajs.dom.{document, window}
+import moleculeadmin.client.app.logic.query.QueryState._
+import moleculeadmin.client.app.logic.query.keyEvents.MarkerToggling
 
 
-trait BodyElements extends AppElements with DateHandling with RxBindings {
+trait BodyElements
+  extends AppElements
+    with DateHandling
+    with RxBindings
+    with MarkerToggling {
 
 
   def _mkRow(
@@ -22,6 +28,17 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     cells: JsDom.TypedTag[TableCell]*
   ): TableRow = tr(
     td(rowIndex + 1),
+    onmouseover := { () =>
+      if (toggling) {
+        toggler match {
+          case "s" => toggleStar()
+          case "f" => toggleFlag()
+          case "c" => toggleCheck()
+          case _   =>
+        }
+      }
+
+    },
     cells
   ).render
 
@@ -51,13 +68,46 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
 
   // Card one ======================================================
 
-  def _tdNoEdit: TypedTag[TableCell] = td(cursor.default)
-  def _tdNoEditItems: TypedTag[TableCell] = td(cursor.default)(ul(li()), contenteditable := true, cls := "items")
-  def _tdNoAggrEdit: TypedTag[TableCell] = td(noAggrEdit)
-  def _tdOneNumNoEdit: TypedTag[TableCell] = td(cls := "num")
-  def _tdOneNumNoAggrEdit: TypedTag[TableCell] = td(cls := "num", noAggrEdit)
-  def _tdOneDate: TypedTag[TableCell] = td(cls := "date")
+  def _tdNoEdit(cellId: String): TypedTag[TableCell] = td(
+    id := cellId,
+    cursor.default
+  )
+
+  def _tdNoAggrEdit(cellId: String): TypedTag[TableCell] = td(
+    id := cellId,
+    noAggrEdit
+  )
+
+  def _tdOneNumNoEdit(
+    cellId: String,
+    number: Frag // number or BigInt/BigDecimal (String)
+  ): TypedTag[TableCell] = td(
+    id := cellId,
+    cls := "num",
+    number
+  )
+
+  def _tdOneNumNoAggrEdit(
+    cellId: String,
+    number: Double
+  ): TypedTag[TableCell] = td(
+    id := cellId,
+    cls := "num",
+    noAggrEdit,
+    number
+  )
+
+  def _tdOneDate(
+    cellId: String,
+    date: String
+  ): TypedTag[TableCell] = td(
+    id := cellId,
+    cls := "date",
+    date
+  )
+
   def _tdOneEid(
+    cellId: String,
     eid: Long,
     curEntity: rx.Var[Long],
     setCurEid: () => Unit,
@@ -71,6 +121,7 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     checkToggle: () => Unit,
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = {
     td(
+      id := cellId,
       cls := Rx(if (eid == curEntity()) "eidChosen" else "eid"),
       _xRetract(retract),
       eid,
@@ -82,11 +133,13 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     )
   }
   def _tdOneRef(
+    cellId: String,
     ref: Long,
     curEntity: rx.Var[Long],
     setCurEid: Long => () => Unit,
     lockCurEid: Long => () => Unit,
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = td(
+    id := cellId,
     cls := Rx(if (ref == curEntity()) "eidChosen" else "eid"),
     attr("card") := 1,
     ref,
@@ -95,14 +148,14 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
   )
 
   def _tdOneStrEdit(
-    cellClass: String,
     cellId: String,
+    cellClass: String,
     eid: Long,
     strFrag: Frag,
     update: () => Unit
   ): TypedTag[TableCell] = td(
-    cls := cellClass,
     id := cellId,
+    cls := cellClass,
     attr("card") := 1,
     attr("eid") := eid,
     contenteditable := true,
@@ -111,14 +164,14 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
   )
 
   def _tdOneDateEdit(
-    cellClass: String,
     cellId: String,
+    cellClass: String,
     eid: Long,
     optValue: Option[String],
     update: () => Unit
   ): TypedTag[TableCell] = td(
-    cls := cellClass,
     id := cellId,
+    cls := cellClass,
     attr("card") := 1,
     attr("eid") := eid,
     contenteditable := true,
@@ -128,14 +181,14 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
 
   // T String/Double
   def _tdOneNumEdit[T](
-    cellClass: String,
     cellId: String,
+    cellClass: String,
     eid: Long,
     optValue: Option[T],
     update: () => Unit
   ): TypedTag[TableCell] = td(
-    cls := cellClass,
     id := cellId,
+    cls := cellClass,
     attr("card") := 1,
     attr("eid") := eid,
     contenteditable := true,
@@ -156,11 +209,11 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
     val refStr = optValue.fold("")(_.toString)
     val ref    = optValue.fold(0L)(_.toLong)
     td(
+      id := cellId,
       cls := Rx(if (ref > 0L && ref == curEntity()) "eidChosen" else "eid"),
       refStr,
       onmouseover := setCurEid(ref),
       onclick := lockCurEid(ref),
-      id := cellId,
       attr("card") := 1,
       attr("eid") := eid,
       contenteditable := true,
@@ -176,9 +229,9 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = {
     val ref = optValue.fold("")(_.toString)
     td(
+      id := cellId,
       cls := "num",
       ref,
-      id := cellId,
       attr("card") := 1,
       attr("eid") := eid,
       contenteditable := true,
@@ -187,14 +240,14 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
   }
 
   def _tdOneEdit(
-    cellClass: String,
     cellId: String,
+    cellClass: String,
     eid: Long,
     optValue: Option[String],
     update: () => Unit
   ): TypedTag[TableCell] = td(
-    cls := cellClass,
     id := cellId,
+    cls := cellClass,
     attr("card") := 1,
     attr("eid") := eid,
     contenteditable := true,
@@ -206,10 +259,12 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
   // Card many ========================================================
 
   def _tdManyStringUrl(
+    cellId: String,
     strFrags: List[Seq[Frag]],
     cellType: String,
     showAll: Boolean
   ): TypedTag[TableCell] = td(
+    id := cellId,
     cls := cellType,
     attr("card") := 2,
     if (showAll)
@@ -219,10 +274,12 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
   )
 
   def _tdManyString(
+    cellId: String,
     vs: List[String],
     cellType: String,
     showAll: Boolean
   ): TypedTag[TableCell] = td(
+    id := cellId,
     cls := cellType,
     attr("card") := 2,
     if (showAll)
@@ -237,9 +294,11 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
   )
 
   def _tdManyDate(
+    cellId: String,
     vs: List[String],
     showAll: Boolean
   ): TypedTag[TableCell] = td(
+    id := cellId,
     cls := "str",
     attr("card") := 2,
     if (showAll)
@@ -249,9 +308,11 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
   )
 
   def _tdManyDouble(
+    cellId: String,
     vs: List[Double],
     showAll: Boolean
   ): TypedTag[TableCell] = td(
+    id := cellId,
     cls := "num",
     attr("card") := 2,
     if (showAll)
@@ -261,6 +322,7 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
   )
 
   def _tdManyRef(
+    cellId: String,
     vs: List[Double],
     curEntity: rx.Var[Long],
     setCurEid: Long => () => Unit,
@@ -297,6 +359,7 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
       list.appendChild(toggleItem)
     }
     td(
+      id := cellId,
       attr("card") := 2,
       list
     )
@@ -304,14 +367,14 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
 
 
   def _tdManyStringEdit(
-    strFrags: List[Seq[Frag]],
-    cellClass: String,
     cellId: String,
+    cellClass: String,
     eid: Long,
+    strFrags: List[Seq[Frag]],
     update: () => Unit
   ): TypedTag[TableCell] = td(
-    cls := cellClass,
     id := cellId,
+    cls := cellClass,
     attr("card") := 2,
     attr("eid") := eid,
     contenteditable := true,
@@ -320,14 +383,14 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
   )
 
   def _tdManyDateEdit(
-    vs: List[String],
-    cellClass: String,
     cellId: String,
+    cellClass: String,
     eid: Long,
+    vs: List[String],
     update: () => Unit
   ): TypedTag[TableCell] = td(
-    cls := cellClass,
     id := cellId,
+    cls := cellClass,
     attr("card") := 2,
     attr("eid") := eid,
     contenteditable := true,
@@ -336,14 +399,14 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
   )
 
   def _tdManyStringOtherEdit(
-    vs: List[String],
-    cellClass: String,
     cellId: String,
+    cellClass: String,
     eid: Long,
+    vs: List[String],
     update: () => Unit
   ): TypedTag[TableCell] = td(
-    cls := cellClass,
     id := cellId,
+    cls := cellClass,
     attr("card") := 2,
     attr("eid") := eid,
     contenteditable := true,
@@ -352,14 +415,14 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
   )
 
   def _tdManyStringBigEdit(
-    vs: List[String],
-    cellClass: String,
     cellId: String,
+    cellClass: String,
     eid: Long,
+    vs: List[String],
     update: () => Unit
   ): TypedTag[TableCell] = td(
-    cls := cellClass,
     id := cellId,
+    cls := cellClass,
     attr("card") := 2,
     attr("eid") := eid,
     contenteditable := true,
@@ -368,14 +431,14 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
   )
 
   def _tdManyDoubleEdit(
-    vs: List[Double],
-    cellClass: String,
     cellId: String,
+    cellClass: String,
     eid: Long,
+    vs: List[Double],
     update: () => Unit
   ): TypedTag[TableCell] = td(
-    cls := cellClass,
     id := cellId,
+    cls := cellClass,
     attr("card") := 2,
     attr("eid") := eid,
     contenteditable := true,
@@ -384,10 +447,10 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
   )
 
   def _tdManyRefEdit(
-    refs: List[Long],
     cellId: String,
     eid: Long,
     curEntity: rx.Var[Long],
+    refs: List[Long],
     setCurEid: Long => () => Unit,
     lockCurEid: Long => () => Unit,
     update: () => Unit
@@ -412,16 +475,16 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
   }
 
   def _tdManyRefGroupEdit(
-    refs: List[Long],
-    cellClass: String,
     cellId: String,
+    cellClass: String,
     eid: Long,
+    refs: List[Long],
     setCurEid: Long => () => Unit,
     update: () => Unit
   ): TypedTag[TableCell] = {
     td(
-      cls := cellClass,
       id := cellId,
+      cls := cellClass,
       attr("card") := 2,
       attr("eid") := eid,
       contenteditable := true,
@@ -442,15 +505,15 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
   // Map ==============================================================
 
   def _tdMapEdit[T](
-    cellClass: String,
     cellId: String,
+    cellClass: String,
     eid: Long,
     update: () => Unit,
     pairs: Seq[(String, T)],
     processPair: (String, T) => Frag
   ): TypedTag[TableCell] = td(
-    cls := cellClass,
     id := cellId,
+    cls := cellClass,
     attr("card") := 3,
     attr("eid") := eid,
     contenteditable := true,
@@ -459,65 +522,89 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
   )
 
   def _tdMapStrEdit(
-    vs: Map[String, String],
-    cellClass: String,
     cellId: String,
+    cellClass: String,
     eid: Long,
+    vs: Map[String, String],
     update: () => Unit
   ): TypedTag[TableCell] =
-    _tdMapEdit(cellClass, cellId, eid, update,
+    _tdMapEdit(cellId, cellClass, eid, update,
       vs.toSeq.sortBy(_._1),
       (k: String, v: String) => _str2frags(k + " -> " + v)
     )
 
   def _tdMapDateEdit(
-    vs: Map[String, String],
-    cellClass: String,
     cellId: String,
+    cellClass: String,
     eid: Long,
+    vs: Map[String, String],
     update: () => Unit
   ): TypedTag[TableCell] =
-    _tdMapEdit(cellClass, cellId, eid, update,
+    _tdMapEdit(cellId, cellClass, eid, update,
       vs.toSeq.sortBy(_._1),
       (k: String, v: String) => k + " -> " + truncateDateStr(v)
     )
 
   def _tdMapStrOtherEdit(
-    vs: Map[String, String],
-    cellClass: String,
     cellId: String,
+    cellClass: String,
     eid: Long,
+    vs: Map[String, String],
     update: () => Unit
   ): TypedTag[TableCell] =
-    _tdMapEdit(cellClass, cellId, eid, update,
+    _tdMapEdit(cellId, cellClass, eid, update,
       vs.toSeq.sortBy(_._1),
       (k: String, v: String) => k + " -> " + v
     )
 
   def _tdMapDoubleEdit(
-    vs: Map[String, Double],
-    cellClass: String,
     cellId: String,
+    cellClass: String,
     eid: Long,
+    vs: Map[String, Double],
     update: () => Unit
   ): TypedTag[TableCell] =
-    _tdMapEdit(cellClass, cellId, eid, update,
+    _tdMapEdit(cellId, cellClass, eid, update,
       vs.toSeq.sortBy(_._1),
       (k: String, v: Double) => k + " -> " + v
     )
 
 
-  def _tdMapStr(vs: Map[String, String]): TypedTag[TableCell] =
-    mapCell(vs.toSeq.sortBy(_._1), (v: String) => td(_str2frags(v)))
+  def _tdMapStr(
+    cellId: String,
+    vs: Map[String, String]
+  ): TypedTag[TableCell] =
+    mapCell(
+      cellId,
+      vs.toSeq.sortBy(_._1), (v: String) => td(_str2frags(v))
+    )
 
-  def _tdMapDate(vs: Map[String, String]): TypedTag[TableCell] =
-    mapCell(vs.toSeq.sortBy(_._1), (v: String) => td(truncateDateStr(v)))
+  def _tdMapDate(
+    cellId: String,
+    vs: Map[String, String]
+  ): TypedTag[TableCell] =
+    mapCell(
+      cellId,
+      vs.toSeq.sortBy(_._1), (v: String) => td(truncateDateStr(v))
+    )
 
-  def _tdMapStrOther(vs: Map[String, String]): TypedTag[TableCell] =
-    mapCell(vs.toSeq.sortBy(_._1), (v: String) => td(v))
+  def _tdMapStrOther(
+    cellId: String,
+    vs: Map[String, String]
+  ): TypedTag[TableCell] =
+    mapCell(
+      cellId,
+      vs.toSeq.sortBy(_._1), (v: String) => td(v)
+    )
 
-  def _tdMapDouble(vs: Map[String, Double]): TypedTag[TableCell] =
-    mapCell(vs.toSeq.sortBy(_._1), (v: Double) => td(v))
+  def _tdMapDouble(
+    cellId: String,
+    vs: Map[String, Double]
+  ): TypedTag[TableCell] =
+    mapCell(
+      cellId,
+      vs.toSeq.sortBy(_._1), (v: Double) => td(v)
+    )
 
 
   // Hard-coding each combination to make row rendering as fast as possible
@@ -525,40 +612,48 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
   // t ----------------------------------------
 
   def _tdOneT(
+    cellId: String,
     t: Long,
     curT: rx.Var[Long],
     mouseover: () => Unit
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = td(
+    id := cellId,
     cls := Rx(if (curT() == t) "txChosen" else "tx"),
     t, onmouseover := mouseover, noAggrEdit
   )
 
 
   def _tdOneT_tx(
+    cellId: String,
     t: Long,
     tx: Long,
     curT: rx.Var[Long],
     mouseover: () => Unit
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = td(
+    id := cellId,
     cls := Rx(if (curT() == t) "txChosen" else "tx"),
     t, onmouseover := mouseover, noAggrEdit
   )
   def _tdOneT_inst(
+    cellId: String,
     t: Long,
     txInstant: String,
     curT: rx.Var[Long],
     mouseover: () => Unit
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = td(
+    id := cellId,
     cls := Rx(if (curT() == t) "txChosen" else "tx"),
     t, onmouseover := mouseover, noAggrEdit
   )
   def _tdOneT_tx_inst(
+    cellId: String,
     t: Long,
     tx: Long,
     txInstant: String,
     curT: rx.Var[Long],
     mouseover: () => Unit
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = td(
+    id := cellId,
     cls := Rx(if (curT() == t) "txChosen" else "tx"),
     t, onmouseover := mouseover, noAggrEdit
   )
@@ -566,38 +661,46 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
   // tx ----------------------------------------
 
   def _tdOneTx(
+    cellId: String,
     tx: Long,
     curTx: rx.Var[Long],
     mouseover: () => Unit
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = td(
+    id := cellId,
     cls := Rx(if (curTx() == tx) "txChosen" else "tx"),
     tx, onmouseover := mouseover, noAggrEdit
   )
   def _tdOneTx_t(
+    cellId: String,
     tx: Long,
     t: Long,
     curTx: rx.Var[Long],
     mouseover: () => Unit
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = td(
+    id := cellId,
     cls := Rx(if (curTx() == tx) "txChosen" else "tx"),
     tx, onmouseover := mouseover, noAggrEdit
   )
   def _tdOneTx_inst(
+    cellId: String,
     tx: Long,
     txInstant: String,
     curTx: rx.Var[Long],
     mouseover: () => Unit
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = td(
+    id := cellId,
     cls := Rx(if (curTx() == tx) "txChosen" else "tx"),
     tx, onmouseover := mouseover, noAggrEdit
   )
   def _tdOneTx_t_inst(
+    cellId: String,
     tx: Long,
     t: Long,
     txInstant: String,
     curTx: rx.Var[Long],
     mouseover: () => Unit
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = td(
+    id := cellId,
     cls := Rx(if (curTx() == tx) "txChosen" else "tx"),
     tx, onmouseover := mouseover, noAggrEdit
   )
@@ -605,38 +708,46 @@ trait BodyElements extends AppElements with DateHandling with RxBindings {
   // txInstant -----------------------------------
 
   def _tdOneTxInstant(
+    cellId: String,
     txInstant: String,
     curTxInstant: rx.Var[String],
     mouseover: () => Unit
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = td(
+    id := cellId,
     cls := Rx(if (curTxInstant() == txInstant) "txChosen" else "tx"),
     txInstant, onmouseover := mouseover, noAggrEdit
   )
   def _tdOneTxInstant_t(
+    cellId: String,
     txInstant: String,
     t: Long,
     curTxInstant: rx.Var[String],
     mouseover: () => Unit
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = td(
+    id := cellId,
     cls := Rx(if (curTxInstant() == txInstant) "txChosen" else "tx"),
     txInstant, onmouseover := mouseover, noAggrEdit
   )
   def _tdOneTxInstant_tx(
+    cellId: String,
     txInstant: String,
     tx: Long,
     curTxInstant: rx.Var[String],
     mouseover: () => Unit
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = td(
+    id := cellId,
     cls := Rx(if (curTxInstant() == txInstant) "txChosen" else "tx"),
     txInstant, onmouseover := mouseover, noAggrEdit
   )
   def _tdOneTxInstant_t_tx(
+    cellId: String,
     txInstant: String,
     t: Long,
     tx: Long,
     curTxInstant: rx.Var[String],
     mouseover: () => Unit
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = td(
+    id := cellId,
     cls := Rx(if (curTxInstant() == txInstant) "txChosen" else "tx"),
     txInstant, onmouseover := mouseover, noAggrEdit
   )

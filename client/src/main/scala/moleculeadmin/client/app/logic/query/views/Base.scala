@@ -108,6 +108,7 @@ class Base(implicit ctx: Ctx.Owner)
     asserted: Boolean = true
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = cellType match {
     case "str" => td(
+      id := valueCellId,
       if (asserted) () else cls := "retracted",
       if (v.startsWith("http"))
         a(
@@ -122,11 +123,13 @@ class Base(implicit ctx: Ctx.Owner)
     )
 
     case "num" => td(
+      id := valueCellId,
       cls := (if (asserted) "num" else "num retracted"),
       v
     )
 
     case "date" => td(
+      id := valueCellId,
       if (asserted) () else cls := "retracted",
       truncateDateStr(v)
     )
@@ -135,13 +138,13 @@ class Base(implicit ctx: Ctx.Owner)
       val ref = v.toLong
       if (expanding) {
         td(
+          id := valueCellId,
           cls := Rx(
             if (ref == curEntity())
               "eidChosen" + (if (asserted) "" else " retracted")
             else
               "eid" + (if (asserted) "" else " retracted")
           ),
-          id := valueCellId,
           a(href := "#",
             openTriangle,
             color := "#444",
@@ -154,13 +157,13 @@ class Base(implicit ctx: Ctx.Owner)
         )
       } else {
         td(
+          id := valueCellId,
           cls := Rx(
             if (ref == curEntity())
               "eidChosen" + (if (asserted) "" else " retracted")
             else
               "eid" + (if (asserted) "" else " retracted")
           ),
-          id := valueCellId,
           color := "#444",
           ref
         )
@@ -168,16 +171,19 @@ class Base(implicit ctx: Ctx.Owner)
     }
 
     case "enum" => td(
+      id := valueCellId,
       if (asserted) () else cls := "retracted",
       v.split('/')(1)
     )
 
     case "other" => td(
+      id := valueCellId,
       if (asserted) () else cls := "retracted",
       v
     )
 
     case "strSet" => td(
+      id := valueCellId,
       if (asserted) () else cls := "retracted",
       expandingList(
         v.split("__~~__").toSeq.sorted.map { s =>
@@ -197,6 +203,7 @@ class Base(implicit ctx: Ctx.Owner)
     )
 
     case "numSet" => td(
+      id := valueCellId,
       cls := (if (asserted) "num" else "num retracted"),
       expandingList(
         v.split("__~~__").toSeq.map(_.toDouble).sorted.map(n => li(n)))
@@ -256,6 +263,7 @@ class Base(implicit ctx: Ctx.Owner)
 
     case "dateSet" =>
       td(
+        id := valueCellId,
         if (asserted) () else cls := "retracted",
         expandingList(
           v.split("__~~__").toSeq.sorted.map(s => li(truncateDateStr(s)))
@@ -265,12 +273,14 @@ class Base(implicit ctx: Ctx.Owner)
     case "enumSet" =>
       if (expanding)
         td(
+          id := valueCellId,
           if (asserted) () else cls := "retracted",
           v.split("__~~__").toSeq.sorted
             .flatMap(enumAttr => Seq(span(enumAttr.split('/')(1)), br)).init
         )
       else
         td(
+          id := valueCellId,
           if (asserted) () else cls := "retracted",
           v.split('/')(1)
         )
@@ -278,6 +288,7 @@ class Base(implicit ctx: Ctx.Owner)
     case "otherSet" => // Boolean, UUID, URI
       if (expanding)
         td(
+          id := valueCellId,
           if (asserted) () else cls := "retracted",
           expandingList(
             v.split("__~~__").toSeq.sorted.map(s => li(s))
@@ -285,6 +296,7 @@ class Base(implicit ctx: Ctx.Owner)
         )
       else
         td(
+          id := valueCellId,
           if (asserted) () else cls := "retracted",
           v
         )
@@ -298,17 +310,18 @@ class Base(implicit ctx: Ctx.Owner)
           }.sortBy(_._1)
 
         cellType match {
-          case "strMap" => mapCell(rawPairs,
+          case "strMap" => mapCell(valueCellId, rawPairs,
             (v1: String) => td(_str2frags(v1)), asserted)
 
-          case "dateMap" => mapCell(rawPairs,
+          case "dateMap" => mapCell(valueCellId, rawPairs,
             (v1: String) => td(truncateDateStr(v1)), asserted)
 
-          case _ => mapCell(rawPairs, (v1: String) => td(v1), asserted)
+          case _ => mapCell(valueCellId, rawPairs, (v1: String) => td(v1), asserted)
         }
       } else {
         val List(k, v1) = v.split("@", 2).toList
         td(
+          id := valueCellId,
           if (asserted) () else cls := "retracted",
           table(cls := "mapPairs",
             cellType match {
@@ -323,7 +336,7 @@ class Base(implicit ctx: Ctx.Owner)
         )
       }
 
-    case _ => td(v)
+    case _ => td(id := valueCellId, v)
   }
 
 

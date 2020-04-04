@@ -36,6 +36,7 @@ abstract class UpdateClient[T](
 
   // Interface for all cardinalities
   def update(
+    cellIdMaker: Int => String,
     cellId: String,
     cell: TableCell,
     row: TableRow,
@@ -44,6 +45,7 @@ abstract class UpdateClient[T](
     isNum: Boolean): Unit
 
   def updateClient(
+    cellIdMaker: Int => String,
     t: Long, tx: Long, txInstant: String,
     row: TableRow,
     eid: Long,
@@ -136,7 +138,10 @@ abstract class UpdateClient[T](
     val replaceT = (rowIndex1: Int, curRow: TableRow) => {
       // Update callback with new t
       val newCell = tLambda(
-        qr.arrayIndexes(tIndex), tIndex)(ctx)(rowIndex1).render
+        cellIdMaker,
+        qr.arrayIndexes(tIndex),
+        tIndex
+      )(ctx)(rowIndex1).render
       val oldCell = curRow.childNodes.item(tIndex + 1)
       curRow.replaceChild(newCell, oldCell)
     }
@@ -144,7 +149,10 @@ abstract class UpdateClient[T](
     val replaceTx = (rowIndex1: Int, curRow: TableRow) => {
       // Update callback with new tx
       val newCell = txLambda(
-        qr.arrayIndexes(txIndex), txIndex)(ctx)(rowIndex1).render
+        cellIdMaker,
+        qr.arrayIndexes(txIndex),
+        txIndex
+      )(ctx)(rowIndex1).render
       val oldCell = curRow.childNodes.item(txIndex + 1)
       curRow.replaceChild(newCell, oldCell)
     }
@@ -152,7 +160,10 @@ abstract class UpdateClient[T](
     val replaceTxInstant = (rowIndex1: Int, curRow: TableRow) => {
       // Update callback with new txInstant
       val newCell = txInstantLambda(
-        qr.arrayIndexes(txInstantIndex), txInstantIndex)(ctx)(rowIndex1).render
+        cellIdMaker,
+        qr.arrayIndexes(txInstantIndex),
+        txInstantIndex
+      )(ctx)(rowIndex1).render
       val oldCell = curRow.childNodes.item(txInstantIndex + 1)
       curRow.replaceChild(newCell, oldCell)
     }

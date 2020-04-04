@@ -39,6 +39,7 @@ case class UpdateCardMap[T](
   ) {
 
   def update(
+    cellIdMaker: Int => String,
     cellId: String,
     cell: TableCell,
     row: TableRow,
@@ -192,7 +193,7 @@ case class UpdateCardMap[T](
         val data = Seq((eid, retracts, asserts))
         queryWireAjax().updateStr(db, attrFull, "String", "", data).call().foreach {
           case Right((t, tx, txInstant)) =>
-            updateClient(t, tx, txInstant, row, eid, newVopt)
+            updateClient(cellIdMaker, t, tx, txInstant, row, eid, newVopt)
             println(s"Updated $attrFull: $retractsAsserts")
 
           case Left(err) =>
