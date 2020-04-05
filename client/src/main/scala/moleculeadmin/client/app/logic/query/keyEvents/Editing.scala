@@ -121,6 +121,7 @@ trait Editing {
     val curRow  = curCell.parentNode
     val nextRow = curRow.nextSibling
     editCellId = curCell.id
+    println("saveEditMoveDown " + editCellId + " ...")
     if (nextRow != null) {
       val colNo     = getColNo(editCellId)
       val cellBelow = nextRow.childNodes.item(colNo)
@@ -134,6 +135,8 @@ trait Editing {
     } else {
       curCell.asInstanceOf[HTMLInputElement].blur()
     }
+    println("saveEditMoveDown " + editCellId + " done")
+
     // reset current edit cell id
     editCellId = ""
   }
@@ -143,6 +146,7 @@ trait Editing {
     e.preventDefault()
     val curCell = document.activeElement.asInstanceOf[HTMLInputElement]
     editCellId = curCell.id
+    println("saveEditMoveForward " + editCellId + " ...")
 
     def nextEditableCell(testCell: HTMLInputElement): Option[HTMLInputElement] = {
       val sibling = testCell.nextSibling.asInstanceOf[HTMLInputElement]
@@ -157,8 +161,17 @@ trait Editing {
     nextEditableCell(curCell).fold {
       // Trigger update with blur
       curCell.blur()
-      // Re-select cell to stay in business
-      selectContent(curCell)
+      // Go to first selectable cell in next row
+      val curRow  = curCell.parentNode
+      val nextRow = curRow.nextSibling
+      if (nextRow != null) {
+        val firstCellNextRow = nextRow.firstChild.asInstanceOf[HTMLInputElement]
+        selectContent(nextEditableCell(firstCellNextRow).get)
+      } else {
+        // Re-select cell to not loose focus
+        selectContent(curCell)
+      }
+
     } { nextCell =>
       // Select content of next editable cell
       // Fires blur-callback (save) on current cell
@@ -168,6 +181,7 @@ trait Editing {
         selectContent(curCell)
       }
     }
+    println("saveEditMoveForward " + editCellId + " done")
     editCellId = ""
   }
 
@@ -176,6 +190,7 @@ trait Editing {
     e.preventDefault()
     val curCell = document.activeElement.asInstanceOf[HTMLInputElement]
     editCellId = curCell.id
+    println("saveEditMoveBackwards " + editCellId + " ...")
 
     def previousEditableCell(testCell: HTMLInputElement): Option[HTMLInputElement] = {
       val sibling = testCell.previousSibling.asInstanceOf[HTMLInputElement]
@@ -190,7 +205,7 @@ trait Editing {
     previousEditableCell(curCell).fold {
       // Trigger update with blur
       curCell.blur()
-      // Re-select cell to stay in business
+      // Re-select cell to not loose focus
       selectContent(curCell)
     } { nextCell =>
       // Select content of previous editable cell
@@ -201,6 +216,7 @@ trait Editing {
         selectContent(curCell)
       }
     }
+    println("saveEditMoveBackwards " + editCellId + " done")
     editCellId = ""
   }
 }

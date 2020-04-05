@@ -129,7 +129,7 @@ case class GroupSave(col: Col)(implicit val ctx: Ctx.Owner)
     prepare: (Long, Option[ColType], Option[ColType]) => Seq[(Long, Seq[T], Seq[T])],
     save: Seq[(Long, Seq[T], Seq[T])] => Future[Either[String, (Long, Long, String)]],
     updateCell: (Int, Option[ColType]) => Unit
-  ): Unit = {
+  ): Unit = try {
     val origArray = arrays(origIndex)
     val editArray = arrays(editIndex)
     var oldVopt   = Option.empty[ColType]
@@ -138,8 +138,8 @@ case class GroupSave(col: Col)(implicit val ctx: Ctx.Owner)
     var i         = 0
     var j         = 0
 
-    //    println("eidArray -------------")
-    //    eidArray foreach println
+    println("eidArray -------------")
+//    eidArray foreach println
 
     while (i < lastRow) {
       j = indexBridge(i)
@@ -150,8 +150,8 @@ case class GroupSave(col: Col)(implicit val ctx: Ctx.Owner)
       i += 1
     }
 
-    //    println("data -----------------")
-    //    data foreach println
+    println("data -----------------")
+    data foreach println
 
 
     if (data.nonEmpty) {
@@ -184,6 +184,10 @@ case class GroupSave(col: Col)(implicit val ctx: Ctx.Owner)
     } else {
       println("No changes")
     }
+  } catch {
+    case e: Throwable =>
+      println("Unexpected error saving group data: " + e)
+      throw e
   }
 
 
