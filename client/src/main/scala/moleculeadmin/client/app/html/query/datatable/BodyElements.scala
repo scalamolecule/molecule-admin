@@ -196,7 +196,6 @@ trait BodyElements
     optValue.fold("")(_.toString)
   )
 
-
   def _tdOneRefEdit(
     cellId: String,
     eid: Long,

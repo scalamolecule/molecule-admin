@@ -89,6 +89,11 @@ abstract class ScalaCodeImplicits(cols: Seq[Col], col: Col, scalaExpr: String)
   val str2uuid = "implicit def str2uuid(s: String): UUID = UUID.fromString(s)"
   val str2uri  = "implicit def str2uri(s: String): URI = new URI(s)"
 
+  val regex =
+    s"""implicit class Regex(sc: StringContext) {
+       |    def r = new scala.util.matching.Regex(sc.parts.mkString, sc.parts.tail.map(_ => "x"): _*)
+       |  }""".stripMargin
+
   val dateImplicits =
     s"""implicit def str2ldt(s: String): LocalDateTime = {
        |    val msec = $q(\\d{1,4})-(1[0-2]|0?[0-9])-(3[01]|[12][0-9]|0?[0-9])[T ]+(2[0-3]|1[0-9]|0?[0-9]):([1-5][0-9]|0?[0-9]):([1-5][0-9]|0?[0-9])\\.(\\d{1,3})$q.r

@@ -78,10 +78,11 @@ case class ScalaCode(cols: Seq[Col], col: Col, scalaExpr: String)
         float2bigDecErr).mkString("  ", "\n  ", "")
 
       // indenting here so that we can test empty imports
-      case "Date" => "  " + dateImplicits
-      case "UUID" => "  " + str2uuid
-      case "URI"  => "  " + str2uri
-      case _      => "" // no conversions
+      case "String" => "  " + regex
+      case "Date"   => "  " + dateImplicits
+      case "UUID"   => "  " + str2uuid
+      case "URI"    => "  " + str2uri
+      case _        => "" // no conversions
     }
 
     val mapToString = if (attrType == "Date")
@@ -128,7 +129,7 @@ case class ScalaCode(cols: Seq[Col], col: Col, scalaExpr: String)
     )
 
     val implicits = (attrType match {
-      case "String"                 => Seq(iterStr2arr)
+      case "String"                 => Seq(iterStr2arr, regex)
       case "Int"                    => Seq(iter2arr)
       case "Long" | "datom" | "ref" => Seq(iter2arr, iterAnyLong2iterBigInt)
       case "BigInt"                 => Seq(iter2arr, iterAny2iterBigInt)
@@ -181,7 +182,7 @@ case class ScalaCode(cols: Seq[Col], col: Col, scalaExpr: String)
     )
 
     val implicits = (attrType match {
-      case "String"                 => Seq(mapStr2dict)
+      case "String"                 => Seq(mapStr2dict, regex)
       case "Int"                    => Seq(map2dict)
       case "Long" | "datom" | "ref" => Seq(map2dict, mapAnyLong2mapBigInt)
       case "BigInt"                 => Seq(map2dict, mapAny2mapBigInt)

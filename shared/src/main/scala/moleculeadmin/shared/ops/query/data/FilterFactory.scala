@@ -11,27 +11,27 @@ trait FilterFactory extends RegexMatching with DateHandling {
   def predString(token: String): Option[Option[String] => Boolean] = {
     // (don't trim to allow matching empty string)
     token match {
-      case ""                  => None // no filter
-      case "-"                 => Some(_.isEmpty)
-      case "+"                 => Some(_.isDefined)
-      case r"\{( *)$spaces\}"  => Some(_.fold(false)(s => s.matches(spaces)))
-      case r"/(.*)$regex"   => Some(_.fold(false)(s => s.matches(regex)))
-      case r"i/(.*)$regex"  => Some(_.fold(false)(s =>
+      case ""                 => None // no filter
+      case "-"                => Some(_.isEmpty)
+      case "+"                => Some(_.isDefined)
+      case r"\{( *)$spaces\}" => Some(_.fold(false)(s => s.matches(spaces)))
+      case r"/(.*)$regex"     => Some(_.fold(false)(s => s.matches(regex)))
+      case r"i/(.*)$regex"    => Some(_.fold(false)(s =>
         Pattern.compile(regex, Pattern.CASE_INSENSITIVE).matcher(s).matches()
       ))
-      case r"!/(.*)$regex"  => Some(_.fold(false) { s =>
+      case r"!/(.*)$regex"    => Some(_.fold(false) { s =>
         !Pattern.compile(regex).matcher(s).matches()
       })
-      case r"!i/(.*)$regex" => Some(_.fold(false)(s =>
+      case r"!i/(.*)$regex"   => Some(_.fold(false)(s =>
         !Pattern.compile(regex, Pattern.CASE_INSENSITIVE).matcher(s).matches()
       ))
-      case r"v *=>(.*)"        => None // todo?: compile Scala filter expr
-      case r"!(.*)$needle"     => Some(_.fold(false)(s => !s.contains(needle)))
-      case r">=(.*)$needle"    => Some(_.fold(false)(s => s >= needle))
-      case r">(.*)$needle"     => Some(_.fold(false)(s => s > needle))
-      case r"<=(.*)$needle"    => Some(_.fold(false)(s => s <= needle))
-      case r"<(.*)$needle"     => Some(_.fold(false)(s => s < needle))
-      case needle              => Some(_.fold(false)(s => s.contains(needle)))
+      case r"v *=>(.*)"       => None // todo?: compile Scala filter expr
+      case r"!(.*)$needle"    => Some(_.fold(false)(s => !s.contains(needle)))
+      case r">=(.*)$needle"   => Some(_.fold(false)(s => s >= needle))
+      case r">(.*)$needle"    => Some(_.fold(false)(s => s > needle))
+      case r"<=(.*)$needle"   => Some(_.fold(false)(s => s <= needle))
+      case r"<(.*)$needle"    => Some(_.fold(false)(s => s < needle))
+      case needle             => Some(_.fold(false)(s => s.contains(needle)))
     }
   }
 
