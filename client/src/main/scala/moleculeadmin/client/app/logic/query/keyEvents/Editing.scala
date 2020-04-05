@@ -1,6 +1,7 @@
 package moleculeadmin.client.app.logic.query.keyEvents
 
 import moleculeadmin.client.app.logic.query.QueryState.editCellId
+import org.scalajs.dom.html.TableRow
 import org.scalajs.dom.raw.{Element, HTMLInputElement, HTMLUListElement, KeyboardEvent}
 import org.scalajs.dom.{Node, document, window}
 import scalatags.JsDom.all._
@@ -19,6 +20,15 @@ trait Editing {
     sel.addRange(range);
   }
 
+  def markNewRow(curRow: Node, newRow: Node): Unit = {
+    curRow.asInstanceOf[TableRow].className = "view"
+    newRow.asInstanceOf[TableRow].className = "edit"
+  }
+
+  def remarkRow(curRow: Node): Unit = {
+    curRow.asInstanceOf[TableRow].className = "edit"
+  }
+
   def cellUp(): Unit = {
     val curCell = document.activeElement
     val curRow  = curCell.parentNode
@@ -27,6 +37,7 @@ trait Editing {
       val colNo     = getColNo(curCell.id)
       val cellAbove = prevRow.childNodes.item(colNo)
       selectContent(cellAbove.asInstanceOf[HTMLInputElement])
+      markNewRow(curRow, prevRow)
     }
   }
 
@@ -38,6 +49,7 @@ trait Editing {
       val colNo     = getColNo(curCell.id)
       val cellBelow = nextRow.childNodes.item(colNo)
       selectContent(cellBelow.asInstanceOf[HTMLInputElement])
+      markNewRow(curRow, nextRow)
     }
   }
 
@@ -131,6 +143,8 @@ trait Editing {
       if (editCellId.isEmpty) {
         // Re-select content in original cell if invalid data
         selectContent(curCell)
+      } else {
+        markNewRow(curRow, nextRow)
       }
     } else {
       curCell.asInstanceOf[HTMLInputElement].blur()
@@ -167,6 +181,7 @@ trait Editing {
       if (nextRow != null) {
         val firstCellNextRow = nextRow.firstChild.asInstanceOf[HTMLInputElement]
         selectContent(nextEditableCell(firstCellNextRow).get)
+        markNewRow(curRow, nextRow)
       } else {
         // Re-select cell to not loose focus
         selectContent(curCell)
@@ -179,6 +194,8 @@ trait Editing {
       if (editCellId.isEmpty) {
         // Re-select content in original cell if invalid data
         selectContent(curCell)
+      } else {
+        remarkRow(curCell.parentNode)
       }
     }
     println("saveEditMoveForward " + editCellId + " done")
@@ -214,6 +231,8 @@ trait Editing {
       if (editCellId.isEmpty) {
         // Re-select content in original cell if invalid data
         selectContent(curCell)
+      } else {
+        remarkRow(curCell.parentNode)
       }
     }
     println("saveEditMoveBackwards " + editCellId + " done")

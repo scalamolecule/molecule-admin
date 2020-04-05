@@ -108,6 +108,8 @@ abstract class Cell(
       () => {
         val cell: TableCell = document.getElementById(cellId).asInstanceOf[TableCell]
         val row : TableRow  = cell.parentNode.asInstanceOf[TableRow]
+        // Unmark row when going out of focus
+        row.className = "view"
         val eid : Long      = cell.getAttribute("eid").toLong
         updater.update(mkId, cellId, cell, row, eid, oldVOpt, isNum)
       }
@@ -141,6 +143,11 @@ abstract class Cell(
         (baseClass: String, _: Int) => baseClass
     }
 
+    val markRow = (cellId: String) => { () =>
+      document.getElementById(cellId)
+        .parentNode.asInstanceOf[TableRow].className = "edit"
+    }
+
     colType match {
 
       // card one --------------------------------------------------------------
@@ -171,7 +178,8 @@ abstract class Cell(
                     _urlSpan(s.get, true)
                   else
                     _optStr2frags(s),
-                  update(origArray, array, rowIndex, "str")
+                  update(origArray, array, rowIndex, "str"),
+                  markRow
                 )
 
             case "date" =>
@@ -181,7 +189,8 @@ abstract class Cell(
                   getCls("date", rowIndex),
                   e,
                   array(rowIndex),
-                  update(origArray, array, rowIndex, "date")
+                  update(origArray, array, rowIndex, "date"),
+                  markRow
                 )
 
             case "big" =>
@@ -191,7 +200,8 @@ abstract class Cell(
                   getCls("num", rowIndex),
                   e,
                   array(rowIndex),
-                  update(origArray, array, rowIndex, "num")
+                  update(origArray, array, rowIndex, "num"),
+                  markRow
                 )
 
             case _ =>
@@ -201,7 +211,8 @@ abstract class Cell(
                   getCls("", rowIndex),
                   e,
                   array(rowIndex),
-                  update(origArray, array, rowIndex, "")
+                  update(origArray, array, rowIndex, ""),
+                  markRow
                 )
           }
         } else {
@@ -310,7 +321,8 @@ abstract class Cell(
                 mkId(rowIndex),
                 e,
                 array(rowIndex),
-                update(origArray, array, rowIndex, "num")
+                update(origArray, array, rowIndex, "num"),
+                markRow
               )
 
           case "ref" if editable =>
@@ -333,7 +345,8 @@ abstract class Cell(
                 getCls("num", rowIndex),
                 e,
                 array(rowIndex),
-                update(origArray, array, rowIndex, "num")
+                update(origArray, array, rowIndex, "num"),
+                markRow
               )
 
           case "ref" =>
@@ -382,7 +395,8 @@ abstract class Cell(
                     else
                       _str2frags(s)
                   ),
-                  update(origArray, array, rowIndex, "items")
+                  update(origArray, array, rowIndex, "items"),
+                  markRow
                 )
 
             case "date" =>
@@ -392,7 +406,8 @@ abstract class Cell(
                   getCls("str", rowIndex),
                   e,
                   array(rowIndex).getOrElse(List.empty[String]).sorted,
-                  update(origArray, array, rowIndex, "str")
+                  update(origArray, array, rowIndex, "str"),
+                  markRow
                 )
 
             case "big" =>
@@ -402,7 +417,8 @@ abstract class Cell(
                   getCls("num", rowIndex),
                   e,
                   array(rowIndex).getOrElse(List.empty[String]).sorted,
-                  update(origArray, array, rowIndex, "num")
+                  update(origArray, array, rowIndex, "num"),
+                  markRow
                 )
 
             case _ =>
@@ -412,7 +428,8 @@ abstract class Cell(
                   getCls("str", rowIndex),
                   e,
                   array(rowIndex).getOrElse(List.empty[String]).sorted,
-                  update(origArray, array, rowIndex, "str")
+                  update(origArray, array, rowIndex, "str"),
+                  markRow
                 )
           }
         } else {
@@ -488,7 +505,8 @@ abstract class Cell(
                   e,
                   vs.map(_.toLong).sorted,
                   (ref: Long) => () => curEntity() = ref,
-                  update(origArray, array, rowIndex, "")
+                  update(origArray, array, rowIndex, ""),
+                  markRow
                 )
               )
 
@@ -501,7 +519,8 @@ abstract class Cell(
                 array(rowIndex).getOrElse(List.empty[Double]).map(_.toLong).sorted,
                 setCurEid(false),
                 lockCurEid(false),
-                update(origArray, array, rowIndex, "")
+                update(origArray, array, rowIndex, ""),
+                markRow
               )
 
           case "ref" =>
@@ -527,7 +546,8 @@ abstract class Cell(
                 getCls("num", rowIndex),
                 e,
                 array(rowIndex).getOrElse(List.empty[Double]).sorted,
-                update(origArray, array, rowIndex, "num")
+                update(origArray, array, rowIndex, "num"),
+                markRow
               )
 
           case _ =>
@@ -555,7 +575,8 @@ abstract class Cell(
                   getCls("items", rowIndex),
                   e,
                   array(rowIndex).getOrElse(Map.empty[String, String]),
-                  update(origArray, array, rowIndex, "items")
+                  update(origArray, array, rowIndex, "items"),
+                  markRow
                 )
 
             case "date" =>
@@ -565,7 +586,8 @@ abstract class Cell(
                   getCls("str", rowIndex),
                   e,
                   array(rowIndex).getOrElse(Map.empty[String, String]),
-                  update(origArray, array, rowIndex, "str")
+                  update(origArray, array, rowIndex, "str"),
+                  markRow
                 )
 
             case _ =>
@@ -575,7 +597,8 @@ abstract class Cell(
                   getCls("str", rowIndex),
                   e,
                   array(rowIndex).getOrElse(Map.empty[String, String]),
-                  update(origArray, array, rowIndex, "str")
+                  update(origArray, array, rowIndex, "str"),
+                  markRow
                 )
           }
         } else {
@@ -617,7 +640,8 @@ abstract class Cell(
               getCls("str", rowIndex),
               e,
               array(rowIndex).getOrElse(Map.empty[String, Double]),
-              update(origArray, array, rowIndex, "str")
+              update(origArray, array, rowIndex, "str"),
+              markRow
             )
         } else {
           rowIndex: Int =>
