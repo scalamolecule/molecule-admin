@@ -4,10 +4,11 @@ import moleculeadmin.client.app.logic.query.QueryState.editCellId
 import org.scalajs.dom.html.TableRow
 import org.scalajs.dom.raw.{Element, HTMLInputElement, HTMLUListElement, KeyboardEvent}
 import org.scalajs.dom.{Node, document, window}
+import rx.Ctx
 import scalatags.JsDom.all._
 
 
-trait Editing {
+trait Editing extends Paging {
 
   def getColNo(id: String): Int =
     if (id.startsWith("grouped-cell-")) 1 else id.substring(4, 6).trim.toInt
@@ -25,7 +26,7 @@ trait Editing {
     newRow.asInstanceOf[TableRow].className = "edit"
   }
 
-  def remarkRow(curRow: Node): Unit = {
+  def markRow(curRow: Node): Unit = {
     curRow.asInstanceOf[TableRow].className = "edit"
   }
 
@@ -133,7 +134,7 @@ trait Editing {
     val curRow  = curCell.parentNode
     val nextRow = curRow.nextSibling
     editCellId = curCell.id
-    println("saveEditMoveDown " + editCellId + " ...")
+    //    println("saveEditMoveDown " + editCellId + " ...")
     if (nextRow != null) {
       val colNo     = getColNo(editCellId)
       val cellBelow = nextRow.childNodes.item(colNo)
@@ -149,18 +150,19 @@ trait Editing {
     } else {
       curCell.asInstanceOf[HTMLInputElement].blur()
     }
-    println("saveEditMoveDown " + editCellId + " done")
+    //    println("saveEditMoveDown " + editCellId + " done")
 
     // reset current edit cell id
     editCellId = ""
   }
 
-  def saveEditMoveForward(e: KeyboardEvent): Unit = {
+
+  def saveEditMoveForward(e: KeyboardEvent)(implicit ctx: Ctx.Owner): Unit = {
     // prevent immediately moving to next cell
     e.preventDefault()
     val curCell = document.activeElement.asInstanceOf[HTMLInputElement]
     editCellId = curCell.id
-    println("saveEditMoveForward " + editCellId + " ...")
+    //    println("saveEditMoveForward " + editCellId + " ...")
 
     def nextEditableCell(testCell: HTMLInputElement): Option[HTMLInputElement] = {
       val sibling = testCell.nextSibling.asInstanceOf[HTMLInputElement]
@@ -183,10 +185,21 @@ trait Editing {
         selectContent(nextEditableCell(firstCellNextRow).get)
         markNewRow(curRow, nextRow)
       } else {
-        // Re-select cell to not loose focus
-        selectContent(curCell)
-      }
+        if (isLast) {
+          // Re-select cell to not loose focus
+          selectContent(curCell)
+          markRow(curRow)
+        } else {
+          // Go to next page and select first editable cell on first row
+          nextPage
+          val firstRow  = document.getElementById("tableBody")
+            .firstChild.asInstanceOf[TableRow]
+          val firstCell = firstRow.firstChild.asInstanceOf[HTMLInputElement]
+          markRow(firstRow)
+          selectContent(nextEditableCell(firstCell).get)
+        }
 
+      }
     } { nextCell =>
       // Select content of next editable cell
       // Fires blur-callback (save) on current cell
@@ -195,19 +208,20 @@ trait Editing {
         // Re-select content in original cell if invalid data
         selectContent(curCell)
       } else {
-        remarkRow(curCell.parentNode)
+        markRow(curCell.parentNode)
       }
     }
-    println("saveEditMoveForward " + editCellId + " done")
+    //    println("saveEditMoveForward " + editCellId + " done")
     editCellId = ""
   }
 
-  def saveEditMoveBackwards(e: KeyboardEvent): Unit = {
+
+  def saveEditMoveBackwards(e: KeyboardEvent)(implicit ctx: Ctx.Owner): Unit = {
     // prevent immediately moving to next cell
     e.preventDefault()
     val curCell = document.activeElement.asInstanceOf[HTMLInputElement]
     editCellId = curCell.id
-    println("saveEditMoveBackwards " + editCellId + " ...")
+    //    println("saveEditMoveBackwards " + editCellId + " ...")
 
     def previousEditableCell(testCell: HTMLInputElement): Option[HTMLInputElement] = {
       val sibling = testCell.previousSibling.asInstanceOf[HTMLInputElement]
@@ -222,20 +236,40 @@ trait Editing {
     previousEditableCell(curCell).fold {
       // Trigger update with blur
       curCell.blur()
-      // Re-select cell to not loose focus
-      selectContent(curCell)
-    } { nextCell =>
+      // Go to last selectable cell in previous row
+      val curRow  = curCell.parentNode
+      val prevRow = curRow.previousSibling
+      if (prevRow != null) {
+        val lastCellPrevRow = prevRow.lastChild.asInstanceOf[HTMLInputElement]
+        selectContent(previousEditableCell(lastCellPrevRow).get)
+        markNewRow(curRow, prevRow)
+      } else {
+        if (isFirst) {
+          // Re-select cell to not loose focus
+          selectContent(curCell)
+          markRow(curRow)
+        } else {
+          // Go to previous page and select last editable cell on last row
+          prevPage
+          val lastRow  = document.getElementById("tableBody")
+            .lastChild.asInstanceOf[TableRow]
+          val lastCell = lastRow.lastChild.asInstanceOf[HTMLInputElement]
+          markRow(lastRow)
+          selectContent(previousEditableCell(lastCell).get)
+        }
+      }
+    } { prevCell =>
       // Select content of previous editable cell
       // Fires blur-callback (save) on current cell
-      selectContent(nextCell)
+      selectContent(prevCell)
       if (editCellId.isEmpty) {
         // Re-select content in original cell if invalid data
         selectContent(curCell)
       } else {
-        remarkRow(curCell.parentNode)
+        markRow(curCell.parentNode)
       }
     }
-    println("saveEditMoveBackwards " + editCellId + " done")
+    //    println("saveEditMoveBackwards " + editCellId + " done")
     editCellId = ""
   }
 }

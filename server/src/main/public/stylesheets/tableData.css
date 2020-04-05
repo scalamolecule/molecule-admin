@@ -130,7 +130,11 @@
     background: #ffcc3c6b;
 }
 .tableData tbody tr.edit {
-    background: #c2edff;
+    #background: #d3f2ff;
+    ##background: #ddf5ff;
+    #background: #ddffde;
+    #background: #bdffa8;
+    background: #c6ffb4;
 }
 
 
