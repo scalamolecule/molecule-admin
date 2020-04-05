@@ -154,5 +154,6 @@ trait Inserting extends Insert with BaseQuery with Editing {
     ).render
     tableBody.appendChild(newRow)
     newRow.children.item(2).asInstanceOf[TableCell].focus()
+    markNewRow(tableBody.lastElementChild, newRow)
   }
 }

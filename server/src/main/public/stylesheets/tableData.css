@@ -122,14 +122,15 @@
 .tableData tbody td:nth-child(1) {
     text-align: right;
 }
-.tableData tbody tr:nth-child(even) {
+
+.tableData tbody tr.view:nth-child(even) {
     background: #f2f2f2;
 }
-.tableData tbody tr:hover {
+.tableData tbody tr.view:hover {
     background: #ffcc3c6b;
 }
-.tableData tbody tr:nth-child(even):hover {
-    background: #ffcc3c6b;
+.tableData tbody tr.edit {
+    background: #c2edff;
 }
 
 

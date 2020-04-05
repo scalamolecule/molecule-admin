@@ -27,6 +27,7 @@ trait BodyElements
     rowIndex: Int,
     cells: JsDom.TypedTag[TableCell]*
   ): TableRow = tr(
+    cls := "view",
     td(rowIndex + 1),
     onmouseover := { () =>
       if (toggling) {
@@ -152,29 +153,35 @@ trait BodyElements
     cellClass: String,
     eid: Long,
     strFrag: Frag,
-    update: () => Unit
-  ): TypedTag[TableCell] = td(
-    id := cellId,
-    cls := cellClass,
-    attr("card") := 1,
-    attr("eid") := eid,
-    contenteditable := true,
-    onblur := update,
-    strFrag
-  )
+    update: () => Unit,
+    markRow: String => () => Unit,
+  ): TypedTag[TableCell] = {
+    td(
+      id := cellId,
+      cls := cellClass,
+      attr("card") := 1,
+      attr("eid") := eid,
+      contenteditable := true,
+      onclick := markRow(cellId),
+      onblur := update,
+      strFrag,
+    )
+  }
 
   def _tdOneDateEdit(
     cellId: String,
     cellClass: String,
     eid: Long,
     optValue: Option[String],
-    update: () => Unit
+    update: () => Unit,
+    markRow: String => () => Unit,
   ): TypedTag[TableCell] = td(
     id := cellId,
     cls := cellClass,
     attr("card") := 1,
     attr("eid") := eid,
     contenteditable := true,
+    onclick := markRow(cellId),
     onblur := update,
     optValue.fold("")(truncateDateStr)
   )
@@ -185,13 +192,15 @@ trait BodyElements
     cellClass: String,
     eid: Long,
     optValue: Option[T],
-    update: () => Unit
+    update: () => Unit,
+    markRow: String => () => Unit,
   ): TypedTag[TableCell] = td(
     id := cellId,
     cls := cellClass,
     attr("card") := 1,
     attr("eid") := eid,
     contenteditable := true,
+    onclick := markRow(cellId),
     onblur := update,
     optValue.fold("")(_.toString)
   )
@@ -224,7 +233,8 @@ trait BodyElements
     cellId: String,
     eid: Long,
     optValue: Option[Double],
-    update: () => Unit
+    update: () => Unit,
+    markRow: String => () => Unit,
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = {
     val ref = optValue.fold("")(_.toString)
     td(
@@ -234,6 +244,7 @@ trait BodyElements
       attr("card") := 1,
       attr("eid") := eid,
       contenteditable := true,
+      onclick := markRow(cellId),
       onblur := update,
     )
   }
@@ -243,13 +254,15 @@ trait BodyElements
     cellClass: String,
     eid: Long,
     optValue: Option[String],
-    update: () => Unit
+    update: () => Unit,
+    markRow: String => () => Unit,
   ): TypedTag[TableCell] = td(
     id := cellId,
     cls := cellClass,
     attr("card") := 1,
     attr("eid") := eid,
     contenteditable := true,
+    onclick := markRow(cellId),
     onblur := update,
     optValue.fold("")(_.toString)
   )
@@ -370,13 +383,15 @@ trait BodyElements
     cellClass: String,
     eid: Long,
     strFrags: List[Seq[Frag]],
-    update: () => Unit
+    update: () => Unit,
+    markRow: String => () => Unit,
   ): TypedTag[TableCell] = td(
     id := cellId,
     cls := cellClass,
     attr("card") := 2,
     attr("eid") := eid,
     contenteditable := true,
+    onclick := markRow(cellId),
     onblur := update,
     ul(strFrags.map(li(_)))
   )
@@ -386,13 +401,15 @@ trait BodyElements
     cellClass: String,
     eid: Long,
     vs: List[String],
-    update: () => Unit
+    update: () => Unit,
+    markRow: String => () => Unit,
   ): TypedTag[TableCell] = td(
     id := cellId,
     cls := cellClass,
     attr("card") := 2,
     attr("eid") := eid,
     contenteditable := true,
+    onclick := markRow(cellId),
     onblur := update,
     ul(vs.map(li(_)))
   )
@@ -402,13 +419,15 @@ trait BodyElements
     cellClass: String,
     eid: Long,
     vs: List[String],
-    update: () => Unit
+    update: () => Unit,
+    markRow: String => () => Unit,
   ): TypedTag[TableCell] = td(
     id := cellId,
     cls := cellClass,
     attr("card") := 2,
     attr("eid") := eid,
     contenteditable := true,
+    onclick := markRow(cellId),
     onblur := update,
     ul(vs.map(li(_)))
   )
@@ -418,13 +437,15 @@ trait BodyElements
     cellClass: String,
     eid: Long,
     vs: List[String],
-    update: () => Unit
+    update: () => Unit,
+    markRow: String => () => Unit,
   ): TypedTag[TableCell] = td(
     id := cellId,
     cls := cellClass,
     attr("card") := 2,
     attr("eid") := eid,
     contenteditable := true,
+    onclick := markRow(cellId),
     onblur := update,
     ul(vs.map(li(_)))
   )
@@ -434,13 +455,15 @@ trait BodyElements
     cellClass: String,
     eid: Long,
     vs: List[Double],
-    update: () => Unit
+    update: () => Unit,
+    markRow: String => () => Unit,
   ): TypedTag[TableCell] = td(
     id := cellId,
     cls := cellClass,
     attr("card") := 2,
     attr("eid") := eid,
     contenteditable := true,
+    onclick := markRow(cellId),
     onblur := update,
     vs.flatMap(v => Seq(v: Frag, br))
   )
@@ -452,13 +475,15 @@ trait BodyElements
     refs: List[Long],
     setCurEid: Long => () => Unit,
     lockCurEid: Long => () => Unit,
-    update: () => Unit
+    update: () => Unit,
+    markRow: String => () => Unit,
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = {
     td(
       id := cellId,
       attr("card") := 2,
       attr("eid") := eid,
       contenteditable := true,
+      onclick := markRow(cellId),
       onblur := update,
       ul(
         refs.map(ref =>
@@ -479,7 +504,8 @@ trait BodyElements
     eid: Long,
     refs: List[Long],
     setCurEid: Long => () => Unit,
-    update: () => Unit
+    update: () => Unit,
+    markRow: String => () => Unit,
   ): TypedTag[TableCell] = {
     td(
       id := cellId,
@@ -487,6 +513,7 @@ trait BodyElements
       attr("card") := 2,
       attr("eid") := eid,
       contenteditable := true,
+      onclick := markRow(cellId),
       onblur := update,
       ul(
         refs.map(ref =>
@@ -508,14 +535,16 @@ trait BodyElements
     cellClass: String,
     eid: Long,
     update: () => Unit,
+    markRow: String => () => Unit,
     pairs: Seq[(String, T)],
-    processPair: (String, T) => Frag
+    processPair: (String, T) => Frag,
   ): TypedTag[TableCell] = td(
     id := cellId,
     cls := cellClass,
     attr("card") := 3,
     attr("eid") := eid,
     contenteditable := true,
+    onclick := markRow(cellId),
     onblur := update,
     ul(pairs.map { case (k, v) => li(processPair(k, v)) })
   )
@@ -525,9 +554,10 @@ trait BodyElements
     cellClass: String,
     eid: Long,
     vs: Map[String, String],
-    update: () => Unit
+    update: () => Unit,
+    markRow: String => () => Unit,
   ): TypedTag[TableCell] =
-    _tdMapEdit(cellId, cellClass, eid, update,
+    _tdMapEdit(cellId, cellClass, eid, update, markRow,
       vs.toSeq.sortBy(_._1),
       (k: String, v: String) => _str2frags(k + " -> " + v)
     )
@@ -537,9 +567,10 @@ trait BodyElements
     cellClass: String,
     eid: Long,
     vs: Map[String, String],
-    update: () => Unit
+    update: () => Unit,
+    markRow: String => () => Unit,
   ): TypedTag[TableCell] =
-    _tdMapEdit(cellId, cellClass, eid, update,
+    _tdMapEdit(cellId, cellClass, eid, update, markRow,
       vs.toSeq.sortBy(_._1),
       (k: String, v: String) => k + " -> " + truncateDateStr(v)
     )
@@ -549,9 +580,10 @@ trait BodyElements
     cellClass: String,
     eid: Long,
     vs: Map[String, String],
-    update: () => Unit
+    update: () => Unit,
+    markRow: String => () => Unit,
   ): TypedTag[TableCell] =
-    _tdMapEdit(cellId, cellClass, eid, update,
+    _tdMapEdit(cellId, cellClass, eid, update, markRow,
       vs.toSeq.sortBy(_._1),
       (k: String, v: String) => k + " -> " + v
     )
@@ -561,9 +593,10 @@ trait BodyElements
     cellClass: String,
     eid: Long,
     vs: Map[String, Double],
-    update: () => Unit
+    update: () => Unit,
+    markRow: String => () => Unit,
   ): TypedTag[TableCell] =
-    _tdMapEdit(cellId, cellClass, eid, update,
+    _tdMapEdit(cellId, cellClass, eid, update, markRow,
       vs.toSeq.sortBy(_._1),
       (k: String, v: Double) => k + " -> " + v
     )

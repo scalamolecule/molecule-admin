@@ -1,6 +1,7 @@
 package moleculeadmin.client.app.logic.query.keyEvents
 
 import org.scalajs.dom.document
+import org.scalajs.dom.html.{TableCell, TableRow}
 import org.scalajs.dom.raw.{HTMLInputElement, KeyboardEvent}
 import scala.scalajs.js.timers.setTimeout
 
@@ -30,7 +31,11 @@ trait BaseKeyEvents {
     }
   }
 
-  def blur(): Unit = document.activeElement.asInstanceOf[HTMLInputElement].blur()
+  def blur(): Unit = {
+    val cell = document.activeElement.asInstanceOf[HTMLInputElement]
+    cell.blur()
+    cell.parentNode.asInstanceOf[TableRow].className = "view"
+  }
 
   def noBottomScroll(e: KeyboardEvent): Unit = {
     // prevent default scroll to bottom
