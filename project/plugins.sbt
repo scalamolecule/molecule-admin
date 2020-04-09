@@ -10,3 +10,5 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-rjs" % "1.0.10")
 addSbtPlugin("com.typesafe.sbt" % "sbt-gzip" % "1.0.2")
 addSbtPlugin("com.typesafe.sbt" % "sbt-digest" % "1.1.4")
 
+addSbtPlugin("io.kamon" % "sbt-kanela-runner-play-2.8" % "2.0.6")
+

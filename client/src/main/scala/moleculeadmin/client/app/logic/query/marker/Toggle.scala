@@ -2,16 +2,14 @@ package moleculeadmin.client.app.logic.query.marker
 
 import autowire._
 import boopickle.Default._
-import moleculeadmin.client.app.logic.query.QueryState.{cachedFilterIndex, curFlags, _}
 import moleculeadmin.client.app.html.AppElements
+import moleculeadmin.client.app.logic.query.QueryState._
 import moleculeadmin.client.queryWireAjax
 import moleculeadmin.shared.util.HelpersAdmin
 import org.scalajs.dom.html.TableSection
 import org.scalajs.dom.raw.{Element, HTMLCollection}
 import org.scalajs.dom.window
-import rx.Ctx
-import scala.collection.{GenSet, mutable}
-import scala.collection.mutable.ListBuffer
+import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 
 
@@ -156,30 +154,6 @@ case class Toggle(
   }
 
   def save(): Unit = {
-
-    // Update markers for each entity id column
-    eidCols.foreach { eidCol =>
-
-      // Loop entity ids
-      allEids.foreach { eid =>
-
-        // Eid might not be present in (other) column
-        val entityIndexOpt: Option[List[Int]] = curEntityIndexes(eidCol).get(eid)
-
-        // Update column only if it contains eid
-        entityIndexOpt.foreach { entityIndex =>
-          val curMarkerIndex: Array[Boolean] = curMarkerIndexes(eidCol)
-          var i                              = 0
-          val entityIndexLength              = entityIndex.length
-          while (i < entityIndexLength) {
-            entityRow = entityIndex(i)
-            curMarkerIndex(entityRow) = !currentlyOn
-            i += 1
-          }
-        }
-      }
-    }
-
     // Save asynchronously in meta db
     queryWireAjax().saveToggle(db, dbSettingsIdOpt, tpe, eids, currentlyOn).call()
       .foreach {

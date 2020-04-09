@@ -1,5 +1,6 @@
 package moleculeadmin.server
 
+import java.lang.instrument.Instrumentation
 import java.util.{Date, List => jList}
 import datomic.{Datom, Peer}
 import db.admin.dsl.moleculeAdmin._
@@ -35,17 +36,16 @@ class QueryBackend extends ToggleBackend {
   ): Either[Seq[String], QueryResult] = try {
     log.info("-------------------")
     log.info("Querying datomic...\n" + datalogQuery)
-
-    val conn = Conn(base + "/" + db)
-    val allInputs = if (rules.isEmpty)
+    val t           = Timer("Query")
+    val conn        = Conn(base + "/" + db)
+    val allInputs   = if (rules.isEmpty)
       conn.db +: inputs(l ++ ll ++ lll)
     else
       conn.db +: rules.get +: inputs(l ++ ll ++ lll)
-    val t = Timer("Query")
-    val allRows = Peer.q(datalogQuery, allInputs: _*)
-    val queryTime = t.delta
+    val allRows     = Peer.q(datalogQuery, allInputs: _*)
+    val queryTime   = t.delta
     val rowCountAll = allRows.size
-    val rowCount = if (maxRows == -1 || rowCountAll < maxRows)
+    val rowCount    = if (maxRows == -1 || rowCountAll < maxRows)
       rowCountAll else maxRows
 
     log.info("Query time : " + thousands(queryTime) + " ms")
@@ -62,7 +62,6 @@ class QueryBackend extends ToggleBackend {
 
       log.info("Rows2QueryResult took " + t.ms)
       log.info("Sending data to client... Total server time: " + t.msTotal)
-
       Right(queryResult)
     }
   } catch {
@@ -93,8 +92,8 @@ class QueryBackend extends ToggleBackend {
     tx: Long,
     enumAttrs: Seq[String]
   ): (String, List[DatomTuple], List[DatomTuple]) = {
-    val conn = Conn(base + "/" + db)
-    val result = datomic.Peer.q(
+    val conn               = Conn(base + "/" + db)
+    val result             = datomic.Peer.q(
       """[:find ?e ?aStr ?v ?op
         |:in $ ?log ?tx
         |:where [(tx-data ?log ?tx) [[?e ?a ?v _ ?op]]]
@@ -105,14 +104,14 @@ class QueryBackend extends ToggleBackend {
       conn.datomicConn.log(),
       tx.asInstanceOf[Object]
     )
-    var txInst = ""
-    var txMetaData = List.empty[DatomTuple]
-    var txData = List.empty[DatomTuple]
-    val it = result.iterator()
+    var txInst             = ""
+    var txMetaData         = List.empty[DatomTuple]
+    var txData             = List.empty[DatomTuple]
+    val it                 = result.iterator()
     var row: jList[AnyRef] = null
-    var e = 0L
-    var attr = ""
-    var tpl: DatomTuple = null
+    var e                  = 0L
+    var attr               = ""
+    var tpl: DatomTuple    = null
     while (it.hasNext) {
       row = it.next()
       e = row.get(0).asInstanceOf[Long]
@@ -148,33 +147,33 @@ class QueryBackend extends ToggleBackend {
     try {
       log.info("----------------------------")
       log.info("Fetching log transactions...")
-      val timer = Timer()
-      val conn = Conn(base + "/" + db)
-      val datomicDb = conn.db
+      val timer      = Timer()
+      val conn       = Conn(base + "/" + db)
+      val datomicDb  = conn.db
       val prevFirstT = if (prevFirstT0 == 0L) datomicDb.basisT() else prevFirstT0
-      val firstT = if (prevFirstT > 1100) prevFirstT - 100 else 1001
+      val firstT     = if (prevFirstT > 1100) prevFirstT - 100 else 1001
       log.info("Fetching from t " + firstT)
       val txMaps = conn.datomicConn.log.txRange(firstT, null).asScala
       log.info("Fetched last " + txMaps.size + " txs from log in " + timer.ms)
-      val txData = new Array[TxResult](txMaps.size)
-      var txIndex = 0
-      var t = 0L
-      var tx = 0L
-      var txInstant = ""
+      val txData        = new Array[TxResult](txMaps.size)
+      var txIndex       = 0
+      var t             = 0L
+      var tx            = 0L
+      var txInstant     = ""
       var txRaw: AnyRef = null
-      var eRaw: AnyRef = null
-      var e = 0L
-      var a = ""
-      var v = ""
-      var op = true
-      var first = true
-      var isData = true
-      var valid = true
+      var eRaw : AnyRef = null
+      var e             = 0L
+      var a             = ""
+      var v             = ""
+      var op            = true
+      var first         = true
+      var isData        = true
+      var valid         = true
 
       txMaps.foreach { txMap =>
         t = txMap.get(datomic.Log.T).asInstanceOf[Long]
         val txMetaDatoms = new ListBuffer[DatomTuple]
-        val dataDatoms = new ListBuffer[DatomTuple]
+        val dataDatoms   = new ListBuffer[DatomTuple]
         first = true
         isData = true
         valid = true
@@ -225,14 +224,14 @@ class QueryBackend extends ToggleBackend {
     enumAttrs: Seq[String]
   ): Either[String, Array[TxResult]] = {
     log.info(s"Undoing txs from t ${ts.head}...")
-    val timer = Timer()
-    val conn = Conn(base + "/" + db)
-    val datoms = new ListBuffer[DatomTuple]
-    val undoneTs = new ListBuffer[Long]
-    var txIndex = 0
-    var e = 0L
-    var a = ""
-    var v = ""
+    val timer     = Timer()
+    val conn      = Conn(base + "/" + db)
+    val datoms    = new ListBuffer[DatomTuple]
+    val undoneTs  = new ListBuffer[Long]
+    var txIndex   = 0
+    var e         = 0L
+    var a         = ""
+    var v         = ""
     var prevValue = ""
     withTransactor {
       try {
@@ -248,13 +247,13 @@ class QueryBackend extends ToggleBackend {
         log.info("Fetched targeted " + txMaps.length + " txs in " + timer.ms)
         val newTxs = new Array[TxResult](txMaps.size)
         txMaps.foreach { txMap =>
-          val undoneT = txMap.get(datomic.Log.T).asInstanceOf[Long]
-          val tx = Peer.toTx(undoneT).asInstanceOf[Long]
+          val undoneT   = txMap.get(datomic.Log.T).asInstanceOf[Long]
+          val tx        = Peer.toTx(undoneT).asInstanceOf[Long]
           val rawDatoms = txMap.get(datomic.Log.DATA)
             .asInstanceOf[jList[Datom]].asScala.distinct
 
           datoms.clear()
-          val stmts = rawDatoms.flatMap { d =>
+          val stmts                 = rawDatoms.flatMap { d =>
             e = d.e.asInstanceOf[Long]
             a = conn.db.ident(d.a).toString
             v = formatValue(conn, a, d.v, enumAttrs)
@@ -276,7 +275,7 @@ class QueryBackend extends ToggleBackend {
             prevValue = v
             stmt
           }
-          val txR = conn.transact(Seq(stmts))
+          val txR                   = conn.transact(Seq(stmts))
           val (newT, newTx, newTxI) = (txR.t, txR.tx, date2strLocal(txR.inst))
           newTxs(txIndex) = (
             newT, newTx, newTxI,
@@ -291,7 +290,7 @@ class QueryBackend extends ToggleBackend {
 
         // Add newT/undoneT pairs to meta db
         val moleculeAdminConn = Conn(base + "/MoleculeAdmin")
-        val dbSettingsId = user_User.username_("admin")
+        val dbSettingsId      = user_User.username_("admin")
           .DbSettings.e.Db.name_(db).get(moleculeAdminConn)
         user_DbSettings(dbSettingsId).undoneTs.assert(undoneTs)
           .update(moleculeAdminConn)
@@ -334,7 +333,7 @@ class QueryBackend extends ToggleBackend {
     txInstantStr: String
   ): (Long, Long) = {
     val rawConn = Conn(base + "/" + db).datomicConn
-    val result = datomic.Peer.q(
+    val result  = datomic.Peer.q(
       """[:find  ?t ?tx
         | :in    $ ?txInstant
         | :where [?tx :db/txInstant ?txInstant]
@@ -342,7 +341,7 @@ class QueryBackend extends ToggleBackend {
       rawConn.db(),
       strLocal2date(txInstantStr).asInstanceOf[Object]
     )
-    val row = result.iterator().next()
+    val row     = result.iterator().next()
     (row.get(0).asInstanceOf[Long], row.get(1).asInstanceOf[Long])
   }
 
@@ -355,7 +354,7 @@ class QueryBackend extends ToggleBackend {
           case List(eid) => eid
           case Nil       => user_User.username("admin").save.eid
         }
-        val dbId = meta_Db.e.name_(db).get.headOption match {
+        val dbId   = meta_Db.e.name_(db).get.headOption match {
           case Some(eid) => eid
           case None      =>
             throw new RuntimeException(
@@ -418,7 +417,7 @@ class QueryBackend extends ToggleBackend {
           case List(eid) => eid
           case Nil       => user_User.username("admin").save.eid
         }
-        val dbId = meta_Db.e.name_(db).get.headOption match {
+        val dbId   = meta_Db.e.name_(db).get.headOption match {
           case Some(eid) => eid
           case None      =>
             throw new RuntimeException(
@@ -528,8 +527,8 @@ class QueryBackend extends ToggleBackend {
           val txR: TxReport = conn.transact(stmtss)
           Right((txR.t, txR.tx, date2strLocal(txR.inst)))
         } else {
-          var first = 1
-          var last = 1
+          var first             = 1
+          var last              = 1
           var lastTxR: TxReport = null
           log.info("Transacting " + stmtss.length + " statements:")
           stmtss.grouped(1000).foreach { stmtGroup =>
@@ -582,11 +581,11 @@ class QueryBackend extends ToggleBackend {
     //    log.info(rowValues)
     //    elements foreach println
     implicit val conn = Conn(base + "/" + db)
-    var i = 0
+    var i              = 0
     val data: Seq[Any] = elements.collect {
       case Atom(_, _, tpe, card, _, _, _, _) =>
         val cast = getCaster(tpe, "")
-        val vs = rowValues(i)
+        val vs   = rowValues(i)
         i += 1
         if (vs.isEmpty) {
           None
@@ -647,7 +646,7 @@ class QueryBackend extends ToggleBackend {
     value: String
   ): Either[String, Int] = {
     implicit val conn = Conn(base + "/" + db)
-    val refAttrFull = s":$nsFull/$refAttr"
+    val refAttrFull  = s":$nsFull/$refAttr"
     val eligibleEids = if (refCard == 1) {
       // Don't overwrite existing card-one refs
       conn.q(
@@ -700,7 +699,7 @@ class QueryBackend extends ToggleBackend {
     eid: Long
   ): Either[String, ListBuffer[(String, Int)]] = {
     try {
-      val raw = Peer.q(
+      val raw  = Peer.q(
         s"""[:find  ?attrName (count ?backRef)
            | :in $$ ?eid
            | :where [?backRef ?attrId ?eid]
@@ -710,7 +709,7 @@ class QueryBackend extends ToggleBackend {
         eid.asInstanceOf[Object]
       )
       val data = new ListBuffer[(String, Int)]
-      val it = raw.iterator()
+      val it   = raw.iterator()
       while (it.hasNext) {
         val row = it.next
         data.+=((row.get(0).toString, row.get(1).toString.toInt))

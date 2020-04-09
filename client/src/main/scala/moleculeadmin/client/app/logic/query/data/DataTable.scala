@@ -2,7 +2,7 @@ package moleculeadmin.client.app.logic.query.data
 
 import autowire._
 import boopickle.Default._
-import molecule.ast.model.{Element, Model}
+import molecule.ast.model._
 import molecule.ast.query.QueryExpr
 import molecule.ops.VerifyRawModel
 import molecule.transform.{Model2Query, Query2String}
@@ -10,8 +10,8 @@ import moleculeadmin.client.app.html.query.datatable.TableElements
 import moleculeadmin.client.app.logic.QueryClient._
 import moleculeadmin.client.app.logic.query.QueryState._
 import moleculeadmin.client.app.logic.query.{Callbacks, KeyEvents, UrlHandling}
-import moleculeadmin.client.{queryWireAjax, queryWireWS}
-import moleculeadmin.shared.ast.query.Filter
+import moleculeadmin.client.queryWireAjax
+import moleculeadmin.shared.ast.query.{Col, Filter, QueryResult}
 import moleculeadmin.shared.ops.query.ModelOps
 import org.scalajs.dom.document
 import org.scalajs.dom.html.{Div, TableSection}
@@ -69,7 +69,8 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
           _rowCol1("Please add at least one mandatory attribute")
         }
 
-        case elements => renderDataTable(elements)
+        case elements =>
+          renderDataTable(elements)
       }
     } catch {
       case e: Throwable => {
@@ -134,12 +135,12 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
     tableFoot: TableSection
   ): Unit = {
     //    println("fetchAndPopulate...")
-    val (query, _)   = Model2Query(Model(modelElements.now))
-    val datalogQuery = molecule.transform.Query2String(query).multiLine(60)
-    val resolve      = (expr: QueryExpr) => Query2String(query).p(expr)
-    val rules        = if (query.i.rules.nonEmpty)
+    val (query, _, _, _) = Model2Query(Model(modelElements.now))
+    val datalogQuery     = molecule.transform.Query2String(query).multiLine(60)
+    val resolve          = (expr: QueryExpr) => Query2String(query).p(expr)
+    val rules            = if (query.i.rules.nonEmpty)
       Some("[" + (query.i.rules map resolve mkString " ") + "]") else None
-    val (l, ll, lll) = encodeInputs(query)
+    val (l, ll, lll)     = encodeInputs(query)
     groupableCols = getGroupableCols(columns.now)
 
     // Temporary showing
@@ -177,6 +178,9 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
         recentQueries =
           curQuery +: recentQueries.filterNot(_.molecule == curMolecule.now)
 
+        // After all rendering, populate marker indexes
+        populateMarkerIndexes(queryResult)
+
       case Left(Nil) =>
         resetTableBodyFoot("Empty result set...")
         rowCountAll = 0
@@ -196,6 +200,33 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
             p(), p(b("Stacktrace")), ul(msgs.tail.map(li(_)))
           ).render
         )
+    }
+  }
+
+
+  def populateMarkerIndexes(qr: QueryResult) = {
+    columns.now.collect {
+      case Col(colIndex, _, _, _, "e" | "e_", _, _, _, _, _, _, _, _, _, _) =>
+        val t               = Timer()
+        val array           = qr.num(qr.arrayIndexes(colIndex))
+        val length          = array.length
+        val starIndex       = new Array[Boolean](length)
+        val flagIndex       = new Array[Boolean](length)
+        val checkIndex      = new Array[Boolean](length)
+        var eid             = 0L
+        var i               = 0
+        while (i < length) {
+          eid = array(i).get.toLong
+          starIndex(i) = curStars.contains(eid)
+          flagIndex(i) = curFlags.contains(eid)
+          checkIndex(i) = curChecks.contains(eid)
+          i += 1
+        }
+        val tableCol = colIndex + 1
+        curStarIndexes(tableCol) = starIndex
+        curFlagIndexes(tableCol) = flagIndex
+        curCheckIndexes(tableCol) = checkIndex
+        println(s"Marker indexes for col $colIndex populated in " + t.msTotal)
     }
   }
 
