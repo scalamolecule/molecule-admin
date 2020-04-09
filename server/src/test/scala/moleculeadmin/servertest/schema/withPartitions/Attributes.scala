@@ -134,6 +134,63 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
       }
 
 
+      test("Int, card 1, first pos, option, descr") {
+        val ps = new PartitionSetup
+        import ps._
+
+        // Client schema
+        createAttribute(partitionMetaSchema, "Partition", "a", "Aa",
+          "number", 1, "Int", Nil, None, Seq("noHistory"), Some("number description")).right.get.parts.head ==>
+          Part(1, "a", None, None, Seq(
+            Ns(1, "Aa", "a_Aa", None, None, Seq(
+              Attr(1, "number", 1, "Int", None, None, Some(Set("noHistory")), Some("number description"), None, None, None, None, List())))))
+
+        // def file has namespace prepared, here positioned first
+        read ! partitionDefFilePath ==>
+          """package db.migration.schema
+            |import molecule.schema.definition._
+            |
+            |@InOut(0, 5)
+            |object PartitionDefinition {
+            |
+            |  object a {
+            |
+            |    trait Aa {
+            |      val number = oneInt.noHistory.doc("number description")
+            |    }
+            |  }
+            |
+            |  object b {
+            |
+            |    trait Bb {
+            |      val bb1 = oneInt
+            |      val bb2 = oneInt
+            |    }
+            |
+            |    trait Bc {
+            |      val bc1 = oneInt
+            |    }
+            |  }
+            |
+            |  object c {
+            |
+            |  }
+            |}
+            |""".stripMargin
+
+        // meta schema (saving meta partition for possible ns/attr additions)
+        meta_Db.name_("Partition").Partitions.name_("a").Namespaces.name_("Aa")
+          .Attrs.name.options.get(moleculeAdminConn) ==> List(("number", Set("noHistory")))
+
+        // live namespaces having defined attributes
+        Schema.ns_("Aa").attr.noHistory.get(partitionConn) ==> List(("number", true))
+
+        // Data - we can use the new attribute
+        partitionConn.transact(list(list(":db/add", "#db/id[:a -1000001]", ":a_Aa/number", 42.asInstanceOf[Object])).asInstanceOf[util.List[AnyRef]])
+        partitionConn.q("[:find ?value :where [_ :a_Aa/number ?value]]") ==> List(List(42))
+      }
+
+
       test("Enum, card 2, middle pos, options, descr") {
         val ps = new PartitionSetup
         import ps._

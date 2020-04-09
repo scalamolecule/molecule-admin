@@ -48,6 +48,7 @@ object CoreTestDefinition {
     val dateMap   = mapDate
     val uuidMap   = mapUUID
     val uriMap    = mapURI
+    val s         = oneString.indexed.fulltext
   }
 
   trait Ref1 {

@@ -237,7 +237,7 @@ case class AttributeForm(db: String,
     val attrDoc = input(id := "attr-descr", size := 40, v(doc.getOrElse(""))).render
 
     val attrCount = attrs.size
-    val attrPos   = select(id := "ns-pos",
+    val attrPos   = select(id := "attr-pos",
       option(value := 1, "First"),
       if (update) {
         attrs.filterNot(_.name == attr).map {

@@ -41,7 +41,9 @@ object Attribute extends SchemaBase with Base {
               case Seq(nsE) => {
                 val liveConn = Conn(base + "/" + db)
                 val enums1   = if (enums.nonEmpty) Some(enums.toSet) else None
-                val options1 = if (options.nonEmpty) Some(options.toSet) else None
+//                val options1 = if (options.nonEmpty) Some(options.toSet) else None
+                val options1 = Some(("indexed" +: options).toSet)
+                println("options1: " + options1)
 
                 val curAttrs       = meta_Namespace(nsE).Attrs.e.pos.name.get
                 val pos            = if (pos0 == 0) curAttrs.length + 1 else pos0
@@ -906,7 +908,17 @@ object Attribute extends SchemaBase with Base {
   }
 
 
-  private def addAttrToLiveSchema(dbConn: Conn, part: String, nsOnly: String, attr: String, card: Int, tpe: String, enums: Seq[String], options: Seq[String], doc: Option[String]): Unit = {
+  private def addAttrToLiveSchema(
+    dbConn: Conn,
+    part: String,
+    nsOnly: String,
+    attr: String,
+    card: Int,
+    tpe: String,
+    enums: Seq[String],
+    options: Seq[String],
+    doc: Option[String]
+  ): Unit = {
     val base    : Seq[Object]       = Seq(
       ":db/ident", getFullAttr(part, nsOnly, attr),
       ":db/valueType", s":db.type/${tpeMoleculeDatomic(tpe)}",
