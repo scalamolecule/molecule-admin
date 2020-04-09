@@ -179,7 +179,7 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
           curQuery +: recentQueries.filterNot(_.molecule == curMolecule.now)
 
       case Left(Nil) =>
-        resetTableBodyFoot("Empty result set...")
+        resetTableBodyFoot("Empty result set", false)
         rowCountAll = 0
         renderSubMenu.recalc()
 
@@ -215,14 +215,14 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
   ).render
   lazy val tableFoot: TableSection = tfoot().render
 
-  def resetTableBodyFoot(msg: String): Node = {
+  def resetTableBodyFoot(msg: String, showSpinner: Boolean = true): Node = {
     tableBody.innerHTML = ""
     tableFoot.innerHTML = ""
     tableFoot.appendChild(
       tr(
         td(
           colspan := columns.now.size + 1,
-          _sync(0, 6),
+          if(showSpinner) _sync(0, 6) else (),
           msg
         )
       ).render

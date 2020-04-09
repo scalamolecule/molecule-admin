@@ -1,4 +1,5 @@
 package moleculeadmin.client.app.logic.schema
+
 import autowire._
 import boopickle.Default._
 import util.client.rx.RxBindings
@@ -37,15 +38,15 @@ case class SyncTab(db: String)(implicit val ctx: Ctx.Owner)
           tr(
             td(
               baseParts.map {
-                case (ns, false) => div(ns, color.red, fontWeight.bold)
-                case (ns, true)  => div(ns)
+                case (part, false) => div(part, color.red, fontWeight.bold)
+                case (part, true)  => div(part)
               }
             ),
             td(),
             td(
               testParts.map {
-                case (ns, false) => div(ns, color.red, fontWeight.bold)
-                case (ns, true)  => div(ns)
+                case (part, false) => div(part, color.red, fontWeight.bold)
+                case (part, true)  => div(part)
               }
             )
           )
@@ -241,6 +242,44 @@ case class SyncTab(db: String)(implicit val ctx: Ctx.Owner)
   )
 
 
+  def errorAttrOptions(data: Seq[(String, String, Seq[(String, Seq[String], Seq[String], Boolean)])], base: String, test: String) = li(
+    p("Attribute options out of sync:", color.red, fontWeight.bold),
+    table(cls := "table", style := "width: auto")(
+      thead(
+        tr(
+          th("Partition", style := "vertical-align: top"),
+          th(style := "width:20px;"),
+          th("Namespace", style := "vertical-align: top"),
+          th(style := "width:20px;"),
+          th("Attribute", style := "vertical-align: top"),
+          th(style := "width:20px;"),
+          th("Options", br, s"($base)"),
+          th(style := "width:30px;"),
+          th("Options", br, s"($test)")
+        )
+      ),
+      tbody(
+        for ((part, ns, attrs) <- data) yield {
+          attrs.map {
+            case (attr, baseOptions, testOptions, ok) =>
+              tr(
+                td(part),
+                td(),
+                td(ns),
+                td(),
+                td(attr, if (ok) () else style := "font-weight: bold; color:red;"),
+                td(),
+                td(baseOptions, if (ok) () else style := "font-weight: bold; color:red;"),
+                td(),
+                td(testOptions, if (ok) () else style := "font-weight: bold; color:red;")
+              )
+          }
+        }
+      )
+    )
+  )
+
+
   def errorAttrRef(data: Seq[(String, String, Seq[(String, String, String, String, Boolean)])]) = li(
     p("Reference namespaces out of sync:", color.red, fontWeight.bold),
     table(cls := "table", style := "width: auto")(
@@ -366,39 +405,50 @@ case class SyncTab(db: String)(implicit val ctx: Ctx.Owner)
 
                               syncDef.attrType match {
                                 case errData if errData.nonEmpty => Seq(errorAttrType(errData, live, deff))
-                                case Nil                         => Seq(li("Attribute types OK", style := "color: #009e00")) ++ Seq(
+                                case Nil                         => Seq(li("Attribute types OK", style := "color: #009e00")) ++ (
 
-                                  li("Definition file in sync with live database", style := "color: #009e00; font-weight: bold;"),
-                                  li(" "),
-                                  li("Checking meta database against definition file...")
-                                ) ++ (
+                                  syncDef.attrOptions match {
+                                    case errData if errData.nonEmpty => Seq(errorAttrOptions(errData, live, deff))
+                                    case Nil                         => Seq(li("Attribute Options OK", style := "color: #009e00")) ++ Seq(
 
-                                  syncMeta.part match {
-                                    case Some((defParts, metaParts)) => Seq(errorPart(defParts, metaParts, deff, meta))
-                                    case None                        => Seq(li("Partitions OK", style := "color: #009e00")) ++ (
+                                      li("Definition file in sync with live database", style := "color: #009e00; font-weight: bold;"),
+                                      li(" "),
+                                      li("Checking meta database against definition file...")
+                                    ) ++ (
 
-                                      syncMeta.ns match {
-                                        case errData if errData.nonEmpty => Seq(errorNs(errData, deff, meta))
-                                        case Nil                         => Seq(li("Namespaces OK", style := "color: #009e00")) ++ (
+                                      syncMeta.part match {
+                                        case Some((defParts, metaParts)) => Seq(errorPart(defParts, metaParts, deff, meta))
+                                        case None                        => Seq(li("Partitions OK", style := "color: #009e00")) ++ (
 
-                                          syncMeta.attr match {
-                                            case errData if errData.nonEmpty => Seq(errorAttr(errData, deff, meta))
-                                            case Nil                         => Seq(li("Attribute names OK", style := "color: #009e00")) ++ (
+                                          syncMeta.ns match {
+                                            case errData if errData.nonEmpty => Seq(errorNs(errData, deff, meta))
+                                            case Nil                         => Seq(li("Namespaces OK", style := "color: #009e00")) ++ (
 
-                                              syncMeta.attrCard match {
-                                                case errData if errData.nonEmpty => Seq(errorAttrCard(errData, deff, meta))
-                                                case Nil                         => Seq(li("Attribute cardinalities OK", style := "color: #009e00")) ++ (
+                                              syncMeta.attr match {
+                                                case errData if errData.nonEmpty => Seq(errorAttr(errData, deff, meta))
+                                                case Nil                         => Seq(li("Attribute names OK", style := "color: #009e00")) ++ (
 
-                                                  syncMeta.attrType match {
-                                                    case errData if errData.nonEmpty => Seq(errorAttrType(errData, deff, meta))
-                                                    case Nil                         => Seq(li("Attribute types OK", style := "color: #009e00")) ++ (
 
-                                                      syncMeta.metaAttrRef match {
-                                                        case errData if errData.nonEmpty => Seq(errorAttrRef(errData))
-                                                        case Nil                         => Seq(li("Reference namespaces OK", style := "color: #009e00")) ++ Seq(
+                                                  syncMeta.attrCard match {
+                                                    case errData if errData.nonEmpty => Seq(errorAttrCard(errData, deff, meta))
+                                                    case Nil                         => Seq(li("Attribute cardinalities OK", style := "color: #009e00")) ++ (
 
-                                                          li("Meta database in sync with definition file", style := "color: #009e00; font-weight: bold;")
-                                                        )
+                                                      syncMeta.attrType match {
+                                                        case errData if errData.nonEmpty => Seq(errorAttrType(errData, deff, meta))
+                                                        case Nil                         => Seq(li("Attribute types OK", style := "color: #009e00")) ++ (
+
+                                                          syncMeta.attrOptions match {
+                                                            case errData if errData.nonEmpty => Seq(errorAttrOptions(errData, deff, meta))
+                                                            case Nil                         => Seq(li("Attribute Options OK", style := "color: #009e00")) ++ (
+
+                                                              syncMeta.metaAttrRef match {
+                                                                case errData if errData.nonEmpty => Seq(errorAttrRef(errData))
+                                                                case Nil                         => Seq(li("Reference namespaces OK", style := "color: #009e00")) ++ Seq(
+
+                                                                  li("Meta database in sync with definition file", style := "color: #009e00; font-weight: bold;")
+                                                                )
+                                                              })
+                                                          })
                                                       })
                                                   })
                                               })

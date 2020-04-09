@@ -146,17 +146,16 @@ case class Sync(baseSchema: Seq[FlatAttr], testSchema: Seq[FlatAttr]) extends Sc
 
   def attrCard: Seq[(String, String, Seq[(String, Int, Int, Boolean, String)])] = {
 
-    val baseTypes: Map[String, Int] = baseSchema.map(a => a.nsFull + "_" + a.attr -> a.card).toMap
+    val baseCardinalities: Map[String, Int] = baseSchema.map(a => a.nsFull + "_" + a.attr -> a.card).toMap
 
     testSchema.groupBy(_.nsFull).toSeq.sortBy(_._2.head.pos).flatMap { case (_, attrs) =>
-
-      val (okNs, attrCardsWithError) = attrs.sortBy(_.pos).foldLeft(
+      val (okAttr, attrCardsWithError) = attrs.sortBy(_.pos).foldLeft(
         true,
         Seq.empty[(String, Int, Int, Boolean, String)]
       ) {
         case ((prevOk, acc), a) =>
           val attrKey       = a.nsFull + "_" + a.attr
-          val baseCard      = baseTypes(attrKey)
+          val baseCard      = baseCardinalities(attrKey)
           val (ok, comment) = (baseCard, a.card) match {
             case (2, 3)           => (true, " (Ok, cardinality '3' indicates mapped values)")
             case (2, 4)           => (true, " (Ok, cardinality '4' indicates keyed mapped values)")
@@ -166,7 +165,7 @@ case class Sync(baseSchema: Seq[FlatAttr], testSchema: Seq[FlatAttr]) extends Sc
           (prevOk && ok, acc :+ (a.attr, baseCard, a.card, ok, comment))
       }
 
-      if (okNs) None else Some(attrs.head.part, attrs.head.ns, attrCardsWithError)
+      if (okAttr) None else Some(attrs.head.part, attrs.head.ns, attrCardsWithError)
     }
   }
 
@@ -177,7 +176,7 @@ case class Sync(baseSchema: Seq[FlatAttr], testSchema: Seq[FlatAttr]) extends Sc
 
     testSchema.groupBy(_.nsFull).toSeq.sortBy(_._2.head.pos).flatMap { case (_, attrs) =>
 
-      val (okNs, attrTypesWithError) = attrs.sortBy(_.pos).foldLeft(
+      val (okAttr, attrTypesWithError) = attrs.sortBy(_.pos).foldLeft(
         true,
         Seq.empty[(String, String, String, Boolean, String)]
       ) {
@@ -206,14 +205,41 @@ case class Sync(baseSchema: Seq[FlatAttr], testSchema: Seq[FlatAttr]) extends Sc
           (prevOk && ok, acc :+ (a.attr, baseTpe, a.tpe, ok, comment))
       }
 
-      if (okNs) None else Some(attrs.head.part, attrs.head.ns, attrTypesWithError)
+      if (okAttr) None else Some(attrs.head.part, attrs.head.ns, attrTypesWithError)
+    }
+  }
+
+
+  def attrOptions: Seq[(String, String, Seq[(String, Seq[String], Seq[String], Boolean)])] = {
+    val baseOptionsMap: Map[String, Seq[String]] =
+      baseSchema.map(a => a.nsFull + "_" + a.attr -> a.options).toMap
+
+    testSchema.groupBy(_.nsFull).toSeq.sortBy(_._2.head.pos).flatMap {
+      case (_, attrs) =>
+        val (okAttr, attrOptionsWithError) = attrs.sortBy(_.pos).foldLeft(
+          true,
+          Seq.empty[(String, Seq[String], Seq[String], Boolean)]
+        ) {
+          case ((prevOk, acc), a) =>
+            val attrKey                  = a.nsFull + "_" + a.attr
+            val baseOptions: Seq[String] = baseOptionsMap(attrKey).sorted
+            val ok                       = baseOptions.map {
+              case "identity" => "uniqueIdentity"
+              case "value"    => "uniqueValue"
+              case opt        => opt
+            }.sorted == a.options.sorted
+
+            (prevOk && ok, acc :+ (a.attr, baseOptions, a.options, ok))
+        }
+
+        if (okAttr) None else Some(attrs.head.part, attrs.head.ns, attrOptionsWithError)
     }
   }
 
 
   def metaAttrRef: Seq[(String, String, Seq[(String, String, String, String, Boolean)])] = {
-
-    val baseRefs: Map[String, Option[String]] = baseSchema.map(a => a.nsFull + "_" + a.attr -> a.refNs$).toMap
+    val baseRefs: Map[String, Option[String]] =
+      baseSchema.map(a => a.nsFull + "_" + a.attr -> a.refNs$).toMap
 
     testSchema.groupBy(_.nsFull).toSeq.sortBy(_._2.head.pos).flatMap { case (_, attrs) =>
 
@@ -229,12 +255,10 @@ case class Sync(baseSchema: Seq[FlatAttr], testSchema: Seq[FlatAttr]) extends Sc
             case (_, _)                       => true
           }
           val baseRefStr = baseRef match {
-            //            case Some(refNs) if refNs.contains('_') => refNs
             case Some(refNs) => refNs
             case None        => ""
           }
           val testRefStr = a.refNs$ match {
-            //            case Some(refNs) if refNs.contains('_') => refNs
             case Some(refNs) => refNs
             case None        => ""
           }
