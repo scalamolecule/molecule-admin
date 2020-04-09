@@ -10,6 +10,7 @@ import scala.languageFeature.implicitConversions._
 
 object Model2MoleculeTest extends TestSuite with TreeSchema with Model2Molecule with Helpers {
 
+
   val tests = Tests {
 
     test("dummy") {
@@ -87,7 +88,16 @@ object Model2MoleculeTest extends TestSuite with TreeSchema with Model2Molecule 
         Generic("Ref1", "e_", "datom", Eq(Seq(42L))),
         Atom("Ref1", "int1", "Int", 1, VarValue, None, Seq(), Seq())
       )) ==> "Ns.e.Ref1.e_(42L).int1"
+    }
 
+    test("Backref with partitions") {
+      model2molecule(List(
+        Atom("a_Aa", "aa1", "Int", 1, VarValue, None, Seq(), Seq()),
+        Bond("a_Aa", "abb", "b_Bb", 1, Seq()),
+        Atom("b_Bb", "bb1", "Int", 1, VarValue, None, Seq(), Seq()),
+        ReBond("a_Aa"),
+        Atom("a_Aa", "acc", "ref", 1, VarValue, None, Seq(), Seq())
+      )) ==> "a_Aa.aa1.Abb.bb1._Aa.acc"
     }
   }
 }
