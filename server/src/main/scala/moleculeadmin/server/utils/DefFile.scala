@@ -256,7 +256,7 @@ case class DefFile(db: String, path: Option[String] = None, schemaDefFile: Optio
           es.toList.sorted.mkString("(\"", "\", \"", "\")")
       }
 
-      val options = options0 match {
+      val options = options0.map(_.filterNot(_ == "indexed")) match {
         case None       => ""
         case Some(opts) => "." + opts.mkString(".")
       }

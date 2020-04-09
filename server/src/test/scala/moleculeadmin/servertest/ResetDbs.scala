@@ -9,7 +9,7 @@ import db.core.dsl.tree._
 import db.core.schema.{CoreTestSchema, TreeSchema}
 import db.integration.MBrainzSchemaLowerToUpper1
 import db.migration.dsl.partition.b_Bb
-import db.migration.schema.{Partition1Schema, PartitionSchema}
+import db.migration.schema.{Partition1Schema, Partition2Schema, PartitionSchema}
 import molecule.api.out10._
 import molecule.boilerplate.attributes.EnumValue
 import molecule.facade.Conn
@@ -30,7 +30,7 @@ import utest._
 
 object ResetDbs extends TestSuite with ExampleData with Settings {
   val protocol = "free"
-  val base = "datomic:free://localhost:4334"
+  val base     = "datomic:free://localhost:4334"
 
 
   val tests = Tests {
@@ -67,6 +67,7 @@ object ResetDbs extends TestSuite with ExampleData with Settings {
       "CoreTest",
       "Partition",
       "Partition1",
+      "Partition2",
       "Tree",
       "mbrainz-1968-1973"
     ) else dbs0
@@ -90,6 +91,12 @@ object ResetDbs extends TestSuite with ExampleData with Settings {
         write.over(partition1DefFilePath, partition1DefFile)
         DefFile("Partition1", Some(partition1DefFilePath.toString)).saveToMetaDb
         recreateDbFrom(Partition1Schema, "localhost:4334/Partition1", protocol)
+
+      case "Partition2" =>
+        if (debug) println("- Partition2")
+        write.over(partition2DefFilePath, partition2DefFile)
+        DefFile("Partition2", Some(partition2DefFilePath.toString)).saveToMetaDb
+        recreateDbFrom(Partition2Schema, "localhost:4334/Partition2", protocol)
 
       case "Tree" =>
         if (debug) println("- Tree")

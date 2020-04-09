@@ -223,15 +223,15 @@ case class Sync(baseSchema: Seq[FlatAttr], testSchema: Seq[FlatAttr]) extends Sc
           case ((prevOk, acc), a) =>
             val attrKey                  = a.nsFull + "_" + a.attr
             val baseOptions: Seq[String] = baseOptionsMap(attrKey).sorted
-            val ok                       = baseOptions.map {
+            val baseOptionsSorted        = baseOptions.map {
               case "identity" => "uniqueIdentity"
               case "value"    => "uniqueValue"
               case opt        => opt
-            }.sorted == a.options.sorted
-
-            (prevOk && ok, acc :+ (a.attr, baseOptions, a.options, ok))
+            }.sorted
+            val testOptionsSorted        = a.options.sorted
+            val ok = baseOptionsSorted == testOptionsSorted
+            (prevOk && ok, acc :+ (a.attr, baseOptionsSorted, testOptionsSorted, ok))
         }
-
         if (okAttr) None else Some(attrs.head.part, attrs.head.ns, attrOptionsWithError)
     }
   }

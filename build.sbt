@@ -21,7 +21,7 @@ lazy val server = (project in file("server"))
 
     // Start agent to allow measuring object sizes in server project
     //    fork in run := true, // needed?
-    // Previous setup with `ageng` project - didn't go well with scalajs
+    // Previous setup with `agent` project - didn't go well with scalajs
     //    javaOptions in run += ("-javaagent:" + (packageBin in (agent, Compile)).value)
   )
   .enablePlugins(PlayScala, JavaAgent)
