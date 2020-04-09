@@ -11,6 +11,7 @@ import org.scalajs.dom.html.{TableCell, TableRow, TableSection}
 import rx.Ctx
 import scalatags.JsDom
 import scalatags.JsDom.all._
+import scala.collection.mutable
 
 
 abstract class Cell(

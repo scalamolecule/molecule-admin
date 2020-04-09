@@ -59,7 +59,7 @@ case class Toggle(
     Array(eid.toString)
   }
 
-  val (curMarkerIndexes, newCls, iconIndex, eids, count, toggling, toggled) =
+  val (newCls, iconIndex, eids, count, toggling) = {
     if (currentlyOn) {
       tpe match {
         case "star" =>
@@ -72,7 +72,7 @@ case class Toggle(
               curStars -= eid
               (Set(eid), 1)
             }
-          (curStarIndexes, mark.starOff, 1, starred, count, "Unstarring", "Unstarred")
+          (mark.starOff, 1, starred, count, "Unstarring")
 
         case "flag" =>
           val (flagged, count) =
@@ -84,7 +84,7 @@ case class Toggle(
               curFlags -= eid
               (Set(eid), 1)
             }
-          (curFlagIndexes, mark.flagOff, 2, flagged, count, "Unflagging", "Unflagged")
+          (mark.flagOff, 2, flagged, count, "Unflagging")
 
         case "check" =>
           val (checked, count) =
@@ -96,7 +96,7 @@ case class Toggle(
               curChecks -= eid
               (Set(eid), 1)
             }
-          (curCheckIndexes, mark.checkOff, 3, checked, count, "Unchecking", "Unchecked")
+          (mark.checkOff, 3, checked, count, "Unchecking")
       }
     } else {
       tpe match {
@@ -110,7 +110,7 @@ case class Toggle(
               curStars += eid
               (Set(eid), 1)
             }
-          (curStarIndexes, mark.starOn, 1, notStarred, count, "Starring", "Starred")
+          (mark.starOn, 1, notStarred, count, "Starring")
 
         case "flag" =>
           val (notFlagged, count) =
@@ -122,7 +122,7 @@ case class Toggle(
               curFlags += eid
               (Set(eid), 1)
             }
-          (curFlagIndexes, mark.flagOn, 2, notFlagged, count, "Flagging", "Flagged")
+          (mark.flagOn, 2, notFlagged, count, "Flagging")
 
         case "check" =>
           val (notChecked, count) =
@@ -134,9 +134,10 @@ case class Toggle(
               curChecks += eid
               (Set(eid), 1)
             }
-          (curCheckIndexes, mark.checkOn, 3, notChecked, count, "Checking", "Checked")
+          (mark.checkOn, 3, notChecked, count, "Checking")
       }
     }
+  }
 
   // Log
   if (count < 10000)
@@ -147,14 +148,8 @@ case class Toggle(
     print(s"$toggling $count entities in database - can take more than 5 seconds ...")
 
 
-  def toggleIcon(eidCol: Int): Unit = {
-    cell = cells(eidCol)
-    if (eidStrs.contains(cell.innerText))
-      cell.children(iconIndex).setAttribute("class", newCls)
-  }
-
+  // Save in metaDb
   def save(): Unit = {
-    // Save asynchronously in meta db
     queryWireAjax().saveToggle(db, dbSettingsIdOpt, tpe, eids, currentlyOn).call()
       .foreach {
         case Left(err)            => window.alert(err)
@@ -164,8 +159,8 @@ case class Toggle(
       }
   }
 
+  // Toggle of table row markers
   val rows = tableBody.children
-
   eidCols.length match {
     case 1 => {
       val c1         = eidCols.head
@@ -276,5 +271,11 @@ case class Toggle(
       throw new IllegalArgumentException(
         "Can only mark up to 7 entity id columns. Found " + n
       )
+  }
+
+  def toggleIcon(eidCol: Int): Unit = {
+    cell = cells(eidCol)
+    if (eidStrs.contains(cell.innerText))
+      cell.children(iconIndex).setAttribute("class", newCls)
   }
 }
