@@ -26,799 +26,822 @@ case class RowBuilder(
     appender(offset.now, curLastRow, indexBridge)
   }
 
-  val appender = {
-    cols.size match {
-      case 1 =>
-        val cellLambda1 = cellLambda(0)
-        (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
-          var rowIndex = rowIndex0
-          while (rowIndex < lastRow) {
-            e = 0
-            tableBody.appendChild(
-              _mkRow(
-                rowIndex,
-                cellLambda1(indexBridge(rowIndex))
-              )
-            )
-            rowIndex += 1
-          }
+  var rowIndex    = 0
+  var bridgeIndex = 0
 
-      case 2 =>
-        val cellLambda1 = cellLambda(0)
-        val cellLambda2 = cellLambda(1)
-        (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
-          var rowIndex = rowIndex0
-          while (rowIndex < lastRow) {
-            e = 0
-            tableBody.appendChild(
-              _mkRow(
-                rowIndex,
-                cellLambda1(indexBridge(rowIndex)),
-                cellLambda2(indexBridge(rowIndex))
-              )
+  val appender = cols.size match {
+    case 1 =>
+      val cellLambda1 = cellLambda(0)
+      (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
+        rowIndex = rowIndex0
+        while (rowIndex < lastRow) {
+          e = 0
+          bridgeIndex = indexBridge(rowIndex)
+          tableBody.appendChild(
+            _mkRow(
+              rowIndex,
+              cellLambda1(bridgeIndex)
             )
-            rowIndex += 1
-          }
+          )
+          rowIndex += 1
+        }
 
-      case 3 =>
-        val cellLambda1 = cellLambda(0)
-        val cellLambda2 = cellLambda(1)
-        val cellLambda3 = cellLambda(2)
-        (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
-          var rowIndex = rowIndex0
-          while (rowIndex < lastRow) {
-            e = 0
-            tableBody.appendChild(
-              _mkRow(
-                rowIndex,
-                cellLambda1(indexBridge(rowIndex)),
-                cellLambda2(indexBridge(rowIndex)),
-                cellLambda3(indexBridge(rowIndex))
-              )
+    case 2 =>
+      val cellLambda1 = cellLambda(0)
+      val cellLambda2 = cellLambda(1)
+      (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
+        rowIndex = rowIndex0
+        while (rowIndex < lastRow) {
+          e = 0
+          bridgeIndex = indexBridge(rowIndex)
+          tableBody.appendChild(
+            _mkRow(
+              rowIndex,
+              cellLambda1(bridgeIndex),
+              cellLambda2(bridgeIndex)
             )
-            rowIndex += 1
-          }
+          )
+          rowIndex += 1
+        }
 
-      case 4 =>
-        val cellLambda1 = cellLambda(0)
-        val cellLambda2 = cellLambda(1)
-        val cellLambda3 = cellLambda(2)
-        val cellLambda4 = cellLambda(3)
-        (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
-          var rowIndex = rowIndex0
-          while (rowIndex < lastRow) {
-            e = 0
-            tableBody.appendChild(
-              _mkRow(
-                rowIndex,
-                cellLambda1(indexBridge(rowIndex)),
-                cellLambda2(indexBridge(rowIndex)),
-                cellLambda3(indexBridge(rowIndex)),
-                cellLambda4(indexBridge(rowIndex))
-              )
+    case 3 =>
+      val cellLambda1 = cellLambda(0)
+      val cellLambda2 = cellLambda(1)
+      val cellLambda3 = cellLambda(2)
+      (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
+        rowIndex = rowIndex0
+        while (rowIndex < lastRow) {
+          e = 0
+          bridgeIndex = indexBridge(rowIndex)
+          tableBody.appendChild(
+            _mkRow(
+              rowIndex,
+              cellLambda1(bridgeIndex),
+              cellLambda2(bridgeIndex),
+              cellLambda3(bridgeIndex)
             )
-            rowIndex += 1
-          }
+          )
+          rowIndex += 1
+        }
 
-      case 5 =>
-        val cellLambda1 = cellLambda(0)
-        val cellLambda2 = cellLambda(1)
-        val cellLambda3 = cellLambda(2)
-        val cellLambda4 = cellLambda(3)
-        val cellLambda5 = cellLambda(4)
-        (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
-          var rowIndex = rowIndex0
-          while (rowIndex < lastRow) {
-            e = 0
-            tableBody.appendChild(
-              _mkRow(
-                rowIndex,
-                cellLambda1(indexBridge(rowIndex)),
-                cellLambda2(indexBridge(rowIndex)),
-                cellLambda3(indexBridge(rowIndex)),
-                cellLambda4(indexBridge(rowIndex)),
-                cellLambda5(indexBridge(rowIndex))
-              )
+    case 4 =>
+      val cellLambda1 = cellLambda(0)
+      val cellLambda2 = cellLambda(1)
+      val cellLambda3 = cellLambda(2)
+      val cellLambda4 = cellLambda(3)
+      (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
+        rowIndex = rowIndex0
+        while (rowIndex < lastRow) {
+          e = 0
+          bridgeIndex = indexBridge(rowIndex)
+          tableBody.appendChild(
+            _mkRow(
+              rowIndex,
+              cellLambda1(bridgeIndex),
+              cellLambda2(bridgeIndex),
+              cellLambda3(bridgeIndex),
+              cellLambda4(bridgeIndex)
             )
-            rowIndex += 1
-          }
+          )
+          rowIndex += 1
+        }
 
-      case 6 =>
-        val cellLambda1 = cellLambda(0)
-        val cellLambda2 = cellLambda(1)
-        val cellLambda3 = cellLambda(2)
-        val cellLambda4 = cellLambda(3)
-        val cellLambda5 = cellLambda(4)
-        val cellLambda6 = cellLambda(5)
-        (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
-          var rowIndex = rowIndex0
-          while (rowIndex < lastRow) {
-            e = 0
-            tableBody.appendChild(
-              _mkRow(
-                rowIndex,
-                cellLambda1(indexBridge(rowIndex)),
-                cellLambda2(indexBridge(rowIndex)),
-                cellLambda3(indexBridge(rowIndex)),
-                cellLambda4(indexBridge(rowIndex)),
-                cellLambda5(indexBridge(rowIndex)),
-                cellLambda6(indexBridge(rowIndex))
-              )
+    case 5 =>
+      val cellLambda1 = cellLambda(0)
+      val cellLambda2 = cellLambda(1)
+      val cellLambda3 = cellLambda(2)
+      val cellLambda4 = cellLambda(3)
+      val cellLambda5 = cellLambda(4)
+      (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
+        rowIndex = rowIndex0
+        while (rowIndex < lastRow) {
+          e = 0
+          bridgeIndex = indexBridge(rowIndex)
+          tableBody.appendChild(
+            _mkRow(
+              rowIndex,
+              cellLambda1(bridgeIndex),
+              cellLambda2(bridgeIndex),
+              cellLambda3(bridgeIndex),
+              cellLambda4(bridgeIndex),
+              cellLambda5(bridgeIndex)
             )
-            rowIndex += 1
-          }
+          )
+          rowIndex += 1
+        }
 
-      case 7 =>
-        val cellLambda1 = cellLambda(0)
-        val cellLambda2 = cellLambda(1)
-        val cellLambda3 = cellLambda(2)
-        val cellLambda4 = cellLambda(3)
-        val cellLambda5 = cellLambda(4)
-        val cellLambda6 = cellLambda(5)
-        val cellLambda7 = cellLambda(6)
-        (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
-          var rowIndex = rowIndex0
-          while (rowIndex < lastRow) {
-            e = 0
-            tableBody.appendChild(
-              _mkRow(
-                rowIndex,
-                cellLambda1(indexBridge(rowIndex)),
-                cellLambda2(indexBridge(rowIndex)),
-                cellLambda3(indexBridge(rowIndex)),
-                cellLambda4(indexBridge(rowIndex)),
-                cellLambda5(indexBridge(rowIndex)),
-                cellLambda6(indexBridge(rowIndex)),
-                cellLambda7(indexBridge(rowIndex))
-              )
+    case 6 =>
+      val cellLambda1 = cellLambda(0)
+      val cellLambda2 = cellLambda(1)
+      val cellLambda3 = cellLambda(2)
+      val cellLambda4 = cellLambda(3)
+      val cellLambda5 = cellLambda(4)
+      val cellLambda6 = cellLambda(5)
+      (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
+        rowIndex = rowIndex0
+        while (rowIndex < lastRow) {
+          e = 0
+          bridgeIndex = indexBridge(rowIndex)
+          tableBody.appendChild(
+            _mkRow(
+              rowIndex,
+              cellLambda1(bridgeIndex),
+              cellLambda2(bridgeIndex),
+              cellLambda3(bridgeIndex),
+              cellLambda4(bridgeIndex),
+              cellLambda5(bridgeIndex),
+              cellLambda6(bridgeIndex)
             )
-            rowIndex += 1
-          }
+          )
+          rowIndex += 1
+        }
 
-      case 8 =>
-        val cellLambda1 = cellLambda(0)
-        val cellLambda2 = cellLambda(1)
-        val cellLambda3 = cellLambda(2)
-        val cellLambda4 = cellLambda(3)
-        val cellLambda5 = cellLambda(4)
-        val cellLambda6 = cellLambda(5)
-        val cellLambda7 = cellLambda(6)
-        val cellLambda8 = cellLambda(7)
-        (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
-          var rowIndex = rowIndex0
-          while (rowIndex < lastRow) {
-            e = 0
-            tableBody.appendChild(
-              _mkRow(
-                rowIndex,
-                cellLambda1(indexBridge(rowIndex)),
-                cellLambda2(indexBridge(rowIndex)),
-                cellLambda3(indexBridge(rowIndex)),
-                cellLambda4(indexBridge(rowIndex)),
-                cellLambda5(indexBridge(rowIndex)),
-                cellLambda6(indexBridge(rowIndex)),
-                cellLambda7(indexBridge(rowIndex)),
-                cellLambda8(indexBridge(rowIndex))
-              )
+    case 7 =>
+      val cellLambda1 = cellLambda(0)
+      val cellLambda2 = cellLambda(1)
+      val cellLambda3 = cellLambda(2)
+      val cellLambda4 = cellLambda(3)
+      val cellLambda5 = cellLambda(4)
+      val cellLambda6 = cellLambda(5)
+      val cellLambda7 = cellLambda(6)
+      (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
+        rowIndex = rowIndex0
+        while (rowIndex < lastRow) {
+          e = 0
+          bridgeIndex = indexBridge(rowIndex)
+          tableBody.appendChild(
+            _mkRow(
+              rowIndex,
+              cellLambda1(bridgeIndex),
+              cellLambda2(bridgeIndex),
+              cellLambda3(bridgeIndex),
+              cellLambda4(bridgeIndex),
+              cellLambda5(bridgeIndex),
+              cellLambda6(bridgeIndex),
+              cellLambda7(bridgeIndex)
             )
-            rowIndex += 1
-          }
+          )
+          rowIndex += 1
+        }
 
-      case 9 =>
-        val cellLambda1 = cellLambda(0)
-        val cellLambda2 = cellLambda(1)
-        val cellLambda3 = cellLambda(2)
-        val cellLambda4 = cellLambda(3)
-        val cellLambda5 = cellLambda(4)
-        val cellLambda6 = cellLambda(5)
-        val cellLambda7 = cellLambda(6)
-        val cellLambda8 = cellLambda(7)
-        val cellLambda9 = cellLambda(8)
-        (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
-          var rowIndex = rowIndex0
-          while (rowIndex < lastRow) {
-            e = 0
-            tableBody.appendChild(
-              _mkRow(
-                rowIndex,
-                cellLambda1(indexBridge(rowIndex)),
-                cellLambda2(indexBridge(rowIndex)),
-                cellLambda3(indexBridge(rowIndex)),
-                cellLambda4(indexBridge(rowIndex)),
-                cellLambda5(indexBridge(rowIndex)),
-                cellLambda6(indexBridge(rowIndex)),
-                cellLambda7(indexBridge(rowIndex)),
-                cellLambda8(indexBridge(rowIndex)),
-                cellLambda9(indexBridge(rowIndex))
-              )
+    case 8 =>
+      val cellLambda1 = cellLambda(0)
+      val cellLambda2 = cellLambda(1)
+      val cellLambda3 = cellLambda(2)
+      val cellLambda4 = cellLambda(3)
+      val cellLambda5 = cellLambda(4)
+      val cellLambda6 = cellLambda(5)
+      val cellLambda7 = cellLambda(6)
+      val cellLambda8 = cellLambda(7)
+      (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
+        rowIndex = rowIndex0
+        while (rowIndex < lastRow) {
+          e = 0
+          bridgeIndex = indexBridge(rowIndex)
+          tableBody.appendChild(
+            _mkRow(
+              rowIndex,
+              cellLambda1(bridgeIndex),
+              cellLambda2(bridgeIndex),
+              cellLambda3(bridgeIndex),
+              cellLambda4(bridgeIndex),
+              cellLambda5(bridgeIndex),
+              cellLambda6(bridgeIndex),
+              cellLambda7(bridgeIndex),
+              cellLambda8(bridgeIndex)
             )
-            rowIndex += 1
-          }
+          )
+          rowIndex += 1
+        }
 
-      case 10 =>
-        val cellLambda1  = cellLambda(0)
-        val cellLambda2  = cellLambda(1)
-        val cellLambda3  = cellLambda(2)
-        val cellLambda4  = cellLambda(3)
-        val cellLambda5  = cellLambda(4)
-        val cellLambda6  = cellLambda(5)
-        val cellLambda7  = cellLambda(6)
-        val cellLambda8  = cellLambda(7)
-        val cellLambda9  = cellLambda(8)
-        val cellLambda10 = cellLambda(9)
-        (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
-          var rowIndex = rowIndex0
-          while (rowIndex < lastRow) {
-            e = 0
-            tableBody.appendChild(
-              _mkRow(
-                rowIndex,
-                cellLambda1(indexBridge(rowIndex)),
-                cellLambda2(indexBridge(rowIndex)),
-                cellLambda3(indexBridge(rowIndex)),
-                cellLambda4(indexBridge(rowIndex)),
-                cellLambda5(indexBridge(rowIndex)),
-                cellLambda6(indexBridge(rowIndex)),
-                cellLambda7(indexBridge(rowIndex)),
-                cellLambda8(indexBridge(rowIndex)),
-                cellLambda9(indexBridge(rowIndex)),
-                cellLambda10(indexBridge(rowIndex))
-              )
+    case 9 =>
+      val cellLambda1 = cellLambda(0)
+      val cellLambda2 = cellLambda(1)
+      val cellLambda3 = cellLambda(2)
+      val cellLambda4 = cellLambda(3)
+      val cellLambda5 = cellLambda(4)
+      val cellLambda6 = cellLambda(5)
+      val cellLambda7 = cellLambda(6)
+      val cellLambda8 = cellLambda(7)
+      val cellLambda9 = cellLambda(8)
+      (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
+        rowIndex = rowIndex0
+        while (rowIndex < lastRow) {
+          e = 0
+          bridgeIndex = indexBridge(rowIndex)
+          tableBody.appendChild(
+            _mkRow(
+              rowIndex,
+              cellLambda1(bridgeIndex),
+              cellLambda2(bridgeIndex),
+              cellLambda3(bridgeIndex),
+              cellLambda4(bridgeIndex),
+              cellLambda5(bridgeIndex),
+              cellLambda6(bridgeIndex),
+              cellLambda7(bridgeIndex),
+              cellLambda8(bridgeIndex),
+              cellLambda9(bridgeIndex)
             )
-            rowIndex += 1
-          }
+          )
+          rowIndex += 1
+        }
 
-      case 11 =>
-        val cellLambda1  = cellLambda(0)
-        val cellLambda2  = cellLambda(1)
-        val cellLambda3  = cellLambda(2)
-        val cellLambda4  = cellLambda(3)
-        val cellLambda5  = cellLambda(4)
-        val cellLambda6  = cellLambda(5)
-        val cellLambda7  = cellLambda(6)
-        val cellLambda8  = cellLambda(7)
-        val cellLambda9  = cellLambda(8)
-        val cellLambda10 = cellLambda(9)
-        val cellLambda11 = cellLambda(10)
-        (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
-          var rowIndex = rowIndex0
-          while (rowIndex < lastRow) {
-            e = 0
-            tableBody.appendChild(
-              _mkRow(
-                rowIndex,
-                cellLambda1(indexBridge(rowIndex)),
-                cellLambda2(indexBridge(rowIndex)),
-                cellLambda3(indexBridge(rowIndex)),
-                cellLambda4(indexBridge(rowIndex)),
-                cellLambda5(indexBridge(rowIndex)),
-                cellLambda6(indexBridge(rowIndex)),
-                cellLambda7(indexBridge(rowIndex)),
-                cellLambda8(indexBridge(rowIndex)),
-                cellLambda9(indexBridge(rowIndex)),
-                cellLambda10(indexBridge(rowIndex)),
-                cellLambda11(indexBridge(rowIndex))
-              )
+    case 10 =>
+      val cellLambda1  = cellLambda(0)
+      val cellLambda2  = cellLambda(1)
+      val cellLambda3  = cellLambda(2)
+      val cellLambda4  = cellLambda(3)
+      val cellLambda5  = cellLambda(4)
+      val cellLambda6  = cellLambda(5)
+      val cellLambda7  = cellLambda(6)
+      val cellLambda8  = cellLambda(7)
+      val cellLambda9  = cellLambda(8)
+      val cellLambda10 = cellLambda(9)
+      (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
+        rowIndex = rowIndex0
+        while (rowIndex < lastRow) {
+          e = 0
+          bridgeIndex = indexBridge(rowIndex)
+          tableBody.appendChild(
+            _mkRow(
+              rowIndex,
+              cellLambda1(bridgeIndex),
+              cellLambda2(bridgeIndex),
+              cellLambda3(bridgeIndex),
+              cellLambda4(bridgeIndex),
+              cellLambda5(bridgeIndex),
+              cellLambda6(bridgeIndex),
+              cellLambda7(bridgeIndex),
+              cellLambda8(bridgeIndex),
+              cellLambda9(bridgeIndex),
+              cellLambda10(bridgeIndex)
             )
-            rowIndex += 1
-          }
+          )
+          rowIndex += 1
+        }
 
-      case 12 =>
-        val cellLambda1  = cellLambda(0)
-        val cellLambda2  = cellLambda(1)
-        val cellLambda3  = cellLambda(2)
-        val cellLambda4  = cellLambda(3)
-        val cellLambda5  = cellLambda(4)
-        val cellLambda6  = cellLambda(5)
-        val cellLambda7  = cellLambda(6)
-        val cellLambda8  = cellLambda(7)
-        val cellLambda9  = cellLambda(8)
-        val cellLambda10 = cellLambda(9)
-        val cellLambda11 = cellLambda(10)
-        val cellLambda12 = cellLambda(11)
-        (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
-          var rowIndex = rowIndex0
-          while (rowIndex < lastRow) {
-            e = 0
-            tableBody.appendChild(
-              _mkRow(
-                rowIndex,
-                cellLambda1(indexBridge(rowIndex)),
-                cellLambda2(indexBridge(rowIndex)),
-                cellLambda3(indexBridge(rowIndex)),
-                cellLambda4(indexBridge(rowIndex)),
-                cellLambda5(indexBridge(rowIndex)),
-                cellLambda6(indexBridge(rowIndex)),
-                cellLambda7(indexBridge(rowIndex)),
-                cellLambda8(indexBridge(rowIndex)),
-                cellLambda9(indexBridge(rowIndex)),
-                cellLambda10(indexBridge(rowIndex)),
-                cellLambda11(indexBridge(rowIndex)),
-                cellLambda12(indexBridge(rowIndex))
-              )
+    case 11 =>
+      val cellLambda1  = cellLambda(0)
+      val cellLambda2  = cellLambda(1)
+      val cellLambda3  = cellLambda(2)
+      val cellLambda4  = cellLambda(3)
+      val cellLambda5  = cellLambda(4)
+      val cellLambda6  = cellLambda(5)
+      val cellLambda7  = cellLambda(6)
+      val cellLambda8  = cellLambda(7)
+      val cellLambda9  = cellLambda(8)
+      val cellLambda10 = cellLambda(9)
+      val cellLambda11 = cellLambda(10)
+      (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
+        rowIndex = rowIndex0
+        while (rowIndex < lastRow) {
+          e = 0
+          bridgeIndex = indexBridge(rowIndex)
+          tableBody.appendChild(
+            _mkRow(
+              rowIndex,
+              cellLambda1(bridgeIndex),
+              cellLambda2(bridgeIndex),
+              cellLambda3(bridgeIndex),
+              cellLambda4(bridgeIndex),
+              cellLambda5(bridgeIndex),
+              cellLambda6(bridgeIndex),
+              cellLambda7(bridgeIndex),
+              cellLambda8(bridgeIndex),
+              cellLambda9(bridgeIndex),
+              cellLambda10(bridgeIndex),
+              cellLambda11(bridgeIndex)
             )
-            rowIndex += 1
-          }
+          )
+          rowIndex += 1
+        }
 
-      case 13 =>
-        val cellLambda1  = cellLambda(0)
-        val cellLambda2  = cellLambda(1)
-        val cellLambda3  = cellLambda(2)
-        val cellLambda4  = cellLambda(3)
-        val cellLambda5  = cellLambda(4)
-        val cellLambda6  = cellLambda(5)
-        val cellLambda7  = cellLambda(6)
-        val cellLambda8  = cellLambda(7)
-        val cellLambda9  = cellLambda(8)
-        val cellLambda10 = cellLambda(9)
-        val cellLambda11 = cellLambda(10)
-        val cellLambda12 = cellLambda(11)
-        val cellLambda13 = cellLambda(12)
-        (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
-          var rowIndex = rowIndex0
-          while (rowIndex < lastRow) {
-            e = 0
-            tableBody.appendChild(
-              _mkRow(
-                rowIndex,
-                cellLambda1(indexBridge(rowIndex)),
-                cellLambda2(indexBridge(rowIndex)),
-                cellLambda3(indexBridge(rowIndex)),
-                cellLambda4(indexBridge(rowIndex)),
-                cellLambda5(indexBridge(rowIndex)),
-                cellLambda6(indexBridge(rowIndex)),
-                cellLambda7(indexBridge(rowIndex)),
-                cellLambda8(indexBridge(rowIndex)),
-                cellLambda9(indexBridge(rowIndex)),
-                cellLambda10(indexBridge(rowIndex)),
-                cellLambda11(indexBridge(rowIndex)),
-                cellLambda12(indexBridge(rowIndex)),
-                cellLambda13(indexBridge(rowIndex))
-              )
+    case 12 =>
+      val cellLambda1  = cellLambda(0)
+      val cellLambda2  = cellLambda(1)
+      val cellLambda3  = cellLambda(2)
+      val cellLambda4  = cellLambda(3)
+      val cellLambda5  = cellLambda(4)
+      val cellLambda6  = cellLambda(5)
+      val cellLambda7  = cellLambda(6)
+      val cellLambda8  = cellLambda(7)
+      val cellLambda9  = cellLambda(8)
+      val cellLambda10 = cellLambda(9)
+      val cellLambda11 = cellLambda(10)
+      val cellLambda12 = cellLambda(11)
+      (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
+        rowIndex = rowIndex0
+        while (rowIndex < lastRow) {
+          e = 0
+          bridgeIndex = indexBridge(rowIndex)
+          tableBody.appendChild(
+            _mkRow(
+              rowIndex,
+              cellLambda1(bridgeIndex),
+              cellLambda2(bridgeIndex),
+              cellLambda3(bridgeIndex),
+              cellLambda4(bridgeIndex),
+              cellLambda5(bridgeIndex),
+              cellLambda6(bridgeIndex),
+              cellLambda7(bridgeIndex),
+              cellLambda8(bridgeIndex),
+              cellLambda9(bridgeIndex),
+              cellLambda10(bridgeIndex),
+              cellLambda11(bridgeIndex),
+              cellLambda12(bridgeIndex)
             )
-            rowIndex += 1
-          }
+          )
+          rowIndex += 1
+        }
 
-      case 14 =>
-        val cellLambda1  = cellLambda(0)
-        val cellLambda2  = cellLambda(1)
-        val cellLambda3  = cellLambda(2)
-        val cellLambda4  = cellLambda(3)
-        val cellLambda5  = cellLambda(4)
-        val cellLambda6  = cellLambda(5)
-        val cellLambda7  = cellLambda(6)
-        val cellLambda8  = cellLambda(7)
-        val cellLambda9  = cellLambda(8)
-        val cellLambda10 = cellLambda(9)
-        val cellLambda11 = cellLambda(10)
-        val cellLambda12 = cellLambda(11)
-        val cellLambda13 = cellLambda(12)
-        val cellLambda14 = cellLambda(13)
-        (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
-          var rowIndex = rowIndex0
-          while (rowIndex < lastRow) {
-            e = 0
-            tableBody.appendChild(
-              _mkRow(
-                rowIndex,
-                cellLambda1(indexBridge(rowIndex)),
-                cellLambda2(indexBridge(rowIndex)),
-                cellLambda3(indexBridge(rowIndex)),
-                cellLambda4(indexBridge(rowIndex)),
-                cellLambda5(indexBridge(rowIndex)),
-                cellLambda6(indexBridge(rowIndex)),
-                cellLambda7(indexBridge(rowIndex)),
-                cellLambda8(indexBridge(rowIndex)),
-                cellLambda9(indexBridge(rowIndex)),
-                cellLambda10(indexBridge(rowIndex)),
-                cellLambda11(indexBridge(rowIndex)),
-                cellLambda12(indexBridge(rowIndex)),
-                cellLambda13(indexBridge(rowIndex)),
-                cellLambda14(indexBridge(rowIndex))
-              )
+    case 13 =>
+      val cellLambda1  = cellLambda(0)
+      val cellLambda2  = cellLambda(1)
+      val cellLambda3  = cellLambda(2)
+      val cellLambda4  = cellLambda(3)
+      val cellLambda5  = cellLambda(4)
+      val cellLambda6  = cellLambda(5)
+      val cellLambda7  = cellLambda(6)
+      val cellLambda8  = cellLambda(7)
+      val cellLambda9  = cellLambda(8)
+      val cellLambda10 = cellLambda(9)
+      val cellLambda11 = cellLambda(10)
+      val cellLambda12 = cellLambda(11)
+      val cellLambda13 = cellLambda(12)
+      (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
+        rowIndex = rowIndex0
+        while (rowIndex < lastRow) {
+          e = 0
+          bridgeIndex = indexBridge(rowIndex)
+          tableBody.appendChild(
+            _mkRow(
+              rowIndex,
+              cellLambda1(bridgeIndex),
+              cellLambda2(bridgeIndex),
+              cellLambda3(bridgeIndex),
+              cellLambda4(bridgeIndex),
+              cellLambda5(bridgeIndex),
+              cellLambda6(bridgeIndex),
+              cellLambda7(bridgeIndex),
+              cellLambda8(bridgeIndex),
+              cellLambda9(bridgeIndex),
+              cellLambda10(bridgeIndex),
+              cellLambda11(bridgeIndex),
+              cellLambda12(bridgeIndex),
+              cellLambda13(bridgeIndex)
             )
-            rowIndex += 1
-          }
+          )
+          rowIndex += 1
+        }
 
-      case 15 =>
-        val cellLambda1  = cellLambda(0)
-        val cellLambda2  = cellLambda(1)
-        val cellLambda3  = cellLambda(2)
-        val cellLambda4  = cellLambda(3)
-        val cellLambda5  = cellLambda(4)
-        val cellLambda6  = cellLambda(5)
-        val cellLambda7  = cellLambda(6)
-        val cellLambda8  = cellLambda(7)
-        val cellLambda9  = cellLambda(8)
-        val cellLambda10 = cellLambda(9)
-        val cellLambda11 = cellLambda(10)
-        val cellLambda12 = cellLambda(11)
-        val cellLambda13 = cellLambda(12)
-        val cellLambda14 = cellLambda(13)
-        val cellLambda15 = cellLambda(14)
-        (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
-          var rowIndex = rowIndex0
-          while (rowIndex < lastRow) {
-            e = 0
-            tableBody.appendChild(
-              _mkRow(
-                rowIndex,
-                cellLambda1(indexBridge(rowIndex)),
-                cellLambda2(indexBridge(rowIndex)),
-                cellLambda3(indexBridge(rowIndex)),
-                cellLambda4(indexBridge(rowIndex)),
-                cellLambda5(indexBridge(rowIndex)),
-                cellLambda6(indexBridge(rowIndex)),
-                cellLambda7(indexBridge(rowIndex)),
-                cellLambda8(indexBridge(rowIndex)),
-                cellLambda9(indexBridge(rowIndex)),
-                cellLambda10(indexBridge(rowIndex)),
-                cellLambda11(indexBridge(rowIndex)),
-                cellLambda12(indexBridge(rowIndex)),
-                cellLambda13(indexBridge(rowIndex)),
-                cellLambda14(indexBridge(rowIndex)),
-                cellLambda15(indexBridge(rowIndex))
-              )
+    case 14 =>
+      val cellLambda1  = cellLambda(0)
+      val cellLambda2  = cellLambda(1)
+      val cellLambda3  = cellLambda(2)
+      val cellLambda4  = cellLambda(3)
+      val cellLambda5  = cellLambda(4)
+      val cellLambda6  = cellLambda(5)
+      val cellLambda7  = cellLambda(6)
+      val cellLambda8  = cellLambda(7)
+      val cellLambda9  = cellLambda(8)
+      val cellLambda10 = cellLambda(9)
+      val cellLambda11 = cellLambda(10)
+      val cellLambda12 = cellLambda(11)
+      val cellLambda13 = cellLambda(12)
+      val cellLambda14 = cellLambda(13)
+      (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
+        rowIndex = rowIndex0
+        while (rowIndex < lastRow) {
+          e = 0
+          bridgeIndex = indexBridge(rowIndex)
+          tableBody.appendChild(
+            _mkRow(
+              rowIndex,
+              cellLambda1(bridgeIndex),
+              cellLambda2(bridgeIndex),
+              cellLambda3(bridgeIndex),
+              cellLambda4(bridgeIndex),
+              cellLambda5(bridgeIndex),
+              cellLambda6(bridgeIndex),
+              cellLambda7(bridgeIndex),
+              cellLambda8(bridgeIndex),
+              cellLambda9(bridgeIndex),
+              cellLambda10(bridgeIndex),
+              cellLambda11(bridgeIndex),
+              cellLambda12(bridgeIndex),
+              cellLambda13(bridgeIndex),
+              cellLambda14(bridgeIndex)
             )
-            rowIndex += 1
-          }
+          )
+          rowIndex += 1
+        }
 
-      case 16 =>
-        val cellLambda1  = cellLambda(0)
-        val cellLambda2  = cellLambda(1)
-        val cellLambda3  = cellLambda(2)
-        val cellLambda4  = cellLambda(3)
-        val cellLambda5  = cellLambda(4)
-        val cellLambda6  = cellLambda(5)
-        val cellLambda7  = cellLambda(6)
-        val cellLambda8  = cellLambda(7)
-        val cellLambda9  = cellLambda(8)
-        val cellLambda10 = cellLambda(9)
-        val cellLambda11 = cellLambda(10)
-        val cellLambda12 = cellLambda(11)
-        val cellLambda13 = cellLambda(12)
-        val cellLambda14 = cellLambda(13)
-        val cellLambda15 = cellLambda(14)
-        val cellLambda16 = cellLambda(15)
-        (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
-          var rowIndex = rowIndex0
-          while (rowIndex < lastRow) {
-            e = 0
-            tableBody.appendChild(
-              _mkRow(
-                rowIndex,
-                cellLambda1(indexBridge(rowIndex)),
-                cellLambda2(indexBridge(rowIndex)),
-                cellLambda3(indexBridge(rowIndex)),
-                cellLambda4(indexBridge(rowIndex)),
-                cellLambda5(indexBridge(rowIndex)),
-                cellLambda6(indexBridge(rowIndex)),
-                cellLambda7(indexBridge(rowIndex)),
-                cellLambda8(indexBridge(rowIndex)),
-                cellLambda9(indexBridge(rowIndex)),
-                cellLambda10(indexBridge(rowIndex)),
-                cellLambda11(indexBridge(rowIndex)),
-                cellLambda12(indexBridge(rowIndex)),
-                cellLambda13(indexBridge(rowIndex)),
-                cellLambda14(indexBridge(rowIndex)),
-                cellLambda15(indexBridge(rowIndex)),
-                cellLambda16(indexBridge(rowIndex))
-              )
+    case 15 =>
+      val cellLambda1  = cellLambda(0)
+      val cellLambda2  = cellLambda(1)
+      val cellLambda3  = cellLambda(2)
+      val cellLambda4  = cellLambda(3)
+      val cellLambda5  = cellLambda(4)
+      val cellLambda6  = cellLambda(5)
+      val cellLambda7  = cellLambda(6)
+      val cellLambda8  = cellLambda(7)
+      val cellLambda9  = cellLambda(8)
+      val cellLambda10 = cellLambda(9)
+      val cellLambda11 = cellLambda(10)
+      val cellLambda12 = cellLambda(11)
+      val cellLambda13 = cellLambda(12)
+      val cellLambda14 = cellLambda(13)
+      val cellLambda15 = cellLambda(14)
+      (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
+        rowIndex = rowIndex0
+        while (rowIndex < lastRow) {
+          e = 0
+          bridgeIndex = indexBridge(rowIndex)
+          tableBody.appendChild(
+            _mkRow(
+              rowIndex,
+              cellLambda1(bridgeIndex),
+              cellLambda2(bridgeIndex),
+              cellLambda3(bridgeIndex),
+              cellLambda4(bridgeIndex),
+              cellLambda5(bridgeIndex),
+              cellLambda6(bridgeIndex),
+              cellLambda7(bridgeIndex),
+              cellLambda8(bridgeIndex),
+              cellLambda9(bridgeIndex),
+              cellLambda10(bridgeIndex),
+              cellLambda11(bridgeIndex),
+              cellLambda12(bridgeIndex),
+              cellLambda13(bridgeIndex),
+              cellLambda14(bridgeIndex),
+              cellLambda15(bridgeIndex)
             )
-            rowIndex += 1
-          }
+          )
+          rowIndex += 1
+        }
 
-      case 17 =>
-        val cellLambda1  = cellLambda(0)
-        val cellLambda2  = cellLambda(1)
-        val cellLambda3  = cellLambda(2)
-        val cellLambda4  = cellLambda(3)
-        val cellLambda5  = cellLambda(4)
-        val cellLambda6  = cellLambda(5)
-        val cellLambda7  = cellLambda(6)
-        val cellLambda8  = cellLambda(7)
-        val cellLambda9  = cellLambda(8)
-        val cellLambda10 = cellLambda(9)
-        val cellLambda11 = cellLambda(10)
-        val cellLambda12 = cellLambda(11)
-        val cellLambda13 = cellLambda(12)
-        val cellLambda14 = cellLambda(13)
-        val cellLambda15 = cellLambda(14)
-        val cellLambda16 = cellLambda(15)
-        val cellLambda17 = cellLambda(16)
-        (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
-          var rowIndex = rowIndex0
-          while (rowIndex < lastRow) {
-            e = 0
-            tableBody.appendChild(
-              _mkRow(
-                rowIndex,
-                cellLambda1(indexBridge(rowIndex)),
-                cellLambda2(indexBridge(rowIndex)),
-                cellLambda3(indexBridge(rowIndex)),
-                cellLambda4(indexBridge(rowIndex)),
-                cellLambda5(indexBridge(rowIndex)),
-                cellLambda6(indexBridge(rowIndex)),
-                cellLambda7(indexBridge(rowIndex)),
-                cellLambda8(indexBridge(rowIndex)),
-                cellLambda9(indexBridge(rowIndex)),
-                cellLambda10(indexBridge(rowIndex)),
-                cellLambda11(indexBridge(rowIndex)),
-                cellLambda12(indexBridge(rowIndex)),
-                cellLambda13(indexBridge(rowIndex)),
-                cellLambda14(indexBridge(rowIndex)),
-                cellLambda15(indexBridge(rowIndex)),
-                cellLambda16(indexBridge(rowIndex)),
-                cellLambda17(indexBridge(rowIndex))
-              )
+    case 16 =>
+      val cellLambda1  = cellLambda(0)
+      val cellLambda2  = cellLambda(1)
+      val cellLambda3  = cellLambda(2)
+      val cellLambda4  = cellLambda(3)
+      val cellLambda5  = cellLambda(4)
+      val cellLambda6  = cellLambda(5)
+      val cellLambda7  = cellLambda(6)
+      val cellLambda8  = cellLambda(7)
+      val cellLambda9  = cellLambda(8)
+      val cellLambda10 = cellLambda(9)
+      val cellLambda11 = cellLambda(10)
+      val cellLambda12 = cellLambda(11)
+      val cellLambda13 = cellLambda(12)
+      val cellLambda14 = cellLambda(13)
+      val cellLambda15 = cellLambda(14)
+      val cellLambda16 = cellLambda(15)
+      (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
+        rowIndex = rowIndex0
+        while (rowIndex < lastRow) {
+          e = 0
+          bridgeIndex = indexBridge(rowIndex)
+          tableBody.appendChild(
+            _mkRow(
+              rowIndex,
+              cellLambda1(bridgeIndex),
+              cellLambda2(bridgeIndex),
+              cellLambda3(bridgeIndex),
+              cellLambda4(bridgeIndex),
+              cellLambda5(bridgeIndex),
+              cellLambda6(bridgeIndex),
+              cellLambda7(bridgeIndex),
+              cellLambda8(bridgeIndex),
+              cellLambda9(bridgeIndex),
+              cellLambda10(bridgeIndex),
+              cellLambda11(bridgeIndex),
+              cellLambda12(bridgeIndex),
+              cellLambda13(bridgeIndex),
+              cellLambda14(bridgeIndex),
+              cellLambda15(bridgeIndex),
+              cellLambda16(bridgeIndex)
             )
-            rowIndex += 1
-          }
+          )
+          rowIndex += 1
+        }
 
-      case 18 =>
-        val cellLambda1  = cellLambda(0)
-        val cellLambda2  = cellLambda(1)
-        val cellLambda3  = cellLambda(2)
-        val cellLambda4  = cellLambda(3)
-        val cellLambda5  = cellLambda(4)
-        val cellLambda6  = cellLambda(5)
-        val cellLambda7  = cellLambda(6)
-        val cellLambda8  = cellLambda(7)
-        val cellLambda9  = cellLambda(8)
-        val cellLambda10 = cellLambda(9)
-        val cellLambda11 = cellLambda(10)
-        val cellLambda12 = cellLambda(11)
-        val cellLambda13 = cellLambda(12)
-        val cellLambda14 = cellLambda(13)
-        val cellLambda15 = cellLambda(14)
-        val cellLambda16 = cellLambda(15)
-        val cellLambda17 = cellLambda(16)
-        val cellLambda18 = cellLambda(17)
-        (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
-          var rowIndex = rowIndex0
-          while (rowIndex < lastRow) {
-            e = 0
-            tableBody.appendChild(
-              _mkRow(
-                rowIndex,
-                cellLambda1(indexBridge(rowIndex)),
-                cellLambda2(indexBridge(rowIndex)),
-                cellLambda3(indexBridge(rowIndex)),
-                cellLambda4(indexBridge(rowIndex)),
-                cellLambda5(indexBridge(rowIndex)),
-                cellLambda6(indexBridge(rowIndex)),
-                cellLambda7(indexBridge(rowIndex)),
-                cellLambda8(indexBridge(rowIndex)),
-                cellLambda9(indexBridge(rowIndex)),
-                cellLambda10(indexBridge(rowIndex)),
-                cellLambda11(indexBridge(rowIndex)),
-                cellLambda12(indexBridge(rowIndex)),
-                cellLambda13(indexBridge(rowIndex)),
-                cellLambda14(indexBridge(rowIndex)),
-                cellLambda15(indexBridge(rowIndex)),
-                cellLambda16(indexBridge(rowIndex)),
-                cellLambda17(indexBridge(rowIndex)),
-                cellLambda18(indexBridge(rowIndex))
-              )
+    case 17 =>
+      val cellLambda1  = cellLambda(0)
+      val cellLambda2  = cellLambda(1)
+      val cellLambda3  = cellLambda(2)
+      val cellLambda4  = cellLambda(3)
+      val cellLambda5  = cellLambda(4)
+      val cellLambda6  = cellLambda(5)
+      val cellLambda7  = cellLambda(6)
+      val cellLambda8  = cellLambda(7)
+      val cellLambda9  = cellLambda(8)
+      val cellLambda10 = cellLambda(9)
+      val cellLambda11 = cellLambda(10)
+      val cellLambda12 = cellLambda(11)
+      val cellLambda13 = cellLambda(12)
+      val cellLambda14 = cellLambda(13)
+      val cellLambda15 = cellLambda(14)
+      val cellLambda16 = cellLambda(15)
+      val cellLambda17 = cellLambda(16)
+      (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
+        rowIndex = rowIndex0
+        while (rowIndex < lastRow) {
+          e = 0
+          bridgeIndex = indexBridge(rowIndex)
+          tableBody.appendChild(
+            _mkRow(
+              rowIndex,
+              cellLambda1(bridgeIndex),
+              cellLambda2(bridgeIndex),
+              cellLambda3(bridgeIndex),
+              cellLambda4(bridgeIndex),
+              cellLambda5(bridgeIndex),
+              cellLambda6(bridgeIndex),
+              cellLambda7(bridgeIndex),
+              cellLambda8(bridgeIndex),
+              cellLambda9(bridgeIndex),
+              cellLambda10(bridgeIndex),
+              cellLambda11(bridgeIndex),
+              cellLambda12(bridgeIndex),
+              cellLambda13(bridgeIndex),
+              cellLambda14(bridgeIndex),
+              cellLambda15(bridgeIndex),
+              cellLambda16(bridgeIndex),
+              cellLambda17(bridgeIndex)
             )
-            rowIndex += 1
-          }
+          )
+          rowIndex += 1
+        }
 
-      case 19 =>
-        val cellLambda1  = cellLambda(0)
-        val cellLambda2  = cellLambda(1)
-        val cellLambda3  = cellLambda(2)
-        val cellLambda4  = cellLambda(3)
-        val cellLambda5  = cellLambda(4)
-        val cellLambda6  = cellLambda(5)
-        val cellLambda7  = cellLambda(6)
-        val cellLambda8  = cellLambda(7)
-        val cellLambda9  = cellLambda(8)
-        val cellLambda10 = cellLambda(9)
-        val cellLambda11 = cellLambda(10)
-        val cellLambda12 = cellLambda(11)
-        val cellLambda13 = cellLambda(12)
-        val cellLambda14 = cellLambda(13)
-        val cellLambda15 = cellLambda(14)
-        val cellLambda16 = cellLambda(15)
-        val cellLambda17 = cellLambda(16)
-        val cellLambda18 = cellLambda(17)
-        val cellLambda19 = cellLambda(18)
-        (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
-          var rowIndex = rowIndex0
-          while (rowIndex < lastRow) {
-            e = 0
-            tableBody.appendChild(
-              _mkRow(
-                rowIndex,
-                cellLambda1(indexBridge(rowIndex)),
-                cellLambda2(indexBridge(rowIndex)),
-                cellLambda3(indexBridge(rowIndex)),
-                cellLambda4(indexBridge(rowIndex)),
-                cellLambda5(indexBridge(rowIndex)),
-                cellLambda6(indexBridge(rowIndex)),
-                cellLambda7(indexBridge(rowIndex)),
-                cellLambda8(indexBridge(rowIndex)),
-                cellLambda9(indexBridge(rowIndex)),
-                cellLambda10(indexBridge(rowIndex)),
-                cellLambda11(indexBridge(rowIndex)),
-                cellLambda12(indexBridge(rowIndex)),
-                cellLambda13(indexBridge(rowIndex)),
-                cellLambda14(indexBridge(rowIndex)),
-                cellLambda15(indexBridge(rowIndex)),
-                cellLambda16(indexBridge(rowIndex)),
-                cellLambda17(indexBridge(rowIndex)),
-                cellLambda18(indexBridge(rowIndex)),
-                cellLambda19(indexBridge(rowIndex))
-              )
+    case 18 =>
+      val cellLambda1  = cellLambda(0)
+      val cellLambda2  = cellLambda(1)
+      val cellLambda3  = cellLambda(2)
+      val cellLambda4  = cellLambda(3)
+      val cellLambda5  = cellLambda(4)
+      val cellLambda6  = cellLambda(5)
+      val cellLambda7  = cellLambda(6)
+      val cellLambda8  = cellLambda(7)
+      val cellLambda9  = cellLambda(8)
+      val cellLambda10 = cellLambda(9)
+      val cellLambda11 = cellLambda(10)
+      val cellLambda12 = cellLambda(11)
+      val cellLambda13 = cellLambda(12)
+      val cellLambda14 = cellLambda(13)
+      val cellLambda15 = cellLambda(14)
+      val cellLambda16 = cellLambda(15)
+      val cellLambda17 = cellLambda(16)
+      val cellLambda18 = cellLambda(17)
+      (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
+        rowIndex = rowIndex0
+        while (rowIndex < lastRow) {
+          e = 0
+          bridgeIndex = indexBridge(rowIndex)
+          tableBody.appendChild(
+            _mkRow(
+              rowIndex,
+              cellLambda1(bridgeIndex),
+              cellLambda2(bridgeIndex),
+              cellLambda3(bridgeIndex),
+              cellLambda4(bridgeIndex),
+              cellLambda5(bridgeIndex),
+              cellLambda6(bridgeIndex),
+              cellLambda7(bridgeIndex),
+              cellLambda8(bridgeIndex),
+              cellLambda9(bridgeIndex),
+              cellLambda10(bridgeIndex),
+              cellLambda11(bridgeIndex),
+              cellLambda12(bridgeIndex),
+              cellLambda13(bridgeIndex),
+              cellLambda14(bridgeIndex),
+              cellLambda15(bridgeIndex),
+              cellLambda16(bridgeIndex),
+              cellLambda17(bridgeIndex),
+              cellLambda18(bridgeIndex)
             )
-            rowIndex += 1
-          }
+          )
+          rowIndex += 1
+        }
 
-      case 20 =>
-        val cellLambda1  = cellLambda(0)
-        val cellLambda2  = cellLambda(1)
-        val cellLambda3  = cellLambda(2)
-        val cellLambda4  = cellLambda(3)
-        val cellLambda5  = cellLambda(4)
-        val cellLambda6  = cellLambda(5)
-        val cellLambda7  = cellLambda(6)
-        val cellLambda8  = cellLambda(7)
-        val cellLambda9  = cellLambda(8)
-        val cellLambda10 = cellLambda(9)
-        val cellLambda11 = cellLambda(10)
-        val cellLambda12 = cellLambda(11)
-        val cellLambda13 = cellLambda(12)
-        val cellLambda14 = cellLambda(13)
-        val cellLambda15 = cellLambda(14)
-        val cellLambda16 = cellLambda(15)
-        val cellLambda17 = cellLambda(16)
-        val cellLambda18 = cellLambda(17)
-        val cellLambda19 = cellLambda(18)
-        val cellLambda20 = cellLambda(19)
-        (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
-          var rowIndex = rowIndex0
-          while (rowIndex < lastRow) {
-            e = 0
-            tableBody.appendChild(
-              _mkRow(
-                rowIndex,
-                cellLambda1(indexBridge(rowIndex)),
-                cellLambda2(indexBridge(rowIndex)),
-                cellLambda3(indexBridge(rowIndex)),
-                cellLambda4(indexBridge(rowIndex)),
-                cellLambda5(indexBridge(rowIndex)),
-                cellLambda6(indexBridge(rowIndex)),
-                cellLambda7(indexBridge(rowIndex)),
-                cellLambda8(indexBridge(rowIndex)),
-                cellLambda9(indexBridge(rowIndex)),
-                cellLambda10(indexBridge(rowIndex)),
-                cellLambda11(indexBridge(rowIndex)),
-                cellLambda12(indexBridge(rowIndex)),
-                cellLambda13(indexBridge(rowIndex)),
-                cellLambda14(indexBridge(rowIndex)),
-                cellLambda15(indexBridge(rowIndex)),
-                cellLambda16(indexBridge(rowIndex)),
-                cellLambda17(indexBridge(rowIndex)),
-                cellLambda18(indexBridge(rowIndex)),
-                cellLambda19(indexBridge(rowIndex)),
-                cellLambda20(indexBridge(rowIndex))
-              )
+    case 19 =>
+      val cellLambda1  = cellLambda(0)
+      val cellLambda2  = cellLambda(1)
+      val cellLambda3  = cellLambda(2)
+      val cellLambda4  = cellLambda(3)
+      val cellLambda5  = cellLambda(4)
+      val cellLambda6  = cellLambda(5)
+      val cellLambda7  = cellLambda(6)
+      val cellLambda8  = cellLambda(7)
+      val cellLambda9  = cellLambda(8)
+      val cellLambda10 = cellLambda(9)
+      val cellLambda11 = cellLambda(10)
+      val cellLambda12 = cellLambda(11)
+      val cellLambda13 = cellLambda(12)
+      val cellLambda14 = cellLambda(13)
+      val cellLambda15 = cellLambda(14)
+      val cellLambda16 = cellLambda(15)
+      val cellLambda17 = cellLambda(16)
+      val cellLambda18 = cellLambda(17)
+      val cellLambda19 = cellLambda(18)
+      (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
+        rowIndex = rowIndex0
+        while (rowIndex < lastRow) {
+          e = 0
+          bridgeIndex = indexBridge(rowIndex)
+          tableBody.appendChild(
+            _mkRow(
+              rowIndex,
+              cellLambda1(bridgeIndex),
+              cellLambda2(bridgeIndex),
+              cellLambda3(bridgeIndex),
+              cellLambda4(bridgeIndex),
+              cellLambda5(bridgeIndex),
+              cellLambda6(bridgeIndex),
+              cellLambda7(bridgeIndex),
+              cellLambda8(bridgeIndex),
+              cellLambda9(bridgeIndex),
+              cellLambda10(bridgeIndex),
+              cellLambda11(bridgeIndex),
+              cellLambda12(bridgeIndex),
+              cellLambda13(bridgeIndex),
+              cellLambda14(bridgeIndex),
+              cellLambda15(bridgeIndex),
+              cellLambda16(bridgeIndex),
+              cellLambda17(bridgeIndex),
+              cellLambda18(bridgeIndex),
+              cellLambda19(bridgeIndex)
             )
-            rowIndex += 1
-          }
+          )
+          rowIndex += 1
+        }
 
-      case 21 =>
-        val cellLambda1  = cellLambda(0)
-        val cellLambda2  = cellLambda(1)
-        val cellLambda3  = cellLambda(2)
-        val cellLambda4  = cellLambda(3)
-        val cellLambda5  = cellLambda(4)
-        val cellLambda6  = cellLambda(5)
-        val cellLambda7  = cellLambda(6)
-        val cellLambda8  = cellLambda(7)
-        val cellLambda9  = cellLambda(8)
-        val cellLambda10 = cellLambda(9)
-        val cellLambda11 = cellLambda(10)
-        val cellLambda12 = cellLambda(11)
-        val cellLambda13 = cellLambda(12)
-        val cellLambda14 = cellLambda(13)
-        val cellLambda15 = cellLambda(14)
-        val cellLambda16 = cellLambda(15)
-        val cellLambda17 = cellLambda(16)
-        val cellLambda18 = cellLambda(17)
-        val cellLambda19 = cellLambda(18)
-        val cellLambda20 = cellLambda(19)
-        val cellLambda21 = cellLambda(20)
-        (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
-          var rowIndex = rowIndex0
-          while (rowIndex < lastRow) {
-            e = 0
-            tableBody.appendChild(
-              _mkRow(
-                rowIndex,
-                cellLambda1(indexBridge(rowIndex)),
-                cellLambda2(indexBridge(rowIndex)),
-                cellLambda3(indexBridge(rowIndex)),
-                cellLambda4(indexBridge(rowIndex)),
-                cellLambda5(indexBridge(rowIndex)),
-                cellLambda6(indexBridge(rowIndex)),
-                cellLambda7(indexBridge(rowIndex)),
-                cellLambda8(indexBridge(rowIndex)),
-                cellLambda9(indexBridge(rowIndex)),
-                cellLambda10(indexBridge(rowIndex)),
-                cellLambda11(indexBridge(rowIndex)),
-                cellLambda12(indexBridge(rowIndex)),
-                cellLambda13(indexBridge(rowIndex)),
-                cellLambda14(indexBridge(rowIndex)),
-                cellLambda15(indexBridge(rowIndex)),
-                cellLambda16(indexBridge(rowIndex)),
-                cellLambda17(indexBridge(rowIndex)),
-                cellLambda18(indexBridge(rowIndex)),
-                cellLambda19(indexBridge(rowIndex)),
-                cellLambda20(indexBridge(rowIndex)),
-                cellLambda21(indexBridge(rowIndex))
-              )
+    case 20 =>
+      val cellLambda1  = cellLambda(0)
+      val cellLambda2  = cellLambda(1)
+      val cellLambda3  = cellLambda(2)
+      val cellLambda4  = cellLambda(3)
+      val cellLambda5  = cellLambda(4)
+      val cellLambda6  = cellLambda(5)
+      val cellLambda7  = cellLambda(6)
+      val cellLambda8  = cellLambda(7)
+      val cellLambda9  = cellLambda(8)
+      val cellLambda10 = cellLambda(9)
+      val cellLambda11 = cellLambda(10)
+      val cellLambda12 = cellLambda(11)
+      val cellLambda13 = cellLambda(12)
+      val cellLambda14 = cellLambda(13)
+      val cellLambda15 = cellLambda(14)
+      val cellLambda16 = cellLambda(15)
+      val cellLambda17 = cellLambda(16)
+      val cellLambda18 = cellLambda(17)
+      val cellLambda19 = cellLambda(18)
+      val cellLambda20 = cellLambda(19)
+      (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
+        rowIndex = rowIndex0
+        while (rowIndex < lastRow) {
+          e = 0
+          bridgeIndex = indexBridge(rowIndex)
+          tableBody.appendChild(
+            _mkRow(
+              rowIndex,
+              cellLambda1(bridgeIndex),
+              cellLambda2(bridgeIndex),
+              cellLambda3(bridgeIndex),
+              cellLambda4(bridgeIndex),
+              cellLambda5(bridgeIndex),
+              cellLambda6(bridgeIndex),
+              cellLambda7(bridgeIndex),
+              cellLambda8(bridgeIndex),
+              cellLambda9(bridgeIndex),
+              cellLambda10(bridgeIndex),
+              cellLambda11(bridgeIndex),
+              cellLambda12(bridgeIndex),
+              cellLambda13(bridgeIndex),
+              cellLambda14(bridgeIndex),
+              cellLambda15(bridgeIndex),
+              cellLambda16(bridgeIndex),
+              cellLambda17(bridgeIndex),
+              cellLambda18(bridgeIndex),
+              cellLambda19(bridgeIndex),
+              cellLambda20(bridgeIndex)
             )
-            rowIndex += 1
-          }
+          )
+          rowIndex += 1
+        }
 
-      case 22 =>
-        val cellLambda1  = cellLambda(0)
-        val cellLambda2  = cellLambda(1)
-        val cellLambda3  = cellLambda(2)
-        val cellLambda4  = cellLambda(3)
-        val cellLambda5  = cellLambda(4)
-        val cellLambda6  = cellLambda(5)
-        val cellLambda7  = cellLambda(6)
-        val cellLambda8  = cellLambda(7)
-        val cellLambda9  = cellLambda(8)
-        val cellLambda10 = cellLambda(9)
-        val cellLambda11 = cellLambda(10)
-        val cellLambda12 = cellLambda(11)
-        val cellLambda13 = cellLambda(12)
-        val cellLambda14 = cellLambda(13)
-        val cellLambda15 = cellLambda(14)
-        val cellLambda16 = cellLambda(15)
-        val cellLambda17 = cellLambda(16)
-        val cellLambda18 = cellLambda(17)
-        val cellLambda19 = cellLambda(18)
-        val cellLambda20 = cellLambda(19)
-        val cellLambda21 = cellLambda(20)
-        val cellLambda22 = cellLambda(21)
-        (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
-          var rowIndex = rowIndex0
-          while (rowIndex < lastRow) {
-            e = 0
-            tableBody.appendChild(
-              _mkRow(
-                rowIndex,
-                cellLambda1(indexBridge(rowIndex)),
-                cellLambda2(indexBridge(rowIndex)),
-                cellLambda3(indexBridge(rowIndex)),
-                cellLambda4(indexBridge(rowIndex)),
-                cellLambda5(indexBridge(rowIndex)),
-                cellLambda6(indexBridge(rowIndex)),
-                cellLambda7(indexBridge(rowIndex)),
-                cellLambda8(indexBridge(rowIndex)),
-                cellLambda9(indexBridge(rowIndex)),
-                cellLambda10(indexBridge(rowIndex)),
-                cellLambda11(indexBridge(rowIndex)),
-                cellLambda12(indexBridge(rowIndex)),
-                cellLambda13(indexBridge(rowIndex)),
-                cellLambda14(indexBridge(rowIndex)),
-                cellLambda15(indexBridge(rowIndex)),
-                cellLambda16(indexBridge(rowIndex)),
-                cellLambda17(indexBridge(rowIndex)),
-                cellLambda18(indexBridge(rowIndex)),
-                cellLambda19(indexBridge(rowIndex)),
-                cellLambda20(indexBridge(rowIndex)),
-                cellLambda21(indexBridge(rowIndex)),
-                cellLambda22(indexBridge(rowIndex))
-              )
+    case 21 =>
+      val cellLambda1  = cellLambda(0)
+      val cellLambda2  = cellLambda(1)
+      val cellLambda3  = cellLambda(2)
+      val cellLambda4  = cellLambda(3)
+      val cellLambda5  = cellLambda(4)
+      val cellLambda6  = cellLambda(5)
+      val cellLambda7  = cellLambda(6)
+      val cellLambda8  = cellLambda(7)
+      val cellLambda9  = cellLambda(8)
+      val cellLambda10 = cellLambda(9)
+      val cellLambda11 = cellLambda(10)
+      val cellLambda12 = cellLambda(11)
+      val cellLambda13 = cellLambda(12)
+      val cellLambda14 = cellLambda(13)
+      val cellLambda15 = cellLambda(14)
+      val cellLambda16 = cellLambda(15)
+      val cellLambda17 = cellLambda(16)
+      val cellLambda18 = cellLambda(17)
+      val cellLambda19 = cellLambda(18)
+      val cellLambda20 = cellLambda(19)
+      val cellLambda21 = cellLambda(20)
+      (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
+        rowIndex = rowIndex0
+        while (rowIndex < lastRow) {
+          e = 0
+          bridgeIndex = indexBridge(rowIndex)
+          tableBody.appendChild(
+            _mkRow(
+              rowIndex,
+              cellLambda1(bridgeIndex),
+              cellLambda2(bridgeIndex),
+              cellLambda3(bridgeIndex),
+              cellLambda4(bridgeIndex),
+              cellLambda5(bridgeIndex),
+              cellLambda6(bridgeIndex),
+              cellLambda7(bridgeIndex),
+              cellLambda8(bridgeIndex),
+              cellLambda9(bridgeIndex),
+              cellLambda10(bridgeIndex),
+              cellLambda11(bridgeIndex),
+              cellLambda12(bridgeIndex),
+              cellLambda13(bridgeIndex),
+              cellLambda14(bridgeIndex),
+              cellLambda15(bridgeIndex),
+              cellLambda16(bridgeIndex),
+              cellLambda17(bridgeIndex),
+              cellLambda18(bridgeIndex),
+              cellLambda19(bridgeIndex),
+              cellLambda20(bridgeIndex),
+              cellLambda21(bridgeIndex)
             )
-            rowIndex += 1
-          }
-    }
+          )
+          rowIndex += 1
+        }
+
+    case 22 =>
+      val cellLambda1  = cellLambda(0)
+      val cellLambda2  = cellLambda(1)
+      val cellLambda3  = cellLambda(2)
+      val cellLambda4  = cellLambda(3)
+      val cellLambda5  = cellLambda(4)
+      val cellLambda6  = cellLambda(5)
+      val cellLambda7  = cellLambda(6)
+      val cellLambda8  = cellLambda(7)
+      val cellLambda9  = cellLambda(8)
+      val cellLambda10 = cellLambda(9)
+      val cellLambda11 = cellLambda(10)
+      val cellLambda12 = cellLambda(11)
+      val cellLambda13 = cellLambda(12)
+      val cellLambda14 = cellLambda(13)
+      val cellLambda15 = cellLambda(14)
+      val cellLambda16 = cellLambda(15)
+      val cellLambda17 = cellLambda(16)
+      val cellLambda18 = cellLambda(17)
+      val cellLambda19 = cellLambda(18)
+      val cellLambda20 = cellLambda(19)
+      val cellLambda21 = cellLambda(20)
+      val cellLambda22 = cellLambda(21)
+      (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
+        rowIndex = rowIndex0
+        while (rowIndex < lastRow) {
+          e = 0
+          bridgeIndex = indexBridge(rowIndex)
+          tableBody.appendChild(
+            _mkRow(
+              rowIndex,
+              cellLambda1(bridgeIndex),
+              cellLambda2(bridgeIndex),
+              cellLambda3(bridgeIndex),
+              cellLambda4(bridgeIndex),
+              cellLambda5(bridgeIndex),
+              cellLambda6(bridgeIndex),
+              cellLambda7(bridgeIndex),
+              cellLambda8(bridgeIndex),
+              cellLambda9(bridgeIndex),
+              cellLambda10(bridgeIndex),
+              cellLambda11(bridgeIndex),
+              cellLambda12(bridgeIndex),
+              cellLambda13(bridgeIndex),
+              cellLambda14(bridgeIndex),
+              cellLambda15(bridgeIndex),
+              cellLambda16(bridgeIndex),
+              cellLambda17(bridgeIndex),
+              cellLambda18(bridgeIndex),
+              cellLambda19(bridgeIndex),
+              cellLambda20(bridgeIndex),
+              cellLambda21(bridgeIndex),
+              cellLambda22(bridgeIndex)
+            )
+          )
+          rowIndex += 1
+        }
   }
 }

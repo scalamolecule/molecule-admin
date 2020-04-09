@@ -95,7 +95,6 @@ object QueryState extends QueryApi {
   )
   val curViews: Var[Seq[String]] = Var(Seq.empty[String])
 
-
   // Entities
   val curEntity              = Var(0L)
   val curEntityLocked        = Var(false)
@@ -103,10 +102,8 @@ object QueryState extends QueryApi {
   var curAttrs               = Seq.empty[String]
   val entityHistorySort      = Var("tx")
 
-  // tableCol = colIndex + 1
-  // tableCol -> (eid -> array indexes)
-  val curEntityIndexes: mutable.Map[Int, mutable.LongMap[List[Int]]] =
-    mutable.Map.empty
+  // tableCol -> (array index -> marked eid)
+  val colEntityIndexes = mutable.Map.empty[Int, Array[Long]]
 
   // For fast render on page scrolling
   // tableCol -> array of marker statuses
@@ -120,8 +117,8 @@ object QueryState extends QueryApi {
   var curChecks: Set[Long] = Set.empty
 
   // Cell id -> marker toggler
-  var starTogglers = Map.empty[String, () => Unit]
-  var flagTogglers = Map.empty[String, () => Unit]
+  var starTogglers  = Map.empty[String, () => Unit]
+  var flagTogglers  = Map.empty[String, () => Unit]
   var checkTogglers = Map.empty[String, () => Unit]
 
   // Are we toggling multiple rows while holding down toggle key?

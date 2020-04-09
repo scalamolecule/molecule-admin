@@ -78,6 +78,7 @@ case class Rows2QueryResult(
   val rows                        = rowCollection.iterator
   var row: java.util.List[AnyRef] = _
   var i                           = 0
+
   def get: QueryResult = {
 
     // Populate mutable arrays

@@ -3,22 +3,28 @@ import sbtcrossproject.CrossType
 
 
 lazy val client = (project in file("client"))
-  .settings(Settings.client)
   .dependsOn(sharedJs)
+  .settings(Settings.client)
   .enablePlugins(ScalaJSWeb, TzdbPlugin)
 
 
 lazy val server = (project in file("server"))
+  .dependsOn(sharedJvm)
   .settings(
     Settings.server,
     scalaJSProjects := Seq(client),
     pipelineStages in Assets := Seq(scalaJSPipeline),
     pipelineStages := Seq(rjs, digest, gzip),
+
     // triggers scalaJSPipeline when using compile or continuous compilation
     compile in Compile := ((compile in Compile) dependsOn scalaJSPipeline).value,
+
+    // Start agent to allow measuring object sizes in server project
+    //    fork in run := true, // needed?
+    // Previous setup with `ageng` project - didn't go well with scalajs
+    //    javaOptions in run += ("-javaagent:" + (packageBin in (agent, Compile)).value)
   )
-  .dependsOn(sharedJvm)
-  .enablePlugins(PlayScala)
+  .enablePlugins(PlayScala, JavaAgent)
   .disablePlugins(PlayLayoutPlugin)
 //  .enablePlugins(MoleculePlugin).settings(moleculeSchemas := Seq("db/admin", "db/core", "db/integration", "db/migration"))
 

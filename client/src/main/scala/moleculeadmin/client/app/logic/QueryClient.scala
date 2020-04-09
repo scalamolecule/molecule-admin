@@ -2,22 +2,19 @@ package moleculeadmin.client.app.logic
 
 import autowire._
 import boopickle.Default._
-import util.client.rx.RxBindings
+import moleculeadmin.client.app.html.AppElements
 import moleculeadmin.client.app.logic.common.TopMenu
 import moleculeadmin.client.app.logic.query.QueryState._
 import moleculeadmin.client.app.logic.query.data.DataTable
 import moleculeadmin.client.app.logic.query.{RenderGrouped, RenderQueryBuilder, RenderSubMenu, RenderViews, _}
-import moleculeadmin.client.app.html.AppElements
-import moleculeadmin.client.{queryWireAjax, queryWireWS}
-import moleculeadmin.shared.ast.query.QueryDTO
-import moleculeadmin.shared.ast.schema.MetaSchema
+import moleculeadmin.client.queryWireAjax
 import moleculeadmin.shared.ops.query.builder.TreeOps
 import moleculeadmin.shared.ops.query.{ColOps, SchemaOps}
 import moleculeadmin.shared.ops.transform.Model2Molecule
-import org.scalajs.dom.raw.MessageEvent
-import org.scalajs.dom.{WebSocket, document}
+import org.scalajs.dom.document
 import rx.{Ctx, Rx}
 import scalatags.JsDom.all._
+import util.client.rx.RxBindings
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 

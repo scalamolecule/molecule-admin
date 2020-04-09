@@ -1,10 +1,9 @@
 package moleculeadmin.client.app.logic.query.data
 
+import moleculeadmin.client.app.html.query.datatable.BodyElements
 import moleculeadmin.client.app.logic.query.QueryState._
 import moleculeadmin.client.app.logic.query.data.edit.{RetractEid, _}
 import moleculeadmin.client.app.logic.query.marker.Toggle
-import moleculeadmin.client.app.logic.query.views.Base
-import moleculeadmin.client.app.html.query.datatable.BodyElements
 import moleculeadmin.shared.ast.query.{QueryResult, _}
 import moleculeadmin.shared.ops.query.ColOps
 import org.scalajs.dom.document
@@ -12,7 +11,6 @@ import org.scalajs.dom.html.{TableCell, TableRow, TableSection}
 import rx.Ctx
 import scalatags.JsDom
 import scalatags.JsDom.all._
-import scala.collection.mutable
 
 
 abstract class Cell(
@@ -31,8 +29,6 @@ abstract class Cell(
   var curFlagToggler : () => Unit = _
   var curCheckToggler: () => Unit = _
 
-  // Avoid creating id variable for each cell
-  //  var id = ""
 
   protected def cellLambda(colIndex: Int): Int => JsDom.TypedTag[TableCell] = {
     val arrayIndex = qr.arrayIndexes(colIndex)
@@ -110,7 +106,7 @@ abstract class Cell(
         val row : TableRow  = cell.parentNode.asInstanceOf[TableRow]
         // Unmark row when going out of focus
         row.className = "view"
-        val eid : Long      = cell.getAttribute("eid").toLong
+        val eid: Long = cell.getAttribute("eid").toLong
         updater.update(mkId, cellId, cell, row, eid, oldVOpt, isNum)
       }
     }
@@ -147,6 +143,7 @@ abstract class Cell(
       document.getElementById(cellId)
         .parentNode.asInstanceOf[TableRow].className = "edit"
     }
+
 
     colType match {
 
@@ -263,36 +260,10 @@ abstract class Cell(
         val array     = qr.num(arrayIndex)
         cellType match {
           case "eid" =>
-            val length      = array.length
-            val starIndex   = new Array[Boolean](length)
-            val flagIndex   = new Array[Boolean](length)
-            val checkIndex  = new Array[Boolean](length)
-            val entityIndex = mutable.LongMap.empty[List[Int]]
-            var eid         = 0L
-            var i           = 0
-            while (i < length) {
-              eid = array(i).get.toLong
-              entityIndex.get(eid) match {
-                case Some(ii) => entityIndex(eid) = ii :+ i
-                case None     => entityIndex(eid) = List(i)
-              }
-              starIndex(i) = curStars.contains(eid)
-              flagIndex(i) = curFlags.contains(eid)
-              checkIndex(i) = curChecks.contains(eid)
-              i += 1
-            }
-
-            val tableCol = colIndex + 1
-            curEntityIndexes(tableCol) = entityIndex
-            curStarIndexes(tableCol) = starIndex
-            curFlagIndexes(tableCol) = flagIndex
-            curCheckIndexes(tableCol) = checkIndex
-
             (rowIndex: Int) =>
               // Set entity id for updates of subsequent attribute values
               e = array(rowIndex).fold(0L)(_.toLong)
               val eid = e
-
               curStarToggler = () =>
                 Toggle(tableBody, "star", curStars.contains(eid), eid = eid)
               curFlagToggler = () =>
@@ -306,9 +277,9 @@ abstract class Cell(
                 curEntity,
                 setCurEid(false)(eid),
                 lockCurEid(false)(eid),
-                if (starIndex(rowIndex)) mark.starOn else mark.starOff,
-                if (flagIndex(rowIndex)) mark.flagOn else mark.flagOff,
-                if (checkIndex(rowIndex)) mark.checkOn else mark.checkOff,
+                if (curStars.contains(eid)) mark.starOn else mark.starOff,
+                if (curFlags.contains(eid)) mark.flagOn else mark.flagOff,
+                if (curChecks.contains(eid)) mark.checkOn else mark.checkOff,
                 () => RetractEid(eid),
                 curStarToggler,
                 curFlagToggler,
