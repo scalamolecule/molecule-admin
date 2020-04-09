@@ -1,7 +1,9 @@
 package moleculeadmin.client.app.logic.query.keyEvents
+
 import moleculeadmin.client.app.logic.query.QueryState._
 import org.scalajs.dom.raw.KeyboardEvent
 import rx.Ctx
+import scala.scalajs.js
 import scala.scalajs.js.Date
 
 
@@ -27,30 +29,30 @@ trait Paging extends BaseKeyEvents {
   ) = {
     // Throttle paging for smooth rendering
     if (beginning < 10000000) {
-      beginning = new Date().getTime
+      beginning = js.Date.now
     }
     i += 1
     if (keyRepeatMs == 0 && i == 3) {
       // Measure duration of 2 key repeats and apply a rough
       // factor of 40% for processing leaving 60% time to rendering
-      keyRepeatMs = ((new Date().getTime - beginning) / 2 * 0.4).round
-      //              println("keyRepeatInterval " + keyRepeatMs)
+      keyRepeatMs = ((js.Date.now - beginning) / 2 * 0.4).round
+      // println("keyRepeatInterval " + keyRepeatMs)
     }
 
     if (i % cycles == 0) {
-      t1 = new Date().getTime
+      t1 = js.Date.now
       e.key match {
         case "ArrowLeft"  => backward(); j += 1
         case "ArrowRight" => forward(); j += 1
         case _            => ()
       }
-      t2 = new Date().getTime
+      t2 = js.Date.now
       delta = t2 - t1
       tProcess = tProcess + delta
       avg = (tProcess / j).round
       ratio = avg / keyRepeatMs
       cycles = ratio.ceil.toInt
-      // println(s"  $j  $delta    $avg    $ratio    $throttle    " + (t2 - beginning))
+      // println(s"  $j  $delta    $avg    $ratio    $cycles    " + (t2 - beginning))
     }
   }
 

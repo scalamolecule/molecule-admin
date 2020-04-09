@@ -14,25 +14,22 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 case class ToggleOffAll(tableBody: TableSection, tpe: String) extends AppElements {
 
-  val (curMarkerIndexes, offCls, iconIndex, eids, count, toggling, toggled) =
+  val (offCls, iconIndex, eids, count, toggling) =
     tpe match {
       case "star" =>
         val starred = curStars
         curStars = Set.empty[Long]
-        (curStarIndexes, mark.starOff, 1, starred, starred.size,
-          "Unstarring all", "Unstarred all")
+        (mark.starOff, 1, starred, starred.size, "Unstarring all")
 
       case "flag" =>
         val flagged = curFlags
         curFlags = Set.empty[Long]
-        (curFlagIndexes, mark.flagOff, 2, flagged, flagged.size,
-          "Unflagging all", "Unflagged all")
+        (mark.flagOff, 2, flagged, flagged.size, "Unflagging all")
 
       case "check" =>
         val checked = curChecks
         curChecks = Set.empty[Long]
-        (curCheckIndexes, mark.checkOff, 3, checked, checked.size,
-          "Unchecking all", "Unchecked all")
+        (mark.checkOff, 3, checked, checked.size, "Unchecking all")
     }
 
   // Log
@@ -54,18 +51,6 @@ case class ToggleOffAll(tableBody: TableSection, tpe: String) extends AppElement
       cells(col).children(iconIndex).setAttribute("class", offCls)
     }
     i += 1
-  }
-
-  // Set current marker index to false for all entity id columns
-  eidCols.foreach { col =>
-    // Update cached marker index
-    val curMarkerIndex       = curMarkerIndexes(col)
-    var i                    = 0
-    val curMarkerIndexLength = curMarkerIndex.length
-    while (i < curMarkerIndexLength) {
-      curMarkerIndex(i) = false
-      i += 1
-    }
   }
 
   // Save asynchronously in meta db

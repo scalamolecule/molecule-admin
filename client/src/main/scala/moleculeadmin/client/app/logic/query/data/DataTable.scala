@@ -178,9 +178,6 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
         recentQueries =
           curQuery +: recentQueries.filterNot(_.molecule == curMolecule.now)
 
-        // After all rendering, populate marker indexes
-        populateMarkerIndexes(queryResult)
-
       case Left(Nil) =>
         resetTableBodyFoot("Empty result set...")
         rowCountAll = 0
@@ -200,33 +197,6 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
             p(), p(b("Stacktrace")), ul(msgs.tail.map(li(_)))
           ).render
         )
-    }
-  }
-
-
-  def populateMarkerIndexes(qr: QueryResult) = {
-    columns.now.collect {
-      case Col(colIndex, _, _, _, "e" | "e_", _, _, _, _, _, _, _, _, _, _) =>
-        val t               = Timer()
-        val array           = qr.num(qr.arrayIndexes(colIndex))
-        val length          = array.length
-        val starIndex       = new Array[Boolean](length)
-        val flagIndex       = new Array[Boolean](length)
-        val checkIndex      = new Array[Boolean](length)
-        var eid             = 0L
-        var i               = 0
-        while (i < length) {
-          eid = array(i).get.toLong
-          starIndex(i) = curStars.contains(eid)
-          flagIndex(i) = curFlags.contains(eid)
-          checkIndex(i) = curChecks.contains(eid)
-          i += 1
-        }
-        val tableCol = colIndex + 1
-        curStarIndexes(tableCol) = starIndex
-        curFlagIndexes(tableCol) = flagIndex
-        curCheckIndexes(tableCol) = checkIndex
-        println(s"Marker indexes for col $colIndex populated in " + t.msTotal)
     }
   }
 

@@ -102,15 +102,6 @@ object QueryState extends QueryApi {
   var curAttrs               = Seq.empty[String]
   val entityHistorySort      = Var("tx")
 
-  // tableCol -> (array index -> marked eid)
-  val colEntityIndexes = mutable.Map.empty[Int, Array[Long]]
-
-  // For fast render on page scrolling
-  // tableCol -> array of marker statuses
-  val curStarIndexes : mutable.Map[Int, Array[Boolean]] = mutable.Map.empty
-  val curFlagIndexes : mutable.Map[Int, Array[Boolean]] = mutable.Map.empty
-  val curCheckIndexes: mutable.Map[Int, Array[Boolean]] = mutable.Map.empty
-
   // Marker On-values
   var curStars : Set[Long] = Set.empty
   var curFlags : Set[Long] = Set.empty

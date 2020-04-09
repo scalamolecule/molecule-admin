@@ -70,9 +70,7 @@ trait AutowireController extends InjectedController with Tags {
         // Send byte Array to HTTP response to Client that can received it
         // as an ArrayBuffer
         Ok(dataAsByteArray)
-          .withHeaders(
-            "Keep-Alive" -> "timeout=3, max=10"
-          )
+        //          .withHeaders("Keep-Alive" -> "timeout=3, max=10")
       }
     }
   }
