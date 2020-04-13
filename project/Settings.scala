@@ -40,7 +40,7 @@ object Settings {
     ),
     libraryDependencies ++= Seq(
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-      "org.scalamolecule" %% "molecule" % "0.22.0",
+      "org.scalamolecule" %% "molecule" % "0.22.1",
       "com.lihaoyi" %% "ammonite-ops" % "2.0.4",
       "com.datomic" % "datomic-free" % "0.9.5697",
       "org.webjars" % "jquery" % "3.3.1",
@@ -51,6 +51,7 @@ object Settings {
       "org.webjars.bower" % "open-iconic" % "1.1.1",
       "org.webjars" % "font-awesome" % "5.5.0",
       "org.webjars.bower" % "highlightjs" % "9.12.0",
+
 //      "io.kamon" %% "kamon-bundle" % "2.1.0",
 //      "io.kamon" %% "kamon-apm-reporter" % "2.1.0",
       specs2 % Test,
@@ -65,7 +66,7 @@ object Settings {
       "com.lihaoyi" %%% "autowire" % "0.2.6",
       "com.lihaoyi" %%% "utest" % "0.7.4",
       "io.suzaku" %%% "boopickle" % "1.3.1",
-      ("org.scalamolecule" %%% "molecule" % "0.22.0")
+      ("org.scalamolecule" %%% "molecule" % "0.22.1")
         .exclude("com.datomic", "datomic-free")
     ),
     testFrameworks += new TestFramework("utest.runner.Framework")

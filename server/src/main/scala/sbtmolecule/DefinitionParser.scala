@@ -19,7 +19,7 @@ case class DefinitionParser(defFileName: String, lines0: List[String], allIndexe
 
     // Check input/output arities
     lines collect {
-      case r"@InOut\((\d+)$in, (\d+)$out\)" => (in.toString.toInt, out.toString.toInt) match {
+      case r"@InOut\((\d+)$in, (\d+)$out\)" => (in.toInt, out.toInt) match {
         case (i: Int, _) if i < 0 || i > 3  => throw new SchemaDefinitionException(s"Input arity in '$defFileName' was $in. It should be in the range 0-3")
         case (_, o: Int) if o < 1 || o > 22 => throw new SchemaDefinitionException(s"Output arity of '$defFileName' was $out. It should be in the range 1-22")
         case (i: Int, o: Int)               => (i, o)
@@ -60,7 +60,7 @@ case class DefinitionParser(defFileName: String, lines0: List[String], allIndexe
     // Parse ..........................................
 
     def parseOptions(str0: String, acc: Seq[Optional] = Nil, attr: String, curFullNs: String = ""): Seq[Optional] = {
-      val indexed = Optional( """":db/index"             , true.asInstanceOf[Object]""", "Indexed")
+      val indexed = Optional("""":db/index"             , true.asInstanceOf[Object]""", "Indexed")
       val options = str0 match {
         case r"\.doc\((.*)$msg\)(.*)$str" => parseOptions(str, acc :+ Optional(s"""":db/doc"               , $msg""", ""), attr, curFullNs)
         case r"\.fulltext(.*)$str"        => parseOptions(str, acc :+ Optional("""":db/fulltext"          , true.asInstanceOf[Object]""", "Fulltext[Ns, In]"), attr, curFullNs)
@@ -403,10 +403,9 @@ case class DefinitionParser(defFileName: String, lines0: List[String], allIndexe
         case r"object\s+(.*)$part\s*\{"                => throw new SchemaDefinitionException(s"Unexpected partition name '$part' in $defFileName (line ${i + 1}).\nPartition names have to start with a lowercase letter and contain only [a-zA-Z0-9].")
 
         // Ns definitions
-        case r"trait\s+([A-Z][a-zA-Z0-9]*)$ns\s*\{" if d.curPart.nonEmpty => (0, "", d.copy(nss = (if (d.nss.last.ns.isEmpty) d.nss.init else d.nss) :+ Namespace(d.curPart, someDescr(d.curPartDescr), d.curPart + "_" + ns, someDescr(cmt))))
-        case r"trait\s+([A-Z][a-zA-Z0-9]*)$ns\s*\{"                       => (0, "", d.copy(nss = d.nss :+ Namespace("db.part/user", None, ns, someDescr(cmt))))
-        case r"trait\s+([a-z][a-zA-Z0-9]*)$ns\s*\{"                       => throw new SchemaDefinitionException(s"Namespace name '$ns' in $defFileName (line ${i + 1}) should start with a capital letter and contain only [a-zA-Z0-9].")
-        case r"trait\s+(.*)$ns\s*\{"                                      => throw new SchemaDefinitionException(s"Unexpected namespace name '$ns' in $defFileName (line ${i + 1}).\nNamespace names have to start with a capital letter [A-Z] and contain only [a-zA-Z0-9].")
+        case r"trait\s+([a-zA-Z0-9]*)$ns\s*\{" if d.curPart.nonEmpty => (0, "", d.copy(nss = (if (d.nss.last.ns.isEmpty) d.nss.init else d.nss) :+ Namespace(d.curPart, someDescr(d.curPartDescr), d.curPart + "_" + ns, someDescr(cmt))))
+        case r"trait\s+([a-zA-Z0-9]*)$ns\s*\{"                       => (0, "", d.copy(nss = d.nss :+ Namespace("db.part/user", None, ns, someDescr(cmt))))
+        case r"trait\s+(.*)$ns\s*\{"                                 => throw new SchemaDefinitionException(s"Unexpected namespace name '$ns' in $defFileName (line ${i + 1}).\nNamespace names can only contain standard letters and numbers ([a-zA-Z0-9]).")
 
         // Attribute definitions
         case r"val\s+(\`?)${q1}get(\w*)$a(\`?)$q2\s*\=\s*(.*)$str"                       => throw new SchemaDefinitionException(s"Attribute name `get$a` not allowed to start with `get` in $defFileName (line ${i + 1}).")
@@ -439,16 +438,16 @@ case class DefinitionParser(defFileName: String, lines0: List[String], allIndexe
 
   def resolveEdgeToOther(nss: Seq[Namespace]): Seq[Namespace] = nss.map { ns =>
     val isBaseEntity: Boolean = ns.attrs.collectFirst {
-      case Ref(attr, _, _, _, _, _, refNs, _, Some("BiEdgeRef_"), revRef, _) => true
+      case Ref(_, _, _, _, _, _, _, _, Some("BiEdgeRef_"), _, _) => true
     } getOrElse false
 
     if (isBaseEntity) {
       val newAttrs: Seq[DefAttr] = ns.attrs.map {
-        case biEdgeRefAttr@Ref(attr1, _, _, _, _, _, edgeNs1, _, Some("BiEdgeRef_"), revRef1, _) =>
+        case biEdgeRefAttr@Ref(attr1, _, _, _, _, _, edgeNs1, _, Some("BiEdgeRef_"), _, _) =>
           nss.collectFirst {
             case Namespace(part2, _, ns2, _, _, attrs2) if part2 == ns.part && ns2 == edgeNs1 =>
               attrs2.collectFirst {
-                case Ref(attr3, _, _, _, _, _, refNs3, _, Some("BiTargetRef_"), revRef3, _) if refNs3 == ns.ns =>
+                case Ref(attr3, _, _, _, _, _, refNs3, _, Some("BiTargetRef_"), _, _) if refNs3 == ns.ns =>
                   biEdgeRefAttr.copy(revRef = attr3)
               } getOrElse {
                 val baseNs = ns.ns.replace("_", ".")
@@ -460,7 +459,7 @@ case class DefinitionParser(defFileName: String, lines0: List[String], allIndexe
             throw new SchemaDefinitionException(s"Couldn't find target reference in edge namespace `${edgeNs1.replace("_", ".")}` that points back to `$baseNs.$attr1`. " +
               s"Expecting something like:\nval ${firstLow(baseNs.split('.').last)} = target[${baseNs.split('.').last}.$attr1.type]")
           }
-        case other                                                                               => other
+        case other                                                                         => other
       }
       ns.copy(attrs = newAttrs)
     } else {
@@ -502,12 +501,12 @@ case class DefinitionParser(defFileName: String, lines0: List[String], allIndexe
 
     nss.map {
       case ns2 if refMap.nonEmpty && refMap.keys.toList.contains(ns2.ns) => {
-        val attrs2 = refMap.foldLeft(ns2.attrs) { case (attrs, (refNs, outRef@Ref(_, _, _, _, tpe, _, _, _, _, _, _))) =>
+        val attrs2 = refMap.foldLeft(ns2.attrs) { case (attrs, (_, _: Ref)) =>
           val cleanNs = if (curNs.ns.contains('_')) curNs.ns.split("_").tail.head else curNs.ns
           // todo: check not to backreference same-named namespaces in different partitions
           curNs.ns match {
             case ns1 if ns1 == ns2.ns => attrs
-            case other                => attrs :+ BackRef(s"_$cleanNs", s"_$cleanNs", "", "", "", "", curNs.ns)
+            case _                    => attrs :+ BackRef(s"_$cleanNs", s"_$cleanNs", "", "", "", "", curNs.ns)
           }
         }.distinct
         ns2.copy(attrs = attrs2)

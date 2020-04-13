@@ -18,5 +18,8 @@ class QueryController @Inject()(api: QueryBackend)(implicit ec: ExecutionContext
   val autowireRouter = AutowireServer.route[QueryApi](api)
 
   // Explicit actions
-  def query(db: String): Action[AnyContent] = Action(Ok(QueryPage(db)))
+  def query(db: String): Action[AnyContent] = Action(
+    Ok(QueryPage(db))
+//      .withSession("prevAjaxCount" -> "0")
+  )
 }

@@ -63,7 +63,7 @@ trait Model2Molecule extends QueryApi with BaseQuery with DateHandling {
       case ((_, m), Generic(_, e@("e" | "e_"), _, value))    => (0, m + "." + e + v("Long", value))
       case ((_, m), Generic(_, attr, _, _))                  => (0, m + "." + attr)
       case ((_, m), Atom(_, attr, tpe, _, value, _, _, _))   => (0, m + "." + attr + v(tpe, value))
-      case ((_, m), ReBond(backRef))                         => (1, m + "._" + c(backRef.split('_').last))
+      case ((_, m), ReBond(backRef))                         => (1, m + "._" + c(backRef))
       case ((0, m), Bond(_, refAttr, _, _, _))               => (0, m + "." + c(refAttr))
       case ((1, m), Bond(_, refAttr, _, _, _))               => (0, m + "\n." + c(refAttr))
       case ((rebonding, m), e)                               => (rebonding, m + " ### Unexpected element: " + e)

@@ -34,8 +34,8 @@ class QueryBackend extends ToggleBackend {
     maxRows: Int,
     cols: Seq[Col]
   ): Either[Seq[String], QueryResult] = try {
-    log.info("-------------------")
-    log.info("Querying datomic...\n" + datalogQuery)
+    log.info("\n---- Querying Datomic... --------------------\n" + datalogQuery)
+//    log.info("Querying datomic...\n" + datalogQuery)
     val t           = Timer("Query")
     val conn        = Conn(base + "/" + db)
     val allInputs   = if (rules.isEmpty)
