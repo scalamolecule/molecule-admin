@@ -233,17 +233,37 @@ trait FilterFactory extends RegexMatching with DateHandling {
     splitComma: Boolean
   ): Option[Option[T] => Boolean] = {
     val predicates: Seq[Option[T] => Boolean] =
-      if (splitComma)
-        (for {
-          lines <- filterExpr.split('\n')
-          token <- lines.split(',')
-          predicate <- predicateFactory(token)
-        } yield predicate).toList
-      else
-        (for {
-          token <- filterExpr.split('\n')
-          predicate <- predicateFactory(token)
-        } yield predicate).toList
+      filterExpr match {
+        case r"!?i?/.*" =>
+          // Ignore line shifts in regex expressions to allow overviewing complex
+          // expressions on multiple lines without affecting regex execution
+          Seq(predicateFactory(filterExpr.replaceAll("\n", "")).get)
+
+        case expr if splitComma =>
+          (for {
+            lines <- expr.split('\n')
+            token <- lines.split(',')
+            predicate <- predicateFactory(token)
+          } yield predicate).toList
+
+        case expr =>
+          (for {
+            token <- expr.split('\n')
+            predicate <- predicateFactory(token)
+          } yield predicate).toList
+      }
+
+    //      if (splitComma)
+    //        (for {
+    //          lines <- filterExpr.split('\n')
+    //          token <- lines.split(',')
+    //          predicate <- predicateFactory(token)
+    //        } yield predicate).toList
+    //      else
+    //        (for {
+    //          token <- filterExpr.split('\n')
+    //          predicate <- predicateFactory(token)
+    //        } yield predicate).toList
 
     predicates.length match {
       case 0 => None
@@ -286,8 +306,7 @@ trait FilterFactory extends RegexMatching with DateHandling {
           case "Boolean"    => filter[String](predBoolean)
           case "BigInt"     => filter[String](predBigInt)
           case "BigDecimal" => filter[String](predBigDecimal)
-          case _            =>
-            filter[String](predString)
+          case _            => filter[String](predString)
         }
         case "double" | "listDouble" => attrType match {
           case "datom"                =>

@@ -129,6 +129,8 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
     tableContainer
   }
 
+  // Used to ignore previous calls when requests are fired faster than responses return
+  var lastAjaxCall = 0
 
   def fetchAndPopulate(
     tableBody: TableSection,
@@ -149,54 +151,64 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
     // Push url with new query onto browser history
     pushUrl()
 
+    lastAjaxCall += 1
+    val origAjaxCall = lastAjaxCall
+
     // Fetch data from db asynchronously
     queryWireAjax()
       .query(db, datalogQuery, rules, l, ll, lll, maxRows.now, columns.now)
-      .call().foreach {
+      .call().foreach { result =>
+      if (origAjaxCall == lastAjaxCall) {
+        // println("handling ajax result " + origAjaxCall)
+        result match {
+          case Right(queryResult) =>
+            rowCountAll = queryResult.rowCountAll
+            rowCount = queryResult.rowCount
 
-      case Right(queryResult) =>
-        rowCountAll = queryResult.rowCountAll
-        rowCount = queryResult.rowCount
+            // Render data table
+            DataTableBodyFoot().populate(tableBody, tableFoot, queryResult)
 
-        // Render data table
-        DataTableBodyFoot().populate(tableBody, tableFoot, queryResult)
+            // Render grouped
+            savedQueries.find(_.molecule == curMolecule.now) match {
+              case None        =>
+                showGrouped = false
+                groupedColIndexes() = Set.empty[Int]
+              case Some(query) =>
+                showGrouped = query.showGrouped
+                if (groupedColIndexes.now == query.groupedColIndexes)
+                  groupedColIndexes.recalc()
+                else
+                  groupedColIndexes() = query.groupedColIndexes
+            }
+            renderSubMenu.recalc()
 
-        // Render grouped
-        savedQueries.find(_.molecule == curMolecule.now) match {
-          case None        =>
-            showGrouped = false
-            groupedColIndexes() = Set.empty[Int]
-          case Some(query) =>
-            showGrouped = query.showGrouped
-            if (groupedColIndexes.now == query.groupedColIndexes)
-              groupedColIndexes.recalc()
-            else
-              groupedColIndexes() = query.groupedColIndexes
+            recentQueries =
+              curQuery +: recentQueries.filterNot(_.molecule == curMolecule.now)
+
+          case Left(Nil) =>
+            resetTableBodyFoot("Empty result set", false)
+            rowCountAll = 0
+            renderSubMenu.recalc()
+
+          case Left(msgs) =>
+            val datalogQuery       = molecule.transform.Query2String(query).multiLine()
+            val dataTableContainer = document.getElementById("dataTableContainer")
+            dataTableContainer.innerHTML = ""
+            dataTableContainer.appendChild(
+              div(
+                p(), p(b("An error occurred when querying")), pre(msgs.head),
+                p(), p(b("Model")), pre(modelElements.now.mkString("\n")),
+                p(), p(b("Query")), pre(query.toString()),
+                p(), p(b("Datalog")), pre(datalogQuery),
+                p(), p(b("Cols")), pre(columns.now.mkString("\n")),
+                p(), p(b("Stacktrace")), ul(msgs.tail.map(li(_)))
+              ).render
+            )
         }
-        renderSubMenu.recalc()
-
-        recentQueries =
-          curQuery +: recentQueries.filterNot(_.molecule == curMolecule.now)
-
-      case Left(Nil) =>
-        resetTableBodyFoot("Empty result set", false)
-        rowCountAll = 0
-        renderSubMenu.recalc()
-
-      case Left(msgs) =>
-        val datalogQuery       = molecule.transform.Query2String(query).multiLine()
-        val dataTableContainer = document.getElementById("dataTableContainer")
-        dataTableContainer.innerHTML = ""
-        dataTableContainer.appendChild(
-          div(
-            p(), p(b("An error occurred when querying")), pre(msgs.head),
-            p(), p(b("Model")), pre(modelElements.now.mkString("\n")),
-            p(), p(b("Query")), pre(query.toString()),
-            p(), p(b("Datalog")), pre(datalogQuery),
-            p(), p(b("Cols")), pre(columns.now.mkString("\n")),
-            p(), p(b("Stacktrace")), ul(msgs.tail.map(li(_)))
-          ).render
-        )
+      } else {
+        // Ignore previous results
+        // println("ignoring ajax result " + origAjaxCall)
+      }
     }
   }
 
@@ -222,7 +234,7 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
       tr(
         td(
           colspan := columns.now.size + 1,
-          if(showSpinner) _sync(0, 6) else (),
+          if (showSpinner) _sync(0, 6) else (),
           msg
         )
       ).render

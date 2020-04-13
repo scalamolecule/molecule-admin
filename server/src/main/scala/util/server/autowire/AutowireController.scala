@@ -24,10 +24,8 @@ trait AutowireController extends InjectedController with Tags {
    *  - no `val` declarations in api
    *  - no parameterless `def` definitions in api:
    * `def myDef() = 7` instead of `def myDef = 7`
-   * - passing `None` results in `InvalidInput: null`
+   * - passing `None` as method argument results in `InvalidInput: null`
    * - default arguments only in interface, NOT in implementation!
-   *
-   * Otherwise it's absolutely awesome!
    */
   val autowireRouter: Router
 
@@ -44,16 +42,16 @@ trait AutowireController extends InjectedController with Tags {
       val argsData = ajaxRequest.body.asBytes(parse.UNLIMITED).get
       val args     = pickler.fromBytes(argsData.asByteBuffer)
 
-      // Autowire Request holding server method coordinates and unpickled args
+      // Autowire Request holding server method coordinates and args
       val methodRequest = autowire.Core.Request(path, args)
 
       /*
        * Invoke server method
        *
        * The autowire Router is a macro-generated collection of partial functions
-       * that match autowire Requests as input and calls the corresponding server
-       * method with the args provided in the Request. Applying the method request
-       * to the router then:
+       * that match autowire method Requests as input and calls the corresponding
+       * server method with the args provided in the Request. Applying the method
+       * request to the router then:
        * - validates bindings
        * - wraps the invocation in a Future
        * - invokes the method with the args
@@ -67,9 +65,10 @@ trait AutowireController extends InjectedController with Tags {
         val dataAsByteArray = Array.ofDim[Byte](byteBufferResult.remaining())
         byteBufferResult.get(dataAsByteArray)
 
-        // Send byte Array to HTTP response to Client that can received it
-        // as an ArrayBuffer
+        // Send byte Array as HTTP response to Client and increase counter
         Ok(dataAsByteArray)
+        //          .withSession("prevAjaxCount" ->
+        //            (ajaxRequest.session("prevAjaxCount").toInt + 1).toString)
         //          .withHeaders("Keep-Alive" -> "timeout=3, max=10")
       }
     }

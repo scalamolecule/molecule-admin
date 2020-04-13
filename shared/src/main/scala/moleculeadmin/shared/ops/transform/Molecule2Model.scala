@@ -67,7 +67,7 @@ class Molecule2Model(molecule0: String, nsMap: Map[String, Ns])
     }.map("_" + _._1).toList
   }.toMap
 
-  val backRefs: Seq[String] = backRefNss.values.flatten.toSeq
+  val backRefs: Set[String] = backRefNss.values.flatten.toSet
 
   // Building vars
   var first         = true
@@ -86,11 +86,11 @@ class Molecule2Model(molecule0: String, nsMap: Map[String, Ns])
     println("refNss    : " + refNss)
     println("backRefNss: " + backRefNss)
     println("backRefs  : " + backRefs)
-    println("refDefs --------------")
-    refDefs.foreach { case (ns1, attrs1) =>
-      println(ns1)
-      attrs1 foreach println
-    }
+    //    println("refDefs --------------")
+    //    refDefs.foreach { case (ns1, attrs1) =>
+    //      println(ns1)
+    //      attrs1 foreach println
+    //    }
   }
 
   //  debug("1")
