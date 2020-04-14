@@ -136,7 +136,6 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
     tableBody: TableSection,
     tableFoot: TableSection
   ): Unit = {
-    //    println("fetchAndPopulate...")
     val (query, _, _, _) = Model2Query(Model(modelElements.now))
     val datalogQuery     = molecule.transform.Query2String(query).multiLine(60)
     val resolve          = (expr: QueryExpr) => Query2String(query).p(expr)

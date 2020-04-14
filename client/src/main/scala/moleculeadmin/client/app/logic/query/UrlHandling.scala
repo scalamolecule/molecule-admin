@@ -12,11 +12,8 @@ import scala.scalajs.js.URIUtils
 trait UrlHandling extends RegexMatching {
 
   def pushUrl(): Unit = {
-    val m = if (curMolecule.now.isEmpty) "" else {
-      "&m=" + URIUtils.encodeURI(
-        curMolecule.now
-          .replaceAllLiterally("\n", "")
-      )
+    val m      = if (curMolecule.now.isEmpty) "" else {
+      "&m=" + URIUtils.encodeURI(curMolecule.now.replaceAllLiterally("\n", ""))
     }
     val newUrl =
       window.location.protocol + "//" +
@@ -54,7 +51,7 @@ trait UrlHandling extends RegexMatching {
         savedQueries.find(_.molecule == m) match {
           case Some(q) => new Callbacks().useQuery(q)
           case None    =>
-            // Finally created from molecule
+            // Finally create from molecule
             Molecule2Model(m) match {
               case Right(elements) => modelElements() = elements
               case Left(err)       => window.alert(s"Error using query: $err")
@@ -75,7 +72,7 @@ trait UrlHandling extends RegexMatching {
           modelElements() = Nil
         }
       } { m =>
-        if (m != curMolecule.now) {
+        if (m != curMolecule.now.replaceAllLiterally("\n", "")) {
           setQuery(m)
         }
       }
