@@ -1,6 +1,7 @@
 package util.server.openrefine
 import com.google.refine.clustering.binning._
-import util.{Fingerprint, NGram}
+import util.Fingerprint
+//import util.{Fingerprint, NGram}
 
 
 
@@ -13,9 +14,9 @@ object openrefine {
 
 
   // TODO: Not ready yet...
-  object ngram {
-    def apply(s: String, count: Int): Seq[String] = NGram(s, count)
-  }
+//  object ngram {
+//    def apply(s: String, count: Int): Seq[String] = NGram(s, count)
+//  }
 
 
   object ngramFingerprint {
