@@ -280,5 +280,42 @@ object ResetDbs extends TestSuite with ExampleData with Settings {
 
     Ns.long(222).Tx(Ns.str("meta info")).save
     Ns.long(333).Tx(Ns.str("meta with ref").Ref1.int1(444)).save
+
+//    for {
+//      a <- 1 to 3
+//      b <- 1 to 3
+//      c <- 1 to 3
+//    } yield println(s"($a, $b, $c),")
+
+    // sorting
+    Ns.int.long.float insert List(
+      (1, 1, 1),
+      (1, 1, 2),
+      (1, 1, 3),
+      (1, 2, 1),
+      (1, 2, 2),
+      (1, 2, 3),
+      (1, 3, 1),
+      (1, 3, 2),
+      (1, 3, 3),
+      (2, 1, 1),
+      (2, 1, 2),
+      (2, 1, 3),
+      (2, 2, 1),
+      (2, 2, 2),
+      (2, 2, 3),
+      (2, 3, 1),
+      (2, 3, 2),
+      (2, 3, 3),
+      (3, 1, 1),
+      (3, 1, 2),
+      (3, 1, 3),
+      (3, 2, 1),
+      (3, 2, 2),
+      (3, 2, 3),
+      (3, 3, 1),
+      (3, 3, 2),
+      (3, 3, 3),
+    )
   }
 }

@@ -28,7 +28,7 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
     col: Col,
     attrResolver: ResolveAttrs
   ): JsDom.TypedTag[TableCell] = {
-    val Col(colIndex, _, nsAlias, nsFull, attr, attrType, colType, card, _, _,
+    val Col(colIndex, _, nsAlias, nsFull, attr, _, colType, card, _, _,
     aggrType, expr, sortDir, sortPos, _) = col
 
     val postfix         = attrResolver.postfix(col)
