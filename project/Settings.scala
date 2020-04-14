@@ -52,7 +52,10 @@ object Settings {
       "org.webjars" % "font-awesome" % "5.5.0",
       "org.webjars.bower" % "highlightjs" % "9.12.0",
 
-//      "io.kamon" %% "kamon-bundle" % "2.1.0",
+//      "org.atteo" % "evo-inflector" % "1.2.2", // English pluralizer
+
+
+      //      "io.kamon" %% "kamon-bundle" % "2.1.0",
 //      "io.kamon" %% "kamon-apm-reporter" % "2.1.0",
       specs2 % Test,
       guice
