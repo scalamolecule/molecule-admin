@@ -66,7 +66,7 @@ case class EntityHistory()(implicit ctx: Ctx.Owner) extends Base {
           var txCur   = 0L
           var txCount = 0
           data.sortBy(t => (t._1, t._5, t._4, t._6)).foreach {
-            case (t, tx, txInstant, op, a, v) => {
+            case (t, tx, txInstant, op, a, v) if viewCellTypes.contains(a) => {
               i += 1
               if (tx != txPrev) {
                 txCur = tx
@@ -96,13 +96,17 @@ case class EntityHistory()(implicit ctx: Ctx.Owner) extends Base {
               )
               txPrev = tx
             }
+
+            case (t, _, _, op, a, v) =>
+              val op1 = if (op) "asserted" else "retracted"
+              println(s"Ignore abandoned $a -> `$v`  $op1 in t $t")
           }
 
         } else {
           var attrCount = 0
           var attrPrev  = ""
           data.sortBy(t => (t._5, t._1, t._4, t._6)).foreach {
-            case (t, tx, txInstant, asserted, a, v) => {
+            case (t, tx, txInstant, asserted, a, v) if viewCellTypes.contains(a) => {
               i += 1
               if (a != attrPrev) {
                 attrCount += 1
@@ -133,6 +137,10 @@ case class EntityHistory()(implicit ctx: Ctx.Owner) extends Base {
               txPrev = tx
               attrPrev = a
             }
+
+            case (t, _, _, op, a, v) =>
+              val op1 = if (op) "asserted" else "retracted"
+              println(s"Ignore abandoned $a -> `$v`  $op1 in t $t")
           }
         }
       }

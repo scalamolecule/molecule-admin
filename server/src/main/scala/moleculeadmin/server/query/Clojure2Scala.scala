@@ -55,8 +55,10 @@ class Clojure2Scala(rowCount: Int)
     numArrays = numArrays :+ array
     updateColTypes(colIndex, 2)
     col.attrType match {
-      case "Int" | "Long" | "ref" | "datom" => (row: jList[AnyRef], i: Int) => array(i) = Some(row.get(colIndex).asInstanceOf[jLong].toDouble)
-      case _                                => (row: jList[AnyRef], i: Int) => array(i) = Some(row.get(colIndex).asInstanceOf[jDouble].toDouble)
+      case "Int" | "Long" | "ref" | "datom" => (row: jList[AnyRef], i: Int) =>
+        array(i) = Some(row.get(colIndex).asInstanceOf[jLong].toDouble)
+      case _                                => (row: jList[AnyRef], i: Int) =>
+        array(i) = Some(row.get(colIndex).asInstanceOf[jDouble].toDouble)
     }
   }
 
@@ -102,7 +104,8 @@ class Clojure2Scala(rowCount: Int)
           array(i) = row.get(colIndex) match {
             case null       => Option.empty[Double]
             case v: jDouble => Some(v.toDouble)
-            case v          => Some(v.asInstanceOf[jMap[String, AnyRef]].values.iterator.next.asInstanceOf[jLong].toDouble)
+            case v          => Some(
+              v.asInstanceOf[jMap[String, AnyRef]].values.iterator.next.asInstanceOf[jLong].toDouble)
           }
 
       case "ref" =>
@@ -111,7 +114,7 @@ class Clojure2Scala(rowCount: Int)
             case null       => Option.empty[Double]
             case v: jDouble => Some(v.toDouble)
             case v          => Some(v.asInstanceOf[jMap[String, PersistentVector]].values.iterator.next
-              .asInstanceOf[jMap[_, _]].values.iterator.next.asInstanceOf[jLong].toDouble)
+              .asInstanceOf[jMap[_, _]].get(Keyword.intern("db", "id")).asInstanceOf[jLong].toDouble)
           }
 
       case _ =>
@@ -119,7 +122,8 @@ class Clojure2Scala(rowCount: Int)
           array(i) = row.get(colIndex) match {
             case null       => Option.empty[Double]
             case v: jDouble => Some(v.toDouble)
-            case v          => Some(v.asInstanceOf[jMap[String, AnyRef]].values.iterator.next.asInstanceOf[jDouble].toDouble)
+            case v          => Some(
+              v.asInstanceOf[jMap[String, AnyRef]].values.iterator.next.asInstanceOf[jDouble].toDouble)
           }
     }
   }
@@ -141,31 +145,36 @@ class Clojure2Scala(rowCount: Int)
     (row: jList[AnyRef], i: Int) => array(i) = Some(row.get(colIndex).asInstanceOf[jDouble].toDouble)
   }
 
-  protected def castAggrSingleSample(col: Col, colIndex: Int): (jList[AnyRef], Int) => Unit = col.colType match {
-    case "string" | "listString" =>
-      val array = new Array[Option[String]](rowCount)
-      strArrays = strArrays :+ array
-      updateColTypes(colIndex, 1)
-      col.attrType match {
-        case "Date" => (row: jList[AnyRef], i: Int) =>
-          array(i) = Some(date2str(row.get(colIndex).asInstanceOf[PersistentVector].iterator.next.asInstanceOf[Date]))
-        case _      => (row: jList[AnyRef], i: Int) =>
-          array(i) = Some(row.get(colIndex).asInstanceOf[PersistentVector].iterator.next.toString)
-      }
+  protected def castAggrSingleSample(col: Col, colIndex: Int): (jList[AnyRef], Int) => Unit =
+    col.colType match {
+      case "string" | "listString" =>
+        val array = new Array[Option[String]](rowCount)
+        strArrays = strArrays :+ array
+        updateColTypes(colIndex, 1)
+        col.attrType match {
+          case "Date" => (row: jList[AnyRef], i: Int) =>
+            array(i) = Some(date2str(row.get(colIndex)
+              .asInstanceOf[PersistentVector].iterator.next.asInstanceOf[Date]))
+          case _      => (row: jList[AnyRef], i: Int) =>
+            array(i) = Some(row.get(colIndex)
+              .asInstanceOf[PersistentVector].iterator.next.toString)
+        }
 
-    case _ =>
-      val array = new Array[Option[Double]](rowCount)
-      numArrays = numArrays :+ array
-      updateColTypes(colIndex, 2)
-      col.attrType match {
-        case "Int" | "Long" | "ref" =>
-          (row: jList[AnyRef], i: Int) =>
-            array(i) = Some(row.get(colIndex).asInstanceOf[PersistentVector].iterator.next.asInstanceOf[jLong].toDouble)
-        case _                      =>
-          (row: jList[AnyRef], i: Int) =>
-            array(i) = Some(row.get(colIndex).asInstanceOf[PersistentVector].iterator.next.asInstanceOf[jDouble].toDouble)
-      }
-  }
+      case _ =>
+        val array = new Array[Option[Double]](rowCount)
+        numArrays = numArrays :+ array
+        updateColTypes(colIndex, 2)
+        col.attrType match {
+          case "Int" | "Long" | "ref" =>
+            (row: jList[AnyRef], i: Int) =>
+              array(i) = Some(row.get(colIndex)
+                .asInstanceOf[PersistentVector].iterator.next.asInstanceOf[jLong].toDouble)
+          case _                      =>
+            (row: jList[AnyRef], i: Int) =>
+              array(i) = Some(row.get(colIndex)
+                .asInstanceOf[PersistentVector].iterator.next.asInstanceOf[jDouble].toDouble)
+        }
+    }
 
   protected def castAggrListString(col: Col, colIndex: Int): (jList[AnyRef], Int) => Unit = {
     val array = new Array[Option[List[String]]](rowCount)
@@ -372,7 +381,8 @@ class Clojure2Scala(rowCount: Int)
             // todo: cache resulting iterator retriever from this match so that we don't match on all rows
             val it   = vs0 match {
               case vs1: PersistentHashSet => vs1.iterator
-              case vs1                    => vs1.asInstanceOf[jMap[String, PersistentVector]].values.iterator.next.iterator
+              case vs1                    => vs1
+                .asInstanceOf[jMap[String, PersistentVector]].values.iterator.next.iterator
             }
             val list = ListBuffer.empty[String]
             while (it.hasNext)
@@ -386,7 +396,8 @@ class Clojure2Scala(rowCount: Int)
           case vs0  =>
             val it   = vs0 match {
               case vs1: PersistentHashSet => vs1.iterator
-              case vs1                    => vs1.asInstanceOf[jMap[String, PersistentVector]].values.iterator.next.iterator
+              case vs1                    => vs1
+                .asInstanceOf[jMap[String, PersistentVector]].values.iterator.next.iterator
             }
             val list = ListBuffer.empty[String]
             while (it.hasNext)
@@ -409,7 +420,8 @@ class Clojure2Scala(rowCount: Int)
             val it   = vs.asInstanceOf[jMap[String, PersistentVector]].values.iterator.next.iterator
             val list = ListBuffer.empty[Double]
             while (it.hasNext)
-              list += it.next.asInstanceOf[jMap[_, _]].get(Keyword.intern("db", "id")).asInstanceOf[jLong].toDouble
+              list += it.next.asInstanceOf[jMap[_, _]]
+                .get(Keyword.intern("db", "id")).asInstanceOf[jLong].toDouble
             Some(list.toList)
         }
 
@@ -419,7 +431,8 @@ class Clojure2Scala(rowCount: Int)
           case vs0  =>
             val it   = vs0 match {
               case vs1: PersistentHashSet => vs1.iterator
-              case vs1                    => vs1.asInstanceOf[jMap[String, PersistentVector]].values.iterator.next.iterator
+              case vs1                    => vs1
+                .asInstanceOf[jMap[String, PersistentVector]].values.iterator.next.iterator
             }
             val list = ListBuffer.empty[Double]
             while (it.hasNext)
@@ -433,7 +446,8 @@ class Clojure2Scala(rowCount: Int)
           case vs0  =>
             val it   = vs0 match {
               case vs1: PersistentHashSet => vs1.iterator
-              case vs1                    => vs1.asInstanceOf[jMap[String, PersistentVector]].values.iterator.next.iterator
+              case vs1                    => vs1
+                .asInstanceOf[jMap[String, PersistentVector]].values.iterator.next.iterator
             }
             val list = ListBuffer.empty[Double]
             while (it.hasNext)
@@ -520,7 +534,8 @@ class Clojure2Scala(rowCount: Int)
         case vs0  =>
           val it  = vs0 match {
             case vs1: PersistentHashSet => vs1.iterator
-            case vs1                    => vs1.asInstanceOf[jMap[String, PersistentVector]].values.iterator.next.iterator
+            case vs1                    => vs1
+              .asInstanceOf[jMap[String, PersistentVector]].values.iterator.next.iterator
           }
           var map = Map.empty[String, String]
           while (it.hasNext) {
@@ -542,7 +557,8 @@ class Clojure2Scala(rowCount: Int)
         case vs0  =>
           val it  = vs0 match {
             case vs1: PersistentHashSet => vs1.iterator
-            case vs1                    => vs1.asInstanceOf[jMap[String, PersistentVector]].values.iterator.next.iterator
+            case vs1                    => vs1
+              .asInstanceOf[jMap[String, PersistentVector]].values.iterator.next.iterator
           }
           var map = Map.empty[String, Double]
           while (it.hasNext) {

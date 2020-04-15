@@ -61,53 +61,63 @@ case class Transaction()(implicit ctx: Ctx.Owner) extends Base {
 
           // tx meta data
           var i = 1
-          txMetaData.foreach { case (_, a, v, op) =>
-            val cellType   = viewCellTypes(a)
-            val vElementId = s"$txViewTable $a $i"
-            val valueCell  = getValueCell(cellType, vElementId, v, false, level, op)
-            val attrCell   = getAttrCell(a, cellType, vElementId, valueCell, false)
-            view.appendChild(
-              tr(
-                td(),
-                attrCell,
-                valueCell
-              ).render
-            )
-            i += 1
+          txMetaData.foreach {
+            case (_, a, v, op) if viewCellTypes.contains(a) =>
+              val cellType   = viewCellTypes(a)
+              val vElementId = s"$txViewTable $a $i"
+              val valueCell  = getValueCell(cellType, vElementId, v, false, level, op)
+              val attrCell   = getAttrCell(a, cellType, vElementId, valueCell, false)
+              view.appendChild(
+                tr(
+                  td(),
+                  attrCell,
+                  valueCell
+                ).render
+              )
+              i += 1
+
+            case (_, a, v, op) =>
+              val op1 = if (op) "asserted" else "retracted"
+              println(s"Ignore abandoned $a -> `$v` $op1")
           }
 
           // tx data
           var ePrev  = tx
           var aPrev  = ""
           var eCount = 1
-          txData.foreach { case (e, a, v, op) =>
-            if (e != ePrev) {
-              eCount += 1
-            }
-            val cellType   = viewCellTypes(a)
-            val vElementId = s"$txViewTable $a $i"
-            val attr1      = if (e != ePrev || a != aPrev) a else ""
-            val valueCell  = getValueCell(cellType, vElementId, v, false, level, op)
-            val attrCell   = getAttrCell(attr1, cellType, vElementId, valueCell, false)
-            view.appendChild(
-              tr(
-                if (eCount % 2 == 0) cls := "even" else (),
-                if (e != ePrev)
-                  th(
-                    cls := Rx(if (e == curEntity()) "eidChosen" else "eid"),
-                    e,
-                    onmouseover := setCurEid(false)(e),
-                    onclick := lockCurEid(false)(e)
-                  )
-                else
-                  td(),
-                attrCell,
-                valueCell
-              ).render
-            )
-            ePrev = e
-            aPrev = a
-            i += 1
+          txData.foreach {
+            case (e, a, v, op) =>
+              if (e != ePrev) {
+                eCount += 1
+              }
+              val cellType   = viewCellTypes(a)
+              val vElementId = s"$txViewTable $a $i"
+              val attr1      = if (e != ePrev || a != aPrev) a else ""
+              val valueCell  = getValueCell(cellType, vElementId, v, false, level, op)
+              val attrCell   = getAttrCell(attr1, cellType, vElementId, valueCell, false)
+              view.appendChild(
+                tr(
+                  if (eCount % 2 == 0) cls := "even" else (),
+                  if (e != ePrev)
+                    th(
+                      cls := Rx(if (e == curEntity()) "eidChosen" else "eid"),
+                      e,
+                      onmouseover := setCurEid(false)(e),
+                      onclick := lockCurEid(false)(e)
+                    )
+                  else
+                    td(),
+                  attrCell,
+                  valueCell
+                ).render
+              )
+              ePrev = e
+              aPrev = a
+              i += 1
+
+            case (e, a, v, op) =>
+              val op1 = if (op) "asserted" else "retracted"
+              println(s"Ignore abandoned $a -> `$v` $op1")
           }
       }
     }

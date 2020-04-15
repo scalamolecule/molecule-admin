@@ -56,7 +56,6 @@ case class UpdateCardMap[T](
       }
 
     val raw = cell.innerHTML
-
     val strs = if (raw.endsWith("<ul></ul>")) {
       raw.replaceAllLiterally("<ul></ul>", "").split("<br>").toList
     } else
@@ -103,39 +102,29 @@ case class UpdateCardMap[T](
     }.toMap.toList // remove pairs with duplicate keys
       .sortBy(_._1)
 
-    val newVopt: Option[T] = {
-      if (newPairs.isEmpty)
-        Option.empty[T]
-      else if (isNum)
-        Some(newPairs.map {
-          case (k, v) => (k, v.toDouble)
-        }.toMap).asInstanceOf[Option[T]]
-      else
-        Some(newPairs.toMap).asInstanceOf[Option[T]]
-    }
 
-    def redrawCell(): Node = {
-      cell.innerHTML = ""
-      val vs = if (attrType == "String")
-        newPairs.sorted.map {
-          case (k, v) => span(_str2frags(k + " -> " + v))
-        }
-      else
-        newPairs.sorted.map {
-          case (k, v) => span(k + " -> " + v)
-        }
+    if (oldPairs == newPairs) {
+      // do nothing if no change
 
-      vs.foreach { v =>
-        cell.appendChild(v.render)
-        cell.appendChild(br.render)
+      // Remove superfluous line shifts todo: necessary?
+      // redrawCell()
+
+    } else if (eid != 0 && editCellId.nonEmpty && editCellId == cell.id) {
+
+      val newVopt: Option[T] = {
+        if (newPairs.isEmpty)
+          Option.empty[T]
+        else if (isNum)
+          Some(newPairs.map {
+            case (k, v) => (k, v.toDouble)
+          }.toMap).asInstanceOf[Option[T]]
+        else
+          Some(newPairs.toMap).asInstanceOf[Option[T]]
       }
-      cell
-    }
 
-    val retracts = oldPairs.diff(newPairs).map { case (k, v) => s"$k@$v" }
-    val asserts  = newPairs.diff(oldPairs).map { case (k, v) => s"$k@$v" }
+      val retracts = oldPairs.diff(newPairs).map { case (k, v) => s"$k@$v" }
+      val asserts  = newPairs.diff(oldPairs).map { case (k, v) => s"$k@$v" }
 
-    if (editCellId.nonEmpty && editCellId == cell.id && eid > 0) {
       val newKeys       = newPairs.map(_._1)
       val duplicateKeys = newKeys.length - newKeys.distinct.length
 
@@ -203,7 +192,8 @@ case class UpdateCardMap[T](
             cell.focus()
         }
       }
-    } else if (eid > 0 && oldPairs != newPairs) {
+
+    } else if (eid != 0) {
       if (!newPairs.forall(pair => valid(attrType, pair._2))) {
         window.alert(
           s"Invalid $attrFull values of type `$attrType`:\n  " +
@@ -216,9 +206,29 @@ case class UpdateCardMap[T](
           newPairs.mkString("\n  ")
         )
       }
+
     } else {
       // Remove superfluous line shifts
       redrawCell()
+    }
+
+
+    def redrawCell(): Node = {
+      cell.innerHTML = ""
+      val vs = if (attrType == "String")
+        newPairs.sorted.map {
+          case (k, v) => span(_str2frags(k + " -> " + v))
+        }
+      else
+        newPairs.sorted.map {
+          case (k, v) => span(k + " -> " + v)
+        }
+
+      vs.foreach { v =>
+        cell.appendChild(v.render)
+        cell.appendChild(br.render)
+      }
+      cell
     }
   }
 }

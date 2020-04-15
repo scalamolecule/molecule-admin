@@ -36,12 +36,15 @@ object Adhoc extends TestSuite
       //      implicit val conn = Conn(base + "/Partition1")
       //      implicit val conn = Conn(base + "/Partition2")
       //      recreateDbFrom(PartitionSchema, "localhost:4334/Partition", protocol)
-      //      implicit val conn = Conn(base + "/Clazzig")
+            implicit val conn = Conn(base + "/Clazzig")
 
+      307863256652483L.touch foreach println
+      println(307863256652483L.touchQuoted)
       //      implicit val conn = Conn(base + "/CoreTest")
       //      implicit val conn = recreateDbFrom(CoreTestSchema)
 
 
+//      Ns.e.ref1$.int(1)
 
     }
   }
