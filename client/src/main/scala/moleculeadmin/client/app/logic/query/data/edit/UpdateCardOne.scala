@@ -1,4 +1,5 @@
 package moleculeadmin.client.app.logic.query.data.edit
+
 import autowire._
 import boopickle.Default._
 import moleculeadmin.client.app.logic.query.QueryState.{curEntity, db, editCellId}
@@ -50,23 +51,27 @@ case class UpdateCardOne[T](
     val oldStr: String = oldVOpt.fold("")(_.toString)
     val newStr: String = _html2str(cell.innerHTML)
 
-    // Optional value for in-memory Client value array
-    val newVopt: Option[T] = {
-      if (newStr.isEmpty) {
-        Option.empty[T]
-      } else if (isNum) {
-        Try(newStr.toDouble) match {
-          case Success(n) => Some(n).asInstanceOf[Option[T]]
-          case Failure(_) =>
-            // Catch invalid str in validation below
-            None
-        }
-      } else {
-        Some(newStr).asInstanceOf[Option[T]]
-      }
-    }
+    if (oldStr == newStr) {
+      // do nothing if no change
 
-    if (editCellId.nonEmpty && editCellId == cell.id && eid > 0) {
+    } else if (editCellId.nonEmpty && editCellId == cell.id && eid != 0) {
+
+      // Optional value for in-memory Client value array
+      val newVopt: Option[T] = {
+        if (newStr.isEmpty) {
+          Option.empty[T]
+        } else if (isNum) {
+          Try(newStr.toDouble) match {
+            case Success(n) => Some(n).asInstanceOf[Option[T]]
+            case Failure(_) =>
+              // Catch invalid str in validation below
+              None
+          }
+        } else {
+          Some(newStr).asInstanceOf[Option[T]]
+        }
+      }
+
       if (attrType != "String" && newStr.contains('\n')) {
         editCellId = ""
         window.alert(s"Can't save multiple $attrFull values of type `$attrType`:\n$newStr")
@@ -150,6 +155,9 @@ case class UpdateCardOne[T](
             Seq((eid, Nil, Seq(value)))
           else
             Seq((eid, Seq(value), Nil))
+          println("-------")
+          data foreach println
+
           queryWireAjax().updateStr(db, attrFull, attrType, enumPrefix, data).call()
         }
         dbUpdate.foreach {
@@ -157,7 +165,7 @@ case class UpdateCardOne[T](
             updateClient(cellIdMaker, t, tx, txInstant, row, eid, newVopt)
             if (nonEmpty)
               println(s"$attrFull: `$oldStr` ==> `$newStr`")
-            else
+            else //if (oldStr.nonEmpty)
               println(s"$attrFull: retracted `$oldStr`")
 
           case Left(err) =>
@@ -171,7 +179,7 @@ case class UpdateCardOne[T](
         }
       }
 
-    } else if (eid > 0 && oldStr != newStr) {
+    } else if (eid != 0) {
       if (!valid(attrType, newStr)) {
         window.alert(s"Invalid `$attrFull` value of type `$attrType`:\n$newStr")
         cell.focus()
@@ -181,7 +189,7 @@ case class UpdateCardOne[T](
       }
 
     } else {
-      // do nothing if no change
+      // is eid ever 0?
     }
   }
 }

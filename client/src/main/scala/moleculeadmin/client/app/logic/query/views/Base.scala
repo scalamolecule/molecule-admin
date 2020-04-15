@@ -76,7 +76,8 @@ class Base(implicit ctx: Ctx.Owner)
         viewElement.innerHTML = ""
         data.foreach {
           case (":db/ident", _) => // skip enum idents like :country/US
-          case (attr, v)        =>
+
+          case (attr, v) if viewCellTypes.contains(attr) =>
             val cellType   = viewCellTypes(attr)
             val vElementId = parentElementId + attr + level
             val valueCell  = getValueCell(cellType, vElementId, v, expand, level)
@@ -87,6 +88,9 @@ class Base(implicit ctx: Ctx.Owner)
                 valueCell
               ).render
             )
+
+          case (attr, v) =>
+            // println(s"Ignore abandoned $attr -> `$v`")
         }
       }
     }

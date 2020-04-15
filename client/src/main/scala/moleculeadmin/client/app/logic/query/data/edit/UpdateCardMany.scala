@@ -49,14 +49,12 @@ case class UpdateCardMany[T](
     isNum: Boolean
   ): Unit = {
 
-
     val oldStrs: List[String] = oldVOpt.fold(List.empty[String]) {
       case vs: List[_] =>
         vs.map(_.toString).distinct.sorted
     }
 
     val raw = cell.innerHTML
-
     val strs = if (cellType == "ref") {
       val s1 = raw.replaceAll("</*ul[^>]*>", "")
       s1.substring(s1.indexOf(">", 5) + 1, s1.length - 5)
@@ -96,42 +94,24 @@ case class UpdateCardMany[T](
 
     val newStrs: List[String] = vs.distinct.sorted
 
-    val newVopt: Option[T] = {
-      if (newStrs.isEmpty)
-        Option.empty[T]
-      else if (isNum)
-        Some(newStrs.map(_.toDouble)).asInstanceOf[Option[T]]
-      else
-        Some(newStrs).asInstanceOf[Option[T]]
-    }
 
-    def redrawCell(): Node = {
-      cell.innerHTML = ""
-      val vs: Seq[Frag] = if (cellType == "ref")
-        newStrs.map(_.toLong).sorted.map { ref =>
-          span(
-            cls := Rx(if (ref == curEntity()) "eidChosen" else "eid"),
-            ref,
-            onmouseover := { () => curEntity() = ref }
-          )
-        }
-      else if (isNum)
-        newStrs.map(_.toDouble).sorted.map(n => n: Frag)
-      else if (attrType == "String")
-        newStrs.sorted.map { s =>
-          span(_str2frags(s))
-        }
-      else
-        newStrs.sorted.map(n => n: Frag)
+    if (oldStrs == newStrs) {
+      // do nothing if no change
 
-      vs.foreach { v =>
-        cell.appendChild(v.render)
-        cell.appendChild(br.render)
+      // Remove superfluous line shifts todo: necessary?
+      // redrawCell()
+
+    } else if (eid != 0 && editCellId.nonEmpty && editCellId == cell.id) {
+
+      val newVopt: Option[T] = {
+        if (newStrs.isEmpty)
+          Option.empty[T]
+        else if (isNum)
+          Some(newStrs.map(_.toDouble)).asInstanceOf[Option[T]]
+        else
+          Some(newStrs).asInstanceOf[Option[T]]
       }
-      cell
-    }
 
-    if (editCellId.nonEmpty && editCellId == cell.id && eid > 0) {
       val (retracts, asserts) = (oldStrs.diff(newStrs), newStrs.diff(oldStrs))
 
       val retractsAsserts = (if (retracts.isEmpty) "" else
@@ -198,7 +178,8 @@ case class UpdateCardMany[T](
             cell.focus()
         }
       }
-    } else if (eid > 0 && oldStrs != newStrs) {
+
+    } else if (eid != 0) {
       if (!newStrs.forall(valid(attrType, _))) {
         window.alert(
           s"Invalid $attrFull values of type `$attrType`:\n  " +
@@ -211,9 +192,36 @@ case class UpdateCardMany[T](
           newStrs.mkString("\n  ")
         )
       }
+
     } else {
       // Remove superfluous line shifts
       redrawCell()
+    }
+
+    def redrawCell(): Node = {
+      cell.innerHTML = ""
+      val vs: Seq[Frag] = if (cellType == "ref")
+        newStrs.map(_.toLong).sorted.map { ref =>
+          span(
+            cls := Rx(if (ref == curEntity()) "eidChosen" else "eid"),
+            ref,
+            onmouseover := { () => curEntity() = ref }
+          )
+        }
+      else if (isNum)
+        newStrs.map(_.toDouble).sorted.map(n => n: Frag)
+      else if (attrType == "String")
+        newStrs.sorted.map { s =>
+          span(_str2frags(s))
+        }
+      else
+        newStrs.sorted.map(n => n: Frag)
+
+      vs.foreach { v =>
+        cell.appendChild(v.render)
+        cell.appendChild(br.render)
+      }
+      cell
     }
   }
 }
