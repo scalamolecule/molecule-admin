@@ -78,7 +78,7 @@ case class Transaction()(implicit ctx: Ctx.Owner) extends Base {
 
             case (_, a, v, op) =>
               val op1 = if (op) "asserted" else "retracted"
-              println(s"Ignore abandoned $a -> `$v` $op1")
+            //              println(s"Ignore abandoned $a -> `$v` $op1")
           }
 
           // tx data
@@ -117,7 +117,7 @@ case class Transaction()(implicit ctx: Ctx.Owner) extends Base {
 
             case (e, a, v, op) =>
               val op1 = if (op) "asserted" else "retracted"
-              println(s"Ignore abandoned $a -> `$v` $op1")
+            //              println(s"Ignore abandoned $a -> `$v` $op1")
           }
       }
     }

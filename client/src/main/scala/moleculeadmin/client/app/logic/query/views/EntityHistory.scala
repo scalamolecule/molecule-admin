@@ -99,7 +99,7 @@ case class EntityHistory()(implicit ctx: Ctx.Owner) extends Base {
 
             case (t, _, _, op, a, v) =>
               val op1 = if (op) "asserted" else "retracted"
-              println(s"Ignore abandoned $a -> `$v`  $op1 in t $t")
+            //              println(s"Ignore abandoned $a -> `$v`  $op1 in t $t")
           }
 
         } else {
@@ -140,7 +140,7 @@ case class EntityHistory()(implicit ctx: Ctx.Owner) extends Base {
 
             case (t, _, _, op, a, v) =>
               val op1 = if (op) "asserted" else "retracted"
-              println(s"Ignore abandoned $a -> `$v`  $op1 in t $t")
+            //              println(s"Ignore abandoned $a -> `$v`  $op1 in t $t")
           }
         }
       }
