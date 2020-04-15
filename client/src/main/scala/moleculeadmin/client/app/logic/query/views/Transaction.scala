@@ -86,7 +86,7 @@ case class Transaction()(implicit ctx: Ctx.Owner) extends Base {
           var aPrev  = ""
           var eCount = 1
           txData.foreach {
-            case (e, a, v, op) =>
+            case (e, a, v, op) if viewCellTypes.contains(a) =>
               if (e != ePrev) {
                 eCount += 1
               }

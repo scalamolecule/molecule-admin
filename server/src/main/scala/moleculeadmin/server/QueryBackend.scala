@@ -6,6 +6,7 @@ import datomic.{Datom, Peer}
 import db.admin.dsl.moleculeAdmin._
 import db.core.dsl.coreTest.Ns
 import molecule.api.Entity
+//import molecule.api.Entity1
 import molecule.api.out10._
 import molecule.ast.model.{Atom, Bond, Model, NoValue}
 import molecule.ast.transactionModel.{Add, Retract, RetractEntity, Statement}
@@ -35,7 +36,7 @@ class QueryBackend extends ToggleBackend {
     cols: Seq[Col]
   ): Either[Seq[String], QueryResult] = try {
     log.info("\n---- Querying Datomic... --------------------\n" + datalogQuery)
-//    log.info("Querying datomic...\n" + datalogQuery)
+    //    log.info("Querying datomic...\n" + datalogQuery)
     val t           = Timer("Query")
     val conn        = Conn(base + "/" + db)
     val allInputs   = if (rules.isEmpty)
@@ -72,7 +73,7 @@ class QueryBackend extends ToggleBackend {
 
   override def touchEntity(db: String, eid: Long): List[(String, String)] = {
     val conn = Conn(base + "/" + db)
-    Entity(conn.db.entity(eid), conn, eid.asInstanceOf[Object]).touchListMax(1)
+    Entity(conn.db.entity(eid), conn, eid.asInstanceOf[Object], false).touchListMax(1)
       .map {
         case (a, date: Date) => (a, date2strLocal(date))
         case (a, vs: Seq[_]) =>
@@ -82,7 +83,9 @@ class QueryBackend extends ToggleBackend {
             ).mkString("__~~__"))
           else
             (a, vs.mkString("__~~__"))
-        case (a, v)          => (a, v.toString)
+
+        case (a, v) =>
+          (a, v.toString)
       }
   }
 
