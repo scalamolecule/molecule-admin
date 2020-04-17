@@ -36,7 +36,6 @@ class QueryBackend extends ToggleBackend {
     cols: Seq[Col]
   ): Either[Seq[String], QueryResult] = try {
     log.info("\n---- Querying Datomic... --------------------\n" + datalogQuery)
-    //    log.info("Querying datomic...\n" + datalogQuery)
     val t           = Timer("Query")
     val conn        = Conn(base + "/" + db)
     val allInputs   = if (rules.isEmpty)
@@ -73,7 +72,8 @@ class QueryBackend extends ToggleBackend {
 
   override def touchEntity(db: String, eid: Long): List[(String, String)] = {
     val conn = Conn(base + "/" + db)
-    Entity(conn.db.entity(eid), conn, eid.asInstanceOf[Object], false).touchListMax(1)
+    Entity(conn.db.entity(eid), conn, eid.asInstanceOf[Object], false)
+      .touchListMax(1)
       .map {
         case (a, date: Date) => (a, date2strLocal(date))
         case (a, vs: Seq[_]) =>
@@ -84,8 +84,7 @@ class QueryBackend extends ToggleBackend {
           else
             (a, vs.mkString("__~~__"))
 
-        case (a, v) =>
-          (a, v.toString)
+        case (a, v) => (a, v.toString)
       }
   }
 
