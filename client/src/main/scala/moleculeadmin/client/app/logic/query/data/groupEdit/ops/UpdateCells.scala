@@ -74,12 +74,12 @@ case class UpdateCells(
       case "Date" => card match {
         case 2 =>
           optV: Option[ColType] =>
-            optV.getOrElse[List[String]](Nil)
+            optV.getOrElse(List.empty[String]).asInstanceOf[List[String]]
               .map(v => truncateDateStr(v))
               .asInstanceOf[ColType]
         case 3 =>
           optV: Option[ColType] =>
-            optV.getOrElse[Map[String, String]](Map.empty[String, String])
+            optV.getOrElse(Map.empty[String, String]).asInstanceOf[Map[String, String]]
               .map { case (k, v) => k -> truncateDateStr(v) }
               .asInstanceOf[ColType]
       }
@@ -89,8 +89,7 @@ case class UpdateCells(
             optV.getOrElse(List.empty[String]).asInstanceOf[ColType]
         case 3 =>
           optV: Option[ColType] =>
-            optV.get.asInstanceOf[Map[String, String]]
-              .asInstanceOf[ColType]
+            optV.getOrElse(Map.empty[String, String]).asInstanceOf[ColType]
       }
     }
 
