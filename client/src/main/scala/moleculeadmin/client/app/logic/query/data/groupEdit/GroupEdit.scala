@@ -193,7 +193,7 @@ case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
         }
       case _        => (vs: Map[String, String]) =>
         vs.toList.sortBy(_._1).map {
-          case (k, v) => li(k + " -> " + v.toString)
+          case (k, v) => li(k + " -> " + v)
         }
     }
     transformValues(
