@@ -1,4 +1,5 @@
 package moleculeadmin.client.app.logic.query.data.groupEdit.ops
+
 import molecule.util.DateHandling
 import org.scalajs.dom.html.{LI, TableCell}
 import org.scalajs.dom.{Node, NodeList}
@@ -16,7 +17,8 @@ case class UpdateCells(
   tableRows: NodeList
 ) extends DateHandling {
 
-  def cardOne[ColType](cellBaseClass: String,
+  def cardOne[ColType](
+    cellBaseClass: String,
     colValueToNode: ColType => Node
   ): (Int, Option[ColType], Option[ColType]) => Unit = {
     var cells   : NodeList  = null
@@ -30,8 +32,8 @@ case class UpdateCells(
       case _      => (optV: Option[ColType]) => optV
     }
     (tableRowIndex: Int,
-      oldVopt0: Option[ColType],
-      newVopt: Option[ColType]
+     oldVopt0: Option[ColType],
+     newVopt: Option[ColType]
     ) => {
       val oldVopt = formatValue(oldVopt0)
       cells = tableRows.item(tableRowIndex).childNodes
@@ -60,7 +62,8 @@ case class UpdateCells(
   }
 
 
-  def cardMany[ColType](cellBaseClass: String,
+  def cardMany[ColType](
+    cellBaseClass: String,
     colValueToItems: ColType => Seq[TypedTag[LI]]
   ): (Int, Option[ColType], Option[ColType]) => Unit = {
     var cells       : NodeList  = null
@@ -71,21 +74,29 @@ case class UpdateCells(
       case "Date" => card match {
         case 2 =>
           optV: Option[ColType] =>
-            optV.get.asInstanceOf[List[String]]
+            optV.getOrElse[List[String]](Nil)
               .map(v => truncateDateStr(v))
               .asInstanceOf[ColType]
         case 3 =>
           optV: Option[ColType] =>
-            optV.get.asInstanceOf[Map[String, String]]
+            optV.getOrElse[Map[String, String]](Map.empty[String, String])
               .map { case (k, v) => k -> truncateDateStr(v) }
               .asInstanceOf[ColType]
       }
-      case _      => (optV: Option[ColType]) => optV.get
+      case _      => card match {
+        case 2 =>
+          optV: Option[ColType] =>
+            optV.getOrElse(List.empty[String]).asInstanceOf[ColType]
+        case 3 =>
+          optV: Option[ColType] =>
+            optV.get.asInstanceOf[Map[String, String]]
+              .asInstanceOf[ColType]
+      }
     }
 
     (tableRowIndex: Int,
-      oldVsOpt: Option[ColType],
-      newVsOpt: Option[ColType]
+     oldVsOpt: Option[ColType],
+     newVsOpt: Option[ColType]
     ) => {
       val oldVs = formatValue(oldVsOpt)
       val newVs = formatValue(newVsOpt)

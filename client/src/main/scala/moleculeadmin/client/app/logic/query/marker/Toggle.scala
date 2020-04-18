@@ -139,8 +139,8 @@ case class Toggle(
     }
   }
 
-  if (count > 10000)
-    print(s"$toggling $count entities in database - can take a few seconds ...")
+  if (count > 1)
+    print(s"$toggling $count entities in database")
 
   // Save in metaDb
   def save(): Unit = {
@@ -149,7 +149,6 @@ case class Toggle(
         case Left(err)            => window.alert(err)
         case Right(dbSettingsId1) =>
           dbSettingsIdOpt = Some(dbSettingsId1)
-          println(" done")
       }
   }
 

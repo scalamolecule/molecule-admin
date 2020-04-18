@@ -32,8 +32,8 @@ case class ToggleOffAll(tableBody: TableSection, tpe: String) extends AppElement
         (mark.checkOff, 3, checked, checked.size, "Unchecking all")
     }
 
-  if (count > 10000)
-    println(s"$toggling $count entities in database - can take a few seconds ...")
+  if (count > 1)
+    println(s"$toggling $count entities in database")
 
   // Toggle off specific marker icon in all entity columns
   val rows : HTMLCollection = tableBody.children
@@ -52,7 +52,6 @@ case class ToggleOffAll(tableBody: TableSection, tpe: String) extends AppElement
     .foreach {
       case Right(dbSettingsId1) =>
         dbSettingsIdOpt = Some(dbSettingsId1)
-        println(" done")
       case Left(err)            => window.alert(err)
     }
 }

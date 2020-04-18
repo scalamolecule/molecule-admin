@@ -1,4 +1,5 @@
 package moleculeadmin.client.app.logic.query.data.groupEdit.ops
+
 import moleculeadmin.client.app.logic.query.QueryState.columns
 import moleculeadmin.shared.ast.query.QueryResult
 import moleculeadmin.shared.util.HelpersAdmin
@@ -37,6 +38,7 @@ case class ColType2TransferTypeLambdas(qr: QueryResult) extends HelpersAdmin {
       else
         (j: Int) => array(j).get.toString
 
+    // None treated as empty array
     case "listString" =>
       val array = qr.listStr(arrayIndexes(colIndex))
       (j: Int) => array(j).getOrElse(List.empty[String]).toJSArray
