@@ -77,8 +77,8 @@ object NumberMatching extends TestSuite with RegexMatching {
       //      cases foreach println
 
       val cases2 = numbersTransposed.zipWithIndex.map { case (regexes, i) =>
-        regexes.distinct.mkString("case r\"(?i)(", "|", ")$x (.*)$z\" => " + (i + 1))
-        //        regexes.distinct.mkString("case r\"(?i)(", "|", ") (.*)$s\" => s")
+        //        regexes.distinct.mkString("case r\"(?i)(", "|", ")$x (.*)$z\" => " + (i + 1))
+        regexes.distinct.mkString("case r\"(?i)(", "|", ")$x (.*)$s\" => s")
       }
       cases2 foreach println
 
@@ -138,20 +138,6 @@ object NumberMatching extends TestSuite with RegexMatching {
       //
       //      }
 
-
-//      println("Acht" match {
-//        case r"acht"            => 2
-//        case r"(?i)(acht)" => 1
-//        case r"Acht"            => 3
-//      })
-
-      val title = "Two poems"
-      val res = Some(title match {
-        case r"(?i)(two|zwei|deux|due|dos|twee|dois|dwa|doi|to|två|kaksi)$x (.*)$z" => 2
-        case _ => 0
-      })
-
-      println(res)
 
 
     }
@@ -220,5 +206,32 @@ case r"(?i)(twenty-one|einundzwanzig|vingtet un|ventuno|veintiuno|eenentwintig|v
 case r"(?i)(twenty-two|zweiundzwanzig|vingt-deux|ventidue|veintidós|tweeëntwintig|vintee dois|dwadziesciadwa|douazecisidoi|toogtyve|tjugotvå|tjueto|kaksikymmentäkaksi)$x (.*)$z" => 22
 case r"(?i)(twenty-three|dreiundzwanzig|vingt-trois|ventitre|veintitrés|drieëntwintig|vintee três|dwadziesciatrzy|douazecisitrei|treogtyve|tjugotre|tjuetre|kaksikymmentäkolme)$x (.*)$z" => 23
 case r"(?i)(twenty-four|vierundzwanzig|vingt-quatre|ventiquattro|veinticuatro|vierentwintig|vintee quatro|dwadziesciacztery|douazecisipatru|fireogtyve|tjugofyra|tjuefire|kaksikymmentäneljä)$x (.*)$z" => 24
+
+
+case r"(?i)(one|ein|un|uno|een|um|jeden|unu|en|et|en|ett|yksi)$x (.*)$s" => s
+case r"(?i)(two|zwei|deux|due|dos|twee|dois|dwa|doi|to|två|kaksi)$x (.*)$s" => s
+case r"(?i)(three|drei|trois|tre|tres|drie|três|trzy|trei|kolme)$x (.*)$s" => s
+case r"(?i)(four|vier|quatre|quattro|cuatro|quatro|cztery|patru|fire|fyra|neljä)$x (.*)$s" => s
+case r"(?i)(five|fünf|cinq|cinque|cinco|vijf|piec|cinci|fem|viisi)$x (.*)$s" => s
+case r"(?i)(six|sechs|sei|seis|zes|szesc|sase|seks|sex|kuusi)$x (.*)$s" => s
+case r"(?i)(seven|sieben|sept|sette|siete|zeven|sete|siedem|sapte|syv|sju|sju|syv|seitsemän)$x (.*)$s" => s
+case r"(?i)(eight|acht|huit|otto|ocho|oito|osiem|opt|otte|otta|åtte|kahdeksan)$x (.*)$s" => s
+case r"(?i)(nine|neun|neuf|nove|nueve|negen|dziewiec|noua|ni|nio|yhdeksän)$x (.*)$s" => s
+case r"(?i)(ten|zehn|dix|dieci|diez|tien|dez|dziesiec|zece|ti|tio|kymmenen)$x (.*)$s" => s
+case r"(?i)(eleven|elf|onze|undici|once|jedenascie|unsprezece|elleve|elva|yksitoista)$x (.*)$s" => s
+case r"(?i)(twelve|zwölf|douze|dodici|doce|twaalf|doze|dwanascie|doisprezece|tolv|kaksitoista)$x (.*)$s" => s
+case r"(?i)(thirteen|dreizehn|treize|tredici|trece|dertien|treze|trzynascie|treisprezece|tretten|tretton|kolmetoista)$x (.*)$s" => s
+case r"(?i)(fourteen|vierzehn|quatorze|quattordici|catorce|veertien|catorze|czternascie|paisprezece|fjorten|fjorton|neljätoista)$x (.*)$s" => s
+case r"(?i)(fifteen|funfzehn|quinze|quindici|quince|vijftien|pietnascie|cincisprezece|femten|femton|viisitoista)$x (.*)$s" => s
+case r"(?i)(sixteen|sechszehn|seize|sedici|dieciséis|zestien|dezasseis|szesnascie|saisprezece|seksten|sexton|kuusitoista)$x (.*)$s" => s
+case r"(?i)(seventeen|siebzehn|dix-sept|diciassette|diecisiete|zeventien|dezassete|siedemnascie|saptesprezece|sytten|sjutton|seitsemäntoista)$x (.*)$s" => s
+case r"(?i)(eighteen|achtzehn|dix-huit|diciotto|dieciocho|achttien|dezoito|osiemnascie|optsprezece|atten|arton|kahdeksantoista)$x (.*)$s" => s
+case r"(?i)(nineteen|neunzehn|dix-neuf|diciannove|diecinueve|negentien|dezanove|dziewietnascie|nouasprezece|nitten|nitton|yhdeksäntoista)$x (.*)$s" => s
+case r"(?i)(twenty|zwanzig|vingt|venti|veinte|twintig|vinte|dwadziescia|douazeci|tyve|tjugo|tjue|kaksikymmentä)$x (.*)$s" => s
+case r"(?i)(twenty-one|einundzwanzig|vingtet un|ventuno|veintiuno|eenentwintig|vintee um|dwadziesciajeden|douazecisiunu|enogtyve|tjugoen|tjueen|kaksikymmentäyksi)$x (.*)$s" => s
+case r"(?i)(twenty-two|zweiundzwanzig|vingt-deux|ventidue|veintidós|tweeëntwintig|vintee dois|dwadziesciadwa|douazecisidoi|toogtyve|tjugotvå|tjueto|kaksikymmentäkaksi)$x (.*)$s" => s
+case r"(?i)(twenty-three|dreiundzwanzig|vingt-trois|ventitre|veintitrés|drieëntwintig|vintee três|dwadziesciatrzy|douazecisitrei|treogtyve|tjugotre|tjuetre|kaksikymmentäkolme)$x (.*)$s" => s
+case r"(?i)(twenty-four|vierundzwanzig|vingt-quatre|ventiquattro|veinticuatro|vierentwintig|vintee quatro|dwadziesciacztery|douazecisipatru|fireogtyve|tjugofyra|tjuefire|kaksikymmentäneljä)$x (.*)$s" => s
+
 
 */

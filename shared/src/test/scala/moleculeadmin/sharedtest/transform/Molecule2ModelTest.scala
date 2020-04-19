@@ -285,6 +285,10 @@ object Molecule2ModelTest extends TestSuite with TreeSchema with Helpers with Ex
       Molecule2Model(s"Ns.bigDec($bigDec1 or $bigDec2)") ==> Right(Seq(Atom("Ns", "bigDec", "BigDecimal", 1, Eq(Seq(bigDec1, bigDec2)))))
       Molecule2Model(s"Ns.bigDec(Seq($bigDec1, $bigDec2))") ==> Right(Seq(Atom("Ns", "bigDec", "BigDecimal", 1, Eq(Seq(bigDec1, bigDec2)))))
 
+      // null
+      Molecule2Model("Ns.int.str_(Nil)") ==> Right(List(
+        Atom("Ns", "int", "Int", 1, VarValue, None, Seq(), Seq()),
+        Atom("Ns", "str_", "String", 1, Fn("not", None), None, Seq(), Seq())))
     }
 
 

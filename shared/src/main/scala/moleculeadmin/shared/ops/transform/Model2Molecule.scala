@@ -38,6 +38,7 @@ trait Model2Molecule extends QueryApi with BaseQuery with DateHandling {
         case Fn("count-distinct", None)    => s"(countDistinct)"
         case Fn("count-distinct", Some(n)) => s"(countDistinct($n))"
         case Distinct                      => s"(distinct)"
+        case Fn("not", _)                  => s"(Nil)"
         case Fn(fn, None)                  => s"($fn)"
         case Fn(fn, Some(1))               => s"($fn)"
         case Fn(fn, Some(n))               => s"($fn($n))"
