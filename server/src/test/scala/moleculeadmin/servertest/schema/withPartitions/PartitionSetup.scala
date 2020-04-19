@@ -221,7 +221,7 @@ trait Settings {
       |  }
       |
       |  trait Ref1 {
-      |    val str1    = oneString
+      |    val str1    = oneString.fulltext
       |    val int1    = oneInt
       |    val enum1   = oneEnum("enum10", "enum11", "enum12")
       |    val ref2    = one[Ref2]

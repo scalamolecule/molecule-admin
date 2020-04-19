@@ -1,4 +1,5 @@
 package moleculeadmin.server.utils
+
 import java.io.File
 import ammonite.ops._
 import db.admin.dsl.moleculeAdmin._
@@ -84,11 +85,11 @@ case class DefFile(db: String, path: Option[String] = None, schemaDefFile: Optio
           }).flatten
 
           val attrIds = if (attributes.isEmpty) Set.empty[Long] else
-              meta_Attribute.pos.name.card.tpe.enums.refNs$.options.doc$.attrGroup$.descrAttr$.insert(attributes).eidSet
+            meta_Attribute.pos.name.card.tpe.enums.refNs$.options.doc$.attrGroup$.descrAttr$.insert(attributes).eidSet
           (nsN, ns.ns.split("_").last, ns.ns, ns.nsDescr, attrIds)
         }
 
-        val nsIds = if(namespaces.isEmpty) Set.empty[Long] else
+        val nsIds = if (namespaces.isEmpty) Set.empty[Long] else
           meta_Namespace.pos.name.nameFull.descr$.attrs.insert(namespaces).eidSet
         (partN, part.low, partDescr, nsIds)
       }
@@ -220,12 +221,11 @@ case class DefFile(db: String, path: Option[String] = None, schemaDefFile: Optio
   def recreateFrom(metaSchema: MetaSchema): Either[String, MetaSchema] = {
 
     def genAttr(part: String, attribute: Attr, longest: Int, allAttrs: Seq[String]): String = {
-      val Attr(i, attr, card0, attrType, enums0, ref, options0, doc0, attrGroup, _, _, descrAttr, _) = attribute
-      val valIndent                                                                                  = if (part == "db.part/user") "    " else "      "
+      val Attr(_, attr, card0, attrType, enums0, ref, options0, doc0, attrGroup, _, _, _, _) = attribute
 
-      val attrFull = if (scalaKeywords.contains(attr)) s"`$attr`" else attr
-
-      val s = " " * (longest - attrFull.length)
+      val valIndent = if (part == "db.part/user") "    " else "      "
+      val attrFull  = if (scalaKeywords.contains(attr)) s"`$attr`" else attr
+      val s         = " " * (longest - attrFull.length)
 
       val cardPrefix = card0 match {
         case 1 => "one"

@@ -372,7 +372,7 @@ case class SyncTab(db: String)(implicit val ctx: Ctx.Owner)
               )
             ),
             td(
-              if (fetching()) span(whiteSpace.nowrap, span(paddingRight := 0, _sync(15)), "(might be re-compiling schema def file...)") else div()
+              if (fetching()) span(whiteSpace.nowrap, span(paddingRight := 0, _sync(15, 8)), "(might be re-compiling schema def file...)") else div()
             )
           )
         )
