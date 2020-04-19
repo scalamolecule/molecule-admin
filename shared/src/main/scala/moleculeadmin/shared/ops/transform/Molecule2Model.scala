@@ -331,7 +331,7 @@ class Molecule2Model(molecule0: String, nsMap: Map[String, Ns])
 
   def resolveApply(attr: String, tpe: String, card: Int, expr: String, enumPrefix: Option[String]): Unit = {
     expr.trim match {
-      case "None" | "Nil" | "not" =>
+      case "None" | "Nil" =>
         elements += Atom(curNsFull, attr, tpe, card, Fn("not"), enumPrefix)
 
       case "countDistinct" =>

@@ -39,6 +39,13 @@ object Model2MoleculeTest extends TestSuite with TreeSchema with Model2Molecule 
       model2molecule(List(Atom("Ns", "str", "String", 1, Fulltext(Seq("b")), None, List(), List()))) ==> """Ns.str.contains("b")"""
     }
 
+    test("null") {
+      model2molecule(List(
+          Atom("Ns", "int", "Int", 1, VarValue, None, Seq(), Seq()),
+          Atom("Ns", "str_", "String", 1, Fn("not", None), None, Seq(), Seq()))
+      ) ==> """Ns.int.str_(Nil)"""
+    }
+
     test("aggregates") {
       model2molecule(List(Atom("Ns", "int", "Long", 1, Fn("min", None), None, List(), List()))) ==> "Ns.int(min)"
       model2molecule(List(Atom("Ns", "int", "Long", 1, Fn("max", None), None, List(), List()))) ==> "Ns.int(max)"
