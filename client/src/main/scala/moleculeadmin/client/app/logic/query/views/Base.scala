@@ -9,7 +9,7 @@ import moleculeadmin.client.app.html.query.ViewElements
 import moleculeadmin.client.queryWireAjax
 import moleculeadmin.shared.ops.query.ModelOps
 import moleculeadmin.shared.ops.query.builder.TreeOps
-import org.scalajs.dom.document
+import org.scalajs.dom.{Element, document}
 import org.scalajs.dom.html.{Span, TableCell}
 import rx.{Ctx, Rx}
 import scalatags.JsDom.TypedTag
@@ -70,19 +70,25 @@ class Base(implicit ctx: Ctx.Owner)
     expand: Boolean,
     level: Int
   ): Unit = {
-    val viewElement = document.getElementById(parentElementId)
-    if (viewElement != null) {
-      queryWireAjax().touchEntity(db, eid).call().foreach { data =>
-        viewElement.innerHTML = ""
+    queryWireAjax().touchEntity(db, eid).call().foreach { data =>
+      val parentElement = document.getElementById(parentElementId)
+      if (parentElement != null) {
+        parentElement.innerHTML = ""
         data.foreach {
           case (":db/ident", _) => // skip enum idents like :country/US
 
           case (attr, v) if viewCellTypes.contains(attr) =>
-            val cellType   = viewCellTypes(attr)
-            val vElementId = parentElementId + attr + level
-            val valueCell  = getValueCell(cellType, vElementId, v, expand, level)
-            val attrCell   = getAttrCell(attr, cellType, vElementId, valueCell, expand)
-            viewElement.appendChild(
+            val cellType    = viewCellTypes(attr)
+            val valueCellId = parentElementId + attr + level
+            val valueCell   = getValueCell(cellType, valueCellId, v, expand, level)
+            val attrCell    = getAttrCell(attr, cellType, valueCellId, valueCell, expand)
+
+            if (level < entityLevels && cellType == "ref") {
+              // Asynchronously append another level
+              addEntityRows(valueCellId, v.toLong, true, level + 1)
+            }
+
+            parentElement.appendChild(
               tr(
                 attrCell,
                 valueCell
@@ -90,7 +96,7 @@ class Base(implicit ctx: Ctx.Owner)
             )
 
           case (attr, v) =>
-            // println(s"Ignore abandoned $attr -> `$v`")
+          // println(s"Ignore deleted attribute $attr -> `$v`")
         }
       }
     }
