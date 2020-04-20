@@ -2,11 +2,13 @@ package moleculeadmin.client.app.html.query
 
 import util.client.rx.RxBindings
 import moleculeadmin.shared.styles.Color
-import org.scalajs.dom.html.{Element, HR, Span, Table}
-import org.scalajs.dom.{document, window}
+import org.scalajs.dom
+import org.scalajs.dom.html.{Anchor, Element, HR, Select, Span, Table}
+import org.scalajs.dom.{document, html, window}
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all.{height, _}
 import org.scalajs.dom.raw.{Element => RawElement}
+import scalatags.JsDom
 
 
 trait ViewElements extends SubMenuElements with RxBindings {
@@ -94,6 +96,7 @@ trait ViewElements extends SubMenuElements with RxBindings {
   // Entity view -----------------------
 
   def _entityView(
+    entityLevelSelector: Frag,
     showBackRefsLink: Frag,
     backRefsSpan: Frag,
     entityData: Frag
@@ -101,9 +104,10 @@ trait ViewElements extends SubMenuElements with RxBindings {
     _card(
       minWidth := 200,
       _cardHeader(
-        height := 23,
-        h5("Entity", display.`inline-block`),
-        showBackRefsLink
+        height := 25,
+        h5("Entity", display.`inline-block`, paddingRight := 10),
+        entityLevelSelector,
+        showBackRefsLink,
       ),
       _cardBody(
         backRefsSpan,
@@ -111,10 +115,18 @@ trait ViewElements extends SubMenuElements with RxBindings {
       )
     )
 
+  def _entityLevelsSelector(
+    options: Seq[JsDom.TypedTag[html.Option]],
+    toggleBackRefs: () => Unit
+  ): Select = select(
+    options,
+    onchange := toggleBackRefs,
+  ).render
+
   def _entityShowBackRefs(
     toggleBackRefs: () => Unit,
     show: String
-  ) =
+  ): TypedTag[Anchor] =
     a(
       href := "#",
       paddingLeft := 30,

@@ -96,11 +96,12 @@ object QueryState extends QueryApi {
   val curViews: Var[Seq[String]] = Var(Seq.empty[String])
 
   // Entities
-  val curEntity              = Var(0L)
-  val curEntityLocked        = Var(false)
-  var showEntityViewBackRefs = false
-  var curAttrs               = Seq.empty[String]
-  val entityHistorySort      = Var("tx")
+  val curEntity         = Var(0L)
+  val curEntityLocked   = Var(false)
+  var showBackRefs      = false
+  var entityLevels      = 1
+  var curAttrs          = Seq.empty[String]
+  val entityHistorySort = Var("tx")
 
   // Marker On-values
   var curStars : Set[Long] = Set.empty

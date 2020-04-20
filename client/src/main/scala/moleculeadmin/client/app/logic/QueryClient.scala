@@ -83,8 +83,8 @@ object QueryClient
         queryBaseSelection = "a"
       }
       showViews = settings.getOrElse("showViews", "false").toBoolean
-      showEntityViewBackRefs =
-        settings.getOrElse("showEntityViewBackRefs", "false").toBoolean
+      showBackRefs = settings.getOrElse("showBackRefs", "false").toBoolean
+      entityLevels = settings.getOrElse("entityLevels", "1").toInt
       entityHistorySort() = settings.getOrElse("entityHistorySort", "tx")
 
       curViews() = settings.collect {
