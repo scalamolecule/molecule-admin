@@ -144,9 +144,7 @@ class Base(implicit ctx: Ctx.Owner)
       if (expanded) {
         if (level < entityLevels) {
           // Expand sub level after current level has rendered
-          Future(
-            addEntityRows(valueCellId, v.toLong, true, level + 1)
-          )
+          addEntityRows(valueCellId, v.toLong, true, level + 1)
         }
         td(
           id := valueCellId,
@@ -225,12 +223,10 @@ class Base(implicit ctx: Ctx.Owner)
         val eidsWithIndexes = v.split("__~~__").toSeq.map(_.toLong).zipWithIndex
         if (level < entityLevels) {
           // Expand sub level after current level has rendered
-          Future(
-            eidsWithIndexes.foreach {
-              case (refId, i) =>
-                addEntityRows(valueCellId + "-" + i, refId, true, level + 1)
-            }
-          )
+          eidsWithIndexes.foreach {
+            case (refId, i) =>
+              addEntityRows(valueCellId + "-" + i, refId, true, level + 1)
+          }
         }
         td(
           id := valueCellId,
