@@ -39,6 +39,7 @@ trait KeyEvents
             case "v"      => toggleViewsMenu()
             case "g"      => toggleGroupedMenu()
             case "q"      => toggleQueryBuilder
+            case "d"      => toggle("tableData")
             case "s"      => if (e.repeat) toggling = true else toggleStar()
             case "f"      => if (e.repeat) toggling = true else toggleFlag()
             case "c"      => if (e.repeat) toggling = true else toggleCheck()
@@ -47,7 +48,7 @@ trait KeyEvents
             case k if groupedOpen      => grouped(e, k)
             case k if viewsOpen        => views(e, k)
             case k if queryBuilderOpen => queryBuilder(k)
-            case " "                   => noBottomScroll(e)
+            case " "                   => noScrollToBottom(e)
             case _                     => ()
           }
         } else if (shift) {
