@@ -15,6 +15,7 @@ import rx.{Ctx, Rx}
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 
 class Base(implicit ctx: Ctx.Owner)
@@ -67,7 +68,7 @@ class Base(implicit ctx: Ctx.Owner)
   def addEntityRows(
     parentElementId: String,
     eid: Long,
-    expand: Boolean,
+    expanded: Boolean,
     level: Int
   ): Unit = {
     queryWireAjax().touchEntity(db, eid).call().foreach { data =>
@@ -80,14 +81,8 @@ class Base(implicit ctx: Ctx.Owner)
           case (attr, v) if viewCellTypes.contains(attr) =>
             val cellType    = viewCellTypes(attr)
             val valueCellId = parentElementId + attr + level
-            val valueCell   = getValueCell(cellType, valueCellId, v, expand, level)
-            val attrCell    = getAttrCell(attr, cellType, valueCellId, valueCell, expand)
-
-            if (level < entityLevels && cellType == "ref") {
-              // Asynchronously append another level
-              addEntityRows(valueCellId, v.toLong, true, level + 1)
-            }
-
+            val valueCell   = getValueCell(cellType, valueCellId, v, expanded, level)
+            val attrCell    = getAttrCell(attr, cellType, valueCellId, valueCell, expanded)
             parentElement.appendChild(
               tr(
                 attrCell,
@@ -113,7 +108,7 @@ class Base(implicit ctx: Ctx.Owner)
     cellType: String,
     valueCellId: String,
     v: String,
-    expanding: Boolean,
+    expanded: Boolean,
     level: Int,
     asserted: Boolean = true
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = cellType match {
@@ -146,7 +141,13 @@ class Base(implicit ctx: Ctx.Owner)
 
     case "ref" => {
       val ref = v.toLong
-      if (expanding) {
+      if (expanded) {
+        if (level < entityLevels) {
+          // Expand sub level after current level has rendered
+          Future(
+            addEntityRows(valueCellId, v.toLong, true, level + 1)
+          )
+        }
         td(
           id := valueCellId,
           cls := Rx(
@@ -161,7 +162,7 @@ class Base(implicit ctx: Ctx.Owner)
             ref,
             onmouseover := { () =>
               // Recursively open entity
-              addEntityRows(valueCellId, ref, expanding, level + 1)
+              addEntityRows(valueCellId, ref, expanded, level + 1)
             }
           )
         )
@@ -220,20 +221,29 @@ class Base(implicit ctx: Ctx.Owner)
     )
 
     case "refSet" => {
-      if (expanding) {
+      if (expanded) {
+        val eidsWithIndexes = v.split("__~~__").toSeq.map(_.toLong).zipWithIndex
+        if (level < entityLevels) {
+          // Expand sub level after current level has rendered
+          Future(
+            eidsWithIndexes.foreach {
+              case (refId, i) =>
+                addEntityRows(valueCellId + "-" + i, refId, true, level + 1)
+            }
+          )
+        }
         td(
           id := valueCellId,
           cls := (if (asserted) "eid" else "retracted"),
           table(
-            v.split("__~~__").toSeq.zipWithIndex.map {
-              case (v1, i) =>
-                val ref          = v1.toLong
-                val eidElementId = valueCellId + "-" + i
+            eidsWithIndexes.map {
+              case (refId, i) =>
+                val refCellId = valueCellId + "-" + i
                 tr(
                   td(
-                    id := eidElementId,
+                    id := refCellId,
                     cls := Rx(
-                      if (ref == curEntity())
+                      if (refId == curEntity())
                         "eidChosen" + (if (asserted) "" else " retracted")
                       else
                         "eid" + (if (asserted) "" else " retracted")
@@ -242,10 +252,10 @@ class Base(implicit ctx: Ctx.Owner)
                       href := "#",
                       openTriangle,
                       color := "#444",
-                      ref,
+                      refId,
                       // Recursively open entity
                       onmouseover := { () =>
-                        addEntityRows(eidElementId, ref, expanding, level + 1)
+                        addEntityRows(refCellId, refId, expanded, level + 1)
                       }
                     )
                   )
@@ -281,7 +291,7 @@ class Base(implicit ctx: Ctx.Owner)
       )
 
     case "enumSet" =>
-      if (expanding)
+      if (expanded)
         td(
           id := valueCellId,
           if (asserted) () else cls := "retracted",
@@ -296,7 +306,7 @@ class Base(implicit ctx: Ctx.Owner)
         )
 
     case "otherSet" => // Boolean, UUID, URI
-      if (expanding)
+      if (expanded)
         td(
           id := valueCellId,
           if (asserted) () else cls := "retracted",
@@ -312,7 +322,7 @@ class Base(implicit ctx: Ctx.Owner)
         )
 
     case map if map.endsWith("Map") =>
-      if (expanding) {
+      if (expanded) {
         val rawPairs = v.split("__~~__").toSeq
           .map { pair =>
             val List(k, v) = pair.split("@", 2).toList
