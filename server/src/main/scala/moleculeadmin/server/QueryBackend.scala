@@ -72,7 +72,7 @@ class QueryBackend extends ToggleBackend {
 
   override def touchEntity(db: String, eid: Long): List[(String, String)] = {
     val conn = Conn(base + "/" + db)
-    Entity(conn.db.entity(eid), conn, eid.asInstanceOf[Object], false)
+    Entity(conn.db.entity(eid), conn, eid.asInstanceOf[Object])
       .touchListMax(1)
       .map {
         case (a, date: Date) => (a, date2strLocal(date))
