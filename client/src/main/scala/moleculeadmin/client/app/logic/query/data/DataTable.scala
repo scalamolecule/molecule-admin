@@ -213,13 +213,14 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
 
   // Render elements -----------------------------------------
 
-  lazy val tableContainer          = _dataTableContainer(
+  lazy val tableContainer = _dataTableContainer(
     _dataTable(
       tableHead,
       tableBody,
       tableFoot
     )
   )
+
   lazy val tableHead: TableSection = thead().render
   lazy val tableBody: TableSection = tbody(id := "tableBody",
     tr(td(), td(colspan := columns.now.size, "fetching data..."))

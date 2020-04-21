@@ -13,7 +13,10 @@ trait TableElements extends AppElements {
     paddingRight := 0
   )
 
-  def _dataTable: TypedTag[Table] = table(cls := "tableData")
+  def _dataTable: TypedTag[Table] = table(
+    id := "tableData",
+    cls := "tableData"
+  )
 
   def _buildQueryOpen: TypedTag[Span] = span(paddingTop := 4)
 

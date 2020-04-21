@@ -37,8 +37,19 @@ trait BaseKeyEvents {
     cell.parentNode.asInstanceOf[TableRow].className = "view"
   }
 
-  def noBottomScroll(e: KeyboardEvent): Unit = {
+  def noScrollToBottom(e: KeyboardEvent): Unit = {
     // prevent default scroll to bottom
     e.preventDefault()
+  }
+
+  def toggle(id: String): Unit = {
+    val el = document.getElementById(id)
+    if (el != null) {
+      val style = el.getAttribute("style")
+      if (style == null || style.isEmpty)
+        el.setAttribute("style", "display:none;")
+      else
+        el.removeAttribute("style")
+    }
   }
 }

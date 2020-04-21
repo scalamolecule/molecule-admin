@@ -10,7 +10,7 @@ import rx.Ctx
 
 trait SubMenuToggling extends BaseKeyEvents with RegexMatching {
 
-  def toggle(id: String): Unit = {
+  def toggleSubmenu(id: String): Unit = {
     val el = document.getElementById("submenu-" + id)
     if (el != null) {
       val style = el.getAttribute("style")
@@ -23,7 +23,7 @@ trait SubMenuToggling extends BaseKeyEvents with RegexMatching {
     }
   }
 
-  def toggleOffElement(id: String): Unit = {
+  def toggleOffSubmenu(id: String): Unit = {
     val el = document.getElementById("submenu-" + id)
     if (el != null) {
       val style = el.getAttribute("style")
@@ -35,34 +35,34 @@ trait SubMenuToggling extends BaseKeyEvents with RegexMatching {
   }
 
   def toggleOffAll(): Unit = {
-    toggleOffElement("query-list")
-    toggleOffElement("views")
-    toggleOffElement("grouped")
-    toggleOffElement("shortcuts")
+    toggleOffSubmenu("query-list")
+    toggleOffSubmenu("views")
+    toggleOffSubmenu("grouped")
+    toggleOffSubmenu("shortcuts")
   }
   def toggleQueryListMenu(): Unit = {
-    toggle("query-list")
-    toggleOffElement("views")
-    toggleOffElement("grouped")
-    toggleOffElement("shortcuts")
+    toggleSubmenu("query-list")
+    toggleOffSubmenu("views")
+    toggleOffSubmenu("grouped")
+    toggleOffSubmenu("shortcuts")
   }
   def toggleViewsMenu(): Unit = {
-    toggleOffElement("query-list")
-    toggle("views")
-    toggleOffElement("grouped")
-    toggleOffElement("shortcuts")
+    toggleOffSubmenu("query-list")
+    toggleSubmenu("views")
+    toggleOffSubmenu("grouped")
+    toggleOffSubmenu("shortcuts")
   }
   def toggleGroupedMenu(): Unit = {
-    toggleOffElement("query-list")
-    toggleOffElement("views")
-    toggle("grouped")
-    toggleOffElement("shortcuts")
+    toggleOffSubmenu("query-list")
+    toggleOffSubmenu("views")
+    toggleSubmenu("grouped")
+    toggleOffSubmenu("shortcuts")
   }
   def toggleShortcutsMenu(): Unit = {
-    toggleOffElement("query-list")
-    toggleOffElement("views")
-    toggleOffElement("grouped")
-    toggle("shortcuts")
+    toggleOffSubmenu("query-list")
+    toggleOffSubmenu("views")
+    toggleOffSubmenu("grouped")
+    toggleSubmenu("shortcuts")
   }
 
 
