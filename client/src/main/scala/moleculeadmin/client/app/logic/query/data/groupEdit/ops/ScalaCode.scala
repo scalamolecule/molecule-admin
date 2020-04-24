@@ -24,10 +24,12 @@ case class ScalaCode(cols: Seq[Col], col: Col, scalaExpr: String)
   val processTypes0   = new ListBuffer[String]
   val processParams0  = new ListBuffer[String]
 
+  var n = 0
   cols.collect {
     case col@Col(_, _, _, _, _, tpe, _, card, opt, _, _, attrExpr, _, _, _)
       if attrExpr != "edit" =>
 
+      n += 1
       val attr                          = attrResolver.postfixed(col)
       val (processType, paramConverter) = getTypeMappings(attr, tpe, card)
       val transferType                  = card match {
@@ -38,18 +40,81 @@ case class ScalaCode(cols: Seq[Col], col: Col, scalaExpr: String)
       }
       transferTypes0 += transferType
       transferParams0 += s"$attr: $transferType"
-
       conversions0 += paramConverter
       processTypes0 += processType
       processParams0 += s"$attr: $processType"
   }
 
-  val transferTypes : String = transferTypes0.mkString(", ")
-  val transferParams: String = transferParams0.mkString(", ")
-  val conversions   : String = conversions0.mkString(",\n          ")
-  val processTypes  : String = processTypes0.mkString(", ")
-  val processParams : String = processParams0.mkString(", ")
-  val n                      = transferTypes0.length
+  val (transferTypes, transferParams, conversions, processTypes, processParams) =
+    if (n <= 22) {
+      (
+        transferTypes0.mkString(s"js.Tuple$n[", ", ", "]"),
+        transferParams0.mkString(s"js.Tuple$n(", ", ", ")"),
+        conversions0.mkString(",\n        "),
+        processTypes0.mkString("(", ", ", ")"),
+        processParams0.mkString("(\n      ", ",\n      ", "\n    )")
+      )
+
+    } else if (n <= 42) {
+      (
+        s"""js.Tuple2[
+           |      js.Tuple20[${transferTypes0.take(20).mkString(", ")}],
+           |      js.Tuple${n - 20}[${transferTypes0.drop(20).mkString(", ")}]
+           |    ]""".stripMargin,
+
+        s"""js.Tuple2(
+           |      js.Tuple20(${transferParams0.take(20).mkString(", ")}),
+           |      js.Tuple${n - 20}(${transferParams0.drop(20).mkString(", ")})
+           |    )""".stripMargin,
+
+        s"""${conversions0.take(20).mkString(",\n        ")}
+           |      )(
+           |        ${conversions0.drop(20).mkString(",\n        ")}""".stripMargin,
+
+
+        s"""(${processTypes0.take(20).mkString(", ")}) =>
+           |    (${processTypes0.drop(20).mkString(", ")})""".stripMargin,
+
+        s"""(
+           |      ${processParams0.take(20).mkString(",\n      ")}
+           |    ) => (
+           |      ${processParams0.drop(20).mkString(",\n      ")}
+           |    )""".stripMargin
+      )
+
+    } else {
+      (
+        s"""js.Tuple3[
+           |      js.Tuple20[${transferTypes0.take(20).mkString(", ")}],
+           |      js.Tuple20[${transferTypes0.slice(20, 40).mkString(", ")}],
+           |      js.Tuple${n - 40}[${transferTypes0.drop(40).mkString(", ")}]
+           |    ]""".stripMargin,
+
+        s"""js.Tuple3(
+           |      js.Tuple20(${transferParams0.take(20).mkString(", ")}),
+           |      js.Tuple20(${transferParams0.slice(20, 40).mkString(", ")}),
+           |      js.Tuple${n - 40}(${transferParams0.drop(40).mkString(", ")})
+           |    )""".stripMargin,
+
+        s"""${conversions0.take(20).mkString(",\n        ")}
+           |      )(
+           |        ${conversions0.slice(20, 40).mkString(",\n        ")}
+           |      )(
+           |        ${conversions0.drop(40).mkString(",\n        ")}""".stripMargin,
+
+        s"""(${processTypes0.take(20).mkString(", ")}) =>
+           |    (${processTypes0.slice(20, 40).mkString(", ")}) =>
+           |      (${processTypes0.drop(40).mkString(", ")})""".stripMargin,
+
+        s"""(
+           |      ${processParams0.take(20).mkString(",\n      ")}
+           |    ) => (
+           |      ${processParams0.slice(20, 40).mkString(",\n      ")}
+           |    ) => (
+           |      ${processParams0.drop(40).mkString(",\n      ")}
+           |    )""".stripMargin
+      )
+    }
 
   val imports: String =
     """import scalajs.js
@@ -95,20 +160,19 @@ case class ScalaCode(cols: Seq[Col], col: Col, scalaExpr: String)
        |object ScalaFiddle {
        |$implicits
        |  @JSExport
-       |  val lambda: js.Tuple$n[$transferTypes] => js.Tuple2[js.UndefOr[String], String] = {
-       |    case js.Tuple$n($transferParams) =>
-       |      try {
-       |        val result: Option[$processType] = process(
-       |          $conversions
-       |        )
-       |        js.Tuple2(result.map($mapToString).orUndefined, "")
-       |      } catch {
-       |        case e: Throwable => js.Tuple2(Option.empty[String].orUndefined, e.toString)
-       |      }
+       |  val lambda: $transferTypes => js.Tuple2[js.UndefOr[String], String] = {
+       |    case $transferParams => try {
+       |      val result: Option[$processType] = process(
+       |        $conversions
+       |      )
+       |      js.Tuple2(result.map($mapToString).orUndefined, "")
+       |    } catch {
+       |      case e: Throwable => js.Tuple2(Option.empty[String].orUndefined, e.toString)
+       |    }
        |  }
        |
-       |  val process: ($processTypes) => Option[$processType] = {$shared
-       |    ($processParams) => {
+       |  val process: $processTypes => Option[$processType] = {$shared
+       |    $processParams => {
        |      $rhs
        |    }
        |  }
@@ -147,21 +211,20 @@ case class ScalaCode(cols: Seq[Col], col: Col, scalaExpr: String)
        |object ScalaFiddle {
        |$implicits
        |  @JSExport
-       |  val lambda: js.Tuple$n[$transferTypes] => js.Tuple2[js.Array[String], String] = {
-       |    case js.Tuple$n($transferParams) =>
-       |      try {
-       |        val result: Iterable[$processType] = process(
-       |          $conversions
-       |        )
-       |        // implicit conversion from Iterable[$processType] to js.Array[String]
-       |        js.Tuple2(result, "")
-       |      } catch {
-       |        case e: Throwable => js.Tuple2(new js.Array[String](0), e.toString)
-       |      }
+       |  val lambda: $transferTypes => js.Tuple2[js.Array[String], String] = {
+       |    case $transferParams => try {
+       |      val result: Iterable[$processType] = process(
+       |        $conversions
+       |      )
+       |      // implicit conversion from Iterable[$processType] to js.Array[String]
+       |      js.Tuple2(result, "")
+       |    } catch {
+       |      case e: Throwable => js.Tuple2(new js.Array[String](0), e.toString)
+       |    }
        |  }
        |
-       |  val process: ($processTypes) => Iterable[$processType] = {$shared
-       |    ($processParams) => {
+       |  val process: $processTypes => Iterable[$processType] = {$shared
+       |    $processParams => {
        |      $rhs
        |    }
        |  }
@@ -195,27 +258,26 @@ case class ScalaCode(cols: Seq[Col], col: Col, scalaExpr: String)
       case "URI"                    => Seq(map2dict, str2uri, mapAny2mapURI)
     }).mkString("  ", "\n  ", "")
 
-    // Empty Option is simply treated as an empty Map.
+    // Empty Option is simply treated as an empty Map
     s"""$imports
        |@JSExportTopLevel("ScalaFiddle")
        |object ScalaFiddle {
        |$implicits
        |  @JSExport
-       |  val lambda: js.Tuple$n[$transferTypes] => js.Tuple2[js.Dictionary[String], String] = {
-       |    case js.Tuple$n($transferParams) =>
-       |      try {
-       |        val result: Map[String, $processType] = process(
-       |          $conversions
-       |        )
-       |        // `result` implicitly converted from Map[String, $processType] to js.Dictionary[String]
-       |        js.Tuple2(result, "")
-       |      } catch {
-       |        case e: Throwable => js.Tuple2(js.Dictionary.empty[String], e.toString)
-       |      }
+       |  val lambda: $transferTypes => js.Tuple2[js.Dictionary[String], String] = {
+       |    case $transferParams => try {
+       |      val result: Map[String, $processType] = process(
+       |        $conversions
+       |      )
+       |      // `result` implicitly converted from Map[String, $processType] to js.Dictionary[String]
+       |      js.Tuple2(result, "")
+       |    } catch {
+       |      case e: Throwable => js.Tuple2(js.Dictionary.empty[String], e.toString)
+       |    }
        |  }
        |
-       |  val process: ($processTypes) => Map[String, $processType] = {$shared
-       |    ($processParams) => {
+       |  val process: $processTypes => Map[String, $processType] = {$shared
+       |    $processParams => {
        |      $rhs
        |    }
        |  }

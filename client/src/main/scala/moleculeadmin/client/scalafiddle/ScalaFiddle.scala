@@ -46,27 +46,127 @@ case class ScalaFiddle[TransferType](scalaCode: String) {
 
   type ResultPair = js.Tuple2[TransferType, String]
 
-  def lambda2: Future[js.Tuple2[Any, Any] => ResultPair] = getLambda[js.Tuple2[Any, Any] => ResultPair]
-  def lambda3: Future[js.Tuple3[Any, Any, Any] => ResultPair] = getLambda[js.Tuple3[Any, Any, Any] => ResultPair]
-  def lambda4: Future[js.Tuple4[Any, Any, Any, Any] => ResultPair] = getLambda[js.Tuple4[Any, Any, Any, Any] => ResultPair]
-  def lambda5: Future[js.Tuple5[Any, Any, Any, Any, Any] => ResultPair] = getLambda[js.Tuple5[Any, Any, Any, Any, Any] => ResultPair]
-  def lambda6: Future[js.Tuple6[Any, Any, Any, Any, Any, Any] => ResultPair] = getLambda[js.Tuple6[Any, Any, Any, Any, Any, Any] => ResultPair]
-  def lambda7: Future[js.Tuple7[Any, Any, Any, Any, Any, Any, Any] => ResultPair] = getLambda[js.Tuple7[Any, Any, Any, Any, Any, Any, Any] => ResultPair]
-  def lambda8: Future[js.Tuple8[Any, Any, Any, Any, Any, Any, Any, Any] => ResultPair] = getLambda[js.Tuple8[Any, Any, Any, Any, Any, Any, Any, Any] => ResultPair]
-  def lambda9: Future[js.Tuple9[Any, Any, Any, Any, Any, Any, Any, Any, Any] => ResultPair] = getLambda[js.Tuple9[Any, Any, Any, Any, Any, Any, Any, Any, Any] => ResultPair]
-  def lambda10: Future[js.Tuple10[Any, Any, Any, Any, Any, Any, Any, Any, Any, Any] => ResultPair] = getLambda[js.Tuple10[Any, Any, Any, Any, Any, Any, Any, Any, Any, Any] => ResultPair]
-  def lambda11: Future[js.Tuple11[Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any] => ResultPair] = getLambda[js.Tuple11[Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any] => ResultPair]
-  def lambda12: Future[js.Tuple12[Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any] => ResultPair] = getLambda[js.Tuple12[Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any] => ResultPair]
-  def lambda13: Future[js.Tuple13[Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any] => ResultPair] = getLambda[js.Tuple13[Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any] => ResultPair]
-  def lambda14: Future[js.Tuple14[Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any] => ResultPair] = getLambda[js.Tuple14[Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any] => ResultPair]
-  def lambda15: Future[js.Tuple15[Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any] => ResultPair] = getLambda[js.Tuple15[Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any] => ResultPair]
-  def lambda16: Future[js.Tuple16[Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any] => ResultPair] = getLambda[js.Tuple16[Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any] => ResultPair]
-  def lambda17: Future[js.Tuple17[Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any] => ResultPair] = getLambda[js.Tuple17[Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any] => ResultPair]
-  def lambda18: Future[js.Tuple18[Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any] => ResultPair] = getLambda[js.Tuple18[Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any] => ResultPair]
-  def lambda19: Future[js.Tuple19[Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any] => ResultPair] = getLambda[js.Tuple19[Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any] => ResultPair]
-  def lambda20: Future[js.Tuple20[Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any] => ResultPair] = getLambda[js.Tuple20[Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any] => ResultPair]
-  def lambda21: Future[js.Tuple21[Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any] => ResultPair] = getLambda[js.Tuple21[Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any] => ResultPair]
-  def lambda22: Future[js.Tuple22[Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any] => ResultPair] = getLambda[js.Tuple22[Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any] => ResultPair]
+  type T2 = js.Tuple2[Any, Any]
+  type T3 = js.Tuple3[Any, Any, Any]
+  type T4 = js.Tuple4[Any, Any, Any, Any]
+  type T5 = js.Tuple5[Any, Any, Any, Any, Any]
+  type T6 = js.Tuple6[Any, Any, Any, Any, Any, Any]
+  type T7 = js.Tuple7[Any, Any, Any, Any, Any, Any, Any]
+  type T8 = js.Tuple8[Any, Any, Any, Any, Any, Any, Any, Any]
+  type T9 = js.Tuple9[Any, Any, Any, Any, Any, Any, Any, Any, Any]
+  type T10 = js.Tuple10[Any, Any, Any, Any, Any, Any, Any, Any, Any, Any]
+  type T11 = js.Tuple11[Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any]
+  type T12 = js.Tuple12[Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any]
+  type T13 = js.Tuple13[Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any]
+  type T14 = js.Tuple14[Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any]
+  type T15 = js.Tuple15[Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any]
+  type T16 = js.Tuple16[Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any]
+  type T17 = js.Tuple17[Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any]
+  type T18 = js.Tuple18[Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any]
+  type T19 = js.Tuple19[Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any]
+  type T20 = js.Tuple20[Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any]
+  type T21 = js.Tuple21[Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any]
+  type T22 = js.Tuple22[Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any, Any]
+
+  type L2 = T2 => ResultPair
+  type L3 = T3 => ResultPair
+  type L4 = T4 => ResultPair
+  type L5 = T5 => ResultPair
+  type L6 = T6 => ResultPair
+  type L7 = T7 => ResultPair
+  type L8 = T8 => ResultPair
+  type L9 = T9 => ResultPair
+  type L10 = T10 => ResultPair
+  type L11 = T11 => ResultPair
+  type L12 = T12 => ResultPair
+  type L13 = T13 => ResultPair
+  type L14 = T14 => ResultPair
+  type L15 = T15 => ResultPair
+  type L16 = T16 => ResultPair
+  type L17 = T17 => ResultPair
+  type L18 = T18 => ResultPair
+  type L19 = T19 => ResultPair
+  type L20 = T20 => ResultPair
+  type L21 = T21 => ResultPair
+  type L22 = T22 => ResultPair
+  type L23 = js.Tuple2[T20, T3] => ResultPair
+  type L24 = js.Tuple2[T20, T4] => ResultPair
+  type L25 = js.Tuple2[T20, T5] => ResultPair
+  type L26 = js.Tuple2[T20, T6] => ResultPair
+  type L27 = js.Tuple2[T20, T7] => ResultPair
+  type L28 = js.Tuple2[T20, T8] => ResultPair
+  type L29 = js.Tuple2[T20, T9] => ResultPair
+  type L30 = js.Tuple2[T20, T10] => ResultPair
+  type L31 = js.Tuple2[T20, T11] => ResultPair
+  type L32 = js.Tuple2[T20, T12] => ResultPair
+  type L33 = js.Tuple2[T20, T13] => ResultPair
+  type L34 = js.Tuple2[T20, T14] => ResultPair
+  type L35 = js.Tuple2[T20, T15] => ResultPair
+  type L36 = js.Tuple2[T20, T16] => ResultPair
+  type L37 = js.Tuple2[T20, T17] => ResultPair
+  type L38 = js.Tuple2[T20, T18] => ResultPair
+  type L39 = js.Tuple2[T20, T19] => ResultPair
+  type L40 = js.Tuple2[T20, T20] => ResultPair
+  type L41 = js.Tuple2[T20, T21] => ResultPair
+  type L42 = js.Tuple2[T20, T22] => ResultPair
+  type L43 = js.Tuple3[T20, T20, T3] => ResultPair
+  type L44 = js.Tuple3[T20, T20, T4] => ResultPair
+  type L45 = js.Tuple3[T20, T20, T5] => ResultPair
+  type L46 = js.Tuple3[T20, T20, T6] => ResultPair
+  type L47 = js.Tuple3[T20, T20, T7] => ResultPair
+  type L48 = js.Tuple3[T20, T20, T8] => ResultPair
+  type L49 = js.Tuple3[T20, T20, T9] => ResultPair
+  type L50 = js.Tuple3[T20, T20, T10] => ResultPair
+
+  def lambda2: Future[L2] = getLambda[L2]
+  def lambda3: Future[L3] = getLambda[L3]
+  def lambda4: Future[L4] = getLambda[L4]
+  def lambda5: Future[L5] = getLambda[L5]
+  def lambda6: Future[L6] = getLambda[L6]
+  def lambda7: Future[L7] = getLambda[L7]
+  def lambda8: Future[L8] = getLambda[L8]
+  def lambda9: Future[L9] = getLambda[L9]
+  def lambda10: Future[L10] = getLambda[L10]
+  def lambda11: Future[L11] = getLambda[L11]
+  def lambda12: Future[L12] = getLambda[L12]
+  def lambda13: Future[L13] = getLambda[L13]
+  def lambda14: Future[L14] = getLambda[L14]
+  def lambda15: Future[L15] = getLambda[L15]
+  def lambda16: Future[L16] = getLambda[L16]
+  def lambda17: Future[L17] = getLambda[L17]
+  def lambda18: Future[L18] = getLambda[L18]
+  def lambda19: Future[L19] = getLambda[L19]
+  def lambda20: Future[L20] = getLambda[L20]
+  def lambda21: Future[L21] = getLambda[L21]
+  def lambda22: Future[L22] = getLambda[L22]
+  def lambda23: Future[L23] = getLambda[L23]
+  def lambda24: Future[L24] = getLambda[L24]
+  def lambda25: Future[L25] = getLambda[L25]
+  def lambda26: Future[L26] = getLambda[L26]
+  def lambda27: Future[L27] = getLambda[L27]
+  def lambda28: Future[L28] = getLambda[L28]
+  def lambda29: Future[L29] = getLambda[L29]
+  def lambda30: Future[L30] = getLambda[L30]
+  def lambda31: Future[L31] = getLambda[L31]
+  def lambda32: Future[L32] = getLambda[L32]
+  def lambda33: Future[L33] = getLambda[L33]
+  def lambda34: Future[L34] = getLambda[L34]
+  def lambda35: Future[L35] = getLambda[L35]
+  def lambda36: Future[L36] = getLambda[L36]
+  def lambda37: Future[L37] = getLambda[L37]
+  def lambda38: Future[L38] = getLambda[L38]
+  def lambda39: Future[L39] = getLambda[L39]
+  def lambda40: Future[L40] = getLambda[L40]
+  def lambda41: Future[L41] = getLambda[L41]
+  def lambda42: Future[L42] = getLambda[L42]
+  def lambda43: Future[L43] = getLambda[L43]
+  def lambda44: Future[L44] = getLambda[L44]
+  def lambda45: Future[L45] = getLambda[L45]
+  def lambda46: Future[L46] = getLambda[L46]
+  def lambda47: Future[L47] = getLambda[L47]
+  def lambda48: Future[L48] = getLambda[L48]
+  def lambda49: Future[L49] = getLambda[L49]
+  def lambda50: Future[L50] = getLambda[L50]
 
 
   private def getLambda[Lambda]: Future[Lambda] = {
@@ -150,7 +250,8 @@ case class ScalaFiddle[TransferType](scalaCode: String) {
   }
 
   private def numbered(code: String): String = code.split("\n").zipWithIndex.map {
-    case (c, i) if i < 9 => s" ${i + 1}  " + c
-    case (c, i)          => s"${i + 1}  " + c
+    case (c, i) if i < 9  => s"  ${i + 1}  " + c
+    case (c, i) if i < 99 => s" ${i + 1}  " + c
+    case (c, i)           => s"${i + 1}  " + c
   }.mkString("\n")
 }
