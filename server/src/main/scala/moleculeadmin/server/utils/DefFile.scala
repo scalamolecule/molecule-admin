@@ -257,8 +257,9 @@ case class DefFile(db: String, path: Option[String] = None, schemaDefFile: Optio
       }
 
       val options = options0.map(_.filterNot(_ == "indexed")) match {
-        case None       => ""
-        case Some(opts) => "." + opts.mkString(".")
+        case None                       => ""
+        case Some(opts) if opts.isEmpty => ""
+        case Some(opts)                 => "." + opts.mkString(".")
       }
 
       val doc = doc0 match {
