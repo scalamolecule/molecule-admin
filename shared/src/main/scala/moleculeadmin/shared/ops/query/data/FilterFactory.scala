@@ -200,7 +200,6 @@ trait FilterFactory extends RegexMatching with DateHandling {
     token match {
       case ""                 => None // no filter
       case "-"                => Some(_ => _.isEmpty)
-      case "-"                => Some(_ => _.isEmpty)
       case "+"                => Some(_ => _.isDefined)
       case r"\{( *)$spaces\}" => Some(_ => _.fold(false)(s => s.matches(spaces)))
       case r"/(.*)$regex"     => Some(_ => _.fold(false)(s => s.matches(regex)))

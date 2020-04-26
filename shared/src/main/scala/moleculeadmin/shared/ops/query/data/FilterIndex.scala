@@ -2,6 +2,7 @@ package moleculeadmin.shared.ops.query.data
 
 import moleculeadmin.shared.ast.query.{Filter, QueryResult}
 import moleculeadmin.shared.util.PredicateMerger._
+import scala.language.existentials
 
 
 trait FilterIndex {
