@@ -61,6 +61,7 @@ case class Toggle(
 
   val (newCls, iconIndex, eids, count, toggling) = {
     if (currentlyOn) {
+      // turn off
       tpe match {
         case "star" =>
           val (starred, count) =
@@ -99,6 +100,7 @@ case class Toggle(
           (mark.checkOff, 3, checked, count, "Unchecking")
       }
     } else {
+      // turn on
       tpe match {
         case "star" =>
           val (notStarred, count) =
