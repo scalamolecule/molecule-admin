@@ -8,6 +8,14 @@ import scala.language.existentials
 
 object FilterApply extends TestSuite with FilterFactory with FilterIndex {
 
+  def getFilterIndex2(
+    qr: QueryResult,
+    filters: Map[Int, Filter[_]],
+    sortIndex: Array[Int] = Array.empty[Int]
+  ): Array[Int] = getFilterIndex(
+    qr, filters, Set.empty[Long], Set.empty[Long], Set.empty[Long], sortIndex
+  )
+
   val tests = Tests {
 
     test("filter 3 columns") {
@@ -39,18 +47,18 @@ object FilterApply extends TestSuite with FilterFactory with FilterIndex {
       val f2 = 2 -> mkFilter(2, "Int", "double", "3")
 
 
-      getFilterIndex(qr, Map(f0)).toList ==> List(1, 2, 3)
-      getFilterIndex(qr, Map(f1)).toList ==> List(2, 3)
-      getFilterIndex(qr, Map(f2)).toList ==> List(3)
+      getFilterIndex2(qr, Map(f0)).toList ==> List(1, 2, 3)
+      getFilterIndex2(qr, Map(f1)).toList ==> List(2, 3)
+      getFilterIndex2(qr, Map(f2)).toList ==> List(3)
 
-      getFilterIndex(qr, Map(f0, f1)).toList ==> List(2, 3)
-      getFilterIndex(qr, Map(f0, f2)).toList ==> List(3)
-      getFilterIndex(qr, Map(f1, f2)).toList ==> List(3)
+      getFilterIndex2(qr, Map(f0, f1)).toList ==> List(2, 3)
+      getFilterIndex2(qr, Map(f0, f2)).toList ==> List(3)
+      getFilterIndex2(qr, Map(f1, f2)).toList ==> List(3)
 
-      getFilterIndex(qr, Map(f0, f1, f2)).toList ==> List(3)
+      getFilterIndex2(qr, Map(f0, f1, f2)).toList ==> List(3)
 
       // Predicate order doesn't matter
-      getFilterIndex(qr, Map(f2, f1, f0)).toList ==> List(3)
+      getFilterIndex2(qr, Map(f2, f1, f0)).toList ==> List(3)
     }
 
 
@@ -67,21 +75,21 @@ object FilterApply extends TestSuite with FilterFactory with FilterIndex {
         Map(0 -> 0),
         4, 4, 777)
 
-      val filters = Map(0 -> Filter(0, "double", false, ">1", (opt: Option[Double]) => opt.fold(false)(_ > 1)))
+      val filters = Map(0 -> Filter(0, "double", false, ">1", _ => (opt: Option[Double]) => opt.fold(false)(_ > 1)))
 
 
       // filter only
-      val filteredIndex = getFilterIndex(qr, filters).toList
+      val filteredIndex = getFilterIndex2(qr, filters).toList
       filteredIndex ==> List(0, 2, 3)
       filteredIndex.flatMap(col(_)) ==> List(2, 4, 3)
 
       // filter + sortAsc index
-      val filteredAndAscIndex: Seq[Int] = getFilterIndex(qr, filters, sortAsc).toList
+      val filteredAndAscIndex: Seq[Int] = getFilterIndex2(qr, filters, sortAsc).toList
       filteredAndAscIndex ==> List(0, 3, 2)
       filteredAndAscIndex.flatMap(col(_)) ==> List(2, 3, 4)
 
       // filter + sortDesc index
-      val filteredAndDescIndex = getFilterIndex(qr, filters, sortDesc).toList
+      val filteredAndDescIndex = getFilterIndex2(qr, filters, sortDesc).toList
       filteredAndDescIndex ==> List(2, 3, 0)
       filteredAndDescIndex.flatMap(col(_)) ==> List(4, 3, 2)
     }
@@ -110,50 +118,50 @@ object FilterApply extends TestSuite with FilterFactory with FilterIndex {
         4, 4, 777
       )
 
-      val f1 = 0 -> Filter(0, "double", false, "1", (opt: Option[Double]) => opt.fold(false)(_ == 1))
+      val f1 = 0 -> Filter(0, "double", false, "1", _ => (opt: Option[Double]) => opt.fold(false)(_ == 1))
 
 
-      val noSort = getFilterIndex(qr, Map(f1)).toList
+      val noSort = getFilterIndex2(qr, Map(f1)).toList
       noSort ==> List(1, 3)
       noSort.flatMap(col1(_)) ==> List(1, 1)
       noSort.flatMap(col2(_)) ==> List(3, 4)
 
-      val asc1 = getFilterIndex(qr, Map(f1), sort1Asc).toList
+      val asc1 = getFilterIndex2(qr, Map(f1), sort1Asc).toList
       asc1 ==> List(1, 3)
       asc1.flatMap(col1(_)) ==> List(1, 1)
       asc1.flatMap(col2(_)) ==> List(3, 4)
 
-      val desc1 = getFilterIndex(qr, Map(f1), sort1Desc).toList
+      val desc1 = getFilterIndex2(qr, Map(f1), sort1Desc).toList
       desc1 ==> List(1, 3)
       desc1.flatMap(col1(_)) ==> List(1, 1)
       desc1.flatMap(col2(_)) ==> List(3, 4)
 
-      val asc2 = getFilterIndex(qr, Map(f1), sort2Asc).toList
+      val asc2 = getFilterIndex2(qr, Map(f1), sort2Asc).toList
       asc2 ==> List(1, 3)
       asc2.flatMap(col1(_)) ==> List(1, 1)
       asc2.flatMap(col2(_)) ==> List(3, 4)
 
-      val desc2 = getFilterIndex(qr, Map(f1), sort2Desc).toList
+      val desc2 = getFilterIndex2(qr, Map(f1), sort2Desc).toList
       desc2 ==> List(3, 1)
       desc2.flatMap(col1(_)) ==> List(1, 1)
       desc2.flatMap(col2(_)) ==> List(4, 3)
 
-      val ascAsc = getFilterIndex(qr, Map(f1), sortAscAsc).toList
+      val ascAsc = getFilterIndex2(qr, Map(f1), sortAscAsc).toList
       ascAsc ==> List(1, 3)
       ascAsc.flatMap(col1(_)) ==> List(1, 1)
       ascAsc.flatMap(col2(_)) ==> List(3, 4)
 
-      val ascDesc = getFilterIndex(qr, Map(f1), sortAscDesc).toList
+      val ascDesc = getFilterIndex2(qr, Map(f1), sortAscDesc).toList
       ascDesc ==> List(3, 1)
       ascDesc.flatMap(col1(_)) ==> List(1, 1)
       ascDesc.flatMap(col2(_)) ==> List(4, 3)
 
-      val descAsc = getFilterIndex(qr, Map(f1), sortDescAsc).toList
+      val descAsc = getFilterIndex2(qr, Map(f1), sortDescAsc).toList
       descAsc ==> List(1, 3)
       descAsc.flatMap(col1(_)) ==> List(1, 1)
       descAsc.flatMap(col2(_)) ==> List(3, 4)
 
-      val descDesc = getFilterIndex(qr, Map(f1), sortDescDesc).toList
+      val descDesc = getFilterIndex2(qr, Map(f1), sortDescDesc).toList
       descDesc ==> List(3, 1)
       descDesc.flatMap(col1(_)) ==> List(1, 1)
       descDesc.flatMap(col2(_)) ==> List(4, 3)
@@ -164,7 +172,7 @@ object FilterApply extends TestSuite with FilterFactory with FilterIndex {
       //      filteredAndDescIndex.flatMap(col(_)) ==> List(4, 3, 2)
 
 
-      val f2 = 0 -> Filter(0, "double", false, "2", (opt: Option[Double]) => opt.fold(false)(_ == 2))
+      val f2 = 0 -> Filter(0, "double", false, "2", _ => (opt: Option[Double]) => opt.fold(false)(_ == 2))
     }
   }
 }

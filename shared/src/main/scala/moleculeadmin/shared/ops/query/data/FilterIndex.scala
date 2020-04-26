@@ -9,6 +9,9 @@ trait FilterIndex {
   def getFilterIndex(
     qr: QueryResult,
     filters: Map[Int, Filter[_]],
+    curStars: Set[Long],
+    curFlags: Set[Long],
+    curChecks: Set[Long],
     sortIndex: Array[Int] = Array.empty[Int]
   ): Array[Int] = {
 
@@ -52,27 +55,27 @@ trait FilterIndex {
     def double(f: Filter[_]): Int => Boolean = {
       val arrayIndex = qr.arrayIndexes(f.colIndex)
       val values     = qr.num(arrayIndex)
-      val predicate  = f.pred.asInstanceOf[Option[Double] => Boolean]
-      lambdaOne(values, predicate)
+      val predicate  = f.markerPred((curStars, curFlags, curChecks))
+      lambdaOne(values, predicate.asInstanceOf[Option[Double] => Boolean])
     }
     def string(f: Filter[_]): Int => Boolean = {
       val arrayIndex = qr.arrayIndexes(f.colIndex)
       val values     = qr.str(arrayIndex)
-      val predicate  = f.pred.asInstanceOf[Option[String] => Boolean]
-      lambdaOne(values, predicate)
+      val predicate  = f.markerPred((curStars, curFlags, curChecks))
+      lambdaOne(values, predicate.asInstanceOf[Option[String] => Boolean])
     }
 
     def listDouble(f: Filter[_]): Int => Boolean = {
       val arrayIndex = qr.arrayIndexes(f.colIndex)
       val values     = qr.listNum(arrayIndex)
-      val predicate  = f.pred.asInstanceOf[Option[Double] => Boolean]
-      lambdaMany(values, predicate)
+      val predicate  = f.markerPred((curStars, curFlags, curChecks))
+      lambdaMany(values, predicate.asInstanceOf[Option[Double] => Boolean])
     }
     def listString(f: Filter[_]): Int => Boolean = {
       val arrayIndex = qr.arrayIndexes(f.colIndex)
       val values     = qr.listStr(arrayIndex)
-      val predicate  = f.pred.asInstanceOf[Option[String] => Boolean]
-      lambdaMany(values, predicate)
+      val predicate  = f.markerPred((curStars, curFlags, curChecks))
+      lambdaMany(values, predicate.asInstanceOf[Option[String] => Boolean])
     }
 
     var i                                = 0

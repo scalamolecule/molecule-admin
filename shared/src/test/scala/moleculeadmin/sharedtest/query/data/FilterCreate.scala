@@ -15,15 +15,17 @@ object FilterCreate extends TestSuite with FilterFactory {
   ): Option[Filter[_]] =
     createFilter(Col(colIndex, 0, "", "", "", attrType, colType, 1), filterExpr)
 
+  val emptyMarkers = (Set.empty[Long], Set.empty[Long], Set.empty[Long])
+
   def testDoubleExpr(vs: Seq[Option[Double]], filterExpr: String, attrType: String): Seq[Option[Double]] = {
     mkFilter(0, attrType, "double", filterExpr).fold(vs)(f =>
-      vs filter f.asInstanceOf[Filter[Double]].pred
+      vs filter f.asInstanceOf[Filter[Double]].markerPred(emptyMarkers)
     )
   }
 
   def testStringExpr(vs: Seq[Option[String]], filterExpr: String, attrType: String): Seq[Option[String]] = {
     mkFilter(0, attrType, "string", filterExpr).fold(vs)(f =>
-      vs filter f.asInstanceOf[Filter[String]].pred
+      vs filter f.asInstanceOf[Filter[String]].markerPred(emptyMarkers)
     )
   }
 

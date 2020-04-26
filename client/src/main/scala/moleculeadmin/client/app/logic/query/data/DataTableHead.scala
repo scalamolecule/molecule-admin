@@ -201,9 +201,7 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
         if (filterExpr.isEmpty) {
           filters() = filters.now - colIndex
         } else {
-          createFilter(
-            col, filterExpr, curStars, curFlags, curChecks, attrType != "String"
-          ) match {
+          createFilter(col, filterExpr, attrType != "String") match {
             case Some(filter) => filters() = filters.now + (colIndex -> filter)
             case None         => filters() = filters.now - colIndex
           }
@@ -213,7 +211,6 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
       }
       _attrFilterCell(filterId, filterExpr, applyFilter)
     }
-
     if (attrExpr == "edit") editCell() else filterCell()
   }
 

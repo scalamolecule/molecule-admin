@@ -26,10 +26,12 @@ case class Indexes(
       cachedFilters = filters.now
       cachedFilterIndex = if (sortCols.isEmpty) {
         // filter
-        getFilterIndex(qr, filters.now)
+        getFilterIndex(
+          qr, filters.now, curStars, curFlags, curChecks)
       } else {
         // sort + filter
-        getFilterIndex(qr, filters.now, getCachedSortIndex)
+        getFilterIndex(
+          qr, filters.now, curStars, curFlags, curChecks, getCachedSortIndex)
       }
       cachedFilterIndex
     } else {

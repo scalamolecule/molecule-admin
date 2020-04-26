@@ -1,4 +1,5 @@
 package moleculeadmin.shared.ast
+
 import moleculeadmin.shared.ast.schema.seq
 import moleculeadmin.shared.ast.tree.Tree
 import molecule.ast.model.Element
@@ -44,20 +45,24 @@ object query extends HelpersAdmin {
     }
   }
 
+  // Starred/flagged/checked eids
+  type Markers = (Set[Long], Set[Long], Set[Long])
 
   /** Filter data
    *
    * @tparam T Double or String
    * @param colIndex   Column index
    * @param filterExpr Filter expression including possible newlines
-   * @param pred       Predicate to filter each value
-   **/
+   * @param markerPred Predicate to filter each value.
+   *                   Currently starred/flagged/checked eids
+   *                   taken as input before applying actual predicate
+   * */
   case class Filter[T](
     colIndex: Int,
     colType: String,
     isAggr: Boolean,
     filterExpr: String,
-    pred: Option[T] => Boolean
+    markerPred: Markers => Option[T] => Boolean
   )
 
 

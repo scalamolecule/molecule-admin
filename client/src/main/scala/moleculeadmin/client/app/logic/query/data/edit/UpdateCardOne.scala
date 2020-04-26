@@ -155,8 +155,6 @@ case class UpdateCardOne[T](
             Seq((eid, Nil, Seq(value)))
           else
             Seq((eid, Seq(value), Nil))
-          println("-------")
-          data foreach println
 
           queryWireAjax().updateStr(db, attrFull, attrType, enumPrefix, data).call()
         }
