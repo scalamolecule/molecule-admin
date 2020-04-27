@@ -74,8 +74,8 @@ trait KeyEvents
             case _                => ()
           }
           case "Escape"             => blur()
-          case "ArrowUp" if ctrl    => cellUp()
-          case "ArrowDown" if ctrl  => cellDown()
+          case "ArrowUp" if ctrl    => saveEditMoveUp(e)
+          case "ArrowDown" if ctrl  => saveEditMoveDown(e)
           case "ArrowLeft" if ctrl  => saveEditMoveBackwards(e)
           case "ArrowRight" if ctrl => saveEditMoveForward(e)
           case "Backspace"          => deleteItem(e)

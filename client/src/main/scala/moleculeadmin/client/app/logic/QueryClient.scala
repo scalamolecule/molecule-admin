@@ -31,9 +31,7 @@ object QueryClient
   @JSExport
   def load(db0: String): Unit = queryWireAjax().loadMetaData(db0).call().map {
     pageMetaData =>
-
       val dbs = init(db0, pageMetaData)
-
       document.body.appendChild(
         TopMenu(dbs, db, "query", RenderSubMenu().dynRender).render
       )
@@ -48,7 +46,6 @@ object QueryClient
           )
         ).render
       }
-
       post()
   }
 
