@@ -44,15 +44,16 @@ case class UpdateCardOne[T](
     cell: TableCell,
     row: TableRow,
     eid: Long,
-    oldVOpt: Option[T],
+    oldVopt: Option[T],
     isNum: Boolean
   ): Unit = {
 
-    val oldStr: String = oldVOpt.fold("")(_.toString)
+    val oldStr: String = oldVopt.fold("")(_.toString)
     val newStr: String = _html2str(cell.innerHTML)
 
     if (oldStr == newStr) {
-      // do nothing if no change
+      // Void change marker
+      setCellEditMode(cell, oldVopt)
 
     } else if (editCellId.nonEmpty && editCellId == cell.id && eid != 0) {
 

@@ -11,7 +11,6 @@ import org.scalajs.dom.window
 import rx.{Ctx, Rx}
 import scalatags.JsDom.all._
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.Try
 
 
 /**
@@ -45,16 +44,16 @@ case class UpdateCardMany[T](
     cell: TableCell,
     row: TableRow,
     eid: Long,
-    oldVOpt: Option[T],
+    oldVopt: Option[T],
     isNum: Boolean
   ): Unit = {
 
-    val oldStrs: List[String] = oldVOpt.fold(List.empty[String]) {
+    val oldStrs: List[String] = oldVopt.fold(List.empty[String]) {
       case vs: List[_] =>
         vs.map(_.toString).distinct.sorted
     }
 
-    val raw = cell.innerHTML
+    val raw  = cell.innerHTML
     val strs = if (cellType == "ref") {
       val s1 = raw.replaceAll("</*ul[^>]*>", "")
       s1.substring(s1.indexOf(">", 5) + 1, s1.length - 5)
@@ -96,10 +95,11 @@ case class UpdateCardMany[T](
 
 
     if (oldStrs == newStrs) {
-      // do nothing if no change
+      // Remove superfluous line shifts
+      redrawCell()
 
-      // Remove superfluous line shifts todo: necessary?
-      // redrawCell()
+      // Void change marker
+      setCellEditMode(cell, oldVopt)
 
     } else if (eid != 0 && editCellId.nonEmpty && editCellId == cell.id) {
 
