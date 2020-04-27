@@ -55,7 +55,7 @@ case class UpdateCardMap[T](
             .toList.distinct.sortBy(_._1)
       }
 
-    val raw = cell.innerHTML
+    val raw  = cell.innerHTML
     val strs = if (raw.endsWith("<ul></ul>")) {
       raw.replaceAllLiterally("<ul></ul>", "").split("<br>").toList
     } else
@@ -104,10 +104,11 @@ case class UpdateCardMap[T](
 
 
     if (oldPairs == newPairs) {
-      // do nothing if no change
+      // Remove superfluous line shifts
+      redrawCell()
 
-      // Remove superfluous line shifts todo: necessary?
-      // redrawCell()
+      // Void change marker
+      setCellEditMode(cell, oldVopt)
 
     } else if (eid != 0 && editCellId.nonEmpty && editCellId == cell.id) {
 
