@@ -74,7 +74,8 @@ case class UpdateCardOne[T](
 
       if (attrType != "String" && newStr.contains('\n')) {
         editCellId = ""
-        window.alert(s"Can't save multiple $attrFull values of type `$attrType`:\n$newStr")
+        window.alert(
+          s"Can't save multiple $attrFull values of type `$attrType`:\n$newStr")
         cell.focus()
 
       } else if (enums.nonEmpty && !enums.contains(newStr)) {
@@ -163,14 +164,15 @@ case class UpdateCardOne[T](
             updateClient(cellIdMaker, t, tx, txInstant, row, eid, newVopt)
             if (nonEmpty)
               println(s"$attrFull: `$oldStr` ==> `$newStr`")
-            else //if (oldStr.nonEmpty)
+            else
               println(s"$attrFull: retracted `$oldStr`")
 
           case Left(err) =>
             editCellId = ""
             selectContent(cell)
             if (nonEmpty)
-              window.alert(s"Error updating `$attrFull` value from `$oldStr` to `$newStr`:\n$err")
+              window.alert(
+                s"Error updating `$attrFull` value from `$oldStr` to `$newStr`:\n$err")
             else
               window.alert(s"Error retracting `$attrFull` value `$oldStr`:\n$err")
             cell.focus()
