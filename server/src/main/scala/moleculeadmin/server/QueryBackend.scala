@@ -752,19 +752,21 @@ class QueryBackend extends ToggleBackend {
         }
 
         val time = System.currentTimeMillis()
-        user_DbSettings(dbSettingsId).Edits.e.expr_(editExpr).get match {
+        user_DbSettings(dbSettingsId)
+          .Edits.e.attr_(fullAttr).expr_(editExpr)
+          .get match {
           case Nil =>
             val newId = user_EditExpr.attr(fullAttr).time(time).expr(editExpr).save.eid
             user_DbSettings(dbSettingsId).edits.assert(newId).update
-            Right("Successfully inserted edit expression")
+            Right(s"Successfully inserted edit expression `$editExpr`")
 
           case Seq(exprId) =>
             // Update timestamp of existing expr
             user_EditExpr(exprId).time(time).update
-            Right("Successfully updated edit expr")
+            Right(s"Successfully updated edit expr `$editExpr`")
 
           case exprIds => Left(
-            s"Unexpectedly found edit expression ${exprIds.length} times.")
+            s"Unexpectedly found edit expression `$editExpr` ${exprIds.length} times.")
         }
       } catch {
         case t: Throwable => Left(t.getMessage)
