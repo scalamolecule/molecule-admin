@@ -112,4 +112,16 @@ trait QueryApi extends BaseApi {
     db: String,
     eid: Long
   ): Either[String, ListBuffer[(String, Int)]] = ???
+
+  def upsertEditExpr(
+    db: String,
+    fullAttr: String,
+    editExpr: String
+  ): Either[String, String] = ???
+
+  def retractEditExpr(
+    db: String,
+    fullAttr: String,
+    editExpr: String
+  ): Either[String, String] = ???
 }

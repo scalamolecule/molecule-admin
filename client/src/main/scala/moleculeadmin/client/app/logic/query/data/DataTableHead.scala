@@ -1,17 +1,17 @@
 package moleculeadmin.client.app.logic.query.data
 
-import util.client.rx.RxBindings
-import moleculeadmin.client.app.logic.query.KeyEvents
-import moleculeadmin.client.app.logic.query.QueryState._
-import moleculeadmin.client.app.logic.query.data.groupEdit.{GroupEdit, GroupJoin, GroupRetract, GroupSave}
-import moleculeadmin.client.app.logic.query.marker.{Toggle, ToggleOffAll}
 import moleculeadmin.client.app.html.AppElements
 import moleculeadmin.client.app.html.query.datatable.HeadElements
-import moleculeadmin.shared.ast.query.{Col, QueryDTO, QueryResult}
+import moleculeadmin.client.app.logic.query.KeyEvents
+import moleculeadmin.client.app.logic.query.QueryState._
+import moleculeadmin.client.app.logic.query.data.groupEdit._
+import moleculeadmin.client.app.logic.query.marker.{Toggle, ToggleOffAll}
+import moleculeadmin.shared.ast.query.{Col, QueryResult}
 import moleculeadmin.shared.ops.query.data.FilterFactory
 import moleculeadmin.shared.ops.query.{ColOps, ModelOps}
 import org.scalajs.dom.html.{TableCell, TableSection}
-import org.scalajs.dom.raw.Node
+import util.client.rx.RxBindings
+import org.scalajs.dom.raw.{HTMLInputElement, Node}
 import org.scalajs.dom.{MouseEvent, document, window}
 import rx.{Ctx, Rx}
 import scalatags.JsDom
@@ -22,197 +22,6 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
   extends RxBindings with ColOps with ModelOps
     with HeadElements with KeyEvents with FilterFactory
     with AppElements {
-
-
-  def attrCell(
-    col: Col,
-    attrResolver: ResolveAttrs
-  ): JsDom.TypedTag[TableCell] = {
-    val Col(colIndex, _, nsAlias, nsFull, attr, _, colType, card, _, _,
-    aggrType, expr, sortDir, sortPos, _) = col
-
-    val postfix         = attrResolver.postfix(col)
-    val sortable        = card == 1 || singleAggrTypes.contains(aggrType)
-    val sort            = { e: MouseEvent =>
-      if (columns.now.size == 5 &&
-        !columns.now.exists(_.colIndex == colIndex)) {
-        window.alert("Can sort maximum 5 columns.")
-      } else {
-        //        println("------------ sort ------------")
-        // Let only columns() propagate change
-        offset.kill()
-        // Show first page with each new sort
-        offset() = 0
-        columns() = getSortedColumns(
-          columns.now, colIndex, e.getModifierState("Shift")
-        )
-        // update sorting for matching recent if any
-        recentQueries = recentQueries.map {
-          case q if q.molecule == curMolecule.now =>
-            q.copy(colSettings = colSettings(columns.now))
-          case q                                  => q
-        }
-        //        println("  SORT: " + columns.now)
-        //        println("  SORT: " + recentQueries)
-      }
-    }
-    val editable        = isEditable(columns.now, colIndex, nsAlias, nsFull)
-    val edit            = { _: MouseEvent =>
-      modelElements() = toggleEdit(modelElements.now, colIndex, nsFull, attr)
-    }
-    val save            = { _: MouseEvent => GroupSave(col).save() }
-    val cancel          = { _: MouseEvent =>
-      resetEditColToOrigColCache(colIndex, colType)
-      modelElements() = toggleEdit(modelElements.now, colIndex, nsFull, attr)
-    }
-    val retractEntities = { _: MouseEvent => GroupRetract(col).entities() }
-    val retractValues   = { _: MouseEvent => GroupRetract(col).values() }
-
-    val togglers: Seq[MouseEvent => Unit] = if (attr == "e") {
-      Seq(
-        { _: MouseEvent => Toggle(tableBody, "star", false, colIndex) },
-        { _: MouseEvent => Toggle(tableBody, "flag", false, colIndex) },
-        { _: MouseEvent => Toggle(tableBody, "check", false, colIndex) },
-        { _: MouseEvent => Toggle(tableBody, "star", true, colIndex) },
-        { _: MouseEvent => Toggle(tableBody, "flag", true, colIndex) },
-        { _: MouseEvent => Toggle(tableBody, "check", true, colIndex) },
-        { _: MouseEvent => ToggleOffAll(tableBody, "star") },
-        { _: MouseEvent => ToggleOffAll(tableBody, "flag") },
-        { _: MouseEvent => ToggleOffAll(tableBody, "check") },
-      )
-    } else Nil
-
-    if (sortable) {
-      if (attr == "e") {
-        val joins     = GroupJoin(colIndex, nsFull)
-        val joinMaker = (
-          nsFull: String,
-          refAttr: String,
-          refCard: Int,
-          refNs: String,
-          valueAttr: String,
-          attrType: String,
-          isEnum: Boolean,
-          value: String
-        ) => joins.create(
-          nsFull, refAttr, refCard, refNs, valueAttr, attrType, isEnum, value
-        )
-
-        _attrHeaderSortable(
-          attr, postfix, expr, sortDir, sortPos, sort,
-          editable, edit, save, cancel,
-          retractEntities, retractValues,
-          togglers,
-          joins.attrs, joinMaker
-        )
-      } else {
-        _attrHeaderSortable(
-          attr, postfix, expr, sortDir, sortPos, sort,
-          editable, edit, save, cancel,
-          retractEntities, retractValues,
-          togglers,
-        )
-      }
-    } else {
-      _attrHeader(
-        attr, postfix, expr,
-        editable, edit, save, cancel,
-        retractEntities, retractValues
-      )
-    }
-  }
-
-  def resetEditColToOrigColCache(colIndex: Int, colType: String): Unit = {
-    val curQueryCache   = queryCache
-    val qr: QueryResult = curQueryCache.queryResult
-    val arrayIndexes    = qr.arrayIndexes
-
-    def revert[T](arrays: List[Array[Option[T]]]): List[Array[Option[T]]] = {
-      val origColIndex = arrayIndexes(colIndex - 1)
-      val editColIndex = arrayIndexes(colIndex)
-      arrays.zipWithIndex.map {
-        case (_, `editColIndex`) => arrays(origColIndex)
-        case (a, _)              => a
-      }
-    }
-
-    val origQueryResult = colType match {
-      case "string"     => qr.copy(str = revert(qr.str))
-      case "double"     => qr.copy(num = revert(qr.num))
-      case "listString" => qr.copy(listStr = revert(qr.listStr))
-      case "listDouble" => qr.copy(listNum = revert(qr.listNum))
-      case "mapString"  => qr.copy(mapStr = revert(qr.mapStr))
-      case "mapDouble"  => qr.copy(mapNum = revert(qr.mapNum))
-    }
-    queryCache = curQueryCache.copy(queryResult = origQueryResult)
-  }
-
-
-  def inputCell(
-    col: Col,
-    attrResolver: ResolveAttrs
-  ): JsDom.TypedTag[TableCell] = {
-    val Col(colIndex, _, _, _, _, attrType,
-    colType, card, opt, _, _, attrExpr, _, _, _) = col
-
-    val filterId = "filter-" + colIndex
-    val attr     = attrResolver.postfixed(col)
-
-    def editCell(): JsDom.TypedTag[TableCell] = {
-      def s(i: Int) = "\u00a0" * i
-      val lambdaRaw = card match {
-        case 1 if opt => attr
-        //          s"""$attr match {
-        //             |${s(2)}case Some(v) => Some(v)
-        //             |${s(2)}case None${s(3)} => None
-        //             |}""".stripMargin
-        case 1 => s"Some($attr)"
-        case 2 => s"$attr.map(v => v)"
-        case 3 =>
-          s"""$attr.map {
-             |${s(2)}case (k, v) => (k, v)
-             |}""".stripMargin
-      }
-
-      val applyLambda = { () =>
-        // Only update after pressing Enter (so that paging is not activated)
-        if (editCellId.nonEmpty) {
-          colType match {
-            case "string"     => GroupEdit(col, filterId).string()
-            case "double"     => GroupEdit(col, filterId).double()
-            case "listString" => GroupEdit(col, filterId).listString()
-            case "listDouble" => GroupEdit(col, filterId).listDouble()
-            case "mapString"  => GroupEdit(col, filterId).mapString()
-            case "mapDouble"  => GroupEdit(col, filterId).mapDouble()
-          }
-        }
-      }
-      val skipSpin    = { () => processing() = "" }
-      _attrEditCell(filterId, lambdaRaw, applyLambda, skipSpin)
-    }
-
-    def filterCell(): JsDom.TypedTag[TableCell] = {
-      val filterExpr  = filters.now.get(colIndex).fold("")(_.filterExpr)
-      val applyFilter = { () =>
-        val filterExpr = document.getElementById(filterId).textContent.trim
-        // Let only filters() propagate change
-        offset.kill()
-        offset() = 0
-        if (filterExpr.isEmpty) {
-          filters() = filters.now - colIndex
-        } else {
-          createFilter(col, filterExpr, attrType != "String") match {
-            case Some(filter) => filters() = filters.now + (colIndex -> filter)
-            case None         => filters() = filters.now - colIndex
-          }
-        }
-        // Update grouped values
-        groupedColIndexes.recalc()
-      }
-      _attrFilterCell(filterId, filterExpr, applyFilter)
-    }
-    if (attrExpr == "edit") editCell() else filterCell()
-  }
 
 
   def populate(tableHead: TableSection): Rx.Dynamic[Node] = Rx {
@@ -266,5 +75,193 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
     tableHead.appendChild(tr(nsCells).render)
     tableHead.appendChild(tr(attrCells.toSeq).render)
     tableHead.appendChild(tr(inputCells.toSeq).render)
+  }
+
+
+  def attrCell(
+    col: Col,
+    attrResolver: ResolveAttrs
+  ): JsDom.TypedTag[TableCell] = {
+    val Col(colIndex, _, nsAlias, nsFull, attr, _, colType, card, opt, _,
+    aggrType, expr, sortDir, sortPos, _) = col
+
+    val postfix         = attrResolver.postfix(col)
+    val sortable        = card == 1 || singleAggrTypes.contains(aggrType)
+    val sort            = sortAction(colIndex)
+    val editable        = isEditable(columns.now, colIndex, nsAlias, nsFull)
+    val edit            = { _: MouseEvent =>
+      modelElements() = toggleEdit(modelElements.now, colIndex, nsFull, attr)
+    }
+    val save            = { _: MouseEvent => GroupSave(col).save() }
+    val cancel          = { _: MouseEvent =>
+      resetEditColToOrigColCache(colIndex, colType)
+      modelElements() = toggleEdit(modelElements.now, colIndex, nsFull, attr)
+    }
+    val retractEntities = { _: MouseEvent => GroupRetract(col).entities() }
+    val retractValues   = { _: MouseEvent => GroupRetract(col).values() }
+
+    val togglers: Seq[MouseEvent => Unit] = if (attr == "e")
+      togglerActions(colIndex) else Nil
+
+    if (sortable) {
+      val (joinAttrs, joinMaker) = if (attr == "e")
+        joinVars(colIndex, nsFull) else (Nil, null)
+
+      val editExprOps = EditExprs(col)
+
+      _attrHeaderSortable(
+        attr, postfix, expr, sortDir, sortPos, sort,
+        editable, edit, save, cancel,
+        retractEntities, retractValues,
+        togglers,
+        joinAttrs, joinMaker,
+        editExprOps.editDropdownId,
+        editExprOps.editExprItems
+      )
+
+    } else {
+      _attrHeader(
+        attr, postfix, expr,
+        editable, edit, save, cancel,
+        retractEntities, retractValues
+      )
+    }
+  }
+
+  private def sortAction(
+    colIndex: Int
+  ): MouseEvent => Unit = { e: MouseEvent =>
+    if (columns.now.size == 5 &&
+      !columns.now.exists(_.colIndex == colIndex)) {
+      window.alert("Can sort maximum 5 columns.")
+    } else {
+      //        println("------------ sort ------------")
+      // Let only columns() propagate change
+      offset.kill()
+      // Show first page with each new sort
+      offset() = 0
+      columns() = getSortedColumns(
+        columns.now, colIndex, e.getModifierState("Shift")
+      )
+      // update sorting for matching recent if any
+      recentQueries = recentQueries.map {
+        case q if q.molecule == curMolecule.now =>
+          q.copy(colSettings = colSettings(columns.now))
+        case q                                  => q
+      }
+    }
+  }
+
+  private def togglerActions(colIndex: Int): Seq[MouseEvent => Unit] = {
+    Seq(
+      { _: MouseEvent => Toggle(tableBody, "star", false, colIndex) },
+      { _: MouseEvent => Toggle(tableBody, "flag", false, colIndex) },
+      { _: MouseEvent => Toggle(tableBody, "check", false, colIndex) },
+      { _: MouseEvent => Toggle(tableBody, "star", true, colIndex) },
+      { _: MouseEvent => Toggle(tableBody, "flag", true, colIndex) },
+      { _: MouseEvent => Toggle(tableBody, "check", true, colIndex) },
+      { _: MouseEvent => ToggleOffAll(tableBody, "star") },
+      { _: MouseEvent => ToggleOffAll(tableBody, "flag") },
+      { _: MouseEvent => ToggleOffAll(tableBody, "check") },
+    )
+  }
+
+  private def joinVars(
+    colIndex: Int,
+    nsFull: String
+  ): (Seq[NsData], JoinMaker) = {
+    val joins     = GroupJoin(colIndex, nsFull)
+    val joinMaker = (
+      nsFull: String,
+      refAttr: String,
+      refCard: Int,
+      refNs: String,
+      valueAttr: String,
+      attrType: String,
+      isEnum: Boolean,
+      value: String
+    ) => joins.create(
+      nsFull, refAttr, refCard, refNs, valueAttr, attrType, isEnum, value
+    )
+    (joins.attrs, joinMaker)
+  }
+
+
+  private def resetEditColToOrigColCache(colIndex: Int, colType: String): Unit = {
+    val curQueryCache   = queryCache
+    val qr: QueryResult = curQueryCache.queryResult
+    val arrayIndexes    = qr.arrayIndexes
+
+    def revert[T](arrays: List[Array[Option[T]]]): List[Array[Option[T]]] = {
+      val origColIndex = arrayIndexes(colIndex - 1)
+      val editColIndex = arrayIndexes(colIndex)
+      arrays.zipWithIndex.map {
+        case (_, `editColIndex`) => arrays(origColIndex)
+        case (a, _)              => a
+      }
+    }
+
+    val origQueryResult = colType match {
+      case "string"     => qr.copy(str = revert(qr.str))
+      case "double"     => qr.copy(num = revert(qr.num))
+      case "listString" => qr.copy(listStr = revert(qr.listStr))
+      case "listDouble" => qr.copy(listNum = revert(qr.listNum))
+      case "mapString"  => qr.copy(mapStr = revert(qr.mapStr))
+      case "mapDouble"  => qr.copy(mapNum = revert(qr.mapNum))
+    }
+    queryCache = curQueryCache.copy(queryResult = origQueryResult)
+  }
+
+
+  def inputCell(
+    col: Col,
+    attrResolver: ResolveAttrs
+  ): JsDom.TypedTag[TableCell] = {
+    val Col(colIndex, _, _, _, _, attrType,
+    colType, card, opt, _, _, attrExpr, _, _, _) = col
+
+    val filterId        = "filter-" + colIndex
+    val attr            = attrResolver.postfixed(col)
+    val defaultEditExpr = EditExprs(col).defaultEditExpr
+
+    def editCell(): JsDom.TypedTag[TableCell] = {
+      val applyLambda = { () =>
+        // Only update after pressing Enter (so that paging is not activated)
+        if (editCellId.nonEmpty) {
+          colType match {
+            case "string"     => GroupEdit(col, filterId).string()
+            case "double"     => GroupEdit(col, filterId).double()
+            case "listString" => GroupEdit(col, filterId).listString()
+            case "listDouble" => GroupEdit(col, filterId).listDouble()
+            case "mapString"  => GroupEdit(col, filterId).mapString()
+            case "mapDouble"  => GroupEdit(col, filterId).mapDouble()
+          }
+        }
+      }
+      val skipSpin    = { () => processing() = "" }
+      _attrEditCell(filterId, defaultEditExpr, applyLambda, skipSpin)
+    }
+
+    def filterCell(): JsDom.TypedTag[TableCell] = {
+      val filterExpr  = filters.now.get(colIndex).fold("")(_.filterExpr)
+      val applyFilter = { () =>
+        val filterExpr = document.getElementById(filterId).textContent.trim
+        // Let only filters() propagate change
+        offset.kill()
+        offset() = 0
+        if (filterExpr.isEmpty) {
+          filters() = filters.now - colIndex
+        } else {
+          createFilter(col, filterExpr, attrType != "String") match {
+            case Some(filter) => filters() = filters.now + (colIndex -> filter)
+            case None         => filters() = filters.now - colIndex
+          }
+        }
+        // Update grouped values
+        groupedColIndexes.recalc()
+      }
+      _attrFilterCell(filterId, filterExpr, applyFilter)
+    }
+    if (attrExpr == "edit") editCell() else filterCell()
   }
 }

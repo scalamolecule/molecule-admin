@@ -17,7 +17,8 @@ trait BaseApi {
       Set[Long],
       Set[Long],
       Set[Long],
-      Seq[QueryDTO]
+      Seq[QueryDTO],
+      Map[String, List[String]]
     )
 
   type PageMetaData = (Seq[String], MetaSchema, SettingsMetaData)

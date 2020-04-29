@@ -4,7 +4,7 @@ import moleculeadmin.client.scalafiddle.ScalaFiddle
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js
 
-object CalculateGroupEdit {
+object ProcessGroupEdit {
 
   def apply[TransferType](
     colIndexes: Seq[Int],

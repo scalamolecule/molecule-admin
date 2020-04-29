@@ -1,6 +1,5 @@
 package moleculeadmin.server
 
-import java.lang.instrument.Instrumentation
 import java.util.{Date, List => jList}
 import datomic.{Datom, Peer}
 import db.admin.dsl.moleculeAdmin._
@@ -719,6 +718,86 @@ class QueryBackend extends ToggleBackend {
       Right(data)
     } catch {
       case t: Throwable => Left(t.getMessage)
+    }
+  }
+
+
+  override def upsertEditExpr(
+    db: String,
+    fullAttr: String,
+    editExpr: String
+  ): Either[String, String] = {
+    implicit val conn = Conn(base + "/MoleculeAdmin")
+    withTransactor {
+      try {
+        // Use admin for now
+        val userId: Long = user_User.e.username_("admin").get match {
+          case List(eid) => eid
+          case Nil       => user_User.username("admin").save.eid
+        }
+        val dbId  : Long = meta_Db.e.name_(db).get.headOption match {
+          case Some(eid) => eid
+          case None      =>
+            throw new RuntimeException(
+              s"Unexpectedly couldn't find database name `$db` in meta database.")
+        }
+
+        // One DbSettings per db for now
+        val dbSettingsId = user_User(userId).DbSettings.e.db_(dbId).get match {
+          case List(eid) => eid
+          case Nil       =>
+            val dbSettingsId1 = user_DbSettings.db(dbId).save.eid
+            user_User(userId).dbSettings.assert(dbSettingsId1).update
+            dbSettingsId1
+        }
+
+        val time = System.currentTimeMillis()
+        user_DbSettings(dbSettingsId).Edits.e.expr_(editExpr).get match {
+          case Nil =>
+            val newId = user_EditExpr.attr(fullAttr).time(time).expr(editExpr).save.eid
+            user_DbSettings(dbSettingsId).edits.assert(newId).update
+            Right("Successfully inserted edit expression")
+
+          case Seq(exprId) =>
+            // Update timestamp of existing expr
+            user_EditExpr(exprId).time(time).update
+            Right("Successfully updated edit expr")
+
+          case exprIds => Left(
+            s"Unexpectedly found edit expression ${exprIds.length} times.")
+        }
+      } catch {
+        case t: Throwable => Left(t.getMessage)
+      }
+    }
+  }
+
+  override def retractEditExpr(
+    db: String,
+    fullAttr: String,
+    editExpr: String
+  ): Either[String, String] = {
+    implicit val conn = Conn(base + "/MoleculeAdmin")
+    withTransactor {
+      try {
+        user_User.username_("admin")
+          .DbSettings.Db.name_(db)
+          ._DbSettings.Edits.e.attr_(fullAttr).expr_(editExpr)
+          .get match {
+          case Nil              => Left(
+            s"Unexpectedly couldn't find saved edit expression `$editExpr` " +
+              s"for attr `$fullAttr` in meta database."
+          )
+          case List(editExprId) =>
+            editExprId.retract
+            Right(s"Successfully retracted edit expression `$editExpr`")
+          case favIds           =>
+            Left(s"Unexpectedly found ${favIds.size} instances of saved " +
+              s"edit expression `$editExpr` for attr `$fullAttr` in meta database.")
+        }
+      } catch {
+        case t: Throwable => Left(t.getMessage)
+      }
     }
   }
 }
