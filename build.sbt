@@ -18,11 +18,6 @@ lazy val server = (project in file("server"))
 
     // triggers scalaJSPipeline when using compile or continuous compilation
     compile in Compile := ((compile in Compile) dependsOn scalaJSPipeline).value,
-
-    // Start agent to allow measuring object sizes in server project
-    //    fork in run := true, // needed?
-    // Previous setup with `agent` project - didn't go well with scalajs
-    //    javaOptions in run += ("-javaagent:" + (packageBin in (agent, Compile)).value)
   )
   .enablePlugins(PlayScala, JavaAgent)
   .disablePlugins(PlayLayoutPlugin)

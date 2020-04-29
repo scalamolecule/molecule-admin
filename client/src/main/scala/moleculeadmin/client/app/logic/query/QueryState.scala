@@ -47,7 +47,10 @@ object QueryState extends QueryApi {
   val columns      : Var[Seq[Col]]     = Var(Seq.empty[Col])
 
   // Filters indexed by colIndex
-  val filters: Var[Map[Int, Filter[_]]] = Var(Map.empty[Int, Filter[_]])
+  val filters  : Var[Map[Int, Filter[_]]]                 = Var(Map.empty[Int, Filter[_]])
+
+  // Edit expressions by full attr name -> (order, expr)
+  val editExprs: mutable.Map[String, List[String]] = mutable.Map.empty
 
   // Table foot
   var rowCountAll: Int      = 0

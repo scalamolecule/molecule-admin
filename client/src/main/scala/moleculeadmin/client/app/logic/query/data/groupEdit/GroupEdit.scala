@@ -1,21 +1,20 @@
 package moleculeadmin.client.app.logic.query.data.groupEdit
-import java.net.URI
-import java.util.{Date, UUID}
-import util.client.rx.RxBindings
+
+import boopickle.Default._
+import moleculeadmin.client.app.html.query.datatable.{BodyElements, HeadElements}
 import moleculeadmin.client.app.logic.query.KeyEvents
 import moleculeadmin.client.app.logic.query.QueryState._
 import moleculeadmin.client.app.logic.query.data.Indexes
 import moleculeadmin.client.app.logic.query.data.groupEdit.ops._
-import moleculeadmin.client.app.html.query.datatable.BodyElements
 import moleculeadmin.client.scalafiddle.ScalaFiddle
 import moleculeadmin.shared.ast.query.{Col, QueryResult}
 import moleculeadmin.shared.ops.query.ColOps
 import org.scalajs.dom.{Node, NodeList, document, window}
 import rx.Ctx
 import scalatags.JsDom.all._
+import util.client.rx.RxBindings
 import scala.collection.immutable.Map
 import scala.scalajs.js
-import scala.scalajs.js.UndefOr
 
 
 /*
@@ -32,16 +31,18 @@ import scala.scalajs.js.UndefOr
   during edits of large number of values
  */
 case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
-  extends RxBindings with ColOps with BodyElements with KeyEvents with TypeMappings {
+  extends RxBindings with ColOps
+    with BodyElements with HeadElements
+    with KeyEvents with TypeMappings {
 
-  val Col(colIndex, _, _, _, _, attrType, _, card, _, enums, _, _, _, _, _) = col
+  val Col(colIndex, _, _, nsFull, attr, attrType, _, card, opt, enums, _, _, _, _, _) = col
 
   val colIndexes: Seq[Int] = columns.now.collect {
     case col if col.attrExpr != "edit" => col.colIndex
   }
 
   // Scala expression to be applied
-  val scalaExpr: String = _html2str(document.getElementById(filterId).innerHTML).trim
+  val editExpr: String = _html2str(document.getElementById(filterId).innerHTML).trim
 
   // Start spinner since compilation can take some seconds
   processing() = filterId
@@ -60,7 +61,7 @@ case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
     toColType: TransferType => ColType,
     updateCell: (Int, Option[ColType], Option[ColType]) => Unit
   ): Unit = {
-    val scalaCode           = ScalaCode(columns.now, col, scalaExpr).get
+    val scalaCode           = ScalaCode(columns.now, col, editExpr).get
     val scalaFiddle         = ScalaFiddle[TransferType](scalaCode)
     val arrayIndexes        = qr.arrayIndexes
     val origArray           = arrays(arrayIndexes(colIndex - 1))
@@ -91,7 +92,6 @@ case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
       }
     }
 
-    // Minimize object creation for large edits
     val resolve: (Int, Int => js.Tuple2[TransferType, String]) => Unit = {
       if (card == 1) {
         (i: Int, toTransferType: Int => js.Tuple2[TransferType, String]) => {
@@ -121,11 +121,15 @@ case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
       }
     }
 
-    CalculateGroupEdit(colIndexes, colType2StringLambdas, scalaFiddle, lastRow, resolve)
+    // Insert/update used edit expression
+    EditExprs(col).upsert(editExpr)
+
+    ProcessGroupEdit(colIndexes, colType2StringLambdas, scalaFiddle, lastRow, resolve)
 
     // Group edit completed - stop spinner
     processing() = ""
   }
+
 
   // Card one ------------------------------------------
 

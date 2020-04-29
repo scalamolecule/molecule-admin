@@ -1,4 +1,5 @@
 package db.admin.schema
+
 import molecule.schema.definition._
 
 @InOut(0, 22)
@@ -61,7 +62,6 @@ object MoleculeAdminDefinition {
     }
   }
 
-
   object stats {
     trait TopValue {
       val entityCount = oneInt.noHistory.doc("Count of entities with this value asserted")
@@ -87,7 +87,6 @@ object MoleculeAdminDefinition {
     }
   }
 
-
   object user {
     trait User {
       val uuid       = oneUUID
@@ -97,12 +96,13 @@ object MoleculeAdminDefinition {
       val dbSettings = many[DbSettings].noHistory.isComponent.doc("Db specific settings")
     }
     trait DbSettings {
-      val db         = one[meta.Db].noHistory.doc("Database")
-      val stars      = manyLong.noHistory.doc("Starred entity ids for this db")
-      val flags      = manyLong.noHistory.doc("Flagged entity ids for this db")
-      val checks     = manyLong.noHistory.doc("Checked entity ids for this db")
-      val undoneTs   = manyLong.noHistory.doc("Bit-encoded pairs of new/undone transaction t. For tx rollbacks. Non-intrusive alternative to real tx meta provisioning")
-      val queries    = many[Query].noHistory.isComponent.doc("Recent/saved/favorite queries for this db")
+      val db       = one[meta.Db].noHistory.doc("Database")
+      val stars    = manyLong.noHistory.doc("Starred entity ids for this db")
+      val flags    = manyLong.noHistory.doc("Flagged entity ids for this db")
+      val checks   = manyLong.noHistory.doc("Checked entity ids for this db")
+      val undoneTs = manyLong.noHistory.doc("Bit-encoded pairs of new/undone transaction t. For tx rollbacks. Non-intrusive alternative to real tx meta provisioning")
+      val queries  = many[Query].noHistory.isComponent.doc("Recent/saved/favorite queries for this db")
+      val edits    = many[EditExpr].noHistory.doc("Group edit Scala expressions for re-use")
     }
     trait Query {
       val molecule    = oneString.noHistory.doc("Molecule of query to build model/view")
@@ -117,6 +117,11 @@ object MoleculeAdminDefinition {
       val colIndex = oneInt.noHistory.doc("Column index")
       val sortDir  = oneString.noHistory.doc("asc/desc or empty string if not sorted")
       val sortPos  = oneInt.noHistory.doc("If multiple sort columns, an index from 1 to max 5")
+    }
+    trait EditExpr {
+      val attr = oneString.noHistory.doc("Full ns-prefixed attribute name that expr was applied to")
+      val time = oneLong.noHistory.doc("Millisecond timestamp for ordering")
+      val expr = oneString.noHistory.doc("Scala edit expression")
     }
   }
 }

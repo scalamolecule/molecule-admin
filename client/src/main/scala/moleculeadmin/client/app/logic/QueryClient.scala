@@ -51,8 +51,10 @@ object QueryClient
 
 
   def init(db0: String, pageMetaData: PageMetaData): Seq[String] = {
-    val (dbs, metaSchema0,
-    (settings, stars, flags, checks, undoneTs, queries)) = pageMetaData
+    val (
+      dbs, metaSchema0,
+      (settings, stars, flags, checks, undoneTs, queries, editExprs0)
+      ) = pageMetaData
 
     prepareBrowserHistory
 
@@ -89,7 +91,7 @@ object QueryClient
       }.toSeq
 
       // Bit-decode newT/undoneT pairs
-      var newT = 0L
+      var newT    = 0L
       var undoneT = 0L
       undoneTs.foreach { pair =>
         newT = pair >> 32
@@ -99,6 +101,7 @@ object QueryClient
       }
 
       savedQueries = queries
+      editExprs ++= editExprs0
       curStars = stars
       curFlags = flags
       curChecks = checks

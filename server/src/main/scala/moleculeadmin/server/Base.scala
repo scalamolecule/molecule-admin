@@ -36,6 +36,15 @@ trait Base extends BaseApi with HelpersAdmin {
         dbSettingsId1
     }
 
+    val editExprs: Map[String, List[String]] =
+      user_DbSettings(dbSettingsId).Edits.attr.time.expr.get
+        .groupBy(_._1)
+        .map {
+          case (a, vs) => a -> vs
+            .sortBy(-_._2) // sort newest first
+            .map(t => t._3) // only return expressions
+        }
+
     user_DbSettings(dbSettingsId)
       .db.stars$.flags$.checks$.undoneTs$
       .Queries.*?(
@@ -62,7 +71,8 @@ trait Base extends BaseApi with HelpersAdmin {
                 groupedCols$.getOrElse(Set.empty[Int]),
                 colSettings
               )
-          }
+          },
+          editExprs
         )
     }
   }

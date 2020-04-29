@@ -9,14 +9,18 @@ import moleculeadmin.shared.ops.query.ColOps
 import moleculeadmin.shared.styles.Color
 import org.scalajs.dom
 import org.scalajs.dom.html._
-import org.scalajs.dom.{ClipboardEvent, Event, MouseEvent, window}
+import org.scalajs.dom.raw.HTMLInputElement
+import org.scalajs.dom.{ClipboardEvent, Event, MouseEvent, document, window}
 import rx.{Ctx, Rx}
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all.{span, _}
+import scala.scalajs.js.timers.setTimeout
 import scala.util.{Failure, Success, Try}
 
 
-trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
+trait HeadElements extends ColOps
+  with BodyElements
+  with SchemaDropdownElements with RxBindings {
 
   def _openCloseQueryBuilder(closed: Boolean, onclck: () => Unit): TypedTag[Element] = td(
     cls := "header open-close",
@@ -121,6 +125,34 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
     }
   }
 
+  def editExprItem(
+    default: Boolean,
+    editExprId: String,
+    editExpr: String,
+    retractEditExpr: () => Unit,
+    pickEditExpr: () => Unit
+  ): TypedTag[Anchor] = {
+    a(
+      href := "#",
+      id := editExprId,
+      cls := "dropdown-item",
+      paddingTop := 5,
+      if (default) () else _xRetract(retractEditExpr)(
+        float.left,
+        marginTop := 3,
+        marginRight := -15,
+        cursor.pointer
+      ),
+      pre(
+        editExpr,
+        display.`inline-block`,
+        marginBottom := 0,
+        marginLeft := 18
+      ),
+      onclick := pickEditExpr
+    )
+  }
+
   private def attrMenu(
     attribute: String,
     postfix: String,
@@ -132,7 +164,9 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
     retractValues: MouseEvent => Unit,
     togglers: Seq[MouseEvent => Unit] = Nil,
     joinAttrs: Seq[NsData] = Nil,
-    joinMaker: JoinMaker = null
+    joinMaker: JoinMaker = null,
+    editDropDownId: String = "",
+    editExprItems: List[Frag] = Nil,
   ): TypedTag[UList] = {
     val items = if (attribute == "e") {
       Seq(
@@ -157,7 +191,8 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
       Seq(
         a(href := "#", cls := "dropdown-item", "Save", onclick := save),
         a(href := "#", cls := "dropdown-item", "Cancel edit", onclick := cancel),
-      )
+        div(cls := "dropdown-divider", marginTop := 3, marginBottom := 6),
+      ) ++ editExprItems
     } else {
       Seq(
         a(href := "#", cls := "dropdown-item", "Edit", onclick := edit),
@@ -179,7 +214,7 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
         if (expr.nonEmpty) span(cls := "expr", expr) else (),
         div(
           cls := "dropdown-menu",
-          id := "submenu-x",
+          id := editDropDownId,
           minWidth := 80,
           padding := "3px 0px",
           marginTop := 0,
@@ -208,7 +243,9 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
     retractValues: MouseEvent => Unit,
     togglers: Seq[MouseEvent => Unit] = Nil,
     joinAttrs: Seq[NsData] = Nil,
-    joinMaker: JoinMaker = null
+    joinMaker: JoinMaker = null,
+    editDropDownId: String = "",
+    editExprItems: List[Frag] = Nil,
   ): TypedTag[TableCell] = {
     val attrCell = {
       if (expr == "orig") {
@@ -223,8 +260,12 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
           paddingTop := 2,
           paddingLeft := 6,
           padding := 0,
-          attrMenu(attribute, postfix, expr, edit, save, cancel,
-            retractEntities, retractValues),
+          attrMenu(
+            attribute, postfix, expr, edit, save, cancel,
+            retractEntities, retractValues,
+            editDropDownId = editDropDownId,
+            editExprItems = editExprItems,
+          ),
           onchange := { () => processing() = "" }
         )
       } else if (nonMenuExprs.contains(expr)) {
@@ -239,7 +280,8 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
       } else if (attribute == "e") {
         td(
           padding := 0,
-          attrMenu(attribute, postfix, expr, edit, save, cancel,
+          attrMenu(
+            attribute, postfix, expr, edit, save, cancel,
             retractEntities, retractValues, togglers, joinAttrs, joinMaker)
         )
       } else if (editable) {
@@ -247,7 +289,8 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
           paddingTop := 2,
           paddingLeft := 6,
           padding := 0,
-          attrMenu(attribute, postfix, expr, edit, save, cancel,
+          attrMenu(
+            attribute, postfix, expr, edit, save, cancel,
             retractEntities, retractValues)
         )
       } else {
@@ -330,12 +373,12 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
     } else {
       td(
         cls := "header",
-        attrMenu(attribute, postfix, expr, edit, save, cancel,
+        attrMenu(
+          attribute, postfix, expr, edit, save, cancel,
           retractEntities, retractValues)
       )
     }
   }
-
 
   def _attrFilterCell(
     filterId: String,
@@ -379,5 +422,4 @@ trait HeadElements extends ColOps with SchemaDropdownElements with RxBindings {
       Rx(if (processing() == filterId) _sync(15) else span())
     )
   }
-
 }
