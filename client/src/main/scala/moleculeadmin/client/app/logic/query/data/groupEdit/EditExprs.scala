@@ -99,30 +99,31 @@ case class EditExprs(col: Col) extends HeadElements {
   }
 
   def upsert(editExpr: String): Unit = {
+    if (editExpr.nonEmpty) {
+      // Update client cache with latest expr first
+      val curEditExprs = editExprs.getOrElse(fullAttr, List.empty[String])
+      val newEditExprs = editExpr :: curEditExprs.filterNot(_ == editExpr)
+      editExprs(fullAttr) = newEditExprs
 
-    // Update client cache with latest expr first
-    val curEditExprs = editExprs.getOrElse(fullAttr, List.empty[String])
-    val newEditExprs = editExpr :: curEditExprs.filterNot(_ == editExpr)
-    editExprs(fullAttr) = newEditExprs
+      // Update edit dropdown
+      val dropdown                = document.getElementById(editDropdownId)
+      val items                   = dropdown.childNodes
+      val (save, cancel, divider) = (items(0), items(1), items(2))
+      dropdown.innerHTML = ""
+      dropdown.appendChild(save)
+      dropdown.appendChild(cancel)
+      dropdown.appendChild(divider)
 
-    // Update edit dropdown
-    val dropdown                = document.getElementById(editDropdownId)
-    val items                   = dropdown.childNodes
-    val (save, cancel, divider) = (items(0), items(1), items(2))
-    dropdown.innerHTML = ""
-    dropdown.appendChild(save)
-    dropdown.appendChild(cancel)
-    dropdown.appendChild(divider)
+      mkEditExprItems(defaultEditExpr :: newEditExprs.take(10))
+        .foreach(item => dropdown.appendChild(item.render))
 
-    mkEditExprItems(defaultEditExpr :: newEditExprs.take(10))
-      .foreach(item => dropdown.appendChild(item.render))
-
-    // Cache in meta db
-    queryWireAjax().upsertEditExpr(db, fullAttr, editExpr).call().foreach {
-      case Right(okMsg) => println(okMsg)
-      case Left(err)    => window.alert(
-        "Error caching edit expression:\n" + err
-      )
+      // Cache in meta db
+      queryWireAjax().upsertEditExpr(db, fullAttr, editExpr).call().foreach {
+        case Right(okMsg) => println(okMsg)
+        case Left(err)    => window.alert(
+          "Error caching edit expression:\n" + err
+        )
+      }
     }
   }
 }
