@@ -373,7 +373,6 @@ trait HeadElements extends ColOps
         if (postfix.isEmpty) () else _pf(postfix)
       )
     } else {
-      println("gotcha")
       td(
         cls := "header",
         attrMenu(

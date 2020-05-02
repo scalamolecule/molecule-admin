@@ -270,6 +270,12 @@ trait BodyElements
 
   // Card many ========================================================
 
+  def _tdManyItemsNoEdit(cellId: String): TypedTag[TableCell] = td(
+    id := cellId,
+    cls := "items",
+    cursor.default
+  )
+
   def _tdManyStringUrl(
     cellId: String,
     strFrags: List[Seq[Frag]],
@@ -529,6 +535,12 @@ trait BodyElements
 
 
   // Map ==============================================================
+
+  def _tdMapItemsNoEdit(cellId: String): TypedTag[TableCell] = td(
+    id := cellId,
+    cls := "mapPairs",
+    cursor.default
+  )
 
   def _tdMapEdit[T](
     cellId: String,

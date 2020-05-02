@@ -408,7 +408,9 @@ abstract class Cell(
           cellType match {
             case "str" =>
               (rowIndex: Int) =>
-                array(rowIndex).fold(_tdNoEdit(mkId(rowIndex)))(vs =>
+                array(rowIndex).fold(
+                  _tdManyItemsNoEdit(mkId(rowIndex))
+                )(vs =>
                   _tdManyStringUrl(
                     mkId(rowIndex),
                     vs.sorted.map { s =>
@@ -578,7 +580,7 @@ abstract class Cell(
             case "date" =>
               (rowIndex: Int) =>
                 array(rowIndex).fold(
-                  _tdNoEdit(mkId(rowIndex))
+                  _tdMapItemsNoEdit(mkId(rowIndex))
                 )(
                   _tdMapDate(mkId(rowIndex), _)
                 )
@@ -586,7 +588,7 @@ abstract class Cell(
             case "str" =>
               (rowIndex: Int) =>
                 array(rowIndex).fold(
-                  _tdNoEdit(mkId(rowIndex))
+                  _tdMapItemsNoEdit(mkId(rowIndex))
                 )(
                   _tdMapStr(mkId(rowIndex), _)
                 )
@@ -594,7 +596,7 @@ abstract class Cell(
             case _ =>
               (rowIndex: Int) =>
                 array(rowIndex).fold(
-                  _tdNoEdit(mkId(rowIndex))
+                  _tdMapItemsNoEdit(mkId(rowIndex))
                 )(
                   _tdMapStrOther(mkId(rowIndex), _)
                 )
