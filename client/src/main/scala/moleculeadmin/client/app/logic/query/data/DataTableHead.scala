@@ -103,11 +103,15 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
     val togglers: Seq[MouseEvent => Unit] = if (attr == "e")
       togglerActions(colIndex) else Nil
 
+    val editExprOps = EditExprs(col)
+    val (editDropdownId, editExprItems) = (
+      editExprOps.editDropdownId,
+      editExprOps.editExprItems
+    )
+
     if (sortable) {
       val (joinAttrs, joinMaker) = if (attr == "e")
         joinVars(colIndex, nsFull) else (Nil, null)
-
-      val editExprOps = EditExprs(col)
 
       _attrHeaderSortable(
         attr, postfix, expr, sortDir, sortPos, sort,
@@ -115,15 +119,15 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
         retractEntities, retractValues,
         togglers,
         joinAttrs, joinMaker,
-        editExprOps.editDropdownId,
-        editExprOps.editExprItems
+        editDropdownId, editExprItems
       )
 
     } else {
       _attrHeader(
         attr, postfix, expr,
         editable, edit, save, cancel,
-        retractEntities, retractValues
+        retractEntities, retractValues,
+        editDropdownId, editExprItems
       )
     }
   }
