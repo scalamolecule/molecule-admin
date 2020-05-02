@@ -2,7 +2,7 @@ package moleculeadmin.client.app.logic.query
 
 import util.client.rx.RxBindings
 import moleculeadmin.client.app.logic.query.QueryState.{queryBaseSelection, querySelection}
-import moleculeadmin.client.app.logic.query.builder.{QueryBranches, SchemaDropDown}
+import moleculeadmin.client.app.logic.query.builder.{QueryBranches, SchemaDropdown}
 import moleculeadmin.client.app.html.AppElements
 import moleculeadmin.client.app.html.query.SchemaDropdownElements
 import moleculeadmin.shared.ast.schema.MetaSchema
@@ -31,7 +31,7 @@ case class RenderQueryBuilder(metaSchema: MetaSchema)(implicit val ctx: Ctx.Owne
       _rowColAuto(
         _row(
           _rowCol(
-            SchemaDropDown(metaSchema, key).dynRender,
+            SchemaDropdown(metaSchema, key).dynRender,
             _selection(selection)
           ),
           _rowColAuto4(QueryBranches(key).dynRender)

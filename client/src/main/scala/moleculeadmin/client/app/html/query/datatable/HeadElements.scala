@@ -165,7 +165,7 @@ trait HeadElements extends ColOps
     togglers: Seq[MouseEvent => Unit] = Nil,
     joinAttrs: Seq[NsData] = Nil,
     joinMaker: JoinMaker = null,
-    editDropDownId: String = "",
+    editDropdownId: String = "",
     editExprItems: List[Frag] = Nil,
   ): TypedTag[UList] = {
     val items = if (attribute == "e") {
@@ -214,7 +214,7 @@ trait HeadElements extends ColOps
         if (expr.nonEmpty) span(cls := "expr", expr) else (),
         div(
           cls := "dropdown-menu",
-          id := editDropDownId,
+          id := editDropdownId,
           minWidth := 80,
           padding := "3px 0px",
           marginTop := 0,
@@ -241,11 +241,11 @@ trait HeadElements extends ColOps
     cancel: MouseEvent => Unit,
     retractEntities: MouseEvent => Unit,
     retractValues: MouseEvent => Unit,
-    togglers: Seq[MouseEvent => Unit] = Nil,
-    joinAttrs: Seq[NsData] = Nil,
-    joinMaker: JoinMaker = null,
-    editDropDownId: String = "",
-    editExprItems: List[Frag] = Nil,
+    togglers: Seq[MouseEvent => Unit],
+    joinAttrs: Seq[NsData],
+    joinMaker: JoinMaker,
+    editDropdownId: String,
+    editExprItems: List[Frag],
   ): TypedTag[TableCell] = {
     val attrCell = {
       if (expr == "orig") {
@@ -263,7 +263,7 @@ trait HeadElements extends ColOps
           attrMenu(
             attribute, postfix, expr, edit, save, cancel,
             retractEntities, retractValues,
-            editDropDownId = editDropDownId,
+            editDropdownId = editDropdownId,
             editExprItems = editExprItems,
           ),
           onchange := { () => processing() = "" }
@@ -360,6 +360,8 @@ trait HeadElements extends ColOps
     cancel: MouseEvent => Unit,
     retractEntities: MouseEvent => Unit,
     retractValues: MouseEvent => Unit,
+    editDropdownId: String,
+    editExprItems: List[Frag],
   ): TypedTag[TableCell] = {
     if (expr == "orig" || !editable) {
       td(
@@ -371,11 +373,15 @@ trait HeadElements extends ColOps
         if (postfix.isEmpty) () else _pf(postfix)
       )
     } else {
+      println("gotcha")
       td(
         cls := "header",
         attrMenu(
           attribute, postfix, expr, edit, save, cancel,
-          retractEntities, retractValues)
+          retractEntities, retractValues,
+          editDropdownId = editDropdownId,
+          editExprItems = editExprItems
+        )
       )
     }
   }

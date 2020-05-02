@@ -13,7 +13,7 @@ import scalatags.JsDom
 import scalatags.JsDom.all._
 
 
-case class SchemaDropDown(metaSchema: MetaSchema, selection: String)
+case class SchemaDropdown(metaSchema: MetaSchema, selection: String)
                          (implicit val ctx: Ctx.Owner)
   extends RxBindings with SchemaOps with SchemaDropdownElements {
 
@@ -74,7 +74,6 @@ case class SchemaDropDown(metaSchema: MetaSchema, selection: String)
 
 
   def dynRender: Rx.Dynamic[JsDom.TypedTag[HTMLElement]] = Rx {
-    //    println("SchemaDropDown...")
     if (metaSchema.parts.isEmpty) {
       div(
         s"Couldn't find partitions for database `$db` in meta_Partitions. ", br,
