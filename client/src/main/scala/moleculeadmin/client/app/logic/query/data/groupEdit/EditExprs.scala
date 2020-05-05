@@ -82,6 +82,10 @@ case class EditExprs(col: Col) extends HeadElements {
   }
 
   def retract(editExpr: String, editExprId: String): () => Unit = () => {
+    // Remove expr from client cache
+    editExprs(fullAttr) = editExprs(fullAttr).filterNot(_ == editExpr)
+
+    // Remove expr from dropdown
     val dropdown     = document.getElementById(editDropdownId)
     val editExprElem = document.getElementById(editExprId)
     dropdown.removeChild(editExprElem)
