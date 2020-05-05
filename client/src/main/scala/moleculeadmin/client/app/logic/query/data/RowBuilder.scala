@@ -3279,5 +3279,1255 @@ case class RowBuilder(
           )
           rowIndex += 1
         }
+
+    case 51 =>
+      val cellLambda1  = cellLambda(0)
+      val cellLambda2  = cellLambda(1)
+      val cellLambda3  = cellLambda(2)
+      val cellLambda4  = cellLambda(3)
+      val cellLambda5  = cellLambda(4)
+      val cellLambda6  = cellLambda(5)
+      val cellLambda7  = cellLambda(6)
+      val cellLambda8  = cellLambda(7)
+      val cellLambda9  = cellLambda(8)
+      val cellLambda10 = cellLambda(9)
+      val cellLambda11 = cellLambda(10)
+      val cellLambda12 = cellLambda(11)
+      val cellLambda13 = cellLambda(12)
+      val cellLambda14 = cellLambda(13)
+      val cellLambda15 = cellLambda(14)
+      val cellLambda16 = cellLambda(15)
+      val cellLambda17 = cellLambda(16)
+      val cellLambda18 = cellLambda(17)
+      val cellLambda19 = cellLambda(18)
+      val cellLambda20 = cellLambda(19)
+      val cellLambda21 = cellLambda(20)
+      val cellLambda22 = cellLambda(21)
+      val cellLambda23 = cellLambda(22)
+      val cellLambda24 = cellLambda(23)
+      val cellLambda25 = cellLambda(24)
+      val cellLambda26 = cellLambda(25)
+      val cellLambda27 = cellLambda(26)
+      val cellLambda28 = cellLambda(27)
+      val cellLambda29 = cellLambda(28)
+      val cellLambda30 = cellLambda(29)
+      val cellLambda31 = cellLambda(30)
+      val cellLambda32 = cellLambda(31)
+      val cellLambda33 = cellLambda(32)
+      val cellLambda34 = cellLambda(33)
+      val cellLambda35 = cellLambda(34)
+      val cellLambda36 = cellLambda(35)
+      val cellLambda37 = cellLambda(36)
+      val cellLambda38 = cellLambda(37)
+      val cellLambda39 = cellLambda(38)
+      val cellLambda40 = cellLambda(39)
+      val cellLambda41 = cellLambda(40)
+      val cellLambda42 = cellLambda(41)
+      val cellLambda43 = cellLambda(42)
+      val cellLambda44 = cellLambda(43)
+      val cellLambda45 = cellLambda(44)
+      val cellLambda46 = cellLambda(45)
+      val cellLambda47 = cellLambda(46)
+      val cellLambda48 = cellLambda(47)
+      val cellLambda49 = cellLambda(48)
+      val cellLambda50 = cellLambda(49)
+      val cellLambda51 = cellLambda(50)
+      (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
+        rowIndex = rowIndex0
+        while (rowIndex < lastRow) {
+          e = 0
+          bridgeIndex = indexBridge(rowIndex)
+          tableBody.appendChild(
+            _mkRow(
+              rowIndex,
+              cellLambda1(bridgeIndex),
+              cellLambda2(bridgeIndex),
+              cellLambda3(bridgeIndex),
+              cellLambda4(bridgeIndex),
+              cellLambda5(bridgeIndex),
+              cellLambda6(bridgeIndex),
+              cellLambda7(bridgeIndex),
+              cellLambda8(bridgeIndex),
+              cellLambda9(bridgeIndex),
+              cellLambda10(bridgeIndex),
+              cellLambda11(bridgeIndex),
+              cellLambda12(bridgeIndex),
+              cellLambda13(bridgeIndex),
+              cellLambda14(bridgeIndex),
+              cellLambda15(bridgeIndex),
+              cellLambda16(bridgeIndex),
+              cellLambda17(bridgeIndex),
+              cellLambda18(bridgeIndex),
+              cellLambda19(bridgeIndex),
+              cellLambda20(bridgeIndex),
+              cellLambda21(bridgeIndex),
+              cellLambda22(bridgeIndex),
+              cellLambda23(bridgeIndex),
+              cellLambda24(bridgeIndex),
+              cellLambda25(bridgeIndex),
+              cellLambda26(bridgeIndex),
+              cellLambda27(bridgeIndex),
+              cellLambda28(bridgeIndex),
+              cellLambda29(bridgeIndex),
+              cellLambda30(bridgeIndex),
+              cellLambda31(bridgeIndex),
+              cellLambda32(bridgeIndex),
+              cellLambda33(bridgeIndex),
+              cellLambda34(bridgeIndex),
+              cellLambda35(bridgeIndex),
+              cellLambda36(bridgeIndex),
+              cellLambda37(bridgeIndex),
+              cellLambda38(bridgeIndex),
+              cellLambda39(bridgeIndex),
+              cellLambda40(bridgeIndex),
+              cellLambda41(bridgeIndex),
+              cellLambda42(bridgeIndex),
+              cellLambda43(bridgeIndex),
+              cellLambda44(bridgeIndex),
+              cellLambda45(bridgeIndex),
+              cellLambda46(bridgeIndex),
+              cellLambda47(bridgeIndex),
+              cellLambda48(bridgeIndex),
+              cellLambda49(bridgeIndex),
+              cellLambda50(bridgeIndex),
+              cellLambda51(bridgeIndex),
+            )
+          )
+          rowIndex += 1
+        }
+
+    case 52 =>
+      val cellLambda1  = cellLambda(0)
+      val cellLambda2  = cellLambda(1)
+      val cellLambda3  = cellLambda(2)
+      val cellLambda4  = cellLambda(3)
+      val cellLambda5  = cellLambda(4)
+      val cellLambda6  = cellLambda(5)
+      val cellLambda7  = cellLambda(6)
+      val cellLambda8  = cellLambda(7)
+      val cellLambda9  = cellLambda(8)
+      val cellLambda10 = cellLambda(9)
+      val cellLambda11 = cellLambda(10)
+      val cellLambda12 = cellLambda(11)
+      val cellLambda13 = cellLambda(12)
+      val cellLambda14 = cellLambda(13)
+      val cellLambda15 = cellLambda(14)
+      val cellLambda16 = cellLambda(15)
+      val cellLambda17 = cellLambda(16)
+      val cellLambda18 = cellLambda(17)
+      val cellLambda19 = cellLambda(18)
+      val cellLambda20 = cellLambda(19)
+      val cellLambda21 = cellLambda(20)
+      val cellLambda22 = cellLambda(21)
+      val cellLambda23 = cellLambda(22)
+      val cellLambda24 = cellLambda(23)
+      val cellLambda25 = cellLambda(24)
+      val cellLambda26 = cellLambda(25)
+      val cellLambda27 = cellLambda(26)
+      val cellLambda28 = cellLambda(27)
+      val cellLambda29 = cellLambda(28)
+      val cellLambda30 = cellLambda(29)
+      val cellLambda31 = cellLambda(30)
+      val cellLambda32 = cellLambda(31)
+      val cellLambda33 = cellLambda(32)
+      val cellLambda34 = cellLambda(33)
+      val cellLambda35 = cellLambda(34)
+      val cellLambda36 = cellLambda(35)
+      val cellLambda37 = cellLambda(36)
+      val cellLambda38 = cellLambda(37)
+      val cellLambda39 = cellLambda(38)
+      val cellLambda40 = cellLambda(39)
+      val cellLambda41 = cellLambda(40)
+      val cellLambda42 = cellLambda(41)
+      val cellLambda43 = cellLambda(42)
+      val cellLambda44 = cellLambda(43)
+      val cellLambda45 = cellLambda(44)
+      val cellLambda46 = cellLambda(45)
+      val cellLambda47 = cellLambda(46)
+      val cellLambda48 = cellLambda(47)
+      val cellLambda49 = cellLambda(48)
+      val cellLambda50 = cellLambda(49)
+      val cellLambda51 = cellLambda(50)
+      val cellLambda52 = cellLambda(51)
+      (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
+        rowIndex = rowIndex0
+        while (rowIndex < lastRow) {
+          e = 0
+          bridgeIndex = indexBridge(rowIndex)
+          tableBody.appendChild(
+            _mkRow(
+              rowIndex,
+              cellLambda1(bridgeIndex),
+              cellLambda2(bridgeIndex),
+              cellLambda3(bridgeIndex),
+              cellLambda4(bridgeIndex),
+              cellLambda5(bridgeIndex),
+              cellLambda6(bridgeIndex),
+              cellLambda7(bridgeIndex),
+              cellLambda8(bridgeIndex),
+              cellLambda9(bridgeIndex),
+              cellLambda10(bridgeIndex),
+              cellLambda11(bridgeIndex),
+              cellLambda12(bridgeIndex),
+              cellLambda13(bridgeIndex),
+              cellLambda14(bridgeIndex),
+              cellLambda15(bridgeIndex),
+              cellLambda16(bridgeIndex),
+              cellLambda17(bridgeIndex),
+              cellLambda18(bridgeIndex),
+              cellLambda19(bridgeIndex),
+              cellLambda20(bridgeIndex),
+              cellLambda21(bridgeIndex),
+              cellLambda22(bridgeIndex),
+              cellLambda23(bridgeIndex),
+              cellLambda24(bridgeIndex),
+              cellLambda25(bridgeIndex),
+              cellLambda26(bridgeIndex),
+              cellLambda27(bridgeIndex),
+              cellLambda28(bridgeIndex),
+              cellLambda29(bridgeIndex),
+              cellLambda30(bridgeIndex),
+              cellLambda31(bridgeIndex),
+              cellLambda32(bridgeIndex),
+              cellLambda33(bridgeIndex),
+              cellLambda34(bridgeIndex),
+              cellLambda35(bridgeIndex),
+              cellLambda36(bridgeIndex),
+              cellLambda37(bridgeIndex),
+              cellLambda38(bridgeIndex),
+              cellLambda39(bridgeIndex),
+              cellLambda40(bridgeIndex),
+              cellLambda41(bridgeIndex),
+              cellLambda42(bridgeIndex),
+              cellLambda43(bridgeIndex),
+              cellLambda44(bridgeIndex),
+              cellLambda45(bridgeIndex),
+              cellLambda46(bridgeIndex),
+              cellLambda47(bridgeIndex),
+              cellLambda48(bridgeIndex),
+              cellLambda49(bridgeIndex),
+              cellLambda50(bridgeIndex),
+              cellLambda51(bridgeIndex),
+              cellLambda52(bridgeIndex),
+            )
+          )
+          rowIndex += 1
+        }
+
+    case 53 =>
+      val cellLambda1  = cellLambda(0)
+      val cellLambda2  = cellLambda(1)
+      val cellLambda3  = cellLambda(2)
+      val cellLambda4  = cellLambda(3)
+      val cellLambda5  = cellLambda(4)
+      val cellLambda6  = cellLambda(5)
+      val cellLambda7  = cellLambda(6)
+      val cellLambda8  = cellLambda(7)
+      val cellLambda9  = cellLambda(8)
+      val cellLambda10 = cellLambda(9)
+      val cellLambda11 = cellLambda(10)
+      val cellLambda12 = cellLambda(11)
+      val cellLambda13 = cellLambda(12)
+      val cellLambda14 = cellLambda(13)
+      val cellLambda15 = cellLambda(14)
+      val cellLambda16 = cellLambda(15)
+      val cellLambda17 = cellLambda(16)
+      val cellLambda18 = cellLambda(17)
+      val cellLambda19 = cellLambda(18)
+      val cellLambda20 = cellLambda(19)
+      val cellLambda21 = cellLambda(20)
+      val cellLambda22 = cellLambda(21)
+      val cellLambda23 = cellLambda(22)
+      val cellLambda24 = cellLambda(23)
+      val cellLambda25 = cellLambda(24)
+      val cellLambda26 = cellLambda(25)
+      val cellLambda27 = cellLambda(26)
+      val cellLambda28 = cellLambda(27)
+      val cellLambda29 = cellLambda(28)
+      val cellLambda30 = cellLambda(29)
+      val cellLambda31 = cellLambda(30)
+      val cellLambda32 = cellLambda(31)
+      val cellLambda33 = cellLambda(32)
+      val cellLambda34 = cellLambda(33)
+      val cellLambda35 = cellLambda(34)
+      val cellLambda36 = cellLambda(35)
+      val cellLambda37 = cellLambda(36)
+      val cellLambda38 = cellLambda(37)
+      val cellLambda39 = cellLambda(38)
+      val cellLambda40 = cellLambda(39)
+      val cellLambda41 = cellLambda(40)
+      val cellLambda42 = cellLambda(41)
+      val cellLambda43 = cellLambda(42)
+      val cellLambda44 = cellLambda(43)
+      val cellLambda45 = cellLambda(44)
+      val cellLambda46 = cellLambda(45)
+      val cellLambda47 = cellLambda(46)
+      val cellLambda48 = cellLambda(47)
+      val cellLambda49 = cellLambda(48)
+      val cellLambda50 = cellLambda(49)
+      val cellLambda51 = cellLambda(50)
+      val cellLambda52 = cellLambda(51)
+      val cellLambda53 = cellLambda(52)
+      (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
+        rowIndex = rowIndex0
+        while (rowIndex < lastRow) {
+          e = 0
+          bridgeIndex = indexBridge(rowIndex)
+          tableBody.appendChild(
+            _mkRow(
+              rowIndex,
+              cellLambda1(bridgeIndex),
+              cellLambda2(bridgeIndex),
+              cellLambda3(bridgeIndex),
+              cellLambda4(bridgeIndex),
+              cellLambda5(bridgeIndex),
+              cellLambda6(bridgeIndex),
+              cellLambda7(bridgeIndex),
+              cellLambda8(bridgeIndex),
+              cellLambda9(bridgeIndex),
+              cellLambda10(bridgeIndex),
+              cellLambda11(bridgeIndex),
+              cellLambda12(bridgeIndex),
+              cellLambda13(bridgeIndex),
+              cellLambda14(bridgeIndex),
+              cellLambda15(bridgeIndex),
+              cellLambda16(bridgeIndex),
+              cellLambda17(bridgeIndex),
+              cellLambda18(bridgeIndex),
+              cellLambda19(bridgeIndex),
+              cellLambda20(bridgeIndex),
+              cellLambda21(bridgeIndex),
+              cellLambda22(bridgeIndex),
+              cellLambda23(bridgeIndex),
+              cellLambda24(bridgeIndex),
+              cellLambda25(bridgeIndex),
+              cellLambda26(bridgeIndex),
+              cellLambda27(bridgeIndex),
+              cellLambda28(bridgeIndex),
+              cellLambda29(bridgeIndex),
+              cellLambda30(bridgeIndex),
+              cellLambda31(bridgeIndex),
+              cellLambda32(bridgeIndex),
+              cellLambda33(bridgeIndex),
+              cellLambda34(bridgeIndex),
+              cellLambda35(bridgeIndex),
+              cellLambda36(bridgeIndex),
+              cellLambda37(bridgeIndex),
+              cellLambda38(bridgeIndex),
+              cellLambda39(bridgeIndex),
+              cellLambda40(bridgeIndex),
+              cellLambda41(bridgeIndex),
+              cellLambda42(bridgeIndex),
+              cellLambda43(bridgeIndex),
+              cellLambda44(bridgeIndex),
+              cellLambda45(bridgeIndex),
+              cellLambda46(bridgeIndex),
+              cellLambda47(bridgeIndex),
+              cellLambda48(bridgeIndex),
+              cellLambda49(bridgeIndex),
+              cellLambda50(bridgeIndex),
+              cellLambda51(bridgeIndex),
+              cellLambda52(bridgeIndex),
+              cellLambda53(bridgeIndex),
+            )
+          )
+          rowIndex += 1
+        }
+
+    case 54 =>
+      val cellLambda1  = cellLambda(0)
+      val cellLambda2  = cellLambda(1)
+      val cellLambda3  = cellLambda(2)
+      val cellLambda4  = cellLambda(3)
+      val cellLambda5  = cellLambda(4)
+      val cellLambda6  = cellLambda(5)
+      val cellLambda7  = cellLambda(6)
+      val cellLambda8  = cellLambda(7)
+      val cellLambda9  = cellLambda(8)
+      val cellLambda10 = cellLambda(9)
+      val cellLambda11 = cellLambda(10)
+      val cellLambda12 = cellLambda(11)
+      val cellLambda13 = cellLambda(12)
+      val cellLambda14 = cellLambda(13)
+      val cellLambda15 = cellLambda(14)
+      val cellLambda16 = cellLambda(15)
+      val cellLambda17 = cellLambda(16)
+      val cellLambda18 = cellLambda(17)
+      val cellLambda19 = cellLambda(18)
+      val cellLambda20 = cellLambda(19)
+      val cellLambda21 = cellLambda(20)
+      val cellLambda22 = cellLambda(21)
+      val cellLambda23 = cellLambda(22)
+      val cellLambda24 = cellLambda(23)
+      val cellLambda25 = cellLambda(24)
+      val cellLambda26 = cellLambda(25)
+      val cellLambda27 = cellLambda(26)
+      val cellLambda28 = cellLambda(27)
+      val cellLambda29 = cellLambda(28)
+      val cellLambda30 = cellLambda(29)
+      val cellLambda31 = cellLambda(30)
+      val cellLambda32 = cellLambda(31)
+      val cellLambda33 = cellLambda(32)
+      val cellLambda34 = cellLambda(33)
+      val cellLambda35 = cellLambda(34)
+      val cellLambda36 = cellLambda(35)
+      val cellLambda37 = cellLambda(36)
+      val cellLambda38 = cellLambda(37)
+      val cellLambda39 = cellLambda(38)
+      val cellLambda40 = cellLambda(39)
+      val cellLambda41 = cellLambda(40)
+      val cellLambda42 = cellLambda(41)
+      val cellLambda43 = cellLambda(42)
+      val cellLambda44 = cellLambda(43)
+      val cellLambda45 = cellLambda(44)
+      val cellLambda46 = cellLambda(45)
+      val cellLambda47 = cellLambda(46)
+      val cellLambda48 = cellLambda(47)
+      val cellLambda49 = cellLambda(48)
+      val cellLambda50 = cellLambda(49)
+      val cellLambda51 = cellLambda(50)
+      val cellLambda52 = cellLambda(51)
+      val cellLambda53 = cellLambda(52)
+      val cellLambda54 = cellLambda(53)
+      (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
+        rowIndex = rowIndex0
+        while (rowIndex < lastRow) {
+          e = 0
+          bridgeIndex = indexBridge(rowIndex)
+          tableBody.appendChild(
+            _mkRow(
+              rowIndex,
+              cellLambda1(bridgeIndex),
+              cellLambda2(bridgeIndex),
+              cellLambda3(bridgeIndex),
+              cellLambda4(bridgeIndex),
+              cellLambda5(bridgeIndex),
+              cellLambda6(bridgeIndex),
+              cellLambda7(bridgeIndex),
+              cellLambda8(bridgeIndex),
+              cellLambda9(bridgeIndex),
+              cellLambda10(bridgeIndex),
+              cellLambda11(bridgeIndex),
+              cellLambda12(bridgeIndex),
+              cellLambda13(bridgeIndex),
+              cellLambda14(bridgeIndex),
+              cellLambda15(bridgeIndex),
+              cellLambda16(bridgeIndex),
+              cellLambda17(bridgeIndex),
+              cellLambda18(bridgeIndex),
+              cellLambda19(bridgeIndex),
+              cellLambda20(bridgeIndex),
+              cellLambda21(bridgeIndex),
+              cellLambda22(bridgeIndex),
+              cellLambda23(bridgeIndex),
+              cellLambda24(bridgeIndex),
+              cellLambda25(bridgeIndex),
+              cellLambda26(bridgeIndex),
+              cellLambda27(bridgeIndex),
+              cellLambda28(bridgeIndex),
+              cellLambda29(bridgeIndex),
+              cellLambda30(bridgeIndex),
+              cellLambda31(bridgeIndex),
+              cellLambda32(bridgeIndex),
+              cellLambda33(bridgeIndex),
+              cellLambda34(bridgeIndex),
+              cellLambda35(bridgeIndex),
+              cellLambda36(bridgeIndex),
+              cellLambda37(bridgeIndex),
+              cellLambda38(bridgeIndex),
+              cellLambda39(bridgeIndex),
+              cellLambda40(bridgeIndex),
+              cellLambda41(bridgeIndex),
+              cellLambda42(bridgeIndex),
+              cellLambda43(bridgeIndex),
+              cellLambda44(bridgeIndex),
+              cellLambda45(bridgeIndex),
+              cellLambda46(bridgeIndex),
+              cellLambda47(bridgeIndex),
+              cellLambda48(bridgeIndex),
+              cellLambda49(bridgeIndex),
+              cellLambda50(bridgeIndex),
+              cellLambda51(bridgeIndex),
+              cellLambda52(bridgeIndex),
+              cellLambda53(bridgeIndex),
+              cellLambda54(bridgeIndex),
+            )
+          )
+          rowIndex += 1
+        }
+
+    case 55 =>
+      val cellLambda1  = cellLambda(0)
+      val cellLambda2  = cellLambda(1)
+      val cellLambda3  = cellLambda(2)
+      val cellLambda4  = cellLambda(3)
+      val cellLambda5  = cellLambda(4)
+      val cellLambda6  = cellLambda(5)
+      val cellLambda7  = cellLambda(6)
+      val cellLambda8  = cellLambda(7)
+      val cellLambda9  = cellLambda(8)
+      val cellLambda10 = cellLambda(9)
+      val cellLambda11 = cellLambda(10)
+      val cellLambda12 = cellLambda(11)
+      val cellLambda13 = cellLambda(12)
+      val cellLambda14 = cellLambda(13)
+      val cellLambda15 = cellLambda(14)
+      val cellLambda16 = cellLambda(15)
+      val cellLambda17 = cellLambda(16)
+      val cellLambda18 = cellLambda(17)
+      val cellLambda19 = cellLambda(18)
+      val cellLambda20 = cellLambda(19)
+      val cellLambda21 = cellLambda(20)
+      val cellLambda22 = cellLambda(21)
+      val cellLambda23 = cellLambda(22)
+      val cellLambda24 = cellLambda(23)
+      val cellLambda25 = cellLambda(24)
+      val cellLambda26 = cellLambda(25)
+      val cellLambda27 = cellLambda(26)
+      val cellLambda28 = cellLambda(27)
+      val cellLambda29 = cellLambda(28)
+      val cellLambda30 = cellLambda(29)
+      val cellLambda31 = cellLambda(30)
+      val cellLambda32 = cellLambda(31)
+      val cellLambda33 = cellLambda(32)
+      val cellLambda34 = cellLambda(33)
+      val cellLambda35 = cellLambda(34)
+      val cellLambda36 = cellLambda(35)
+      val cellLambda37 = cellLambda(36)
+      val cellLambda38 = cellLambda(37)
+      val cellLambda39 = cellLambda(38)
+      val cellLambda40 = cellLambda(39)
+      val cellLambda41 = cellLambda(40)
+      val cellLambda42 = cellLambda(41)
+      val cellLambda43 = cellLambda(42)
+      val cellLambda44 = cellLambda(43)
+      val cellLambda45 = cellLambda(44)
+      val cellLambda46 = cellLambda(45)
+      val cellLambda47 = cellLambda(46)
+      val cellLambda48 = cellLambda(47)
+      val cellLambda49 = cellLambda(48)
+      val cellLambda50 = cellLambda(49)
+      val cellLambda51 = cellLambda(50)
+      val cellLambda52 = cellLambda(51)
+      val cellLambda53 = cellLambda(52)
+      val cellLambda54 = cellLambda(53)
+      val cellLambda55 = cellLambda(54)
+      (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
+        rowIndex = rowIndex0
+        while (rowIndex < lastRow) {
+          e = 0
+          bridgeIndex = indexBridge(rowIndex)
+          tableBody.appendChild(
+            _mkRow(
+              rowIndex,
+              cellLambda1(bridgeIndex),
+              cellLambda2(bridgeIndex),
+              cellLambda3(bridgeIndex),
+              cellLambda4(bridgeIndex),
+              cellLambda5(bridgeIndex),
+              cellLambda6(bridgeIndex),
+              cellLambda7(bridgeIndex),
+              cellLambda8(bridgeIndex),
+              cellLambda9(bridgeIndex),
+              cellLambda10(bridgeIndex),
+              cellLambda11(bridgeIndex),
+              cellLambda12(bridgeIndex),
+              cellLambda13(bridgeIndex),
+              cellLambda14(bridgeIndex),
+              cellLambda15(bridgeIndex),
+              cellLambda16(bridgeIndex),
+              cellLambda17(bridgeIndex),
+              cellLambda18(bridgeIndex),
+              cellLambda19(bridgeIndex),
+              cellLambda20(bridgeIndex),
+              cellLambda21(bridgeIndex),
+              cellLambda22(bridgeIndex),
+              cellLambda23(bridgeIndex),
+              cellLambda24(bridgeIndex),
+              cellLambda25(bridgeIndex),
+              cellLambda26(bridgeIndex),
+              cellLambda27(bridgeIndex),
+              cellLambda28(bridgeIndex),
+              cellLambda29(bridgeIndex),
+              cellLambda30(bridgeIndex),
+              cellLambda31(bridgeIndex),
+              cellLambda32(bridgeIndex),
+              cellLambda33(bridgeIndex),
+              cellLambda34(bridgeIndex),
+              cellLambda35(bridgeIndex),
+              cellLambda36(bridgeIndex),
+              cellLambda37(bridgeIndex),
+              cellLambda38(bridgeIndex),
+              cellLambda39(bridgeIndex),
+              cellLambda40(bridgeIndex),
+              cellLambda41(bridgeIndex),
+              cellLambda42(bridgeIndex),
+              cellLambda43(bridgeIndex),
+              cellLambda44(bridgeIndex),
+              cellLambda45(bridgeIndex),
+              cellLambda46(bridgeIndex),
+              cellLambda47(bridgeIndex),
+              cellLambda48(bridgeIndex),
+              cellLambda49(bridgeIndex),
+              cellLambda50(bridgeIndex),
+              cellLambda51(bridgeIndex),
+              cellLambda52(bridgeIndex),
+              cellLambda53(bridgeIndex),
+              cellLambda54(bridgeIndex),
+              cellLambda55(bridgeIndex),
+            )
+          )
+          rowIndex += 1
+        }
+
+    case 56 =>
+      val cellLambda1  = cellLambda(0)
+      val cellLambda2  = cellLambda(1)
+      val cellLambda3  = cellLambda(2)
+      val cellLambda4  = cellLambda(3)
+      val cellLambda5  = cellLambda(4)
+      val cellLambda6  = cellLambda(5)
+      val cellLambda7  = cellLambda(6)
+      val cellLambda8  = cellLambda(7)
+      val cellLambda9  = cellLambda(8)
+      val cellLambda10 = cellLambda(9)
+      val cellLambda11 = cellLambda(10)
+      val cellLambda12 = cellLambda(11)
+      val cellLambda13 = cellLambda(12)
+      val cellLambda14 = cellLambda(13)
+      val cellLambda15 = cellLambda(14)
+      val cellLambda16 = cellLambda(15)
+      val cellLambda17 = cellLambda(16)
+      val cellLambda18 = cellLambda(17)
+      val cellLambda19 = cellLambda(18)
+      val cellLambda20 = cellLambda(19)
+      val cellLambda21 = cellLambda(20)
+      val cellLambda22 = cellLambda(21)
+      val cellLambda23 = cellLambda(22)
+      val cellLambda24 = cellLambda(23)
+      val cellLambda25 = cellLambda(24)
+      val cellLambda26 = cellLambda(25)
+      val cellLambda27 = cellLambda(26)
+      val cellLambda28 = cellLambda(27)
+      val cellLambda29 = cellLambda(28)
+      val cellLambda30 = cellLambda(29)
+      val cellLambda31 = cellLambda(30)
+      val cellLambda32 = cellLambda(31)
+      val cellLambda33 = cellLambda(32)
+      val cellLambda34 = cellLambda(33)
+      val cellLambda35 = cellLambda(34)
+      val cellLambda36 = cellLambda(35)
+      val cellLambda37 = cellLambda(36)
+      val cellLambda38 = cellLambda(37)
+      val cellLambda39 = cellLambda(38)
+      val cellLambda40 = cellLambda(39)
+      val cellLambda41 = cellLambda(40)
+      val cellLambda42 = cellLambda(41)
+      val cellLambda43 = cellLambda(42)
+      val cellLambda44 = cellLambda(43)
+      val cellLambda45 = cellLambda(44)
+      val cellLambda46 = cellLambda(45)
+      val cellLambda47 = cellLambda(46)
+      val cellLambda48 = cellLambda(47)
+      val cellLambda49 = cellLambda(48)
+      val cellLambda50 = cellLambda(49)
+      val cellLambda51 = cellLambda(50)
+      val cellLambda52 = cellLambda(51)
+      val cellLambda53 = cellLambda(52)
+      val cellLambda54 = cellLambda(53)
+      val cellLambda55 = cellLambda(54)
+      val cellLambda56 = cellLambda(55)
+      (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
+        rowIndex = rowIndex0
+        while (rowIndex < lastRow) {
+          e = 0
+          bridgeIndex = indexBridge(rowIndex)
+          tableBody.appendChild(
+            _mkRow(
+              rowIndex,
+              cellLambda1(bridgeIndex),
+              cellLambda2(bridgeIndex),
+              cellLambda3(bridgeIndex),
+              cellLambda4(bridgeIndex),
+              cellLambda5(bridgeIndex),
+              cellLambda6(bridgeIndex),
+              cellLambda7(bridgeIndex),
+              cellLambda8(bridgeIndex),
+              cellLambda9(bridgeIndex),
+              cellLambda10(bridgeIndex),
+              cellLambda11(bridgeIndex),
+              cellLambda12(bridgeIndex),
+              cellLambda13(bridgeIndex),
+              cellLambda14(bridgeIndex),
+              cellLambda15(bridgeIndex),
+              cellLambda16(bridgeIndex),
+              cellLambda17(bridgeIndex),
+              cellLambda18(bridgeIndex),
+              cellLambda19(bridgeIndex),
+              cellLambda20(bridgeIndex),
+              cellLambda21(bridgeIndex),
+              cellLambda22(bridgeIndex),
+              cellLambda23(bridgeIndex),
+              cellLambda24(bridgeIndex),
+              cellLambda25(bridgeIndex),
+              cellLambda26(bridgeIndex),
+              cellLambda27(bridgeIndex),
+              cellLambda28(bridgeIndex),
+              cellLambda29(bridgeIndex),
+              cellLambda30(bridgeIndex),
+              cellLambda31(bridgeIndex),
+              cellLambda32(bridgeIndex),
+              cellLambda33(bridgeIndex),
+              cellLambda34(bridgeIndex),
+              cellLambda35(bridgeIndex),
+              cellLambda36(bridgeIndex),
+              cellLambda37(bridgeIndex),
+              cellLambda38(bridgeIndex),
+              cellLambda39(bridgeIndex),
+              cellLambda40(bridgeIndex),
+              cellLambda41(bridgeIndex),
+              cellLambda42(bridgeIndex),
+              cellLambda43(bridgeIndex),
+              cellLambda44(bridgeIndex),
+              cellLambda45(bridgeIndex),
+              cellLambda46(bridgeIndex),
+              cellLambda47(bridgeIndex),
+              cellLambda48(bridgeIndex),
+              cellLambda49(bridgeIndex),
+              cellLambda50(bridgeIndex),
+              cellLambda51(bridgeIndex),
+              cellLambda52(bridgeIndex),
+              cellLambda53(bridgeIndex),
+              cellLambda54(bridgeIndex),
+              cellLambda55(bridgeIndex),
+              cellLambda56(bridgeIndex),
+            )
+          )
+          rowIndex += 1
+        }
+
+    case 57 =>
+      val cellLambda1  = cellLambda(0)
+      val cellLambda2  = cellLambda(1)
+      val cellLambda3  = cellLambda(2)
+      val cellLambda4  = cellLambda(3)
+      val cellLambda5  = cellLambda(4)
+      val cellLambda6  = cellLambda(5)
+      val cellLambda7  = cellLambda(6)
+      val cellLambda8  = cellLambda(7)
+      val cellLambda9  = cellLambda(8)
+      val cellLambda10 = cellLambda(9)
+      val cellLambda11 = cellLambda(10)
+      val cellLambda12 = cellLambda(11)
+      val cellLambda13 = cellLambda(12)
+      val cellLambda14 = cellLambda(13)
+      val cellLambda15 = cellLambda(14)
+      val cellLambda16 = cellLambda(15)
+      val cellLambda17 = cellLambda(16)
+      val cellLambda18 = cellLambda(17)
+      val cellLambda19 = cellLambda(18)
+      val cellLambda20 = cellLambda(19)
+      val cellLambda21 = cellLambda(20)
+      val cellLambda22 = cellLambda(21)
+      val cellLambda23 = cellLambda(22)
+      val cellLambda24 = cellLambda(23)
+      val cellLambda25 = cellLambda(24)
+      val cellLambda26 = cellLambda(25)
+      val cellLambda27 = cellLambda(26)
+      val cellLambda28 = cellLambda(27)
+      val cellLambda29 = cellLambda(28)
+      val cellLambda30 = cellLambda(29)
+      val cellLambda31 = cellLambda(30)
+      val cellLambda32 = cellLambda(31)
+      val cellLambda33 = cellLambda(32)
+      val cellLambda34 = cellLambda(33)
+      val cellLambda35 = cellLambda(34)
+      val cellLambda36 = cellLambda(35)
+      val cellLambda37 = cellLambda(36)
+      val cellLambda38 = cellLambda(37)
+      val cellLambda39 = cellLambda(38)
+      val cellLambda40 = cellLambda(39)
+      val cellLambda41 = cellLambda(40)
+      val cellLambda42 = cellLambda(41)
+      val cellLambda43 = cellLambda(42)
+      val cellLambda44 = cellLambda(43)
+      val cellLambda45 = cellLambda(44)
+      val cellLambda46 = cellLambda(45)
+      val cellLambda47 = cellLambda(46)
+      val cellLambda48 = cellLambda(47)
+      val cellLambda49 = cellLambda(48)
+      val cellLambda50 = cellLambda(49)
+      val cellLambda51 = cellLambda(50)
+      val cellLambda52 = cellLambda(51)
+      val cellLambda53 = cellLambda(52)
+      val cellLambda54 = cellLambda(53)
+      val cellLambda55 = cellLambda(54)
+      val cellLambda56 = cellLambda(55)
+      val cellLambda57 = cellLambda(56)
+      (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
+        rowIndex = rowIndex0
+        while (rowIndex < lastRow) {
+          e = 0
+          bridgeIndex = indexBridge(rowIndex)
+          tableBody.appendChild(
+            _mkRow(
+              rowIndex,
+              cellLambda1(bridgeIndex),
+              cellLambda2(bridgeIndex),
+              cellLambda3(bridgeIndex),
+              cellLambda4(bridgeIndex),
+              cellLambda5(bridgeIndex),
+              cellLambda6(bridgeIndex),
+              cellLambda7(bridgeIndex),
+              cellLambda8(bridgeIndex),
+              cellLambda9(bridgeIndex),
+              cellLambda10(bridgeIndex),
+              cellLambda11(bridgeIndex),
+              cellLambda12(bridgeIndex),
+              cellLambda13(bridgeIndex),
+              cellLambda14(bridgeIndex),
+              cellLambda15(bridgeIndex),
+              cellLambda16(bridgeIndex),
+              cellLambda17(bridgeIndex),
+              cellLambda18(bridgeIndex),
+              cellLambda19(bridgeIndex),
+              cellLambda20(bridgeIndex),
+              cellLambda21(bridgeIndex),
+              cellLambda22(bridgeIndex),
+              cellLambda23(bridgeIndex),
+              cellLambda24(bridgeIndex),
+              cellLambda25(bridgeIndex),
+              cellLambda26(bridgeIndex),
+              cellLambda27(bridgeIndex),
+              cellLambda28(bridgeIndex),
+              cellLambda29(bridgeIndex),
+              cellLambda30(bridgeIndex),
+              cellLambda31(bridgeIndex),
+              cellLambda32(bridgeIndex),
+              cellLambda33(bridgeIndex),
+              cellLambda34(bridgeIndex),
+              cellLambda35(bridgeIndex),
+              cellLambda36(bridgeIndex),
+              cellLambda37(bridgeIndex),
+              cellLambda38(bridgeIndex),
+              cellLambda39(bridgeIndex),
+              cellLambda40(bridgeIndex),
+              cellLambda41(bridgeIndex),
+              cellLambda42(bridgeIndex),
+              cellLambda43(bridgeIndex),
+              cellLambda44(bridgeIndex),
+              cellLambda45(bridgeIndex),
+              cellLambda46(bridgeIndex),
+              cellLambda47(bridgeIndex),
+              cellLambda48(bridgeIndex),
+              cellLambda49(bridgeIndex),
+              cellLambda50(bridgeIndex),
+              cellLambda51(bridgeIndex),
+              cellLambda52(bridgeIndex),
+              cellLambda53(bridgeIndex),
+              cellLambda54(bridgeIndex),
+              cellLambda55(bridgeIndex),
+              cellLambda56(bridgeIndex),
+              cellLambda57(bridgeIndex),
+            )
+          )
+          rowIndex += 1
+        }
+
+    case 58 =>
+      val cellLambda1  = cellLambda(0)
+      val cellLambda2  = cellLambda(1)
+      val cellLambda3  = cellLambda(2)
+      val cellLambda4  = cellLambda(3)
+      val cellLambda5  = cellLambda(4)
+      val cellLambda6  = cellLambda(5)
+      val cellLambda7  = cellLambda(6)
+      val cellLambda8  = cellLambda(7)
+      val cellLambda9  = cellLambda(8)
+      val cellLambda10 = cellLambda(9)
+      val cellLambda11 = cellLambda(10)
+      val cellLambda12 = cellLambda(11)
+      val cellLambda13 = cellLambda(12)
+      val cellLambda14 = cellLambda(13)
+      val cellLambda15 = cellLambda(14)
+      val cellLambda16 = cellLambda(15)
+      val cellLambda17 = cellLambda(16)
+      val cellLambda18 = cellLambda(17)
+      val cellLambda19 = cellLambda(18)
+      val cellLambda20 = cellLambda(19)
+      val cellLambda21 = cellLambda(20)
+      val cellLambda22 = cellLambda(21)
+      val cellLambda23 = cellLambda(22)
+      val cellLambda24 = cellLambda(23)
+      val cellLambda25 = cellLambda(24)
+      val cellLambda26 = cellLambda(25)
+      val cellLambda27 = cellLambda(26)
+      val cellLambda28 = cellLambda(27)
+      val cellLambda29 = cellLambda(28)
+      val cellLambda30 = cellLambda(29)
+      val cellLambda31 = cellLambda(30)
+      val cellLambda32 = cellLambda(31)
+      val cellLambda33 = cellLambda(32)
+      val cellLambda34 = cellLambda(33)
+      val cellLambda35 = cellLambda(34)
+      val cellLambda36 = cellLambda(35)
+      val cellLambda37 = cellLambda(36)
+      val cellLambda38 = cellLambda(37)
+      val cellLambda39 = cellLambda(38)
+      val cellLambda40 = cellLambda(39)
+      val cellLambda41 = cellLambda(40)
+      val cellLambda42 = cellLambda(41)
+      val cellLambda43 = cellLambda(42)
+      val cellLambda44 = cellLambda(43)
+      val cellLambda45 = cellLambda(44)
+      val cellLambda46 = cellLambda(45)
+      val cellLambda47 = cellLambda(46)
+      val cellLambda48 = cellLambda(47)
+      val cellLambda49 = cellLambda(48)
+      val cellLambda50 = cellLambda(49)
+      val cellLambda51 = cellLambda(50)
+      val cellLambda52 = cellLambda(51)
+      val cellLambda53 = cellLambda(52)
+      val cellLambda54 = cellLambda(53)
+      val cellLambda55 = cellLambda(54)
+      val cellLambda56 = cellLambda(55)
+      val cellLambda57 = cellLambda(56)
+      val cellLambda58 = cellLambda(57)
+      (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
+        rowIndex = rowIndex0
+        while (rowIndex < lastRow) {
+          e = 0
+          bridgeIndex = indexBridge(rowIndex)
+          tableBody.appendChild(
+            _mkRow(
+              rowIndex,
+              cellLambda1(bridgeIndex),
+              cellLambda2(bridgeIndex),
+              cellLambda3(bridgeIndex),
+              cellLambda4(bridgeIndex),
+              cellLambda5(bridgeIndex),
+              cellLambda6(bridgeIndex),
+              cellLambda7(bridgeIndex),
+              cellLambda8(bridgeIndex),
+              cellLambda9(bridgeIndex),
+              cellLambda10(bridgeIndex),
+              cellLambda11(bridgeIndex),
+              cellLambda12(bridgeIndex),
+              cellLambda13(bridgeIndex),
+              cellLambda14(bridgeIndex),
+              cellLambda15(bridgeIndex),
+              cellLambda16(bridgeIndex),
+              cellLambda17(bridgeIndex),
+              cellLambda18(bridgeIndex),
+              cellLambda19(bridgeIndex),
+              cellLambda20(bridgeIndex),
+              cellLambda21(bridgeIndex),
+              cellLambda22(bridgeIndex),
+              cellLambda23(bridgeIndex),
+              cellLambda24(bridgeIndex),
+              cellLambda25(bridgeIndex),
+              cellLambda26(bridgeIndex),
+              cellLambda27(bridgeIndex),
+              cellLambda28(bridgeIndex),
+              cellLambda29(bridgeIndex),
+              cellLambda30(bridgeIndex),
+              cellLambda31(bridgeIndex),
+              cellLambda32(bridgeIndex),
+              cellLambda33(bridgeIndex),
+              cellLambda34(bridgeIndex),
+              cellLambda35(bridgeIndex),
+              cellLambda36(bridgeIndex),
+              cellLambda37(bridgeIndex),
+              cellLambda38(bridgeIndex),
+              cellLambda39(bridgeIndex),
+              cellLambda40(bridgeIndex),
+              cellLambda41(bridgeIndex),
+              cellLambda42(bridgeIndex),
+              cellLambda43(bridgeIndex),
+              cellLambda44(bridgeIndex),
+              cellLambda45(bridgeIndex),
+              cellLambda46(bridgeIndex),
+              cellLambda47(bridgeIndex),
+              cellLambda48(bridgeIndex),
+              cellLambda49(bridgeIndex),
+              cellLambda50(bridgeIndex),
+              cellLambda51(bridgeIndex),
+              cellLambda52(bridgeIndex),
+              cellLambda53(bridgeIndex),
+              cellLambda54(bridgeIndex),
+              cellLambda55(bridgeIndex),
+              cellLambda56(bridgeIndex),
+              cellLambda57(bridgeIndex),
+              cellLambda58(bridgeIndex),
+            )
+          )
+          rowIndex += 1
+        }
+
+    case 59 =>
+      val cellLambda1  = cellLambda(0)
+      val cellLambda2  = cellLambda(1)
+      val cellLambda3  = cellLambda(2)
+      val cellLambda4  = cellLambda(3)
+      val cellLambda5  = cellLambda(4)
+      val cellLambda6  = cellLambda(5)
+      val cellLambda7  = cellLambda(6)
+      val cellLambda8  = cellLambda(7)
+      val cellLambda9  = cellLambda(8)
+      val cellLambda10 = cellLambda(9)
+      val cellLambda11 = cellLambda(10)
+      val cellLambda12 = cellLambda(11)
+      val cellLambda13 = cellLambda(12)
+      val cellLambda14 = cellLambda(13)
+      val cellLambda15 = cellLambda(14)
+      val cellLambda16 = cellLambda(15)
+      val cellLambda17 = cellLambda(16)
+      val cellLambda18 = cellLambda(17)
+      val cellLambda19 = cellLambda(18)
+      val cellLambda20 = cellLambda(19)
+      val cellLambda21 = cellLambda(20)
+      val cellLambda22 = cellLambda(21)
+      val cellLambda23 = cellLambda(22)
+      val cellLambda24 = cellLambda(23)
+      val cellLambda25 = cellLambda(24)
+      val cellLambda26 = cellLambda(25)
+      val cellLambda27 = cellLambda(26)
+      val cellLambda28 = cellLambda(27)
+      val cellLambda29 = cellLambda(28)
+      val cellLambda30 = cellLambda(29)
+      val cellLambda31 = cellLambda(30)
+      val cellLambda32 = cellLambda(31)
+      val cellLambda33 = cellLambda(32)
+      val cellLambda34 = cellLambda(33)
+      val cellLambda35 = cellLambda(34)
+      val cellLambda36 = cellLambda(35)
+      val cellLambda37 = cellLambda(36)
+      val cellLambda38 = cellLambda(37)
+      val cellLambda39 = cellLambda(38)
+      val cellLambda40 = cellLambda(39)
+      val cellLambda41 = cellLambda(40)
+      val cellLambda42 = cellLambda(41)
+      val cellLambda43 = cellLambda(42)
+      val cellLambda44 = cellLambda(43)
+      val cellLambda45 = cellLambda(44)
+      val cellLambda46 = cellLambda(45)
+      val cellLambda47 = cellLambda(46)
+      val cellLambda48 = cellLambda(47)
+      val cellLambda49 = cellLambda(48)
+      val cellLambda50 = cellLambda(49)
+      val cellLambda51 = cellLambda(50)
+      val cellLambda52 = cellLambda(51)
+      val cellLambda53 = cellLambda(52)
+      val cellLambda54 = cellLambda(53)
+      val cellLambda55 = cellLambda(54)
+      val cellLambda56 = cellLambda(55)
+      val cellLambda57 = cellLambda(56)
+      val cellLambda58 = cellLambda(57)
+      val cellLambda59 = cellLambda(58)
+      (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
+        rowIndex = rowIndex0
+        while (rowIndex < lastRow) {
+          e = 0
+          bridgeIndex = indexBridge(rowIndex)
+          tableBody.appendChild(
+            _mkRow(
+              rowIndex,
+              cellLambda1(bridgeIndex),
+              cellLambda2(bridgeIndex),
+              cellLambda3(bridgeIndex),
+              cellLambda4(bridgeIndex),
+              cellLambda5(bridgeIndex),
+              cellLambda6(bridgeIndex),
+              cellLambda7(bridgeIndex),
+              cellLambda8(bridgeIndex),
+              cellLambda9(bridgeIndex),
+              cellLambda10(bridgeIndex),
+              cellLambda11(bridgeIndex),
+              cellLambda12(bridgeIndex),
+              cellLambda13(bridgeIndex),
+              cellLambda14(bridgeIndex),
+              cellLambda15(bridgeIndex),
+              cellLambda16(bridgeIndex),
+              cellLambda17(bridgeIndex),
+              cellLambda18(bridgeIndex),
+              cellLambda19(bridgeIndex),
+              cellLambda20(bridgeIndex),
+              cellLambda21(bridgeIndex),
+              cellLambda22(bridgeIndex),
+              cellLambda23(bridgeIndex),
+              cellLambda24(bridgeIndex),
+              cellLambda25(bridgeIndex),
+              cellLambda26(bridgeIndex),
+              cellLambda27(bridgeIndex),
+              cellLambda28(bridgeIndex),
+              cellLambda29(bridgeIndex),
+              cellLambda30(bridgeIndex),
+              cellLambda31(bridgeIndex),
+              cellLambda32(bridgeIndex),
+              cellLambda33(bridgeIndex),
+              cellLambda34(bridgeIndex),
+              cellLambda35(bridgeIndex),
+              cellLambda36(bridgeIndex),
+              cellLambda37(bridgeIndex),
+              cellLambda38(bridgeIndex),
+              cellLambda39(bridgeIndex),
+              cellLambda40(bridgeIndex),
+              cellLambda41(bridgeIndex),
+              cellLambda42(bridgeIndex),
+              cellLambda43(bridgeIndex),
+              cellLambda44(bridgeIndex),
+              cellLambda45(bridgeIndex),
+              cellLambda46(bridgeIndex),
+              cellLambda47(bridgeIndex),
+              cellLambda48(bridgeIndex),
+              cellLambda49(bridgeIndex),
+              cellLambda50(bridgeIndex),
+              cellLambda51(bridgeIndex),
+              cellLambda52(bridgeIndex),
+              cellLambda53(bridgeIndex),
+              cellLambda54(bridgeIndex),
+              cellLambda55(bridgeIndex),
+              cellLambda56(bridgeIndex),
+              cellLambda57(bridgeIndex),
+              cellLambda58(bridgeIndex),
+              cellLambda59(bridgeIndex),
+            )
+          )
+          rowIndex += 1
+        }
+
+    case 60 =>
+      val cellLambda1  = cellLambda(0)
+      val cellLambda2  = cellLambda(1)
+      val cellLambda3  = cellLambda(2)
+      val cellLambda4  = cellLambda(3)
+      val cellLambda5  = cellLambda(4)
+      val cellLambda6  = cellLambda(5)
+      val cellLambda7  = cellLambda(6)
+      val cellLambda8  = cellLambda(7)
+      val cellLambda9  = cellLambda(8)
+      val cellLambda10 = cellLambda(9)
+      val cellLambda11 = cellLambda(10)
+      val cellLambda12 = cellLambda(11)
+      val cellLambda13 = cellLambda(12)
+      val cellLambda14 = cellLambda(13)
+      val cellLambda15 = cellLambda(14)
+      val cellLambda16 = cellLambda(15)
+      val cellLambda17 = cellLambda(16)
+      val cellLambda18 = cellLambda(17)
+      val cellLambda19 = cellLambda(18)
+      val cellLambda20 = cellLambda(19)
+      val cellLambda21 = cellLambda(20)
+      val cellLambda22 = cellLambda(21)
+      val cellLambda23 = cellLambda(22)
+      val cellLambda24 = cellLambda(23)
+      val cellLambda25 = cellLambda(24)
+      val cellLambda26 = cellLambda(25)
+      val cellLambda27 = cellLambda(26)
+      val cellLambda28 = cellLambda(27)
+      val cellLambda29 = cellLambda(28)
+      val cellLambda30 = cellLambda(29)
+      val cellLambda31 = cellLambda(30)
+      val cellLambda32 = cellLambda(31)
+      val cellLambda33 = cellLambda(32)
+      val cellLambda34 = cellLambda(33)
+      val cellLambda35 = cellLambda(34)
+      val cellLambda36 = cellLambda(35)
+      val cellLambda37 = cellLambda(36)
+      val cellLambda38 = cellLambda(37)
+      val cellLambda39 = cellLambda(38)
+      val cellLambda40 = cellLambda(39)
+      val cellLambda41 = cellLambda(40)
+      val cellLambda42 = cellLambda(41)
+      val cellLambda43 = cellLambda(42)
+      val cellLambda44 = cellLambda(43)
+      val cellLambda45 = cellLambda(44)
+      val cellLambda46 = cellLambda(45)
+      val cellLambda47 = cellLambda(46)
+      val cellLambda48 = cellLambda(47)
+      val cellLambda49 = cellLambda(48)
+      val cellLambda50 = cellLambda(49)
+      val cellLambda51 = cellLambda(50)
+      val cellLambda52 = cellLambda(51)
+      val cellLambda53 = cellLambda(52)
+      val cellLambda54 = cellLambda(53)
+      val cellLambda55 = cellLambda(54)
+      val cellLambda56 = cellLambda(55)
+      val cellLambda57 = cellLambda(56)
+      val cellLambda58 = cellLambda(57)
+      val cellLambda59 = cellLambda(58)
+      val cellLambda60 = cellLambda(59)
+      (rowIndex0: Int, lastRow: Int, indexBridge: Int => Int) =>
+        rowIndex = rowIndex0
+        while (rowIndex < lastRow) {
+          e = 0
+          bridgeIndex = indexBridge(rowIndex)
+          tableBody.appendChild(
+            _mkRow(
+              rowIndex,
+              cellLambda1(bridgeIndex),
+              cellLambda2(bridgeIndex),
+              cellLambda3(bridgeIndex),
+              cellLambda4(bridgeIndex),
+              cellLambda5(bridgeIndex),
+              cellLambda6(bridgeIndex),
+              cellLambda7(bridgeIndex),
+              cellLambda8(bridgeIndex),
+              cellLambda9(bridgeIndex),
+              cellLambda10(bridgeIndex),
+              cellLambda11(bridgeIndex),
+              cellLambda12(bridgeIndex),
+              cellLambda13(bridgeIndex),
+              cellLambda14(bridgeIndex),
+              cellLambda15(bridgeIndex),
+              cellLambda16(bridgeIndex),
+              cellLambda17(bridgeIndex),
+              cellLambda18(bridgeIndex),
+              cellLambda19(bridgeIndex),
+              cellLambda20(bridgeIndex),
+              cellLambda21(bridgeIndex),
+              cellLambda22(bridgeIndex),
+              cellLambda23(bridgeIndex),
+              cellLambda24(bridgeIndex),
+              cellLambda25(bridgeIndex),
+              cellLambda26(bridgeIndex),
+              cellLambda27(bridgeIndex),
+              cellLambda28(bridgeIndex),
+              cellLambda29(bridgeIndex),
+              cellLambda30(bridgeIndex),
+              cellLambda31(bridgeIndex),
+              cellLambda32(bridgeIndex),
+              cellLambda33(bridgeIndex),
+              cellLambda34(bridgeIndex),
+              cellLambda35(bridgeIndex),
+              cellLambda36(bridgeIndex),
+              cellLambda37(bridgeIndex),
+              cellLambda38(bridgeIndex),
+              cellLambda39(bridgeIndex),
+              cellLambda40(bridgeIndex),
+              cellLambda41(bridgeIndex),
+              cellLambda42(bridgeIndex),
+              cellLambda43(bridgeIndex),
+              cellLambda44(bridgeIndex),
+              cellLambda45(bridgeIndex),
+              cellLambda46(bridgeIndex),
+              cellLambda47(bridgeIndex),
+              cellLambda48(bridgeIndex),
+              cellLambda49(bridgeIndex),
+              cellLambda50(bridgeIndex),
+              cellLambda51(bridgeIndex),
+              cellLambda52(bridgeIndex),
+              cellLambda53(bridgeIndex),
+              cellLambda54(bridgeIndex),
+              cellLambda55(bridgeIndex),
+              cellLambda56(bridgeIndex),
+              cellLambda57(bridgeIndex),
+              cellLambda58(bridgeIndex),
+              cellLambda59(bridgeIndex),
+              cellLambda60(bridgeIndex),
+            )
+          )
+          rowIndex += 1
+        }
   }
 }
