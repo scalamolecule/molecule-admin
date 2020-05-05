@@ -53,7 +53,7 @@ case class UpdateCardOne[T](
 
     if (oldStr == newStr) {
       // Void change marker
-      setCellEditMode(cell, oldVopt)
+      setCellEditMode(cell, oldVopt, oldVopt)
 
     } else if (editCellId.nonEmpty && editCellId == cell.id && eid != 0) {
 
@@ -97,7 +97,7 @@ case class UpdateCardOne[T](
         println(s"$eid $attrFull $newVopt")
         if (related == 0) {
           editArray(rowIndex) = newVopt
-          setCellEditMode(cell, newVopt)
+          setCellEditMode(cell, oldVopt, newVopt)
 
         } else {
           val eArray = qr.num(qr.arrayIndexes(eIndex))
@@ -107,7 +107,7 @@ case class UpdateCardOne[T](
             eArray(i) match {
               case Some(`eid`) =>
                 editArray(i) = newVopt
-                setCellEditMode(cell, newVopt)
+                setCellEditMode(cell, oldVopt, newVopt)
               case _           =>
             }
             i += 1

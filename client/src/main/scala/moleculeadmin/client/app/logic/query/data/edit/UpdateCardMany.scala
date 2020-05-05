@@ -99,7 +99,7 @@ case class UpdateCardMany[T](
       redrawCell()
 
       // Void change marker
-      setCellEditMode(cell, oldVopt)
+      setCellEditMode(cell, oldVopt, oldVopt)
 
     } else if (eid != 0 && editCellId.nonEmpty && editCellId == cell.id) {
 
@@ -137,7 +137,7 @@ case class UpdateCardMany[T](
         println(s"$eid $attrFull $newVopt")
         if (related == 0) {
           editArray(rowIndex) = newVopt
-          setCellEditMode(cell, newVopt)
+          setCellEditMode(cell, oldVopt, newVopt)
         } else {
           val eArray = qr.num(qr.arrayIndexes(eIndex))
           var i      = 0
@@ -146,7 +146,7 @@ case class UpdateCardMany[T](
             eArray(i) match {
               case Some(`eid`) =>
                 editArray(i) = newVopt
-                setCellEditMode(cell, newVopt)
+                setCellEditMode(cell, oldVopt, newVopt)
               case _           =>
             }
             i += 1

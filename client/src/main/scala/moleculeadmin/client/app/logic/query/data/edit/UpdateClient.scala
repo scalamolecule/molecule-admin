@@ -250,8 +250,11 @@ abstract class UpdateClient[T](
     curEntity.recalc()
   }
 
-  def setCellEditMode(cell: TableCell, newVopt: Option[T]): Unit = {
-    val oldVopt = origArray(rowIndex)
+  def setCellEditMode(
+    cell: TableCell,
+    oldVopt: Option[T],
+    newVopt: Option[T]
+  ): Unit = {
     if (oldVopt == newVopt)
       cell.className = baseClass
     else
