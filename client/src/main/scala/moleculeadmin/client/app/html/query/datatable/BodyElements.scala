@@ -69,42 +69,29 @@ trait BodyElements
 
   // Card one ======================================================
 
-  def _tdNoEdit(cellId: String): TypedTag[TableCell] = td(
+  def _tdOneStr(cellId: String): TypedTag[TableCell] = td(
     id := cellId,
+    cls := "str",
     cursor.default
   )
 
-  def _tdNoAggrEdit(cellId: String): TypedTag[TableCell] = td(
+  def _tdOneNum(cellId: String): TypedTag[TableCell] = td(
     id := cellId,
+    cls := "num",
+    cursor.default
+  )
+
+  def _tdOneAggr(cellId: String): TypedTag[TableCell] = td(
+    id := cellId,
+    cls := "num",
     noAggrEdit
   )
 
-  def _tdOneNumNoEdit(
-    cellId: String,
-    number: Frag // number or BigInt/BigDecimal (String)
-  ): TypedTag[TableCell] = td(
-    id := cellId,
-    cls := "num",
-    number
-  )
-
-  def _tdOneNumNoAggrEdit(
-    cellId: String,
-    number: Double
-  ): TypedTag[TableCell] = td(
-    id := cellId,
-    cls := "num",
-    noAggrEdit,
-    number
-  )
-
   def _tdOneDate(
-    cellId: String,
-    date: String
+    cellId: String
   ): TypedTag[TableCell] = td(
     id := cellId,
-    cls := "date",
-    date
+    cls := "date"
   )
 
   def _tdOneEid(
@@ -270,9 +257,10 @@ trait BodyElements
 
   // Card many ========================================================
 
-  def _tdManyItemsNoEdit(cellId: String): TypedTag[TableCell] = td(
+  def _tdMany(cellId: String, clazz: String): TypedTag[TableCell] = td(
     id := cellId,
-    cls := "items",
+    cls := clazz,
+    attr("card") := 2,
     cursor.default
   )
 
@@ -536,7 +524,7 @@ trait BodyElements
 
   // Map ==============================================================
 
-  def _tdMapItemsNoEdit(cellId: String): TypedTag[TableCell] = td(
+  def _tdMapItems(cellId: String): TypedTag[TableCell] = td(
     id := cellId,
     cls := "mapPairs",
     cursor.default

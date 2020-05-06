@@ -35,7 +35,7 @@ abstract class TxLambdas(
       // t
       case (false, false) =>
         (rowIndex: Int) =>
-          arrayT(rowIndex).fold(_tdNoEdit(cellIdMaker(rowIndex))) { t =>
+          arrayT(rowIndex).fold(_tdOneStr(cellIdMaker(rowIndex))) { t =>
             _tdOneT(
               cellIdMaker(rowIndex),
               t.toLong,
@@ -52,7 +52,7 @@ abstract class TxLambdas(
       case (true, false) =>
         val arrayTx = qr.num(arrayIndex + 1) // tx is next
         (rowIndex: Int) =>
-          arrayT(rowIndex).fold(_tdNoEdit(cellIdMaker(rowIndex)))(t =>
+          arrayT(rowIndex).fold(_tdOneStr(cellIdMaker(rowIndex)))(t =>
             _tdOneT_tx(
               cellIdMaker(rowIndex),
               t.toLong,
@@ -68,7 +68,7 @@ abstract class TxLambdas(
         val arrayIndexTxInstant = qr.arrayIndexes(colIndex + j)
         val arrayTxInstant      = qr.str(arrayIndexTxInstant)
         (rowIndex: Int) =>
-          arrayT(rowIndex).fold(_tdNoEdit(cellIdMaker(rowIndex)))(t =>
+          arrayT(rowIndex).fold(_tdOneStr(cellIdMaker(rowIndex)))(t =>
             _tdOneT_inst(
               cellIdMaker(rowIndex),
               t.toLong,
@@ -87,7 +87,7 @@ abstract class TxLambdas(
         val arrayIndexTxInstant = qr.arrayIndexes(colIndex + j)
         val arrayTxInstant      = qr.str(arrayIndexTxInstant)
         (rowIndex: Int) =>
-          arrayT(rowIndex).fold(_tdNoEdit(cellIdMaker(rowIndex)))(t1 =>
+          arrayT(rowIndex).fold(_tdOneStr(cellIdMaker(rowIndex)))(t1 =>
             _tdOneT_tx_inst(
               cellIdMaker(rowIndex),
               t1.toLong,
@@ -115,7 +115,7 @@ abstract class TxLambdas(
       // tx
       case (false, false) =>
         (rowIndex: Int) =>
-          arrayTx(rowIndex).fold(_tdNoEdit(cellIdMaker(rowIndex)))(tx =>
+          arrayTx(rowIndex).fold(_tdOneStr(cellIdMaker(rowIndex)))(tx =>
             _tdOneTx(
               cellIdMaker(rowIndex),
               tx.toLong,
@@ -130,7 +130,7 @@ abstract class TxLambdas(
       case (true, false) =>
         val arrayT = qr.num(arrayIndex - 1)
         (rowIndex: Int) =>
-          arrayTx(rowIndex).fold(_tdNoEdit(cellIdMaker(rowIndex)))(tx1 =>
+          arrayTx(rowIndex).fold(_tdOneStr(cellIdMaker(rowIndex)))(tx1 =>
             _tdOneTx_t(
               cellIdMaker(rowIndex),
               tx1.toLong,
@@ -146,7 +146,7 @@ abstract class TxLambdas(
         val arrayIndexTxInstant = qr.arrayIndexes(colIndex + 1)
         val arrayTxInstant      = qr.str(arrayIndexTxInstant)
         (rowIndex: Int) =>
-          arrayTx(rowIndex).fold(_tdNoEdit(cellIdMaker(rowIndex)))(tx =>
+          arrayTx(rowIndex).fold(_tdOneStr(cellIdMaker(rowIndex)))(tx =>
             _tdOneTx_inst(
               cellIdMaker(rowIndex),
               tx.toLong,
@@ -165,7 +165,7 @@ abstract class TxLambdas(
         val arrayIndexTxInstant = qr.arrayIndexes(colIndex + 1)
         val arrayTxInstant      = qr.str(arrayIndexTxInstant)
         (rowIndex: Int) =>
-          arrayTx(rowIndex).fold(_tdNoEdit(cellIdMaker(rowIndex)))(tx =>
+          arrayTx(rowIndex).fold(_tdOneStr(cellIdMaker(rowIndex)))(tx =>
             _tdOneTx_t_inst(
               cellIdMaker(rowIndex),
               tx.toLong,
@@ -196,7 +196,7 @@ abstract class TxLambdas(
       // txInstant
       case (false, false) =>
         (rowIndex: Int) =>
-          arrayTxInstant(rowIndex).fold(_tdNoEdit(cellIdMaker(rowIndex)))(d =>
+          arrayTxInstant(rowIndex).fold(_tdOneStr(cellIdMaker(rowIndex)))(d =>
             _tdOneTxInstant(
               cellIdMaker(rowIndex),
               d,
@@ -216,7 +216,7 @@ abstract class TxLambdas(
         val arrayIndexT = qr.arrayIndexes(colIndex - j)
         val arrayT      = qr.num(arrayIndexT)
         (rowIndex: Int) =>
-          arrayTxInstant(rowIndex).fold(_tdNoEdit(cellIdMaker(rowIndex)))(d =>
+          arrayTxInstant(rowIndex).fold(_tdOneStr(cellIdMaker(rowIndex)))(d =>
             _tdOneTxInstant_t(
               cellIdMaker(rowIndex),
               d,
@@ -236,7 +236,7 @@ abstract class TxLambdas(
         val arrayIndexTx = qr.arrayIndexes(colIndex - 1)
         val arrayTx      = qr.num(arrayIndexTx)
         (rowIndex: Int) =>
-          arrayTxInstant(rowIndex).fold(_tdNoEdit(cellIdMaker(rowIndex)))(d =>
+          arrayTxInstant(rowIndex).fold(_tdOneStr(cellIdMaker(rowIndex)))(d =>
             _tdOneTxInstant_tx(
               cellIdMaker(rowIndex),
               d,
@@ -258,7 +258,7 @@ abstract class TxLambdas(
         val arrayT       = qr.num(arrayIndexT)
         val arrayTx      = qr.num(arrayIndexTx)
         (rowIndex: Int) =>
-          arrayTxInstant(rowIndex).fold(_tdNoEdit(cellIdMaker(rowIndex)))(d =>
+          arrayTxInstant(rowIndex).fold(_tdOneStr(cellIdMaker(rowIndex)))(d =>
             _tdOneTxInstant_t_tx(
               cellIdMaker(rowIndex),
               d,
