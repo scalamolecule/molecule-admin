@@ -47,7 +47,7 @@ object QueryState extends QueryApi {
   val columns      : Var[Seq[Col]]     = Var(Seq.empty[Col])
 
   // Filters indexed by colIndex
-  val filters  : Var[Map[Int, Filter[_]]]                 = Var(Map.empty[Int, Filter[_]])
+  val filters: Var[Map[Int, Filter[_]]] = Var(Map.empty[Int, Filter[_]])
 
   // Edit expressions by full attr name -> (order, expr)
   val editExprs: mutable.Map[String, List[String]] = mutable.Map.empty
@@ -69,6 +69,7 @@ object QueryState extends QueryApi {
   var cachedSortIndex  : Array[Int]          = Array.empty
   var cachedFilters    : Map[Int, Filter[_]] = Map.empty
   var cachedFilterIndex: Array[Int]          = Array.empty
+  var cachedIndexBridge: Option[Int => Int]  = None
 
   val renderSubMenu: Var[String] = Var("trigger")
 

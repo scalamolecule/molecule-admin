@@ -82,7 +82,7 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
     col: Col,
     attrResolver: ResolveAttrs
   ): JsDom.TypedTag[TableCell] = {
-    val Col(colIndex, _, nsAlias, nsFull, attr, _, colType, card, opt, _,
+    val Col(colIndex, _, nsAlias, nsFull, attr, _, colType, card, _, _,
     aggrType, expr, sortDir, sortPos, _) = col
 
     val postfix         = attrResolver.postfix(col)
@@ -92,7 +92,17 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
     val edit            = { _: MouseEvent =>
       modelElements() = toggleEdit(modelElements.now, colIndex, nsFull, attr)
     }
-    val save            = { _: MouseEvent => GroupSave(col).save() }
+    val save            = { _: MouseEvent =>
+      val indexBridge = cachedIndexBridge.getOrElse {
+        cachedIndexBridge = Some(Indexes(
+          queryCache.queryResult,
+          columns.now.filter(_.sortDir.nonEmpty),
+          filters.now.isEmpty
+        ).getIndexBridge)
+        cachedIndexBridge.get
+      }
+      GroupSave(col, indexBridge).save()
+    }
     val cancel          = { _: MouseEvent =>
       resetEditColToOrigColCache(colIndex, colType)
       modelElements() = toggleEdit(modelElements.now, colIndex, nsFull, attr)
@@ -103,7 +113,7 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
     val togglers: Seq[MouseEvent => Unit] = if (attr == "e")
       togglerActions(colIndex) else Nil
 
-    val editExprOps = EditExprs(col)
+    val editExprOps                     = EditExprs(col)
     val (editDropdownId, editExprItems) = (
       editExprOps.editDropdownId,
       editExprOps.editExprItems

@@ -34,7 +34,7 @@ case class UpdateCardOne[T](
   expr: String
 )(implicit ctx: Ctx.Owner)
   extends UpdateClient[T](
-    cols, qr, origArray, editArray, baseClass,
+    cols, qr, editArray, baseClass,
     rowIndex, related, nsAlias, nsFull, attrName, enums
   ) {
 
@@ -44,14 +44,17 @@ case class UpdateCardOne[T](
     cell: TableCell,
     row: TableRow,
     eid: Long,
-    oldVopt: Option[T],
     isNum: Boolean
   ): Unit = {
 
+    val oldVopt = origArray(rowIndex)
     val oldStr: String = oldVopt.fold("")(_.toString)
     val newStr: String = _html2str(cell.innerHTML)
 
     if (oldStr == newStr) {
+      // Reset client cache if no change
+      editArray(rowIndex) = oldVopt
+
       // Void change marker
       setCellEditMode(cell, oldVopt, oldVopt)
 
@@ -98,7 +101,6 @@ case class UpdateCardOne[T](
         if (related == 0) {
           editArray(rowIndex) = newVopt
           setCellEditMode(cell, oldVopt, newVopt)
-
         } else {
           val eArray = qr.num(qr.arrayIndexes(eIndex))
           var i      = 0

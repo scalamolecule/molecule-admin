@@ -2,7 +2,7 @@ package moleculeadmin.client.app.logic.query.keyEvents
 
 import moleculeadmin.client.app.logic.query.QueryState.editCellId
 import org.scalajs.dom.html.TableRow
-import org.scalajs.dom.raw.{Element, HTMLInputElement, HTMLUListElement, KeyboardEvent}
+import org.scalajs.dom.raw.{HTMLInputElement, HTMLUListElement, KeyboardEvent}
 import org.scalajs.dom.{Node, document, window}
 import rx.Ctx
 import scalatags.JsDom.all._
