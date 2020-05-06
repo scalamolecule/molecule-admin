@@ -42,6 +42,7 @@ case class DataTableBodyFoot()(implicit val ctx: Ctx.Owner)
       ).get
       cachedSortIndex = sortIndex
       cachedFilterIndex = filterIndex
+      cachedIndexBridge = None
 
       // Cache current query result and rendering data
       queryCache = QueryCache(

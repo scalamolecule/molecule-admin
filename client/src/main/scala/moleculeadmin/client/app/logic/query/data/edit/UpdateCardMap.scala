@@ -34,7 +34,7 @@ case class UpdateCardMap[T](
   expr: String
 )(implicit ctx: Ctx.Owner)
   extends UpdateClient[T](
-    cols, qr, origArray, editArray, baseClass,
+    cols, qr, editArray, baseClass,
     rowIndex, related, nsAlias, nsFull, attr, enums
   ) {
 
@@ -44,10 +44,10 @@ case class UpdateCardMap[T](
     cell: TableCell,
     row: TableRow,
     eid: Long,
-    oldVopt: Option[T],
     isNum: Boolean
   ): Unit = {
 
+    val oldVopt = origArray(rowIndex)
     val oldPairs: List[(String, String)] =
       oldVopt.fold(List.empty[(String, String)]) {
         case vs: Map[_, _] =>

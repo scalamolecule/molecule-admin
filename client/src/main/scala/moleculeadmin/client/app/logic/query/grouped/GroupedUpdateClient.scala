@@ -17,7 +17,7 @@ case class GroupedUpdateClient[T](
   attrType: String,
   enums: Seq[String],
 )(implicit ctx: Ctx.Owner) extends UpdateClient[T](
-  columns.now, qr, Array.empty[Option[T]], valueArray, "",
+  columns.now, qr, valueArray, "",
   -1, -1, nsAlias, nsFull, attrName, enums
 ) {
 
@@ -28,7 +28,6 @@ case class GroupedUpdateClient[T](
     cell: TableCell,
     row: TableRow,
     eid: Long,
-    oldVOpt: Option[T],
     isNum: Boolean): Unit = ???
 
 

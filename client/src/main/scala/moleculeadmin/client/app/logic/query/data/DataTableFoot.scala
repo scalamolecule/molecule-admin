@@ -1,4 +1,5 @@
 package moleculeadmin.client.app.logic.query.data
+
 import boopickle.Default._
 import util.client.rx.RxBindings
 import moleculeadmin.client.app.logic.query.QueryState._

@@ -34,7 +34,7 @@ case class UpdateCardMany[T](
   expr: String
 )(implicit ctx: Ctx.Owner)
   extends UpdateClient[T](
-    cols, qr, origArray, editArray, baseClass,
+    cols, qr, editArray, baseClass,
     rowIndex, related, nsAlias, nsFull, attr, enums
   ) {
 
@@ -44,10 +44,10 @@ case class UpdateCardMany[T](
     cell: TableCell,
     row: TableRow,
     eid: Long,
-    oldVopt: Option[T],
     isNum: Boolean
   ): Unit = {
 
+    val oldVopt = origArray(rowIndex)
     val oldStrs: List[String] = oldVopt.fold(List.empty[String]) {
       case vs: List[_] =>
         vs.map(_.toString).distinct.sorted

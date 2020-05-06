@@ -10,7 +10,6 @@ import rx.Ctx
 abstract class UpdateClient[T](
   cols: Seq[Col],
   qr: QueryResult,
-  origArray: Array[Option[T]],
   editArray: Array[Option[T]],
   baseClass: String,
   rowIndex: Int,
@@ -40,7 +39,6 @@ abstract class UpdateClient[T](
     cell: TableCell,
     row: TableRow,
     eid: Long,
-    oldVOpt: Option[T],
     isNum: Boolean): Unit
 
   def updateClient(

@@ -6,7 +6,7 @@ import util.client.rx.RxBindings
 import moleculeadmin.client.app.logic.query.KeyEvents
 import moleculeadmin.client.app.logic.query.QueryState._
 import moleculeadmin.client.app.logic.query.data.Indexes
-import moleculeadmin.client.app.logic.query.keyEvents.Paging
+import moleculeadmin.client.app.logic.query.keyEvents.{Editing, Paging}
 import moleculeadmin.client.app.html.query.datatable.BodyElements
 import moleculeadmin.client.queryWireAjax
 import moleculeadmin.shared.ast.query.Col
@@ -20,7 +20,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scalatags.JsDom.all._
 
-case class GroupSave(col: Col)(implicit val ctx: Ctx.Owner)
+case class GroupSave(
+  col: Col,
+  indexBridge: Int => Int
+)(implicit val ctx: Ctx.Owner)
   extends RxBindings with ColOps with BodyElements with Paging {
 
   val Col(colIndex, _, nsAlias, nsFull, attr, attrType, colType,
@@ -47,10 +50,10 @@ case class GroupSave(col: Col)(implicit val ctx: Ctx.Owner)
   var tableRowIndexOffset = offset.now
   var tableRowIndexMax    = curLastRow
 
-  val sortCols    = columns.now.filter(_.sortDir.nonEmpty)
-  val unfiltered  = filters.now.isEmpty
-  val indexBridge = Indexes(qr, sortCols, unfiltered).getIndexBridge
-  val lastRow     = actualRowCount
+  val sortCols   = columns.now.filter(_.sortDir.nonEmpty)
+  val unfiltered = filters.now.isEmpty
+  val lastRow    = actualRowCount
+
 
   case class CellUpdater[ColType](cellBaseClass: String) {
     var cells   : NodeList  = null
@@ -130,42 +133,42 @@ case class GroupSave(col: Col)(implicit val ctx: Ctx.Owner)
     save: Seq[(Long, Seq[T], Seq[T])] => Future[Either[String, (Long, Long, String)]],
     updateCell: (Int, Option[ColType]) => Unit
   ): Unit = try {
-    val origArray = arrays(origIndex)
-    val editArray = arrays(editIndex)
-    var oldVopt   = Option.empty[ColType]
-    var newVopt   = Option.empty[ColType]
-    val data      = new ListBuffer[(Long, Seq[T], Seq[T])]
-    var i         = 0
-    var j         = 0
-    //    println("eidArray -------------")
-    //    eidArray foreach println
+    val origArray     = arrays(origIndex)
+    val editArray     = arrays(editIndex)
+    var oldVopt       = Option.empty[ColType]
+    var newVopt       = Option.empty[ColType]
+    val data          = new ListBuffer[(Long, Seq[T], Seq[T])]
+    var i             = 0
+    var j             = 0
+    var tableRowIndex = 0
+
     while (i < lastRow) {
       j = indexBridge(i)
+
+      // Current values
       eid = eidArray(j).get.toLong
       oldVopt = origArray(j)
       newVopt = editArray(j)
+
+      // Collect db update stmts
       data ++= prepare(eid, oldVopt, newVopt)
+
+      // Update table cell(s)
+      if (i >= tableRowIndexOffset && i < tableRowIndexMax) {
+        updateCell(tableRowIndex, newVopt)
+        tableRowIndex += 1
+      }
+
+      // Update client cache of original column
+      origArray(j) = newVopt
+
       i += 1
     }
-    //    println("data -----------------")
-    //    data foreach println
+
     if (data.nonEmpty) {
       save(data).map {
-        case Right((t, tx, txInstant)) =>
+        case Right(_) =>
           println(s"Successfully saved ${data.length} changes for attr `$attrFull`")
-          i = 0
-          var tableRowIndex = 0
-          while (i < lastRow) {
-            j = indexBridge(i)
-            newVopt = editArray(j)
-            origArray(j) = newVopt
-            editArray(j) = newVopt
-            if (i >= tableRowIndexOffset && i < tableRowIndexMax) {
-              updateCell(tableRowIndex, newVopt)
-              tableRowIndex += 1
-            }
-            i += 1
-          }
 
           // Invalidate previous caches to avoid old attr data to hang over
           queryCache = cache
@@ -178,6 +181,9 @@ case class GroupSave(col: Col)(implicit val ctx: Ctx.Owner)
       }
     } else {
       println("No changes")
+
+      // Turn spinner off
+      processing() = ""
     }
   } catch {
     case e: Throwable =>

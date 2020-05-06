@@ -1,4 +1,5 @@
 package moleculeadmin.client.app.logic.query.data
+
 import moleculeadmin.client.app.logic.query.QueryState._
 import moleculeadmin.shared.ast.query.{Col, Filter, QueryResult}
 import moleculeadmin.shared.ops.query.data.{FilterIndex, SortIndex}
