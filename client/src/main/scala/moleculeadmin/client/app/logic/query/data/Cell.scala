@@ -154,10 +154,8 @@ abstract class Cell(
         val editArray = qr.num(arrayIndex)
         (rowIndex: Int) =>
           editArray(rowIndex).fold(
-            _tdNoAggrEdit(mkId(rowIndex))
-          )(
-            _tdOneNumNoAggrEdit(mkId(rowIndex), _)
-          )
+            _tdOneAggr(mkId(rowIndex))
+          )(_tdOneAggr(mkId(rowIndex))(_))
 
       case "string" =>
         val origArray = getOrigArray(qr.str)
@@ -218,9 +216,9 @@ abstract class Cell(
             case "str" =>
               (rowIndex: Int) =>
                 editArray(rowIndex).fold(
-                  _tdNoEdit(mkId(rowIndex))
+                  _tdOneStr(mkId(rowIndex))
                 )(s =>
-                  _tdNoEdit(mkId(rowIndex))(
+                  _tdOneStr(mkId(rowIndex))(
                     if (s.startsWith("http"))
                       _urlSpan(s, false)
                     else
@@ -231,28 +229,24 @@ abstract class Cell(
             case "date" =>
               (rowIndex: Int) =>
                 editArray(rowIndex).fold(
-                  _tdNoEdit(mkId(rowIndex))
+                  _tdOneDate(mkId(rowIndex))
                 )(d =>
-                  _tdOneDate(mkId(rowIndex), truncateDateStr(d))
+                  _tdOneDate(mkId(rowIndex))(truncateDateStr(d))
                 )
 
             case "big" =>
               (rowIndex: Int) =>
                 editArray(rowIndex).fold(
-                  _tdNoEdit(mkId(rowIndex))
-                )(
-                  _tdOneNumNoEdit(mkId(rowIndex), _)
-                )
+                  _tdOneNum(mkId(rowIndex))
+                )(_tdOneNum(mkId(rowIndex))(_))
 
             case "txI" => txInstantLambda(mkId, arrayIndex, colIndex)
 
             case _ =>
               (rowIndex: Int) =>
                 editArray(rowIndex).fold(
-                  _tdNoEdit(mkId(rowIndex))
-                )(
-                  _tdNoEdit(mkId(rowIndex))(_)
-                )
+                  _tdOneStr(mkId(rowIndex))
+                )(_tdOneStr(mkId(rowIndex))(_))
           }
         }
 
@@ -323,7 +317,9 @@ abstract class Cell(
 
           case "ref" =>
             (rowIndex: Int) =>
-              editArray(rowIndex).fold(_tdNoEdit(mkId(rowIndex)))(v =>
+              editArray(rowIndex).fold(
+                _tdOneStr(mkId(rowIndex))
+              )(v =>
                 _tdOneRef(
                   mkId(rowIndex),
                   v.toLong,
@@ -340,10 +336,8 @@ abstract class Cell(
             (rowIndex: Int) =>
               mkId(rowIndex)
               editArray(rowIndex).fold(
-                _tdNoEdit(mkId(rowIndex))
-              )(
-                _tdOneNumNoEdit(mkId(rowIndex), _)
-              )
+                _tdOneNum(mkId(rowIndex))
+              )(_tdOneNum(mkId(rowIndex))(_))
         }
 
 
@@ -409,7 +403,7 @@ abstract class Cell(
             case "str" =>
               (rowIndex: Int) =>
                 editArray(rowIndex).fold(
-                  _tdManyItemsNoEdit(mkId(rowIndex))
+                  _tdMany(mkId(rowIndex), "items")
                 )(vs =>
                   _tdManyStringUrl(
                     mkId(rowIndex),
@@ -426,7 +420,7 @@ abstract class Cell(
             case "date" =>
               (rowIndex: Int) =>
                 editArray(rowIndex).fold(
-                  _tdNoEdit(mkId(rowIndex))
+                  _tdMany(mkId(rowIndex), "str")
                 )(vs =>
                   _tdManyDate(mkId(rowIndex), vs.sorted, showAll)
                 )
@@ -434,7 +428,7 @@ abstract class Cell(
             case "big" =>
               (rowIndex: Int) =>
                 editArray(rowIndex).fold(
-                  _tdNoEdit(mkId(rowIndex))
+                  _tdMany(mkId(rowIndex), "num")
                 )(vs =>
                   _tdManyString(mkId(rowIndex), vs.sorted, "num", showAll)
                 )
@@ -442,7 +436,7 @@ abstract class Cell(
             case _ =>
               (rowIndex: Int) =>
                 editArray(rowIndex).fold(
-                  _tdNoEdit(mkId(rowIndex))
+                  _tdMany(mkId(rowIndex), "str")
                 )(vs =>
                   _tdManyString(mkId(rowIndex), vs.sorted, "str", showAll)
                 )
@@ -456,7 +450,7 @@ abstract class Cell(
           case "eid" =>
             (rowIndex: Int) =>
               editArray(rowIndex).fold(
-                _tdNoEdit(mkId(rowIndex))
+                _tdMany(mkId(rowIndex), "num")
               )(vs =>
                 _tdManyRef(
                   mkId(rowIndex),
@@ -471,7 +465,7 @@ abstract class Cell(
             val getCls = getClassLambda(origArray, editArray)
             (rowIndex: Int) =>
               editArray(rowIndex).fold(
-                _tdNoEdit(mkId(rowIndex))
+                _tdMany(mkId(rowIndex), "num")
               )(vs =>
                 _tdManyRefGroupEdit(
                   mkId(rowIndex),
@@ -500,7 +494,7 @@ abstract class Cell(
           case "ref" =>
             (rowIndex: Int) =>
               editArray(rowIndex).fold(
-                _tdNoEdit(mkId(rowIndex))
+                _tdMany(mkId(rowIndex), "num")
               )(vs =>
                 _tdManyRef(
                   mkId(rowIndex),
@@ -527,7 +521,7 @@ abstract class Cell(
           case _ =>
             (rowIndex: Int) =>
               editArray(rowIndex).fold(
-                _tdNoEdit(mkId(rowIndex))
+                _tdMany(mkId(rowIndex), "num")
               )(vs =>
                 _tdManyDouble(mkId(rowIndex), vs.sorted, showAll)
               )
@@ -580,7 +574,7 @@ abstract class Cell(
             case "date" =>
               (rowIndex: Int) =>
                 editArray(rowIndex).fold(
-                  _tdMapItemsNoEdit(mkId(rowIndex))
+                  _tdMapItems(mkId(rowIndex))
                 )(
                   _tdMapDate(mkId(rowIndex), _)
                 )
@@ -588,7 +582,7 @@ abstract class Cell(
             case "str" =>
               (rowIndex: Int) =>
                 editArray(rowIndex).fold(
-                  _tdMapItemsNoEdit(mkId(rowIndex))
+                  _tdMapItems(mkId(rowIndex))
                 )(
                   _tdMapStr(mkId(rowIndex), _)
                 )
@@ -596,7 +590,7 @@ abstract class Cell(
             case _ =>
               (rowIndex: Int) =>
                 editArray(rowIndex).fold(
-                  _tdMapItemsNoEdit(mkId(rowIndex))
+                  _tdMapItems(mkId(rowIndex))
                 )(
                   _tdMapStrOther(mkId(rowIndex), _)
                 )
@@ -620,7 +614,7 @@ abstract class Cell(
         } else {
           rowIndex: Int =>
             editArray(rowIndex).fold(
-              _tdNoEdit(mkId(rowIndex))
+              _tdMapItems(mkId(rowIndex))
             )(
               _tdMapDouble(mkId(rowIndex), _)
             )
