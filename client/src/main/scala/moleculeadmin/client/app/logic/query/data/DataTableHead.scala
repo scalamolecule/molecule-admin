@@ -85,14 +85,16 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
     val Col(colIndex, _, nsAlias, nsFull, attr, _, colType, card, _, _,
     aggrType, expr, sortDir, sortPos, _) = col
 
-    val postfix         = attrResolver.postfix(col)
-    val sortable        = card == 1 || singleAggrTypes.contains(aggrType)
-    val sort            = sortAction(colIndex)
-    val editable        = isEditable(columns.now, colIndex, nsAlias, nsFull)
-    val edit            = { _: MouseEvent =>
+    val postfix  = attrResolver.postfix(col)
+    val sortable = card == 1 || singleAggrTypes.contains(aggrType)
+    val sort     = sortAction(colIndex)
+    val editable = isEditable(columns.now, colIndex, nsAlias, nsFull)
+
+    val edit = { _: MouseEvent =>
       modelElements() = toggleEdit(modelElements.now, colIndex, nsFull, attr)
     }
-    val save            = { _: MouseEvent =>
+
+    val save = { _: MouseEvent =>
       val indexBridge = cachedIndexBridge.getOrElse {
         cachedIndexBridge = Some(Indexes(
           queryCache.queryResult,
@@ -103,10 +105,12 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
       }
       GroupSave(col, indexBridge).save()
     }
-    val cancel          = { _: MouseEvent =>
+
+    val cancel = { _: MouseEvent =>
       resetEditColToOrigColCache(colIndex, colType)
       modelElements() = toggleEdit(modelElements.now, colIndex, nsFull, attr)
     }
+
     val retractEntities = { _: MouseEvent => GroupRetract(col).entities() }
     val retractValues   = { _: MouseEvent => GroupRetract(col).values() }
 
