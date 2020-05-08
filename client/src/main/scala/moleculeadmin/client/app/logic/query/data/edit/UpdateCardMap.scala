@@ -44,10 +44,12 @@ case class UpdateCardMap[T](
     cell: TableCell,
     row: TableRow,
     eid: Long,
-    isNum: Boolean
+    isNum: Boolean,
+    isGroupEdit: Boolean
   ): Unit = {
 
-    val oldVopt = origArray(rowIndex)
+    val oldVopt = if (isGroupEdit) origArray(rowIndex) else editArray(rowIndex)
+
     val oldPairs: List[(String, String)] =
       oldVopt.fold(List.empty[(String, String)]) {
         case vs: Map[_, _] =>

@@ -56,8 +56,8 @@ abstract class Cell(
     }
 
     // e has to be first within namespace to allow editing
-    val groupEdit = expr == "edit"
-    val editable  = groupEdit || isEditable(cols, colIndex, nsAlias, nsFull)
+    val isGroupEdit = expr == "edit"
+    val editable  = isGroupEdit || isEditable(cols, colIndex, nsAlias, nsFull)
     lazy val showAll = expr == "orig" || expr == "edit"
 
 
@@ -108,12 +108,12 @@ abstract class Cell(
         // Unmark row when going out of focus
         row.className = "view"
         val eid: Long = cell.getAttribute("eid").toLong
-        updater.update(mkId, cellId, cell, row, eid, isNum)
+        updater.update(mkId, cellId, cell, row, eid, isNum, isGroupEdit)
       }
     }
 
     def getOrigArray[T](arrays: List[Array[Option[T]]]): Array[Option[T]] = {
-      if (groupEdit)
+      if (isGroupEdit)
         arrays(arrayIndex - 1)
       else
         Array.empty[Option[T]]
@@ -123,7 +123,7 @@ abstract class Cell(
       origArray: Array[Option[T]],
       editArray: Array[Option[T]]
     ): (String, Int) => String = {
-      if (groupEdit)
+      if (isGroupEdit)
         (baseClass: String, rowIndex: Int) => {
           val oldV = origArray(rowIndex)
           val newV = editArray(rowIndex)
@@ -281,7 +281,7 @@ abstract class Cell(
                 curCheckToggler,
               )
 
-          case "ref" if groupEdit =>
+          case "ref" if isGroupEdit =>
             (rowIndex: Int) =>
               _tdOneRefEdit2(
                 mkId(rowIndex),
@@ -461,7 +461,7 @@ abstract class Cell(
                 )
               )
 
-          case "ref" if groupEdit =>
+          case "ref" if isGroupEdit =>
             val getCls = getClassLambda(origArray, editArray)
             (rowIndex: Int) =>
               editArray(rowIndex).fold(

@@ -28,7 +28,9 @@ case class GroupedUpdateClient[T](
     cell: TableCell,
     row: TableRow,
     eid: Long,
-    isNum: Boolean): Unit = ???
+    isNum: Boolean,
+    isGroupEdit: Boolean
+  ): Unit = ???
 
 
   def updateClient(
