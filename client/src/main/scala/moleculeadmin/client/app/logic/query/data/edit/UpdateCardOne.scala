@@ -44,10 +44,12 @@ case class UpdateCardOne[T](
     cell: TableCell,
     row: TableRow,
     eid: Long,
-    isNum: Boolean
+    isNum: Boolean,
+    isGroupEdit: Boolean
   ): Unit = {
 
-    val oldVopt = origArray(rowIndex)
+    val oldVopt = if (isGroupEdit) origArray(rowIndex) else editArray(rowIndex)
+
     val oldStr: String = oldVopt.fold("")(_.toString)
     val newStr: String = _html2str(cell.innerHTML)
 

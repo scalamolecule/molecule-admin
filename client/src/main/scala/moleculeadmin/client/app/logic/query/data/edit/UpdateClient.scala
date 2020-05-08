@@ -39,7 +39,9 @@ abstract class UpdateClient[T](
     cell: TableCell,
     row: TableRow,
     eid: Long,
-    isNum: Boolean): Unit
+    isNum: Boolean,
+    isGroupEdit: Boolean
+  ): Unit
 
   def updateClient(
     cellIdMaker: Int => String,

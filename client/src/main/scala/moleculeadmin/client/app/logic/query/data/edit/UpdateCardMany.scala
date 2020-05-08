@@ -44,10 +44,12 @@ case class UpdateCardMany[T](
     cell: TableCell,
     row: TableRow,
     eid: Long,
-    isNum: Boolean
+    isNum: Boolean,
+    isGroupEdit: Boolean
   ): Unit = {
 
-    val oldVopt = origArray(rowIndex)
+    val oldVopt = if (isGroupEdit) origArray(rowIndex) else editArray(rowIndex)
+
     val oldStrs: List[String] = oldVopt.fold(List.empty[String]) {
       case vs: List[_] =>
         vs.map(_.toString).distinct.sorted
