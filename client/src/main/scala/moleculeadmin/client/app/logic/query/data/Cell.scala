@@ -57,7 +57,7 @@ abstract class Cell(
 
     // e has to be first within namespace to allow editing
     val isGroupEdit = expr == "edit"
-    val editable  = isGroupEdit || isEditable(cols, colIndex, nsAlias, nsFull)
+    val editable    = isGroupEdit || isEditable(cols, colIndex, nsAlias, nsFull)
     lazy val showAll = expr == "orig" || expr == "edit"
 
 
@@ -84,11 +84,10 @@ abstract class Cell(
       rowIndex: Int,
       baseClass: String
     ): () => Unit = {
-      val cellId : String    = idBase(colIndex)(rowIndex)
-      val oldVOpt: Option[T] = editArray(rowIndex)
-      val isNum  : Boolean   = Seq(
+      val cellId: String  = idBase(colIndex)(rowIndex)
+      val isNum : Boolean = Seq(
         "Int", "Long", "ref", "datom", "Float", "Double").contains(attrType)
-      val updater            = card match {
+      val updater         = card match {
         case 1 => UpdateCardOne(
           cols, qr, origArray, editArray, baseClass, colType, colIndex, rowIndex,
           related, nsAlias, nsFull, attr, attrType, enums, expr

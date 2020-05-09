@@ -142,6 +142,14 @@ case class GroupSave(
     var j             = 0
     var tableRowIndex = 0
 
+    if (filters.now.nonEmpty && lastRow != cachedFilterIndex.length) {
+      val err = "Unexpected internal error: " +
+        s"lastRow count ($lastRow) doesn't match " +
+        s"cachedFilterIndex.length (${cachedFilterIndex.length})"
+      window.alert(err)
+      throw new RuntimeException(err)
+    }
+
     while (i < lastRow) {
       j = indexBridge(i)
 
