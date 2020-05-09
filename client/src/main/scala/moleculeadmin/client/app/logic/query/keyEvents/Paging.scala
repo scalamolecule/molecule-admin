@@ -108,7 +108,16 @@ trait Paging extends BaseKeyEvents {
 
   def chunkSize: Int = {
     val curRowCount1 = actualRowCount
-    curRowCount1 / (if (curRowCount1 < 10000) 50 else 100) / limit.now
+    val factor       =
+      if (curRowCount1 > 25000)
+        100
+      else if (curRowCount1 > 10000)
+        50
+      else if (curRowCount1 > 5000)
+        25
+      else
+        10
+    curRowCount1 / factor / limit.now
   }
 
   def hasChunkBefore: Boolean =
