@@ -10,12 +10,12 @@ import moleculeadmin.shared.ast.query.{Col, QueryResult}
 import moleculeadmin.shared.ops.query.data.FilterFactory
 import moleculeadmin.shared.ops.query.{ColOps, ModelOps}
 import org.scalajs.dom.html.{TableCell, TableSection}
-import util.client.rx.RxBindings
-import org.scalajs.dom.raw.{HTMLInputElement, Node}
+import org.scalajs.dom.raw.Node
 import org.scalajs.dom.{MouseEvent, document, window}
 import rx.{Ctx, Rx}
 import scalatags.JsDom
 import scalatags.JsDom.all._
+import util.client.rx.RxBindings
 
 
 case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
