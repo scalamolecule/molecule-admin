@@ -24,7 +24,7 @@ case class Toggle(
 
   var entityRow             = 0
   var cells: HTMLCollection = null
-  var cell : Element        = null
+  var span : Element        = null
   val allEids               = mutable.Set.empty[Long]
 
   val eidStrs = if (eid == 0L) {
@@ -269,8 +269,8 @@ case class Toggle(
   }
 
   def toggleIcon(eidCol: Int): Unit = {
-    cell = cells(eidCol)
-    if (eidStrs.contains(cell.innerText))
-      cell.children(iconIndex).setAttribute("class", newCls)
+    span = cells(eidCol).firstElementChild
+    if (eidStrs.contains(span.innerText))
+      span.children(iconIndex).setAttribute("class", newCls)
   }
 }
