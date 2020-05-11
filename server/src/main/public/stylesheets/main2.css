@@ -83,28 +83,35 @@ i.oi-x:hover {
 
 .starOn {
     color: #ffa500;
+    margin-top: 1px;
     padding-left: 5px;
 }
 .starOff{
     color: #b5b5b5;
+    margin-top: 1px;
     padding-left: 5px;
 }
 
 .flagOn {
     color: #ff5800;
+    margin-top: 2px;
     padding-left: 4px;
 }
 .flagOff{
     color: #b5b5b5;
+    margin-top: 2px;
     padding-left: 4px;
 }
 
 .checkOn {
     color: #66c166;
+    margin-top: 2px;
     padding-left: 4px;
+
 }
 .checkOff{
     color: #bfbfbf;
+    margin-top: 2px;
     padding-left: 4px;
 }
 

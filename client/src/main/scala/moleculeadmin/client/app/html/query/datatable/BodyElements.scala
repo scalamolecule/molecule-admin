@@ -111,13 +111,16 @@ trait BodyElements
     td(
       id := cellId,
       cls := Rx(if (eid == curEntity()) "eidChosen" else "eid"),
-      _xRetract(retract),
-      eid,
-      i(cls := starCls, onclick := starToggle),
-      i(cls := flagCls, onclick := flagToggle),
-      i(cls := checkCls, onclick := checkToggle),
       onmouseover := setCurEid,
-      onclick := lockCurEid
+      onclick := lockCurEid,
+      // todo: skip span and do css magic to avoid squeezing overflow
+      span(
+        _xRetract(retract),
+        eid,
+        i(cls := starCls, onclick := starToggle),
+        i(cls := flagCls, onclick := flagToggle),
+        i(cls := checkCls, onclick := checkToggle),
+      ),
     )
   }
   def _tdOneRef(

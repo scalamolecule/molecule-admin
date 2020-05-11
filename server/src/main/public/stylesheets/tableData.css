@@ -83,17 +83,29 @@
 .tableData tBody td i.retractEntity:hover {
     color: red;
 }
+
 .tableData tBody td.eid {
     text-align: right;
     color: #2b7dbe;
     cursor: default;
+    white-space: nowrap;
+    display: table-cell;
+}
+.tableData tBody td.eid span {
+    display: flex;
 }
 .tableData tBody td.eidChosen {
     text-align: right;
     background-color: #3cb7ff4f;
     color: #2400ff;
     cursor: default;
+    white-space: nowrap;
+    display: table-cell;
 }
+.tableData tBody td.eidChosen span {
+    display: flex;
+}
+
 .tableData tBody td.tx {
     text-align: right;
     color: #a54ffa;
