@@ -42,7 +42,7 @@ case class ToggleOffAll(tableBody: TableSection, tpe: String) extends AppElement
   while (i < rows.length) {
     cells = rows(i).children
     eidCols.foreach { col =>
-      cells(col).children(iconIndex).setAttribute("class", offCls)
+      cells(col).firstElementChild.children(iconIndex).setAttribute("class", offCls)
     }
     i += 1
   }
