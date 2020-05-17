@@ -26,7 +26,10 @@ object Settings {
     libraryDependencies ++= Seq(
       "org.scala-js" %%% "scalajs-dom" % "0.9.8",
       "com.lihaoyi" %%% "scalarx" % "0.4.1",
-      "io.github.cquiroz" %%% "scala-java-time" % "2.0.0-RC3"
+      "io.github.cquiroz" %%% "scala-java-time" % "2.0.0-RC3",
+
+
+      "org.scala-js" %% "scalajs-env-jsdom-nodejs" % "1.0.0"
     )
   )
 

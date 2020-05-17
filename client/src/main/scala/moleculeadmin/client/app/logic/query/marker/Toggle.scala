@@ -28,15 +28,15 @@ case class Toggle(
   val allEids               = mutable.Set.empty[Long]
 
   val eidStrs = if (eid == 0L) {
-    val qr               = queryCache.queryResult
+    val qr               = cachedQueryResult
     val eidArray         = qr.num(qr.arrayIndexes(colIndex))
     val filteredEidArray =
-      if (cachedFilterIndex.nonEmpty) {
-        val a2     = new Array[Option[Double]](cachedFilterIndex.length)
+      if (cachedSortFilterIndex.nonEmpty) {
+        val a2     = new Array[Option[Double]](cachedSortFilterIndex.length)
         var i      = 0
-        val length = cachedFilterIndex.length
+        val length = cachedSortFilterIndex.length
         while (i < length) {
-          a2(i) = eidArray(cachedFilterIndex(i))
+          a2(i) = eidArray(cachedSortFilterIndex(i))
           i += 1
         }
         a2

@@ -35,24 +35,28 @@ object ScalaFiddleTestCode extends TestSuite with AppElements {
           |
           |@JSExportTopLevel("ScalaFiddle")
           |object ScalaFiddle {
-          |
+          |  implicit class Regex(sc: StringContext) {
+          |    def r = new scala.util.matching.Regex(sc.parts.mkString, sc.parts.tail.map(_ => "x"): _*)
+          |  }
           |  @JSExport
           |  val lambda: js.Tuple2[String, String] => js.Tuple2[js.UndefOr[String], String] = {
-          |    case js.Tuple2(e: String, long: String) =>
-          |      try {
-          |        val result: Option[BigInt] = process(
-          |          BigInt(e),
-          |          BigInt(long)
-          |        )
-          |        js.Tuple2(result.map(_.toString).orUndefined, "")
-          |      } catch {
-          |        case e: Throwable => js.Tuple2(Option.empty[String].orUndefined, e.toString)
-          |      }
+          |    case js.Tuple2(e: String, long: String) => try {
+          |      val result: Option[BigInt] = process(
+          |        BigInt(e),
+          |        BigInt(long)
+          |      )
+          |      js.Tuple2(result.map(_.toString).orUndefined, "")
+          |    } catch {
+          |      case e: Throwable => js.Tuple2(Option.empty[String].orUndefined, e.toString)
+          |    }
           |  }
           |
           |  val process: (BigInt, BigInt) => Option[BigInt] = {
           |    var i = 0
-          |    (e: BigInt, long: BigInt) => {
+          |    (
+          |      e: BigInt,
+          |      long: BigInt
+          |    ) => {
           |      i += 1
           |      Some(long + i)
           |    }

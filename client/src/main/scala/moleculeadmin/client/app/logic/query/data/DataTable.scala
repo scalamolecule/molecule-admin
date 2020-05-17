@@ -158,7 +158,6 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
       .query(db, datalogQuery, rules, l, ll, lll, maxRows.now, columns.now)
       .call().foreach { result =>
       if (origAjaxCall == lastAjaxCall) {
-        // println("handling ajax result " + origAjaxCall)
         result match {
           case Right(queryResult) =>
             rowCountAll = queryResult.rowCountAll
@@ -205,7 +204,7 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
             )
         }
       } else {
-        // Ignore previous results
+        // Ignore aborted results
         // println("ignoring ajax result " + origAjaxCall)
       }
     }

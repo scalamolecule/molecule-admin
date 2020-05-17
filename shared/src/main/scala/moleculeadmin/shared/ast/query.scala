@@ -65,18 +65,6 @@ object query extends HelpersAdmin {
     markerPred: Markers => Option[T] => Boolean
   )
 
-
-  case class QueryCache(
-    modelElements: Seq[Element],
-    tree: Tree,
-    molecule: String,
-    queryResult: QueryResult,
-    columns: Seq[Col],
-    sortIndex: Array[Int],
-    filters: Map[Int, Filter[_]] = Map.empty[Int, Filter[_]],
-    filterIndex: Array[Int],
-  )
-
   case class QueryDTO(
     molecule: String,
     part: String,

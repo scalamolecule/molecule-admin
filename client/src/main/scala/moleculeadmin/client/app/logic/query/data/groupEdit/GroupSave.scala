@@ -2,12 +2,9 @@ package moleculeadmin.client.app.logic.query.data.groupEdit
 
 import autowire._
 import boopickle.Default._
-import util.client.rx.RxBindings
-import moleculeadmin.client.app.logic.query.KeyEvents
-import moleculeadmin.client.app.logic.query.QueryState._
-import moleculeadmin.client.app.logic.query.data.Indexes
-import moleculeadmin.client.app.logic.query.keyEvents.{Editing, Paging}
 import moleculeadmin.client.app.html.query.datatable.BodyElements
+import moleculeadmin.client.app.logic.query.QueryState._
+import moleculeadmin.client.app.logic.query.keyEvents.Paging
 import moleculeadmin.client.queryWireAjax
 import moleculeadmin.shared.ast.query.Col
 import moleculeadmin.shared.ops.query.ColOps
@@ -15,15 +12,13 @@ import org.scalajs.dom.html.{LI, TableCell, TableRow}
 import org.scalajs.dom.{Node, NodeList, document, window}
 import rx.{Ctx, Rx}
 import scalatags.JsDom.TypedTag
+import scalatags.JsDom.all._
+import util.client.rx.RxBindings
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scalatags.JsDom.all._
 
-case class GroupSave(
-  col: Col,
-  indexBridge: Int => Int
-)(implicit val ctx: Ctx.Owner)
+case class GroupSave(col: Col)(implicit val ctx: Ctx.Owner)
   extends RxBindings with ColOps with BodyElements with Paging {
 
   val Col(colIndex, _, nsAlias, nsFull, attr, attrType, colType,
@@ -36,8 +31,8 @@ case class GroupSave(
   // Start spinner since saving to db can take time
   processing() = filterId
 
-  val cache = queryCache
-  val qr    = cache.queryResult
+  val qr          = cachedQueryResult
+  val indexBridge = cachedIndexBridge
 
   val eidIndex = getEidColIndex(columns.now, colIndex, nsAlias, nsFull)
   val eidArray = qr.num(qr.arrayIndexes(eidIndex))
@@ -50,9 +45,7 @@ case class GroupSave(
   var tableRowIndexOffset = offset.now
   var tableRowIndexMax    = curLastRow
 
-  val sortCols   = columns.now.filter(_.sortDir.nonEmpty)
-  val unfiltered = filters.now.isEmpty
-  val lastRow    = actualRowCount
+  val lastRow = actualRowCount
 
 
   case class CellUpdater[ColType](cellBaseClass: String) {
@@ -142,10 +135,10 @@ case class GroupSave(
     var j             = 0
     var tableRowIndex = 0
 
-    if (filters.now.nonEmpty && lastRow != cachedFilterIndex.length) {
+    if (filters.now.nonEmpty && lastRow != cachedSortFilterIndex.length) {
       val err = "Unexpected internal error: " +
         s"lastRow count ($lastRow) doesn't match " +
-        s"cachedFilterIndex.length (${cachedFilterIndex.length})"
+        s"cachedFilterIndex.length (${cachedSortFilterIndex.length})"
       window.alert(err)
       throw new RuntimeException(err)
     }
@@ -178,8 +171,8 @@ case class GroupSave(
         case Right(_) =>
           println(s"Successfully saved ${data.length} changes for attr `$attrFull`")
 
-          // Invalidate previous caches to avoid old attr data to hang over
-          queryCache = cache
+          // Reset cache to avoid old attr data to hang over
+          cachedQueryResult = qr
 
           // Turn spinner off
           processing() = ""

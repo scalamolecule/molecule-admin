@@ -4,7 +4,6 @@ import moleculeadmin.client.app.logic.query.KeyEvents
 import moleculeadmin.client.app.logic.query.QueryState._
 import moleculeadmin.shared.ast.query.Col
 import rx.Ctx
-import scalatags.JsDom.all.s
 
 
 abstract class GroupedData[T](col: Col)(implicit ctx: Ctx.Owner)
@@ -13,7 +12,7 @@ abstract class GroupedData[T](col: Col)(implicit ctx: Ctx.Owner)
   val Col(colIndex, _, nsAlias, nsFull, attr, attrType, colType, _,
   opt, enums, _, _, _, _, _) = col
 
-  val qr            = queryCache.queryResult
+  val qr            = cachedQueryResult
   val attrFull      = s":$nsFull/${clean(attr)}"
   val enumPrefix    = if (enums.isEmpty) "" else s":$nsAlias.${clean(attr)}/"
   val isNum         = Seq("Int", "Long", "Float", "Double").contains(attrType)
@@ -62,13 +61,7 @@ abstract class GroupedData[T](col: Col)(implicit ctx: Ctx.Owner)
   }
 
   def extractGroupedData(): Unit = {
-    val filterIndex = queryCache.filterIndex
-    val indexBridge = {
-      if (filterIndex.nonEmpty)
-        (i: Int) => filterIndex(i)
-      else
-        (i: Int) => i
-    }
+    val indexBridge = cachedIndexBridge
     var rowIndex    = 0
     val lastRow     = actualRowCount
     colType match {

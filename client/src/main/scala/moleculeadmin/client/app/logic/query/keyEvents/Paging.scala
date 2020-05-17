@@ -94,7 +94,7 @@ trait Paging extends BaseKeyEvents {
   }
 
   def actualRowCount: Int = if (filters.now.isEmpty)
-    rowCount else cachedFilterIndex.length
+    rowCount else cachedSortFilterIndex.length
 
   def isFirst: Boolean = offset.now == 0
 

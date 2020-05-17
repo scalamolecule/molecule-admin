@@ -2,13 +2,12 @@ package moleculeadmin.client.app.logic.query.data.groupEdit
 
 import autowire._
 import boopickle.Default._
-import moleculeadmin.client.app.logic.query.QueryState._
-import moleculeadmin.client.app.logic.query.data.Indexes
-import moleculeadmin.client.app.logic.query.keyEvents.Paging
 import moleculeadmin.client.app.html.query.datatable.HeadElements
+import moleculeadmin.client.app.logic.query.QueryState._
+import moleculeadmin.client.app.logic.query.keyEvents.Paging
 import moleculeadmin.client.queryWireAjax
 import moleculeadmin.shared.ast.query.Col
-import moleculeadmin.shared.ast.schema.{Attr, Part}
+import moleculeadmin.shared.ast.schema.Attr
 import org.scalajs.dom.window
 import rx.Ctx
 import scala.collection.mutable.ListBuffer
@@ -47,10 +46,8 @@ case class GroupJoin(colIndex: Int, nsFull: String)(implicit val ctx: Ctx.Owner)
     isEnum: Boolean,
     value: String
   ): Unit = {
-    val qr          = queryCache.queryResult
-    val sortCols    = columns.now.filter(_.sortDir.nonEmpty)
-    val unfiltered  = filters.now.isEmpty
-    val indexBridge = Indexes(qr, sortCols, unfiltered).getIndexBridge
+    val qr          = cachedQueryResult
+    val indexBridge = cachedIndexBridge
     val eidArray    = qr.num(qr.arrayIndexes(colIndex))
     val eids        = new ListBuffer[Long]
     val lastRow     = actualRowCount

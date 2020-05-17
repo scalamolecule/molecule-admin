@@ -4,10 +4,9 @@ import boopickle.Default._
 import moleculeadmin.client.app.html.query.datatable.{BodyElements, HeadElements}
 import moleculeadmin.client.app.logic.query.KeyEvents
 import moleculeadmin.client.app.logic.query.QueryState._
-import moleculeadmin.client.app.logic.query.data.Indexes
 import moleculeadmin.client.app.logic.query.data.groupEdit.ops._
 import moleculeadmin.client.scalafiddle.ScalaFiddle
-import moleculeadmin.shared.ast.query.{Col, QueryResult}
+import moleculeadmin.shared.ast.query.Col
 import moleculeadmin.shared.ops.query.ColOps
 import org.scalajs.dom.{Node, NodeList, document, window}
 import rx.Ctx
@@ -35,7 +34,8 @@ case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
     with BodyElements with HeadElements
     with KeyEvents with TypeMappings {
 
-  val Col(colIndex, _, _, nsFull, attr, attrType, _, card, opt, enums, _, _, _, _, _) = col
+  val Col(colIndex, _, _, nsFull, attr, attrType, _,
+  card, opt, enums, _, _, _, _, _) = col
 
   val colIndexes: Seq[Int] = columns.now.collect {
     case col if col.attrExpr != "edit" => col.colIndex
@@ -47,7 +47,7 @@ case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
   // Start spinner since compilation can take some seconds
   processing() = filterId
 
-  val qr: QueryResult = queryCache.queryResult
+  val qr = cachedQueryResult
 
   val tableRows: NodeList = document.getElementById("tableBody").childNodes
 
@@ -70,14 +70,10 @@ case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
     var newVopt             = Option.empty[ColType]
     val tableRowIndexOffset = offset.now
     val tableRowIndexMax    = curLastRow
-    val sortCols            = columns.now.filter(_.sortDir.nonEmpty)
-    val unfiltered          = filters.now.isEmpty
-    val indexBridge         = Indexes(qr, sortCols, unfiltered).getIndexBridge
+    val indexBridge         = cachedIndexBridge
     val lastRow             = actualRowCount
     var j                   = 0
     var tableRowIndex       = 0
-
-    //    println(scalaCode)
 
     def alert(error: String): Nothing = {
       println(scalaCode)

@@ -2,9 +2,9 @@ package moleculeadmin.client.app.logic.query.grouped
 
 import autowire._
 import boopickle.Default._
+import moleculeadmin.client.app.html.query.GroupedAttrElements
 import moleculeadmin.client.app.logic.query.QueryState._
 import moleculeadmin.client.app.logic.query.data.TypeValidation
-import moleculeadmin.client.app.html.query.GroupedAttrElements
 import moleculeadmin.client.queryWireAjax
 import moleculeadmin.shared.ast.query.Col
 import org.scalajs.dom.html.TableCell
@@ -148,7 +148,8 @@ abstract class GroupedUpdate[T](col: Col)(implicit ctx: Ctx.Owner)
     var i               = 0
     val tableRowsLength = tableRows.length
     while (i < tableRowsLength) {
-      val tableCell  = tableRows.item(i).childNodes.item(valueColIndex).asInstanceOf[TableCell]
+      val tableCell  = tableRows.item(i).childNodes
+        .item(valueColIndex).asInstanceOf[TableCell]
       val tableCellV = html2value(tableCell.innerHTML)
       if (tableCellV == oldTableStr) {
         affectedRows = affectedRows :+ i
@@ -160,13 +161,7 @@ abstract class GroupedUpdate[T](col: Col)(implicit ctx: Ctx.Owner)
     }
 
     // Update value array and collect entity ids
-    val filterIndex      = queryCache.filterIndex
-    val indexBridge      = {
-      if (filterIndex.nonEmpty)
-        (i: Int) => filterIndex(i)
-      else
-        (i: Int) => i
-    }
+    val indexBridge      = cachedIndexBridge
     val filteredRowCount = actualRowCount
     val positives        = new Array[Int](filteredRowCount)
     var eids             = List.empty[Long]
