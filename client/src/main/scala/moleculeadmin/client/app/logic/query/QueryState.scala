@@ -1,8 +1,9 @@
 package moleculeadmin.client.app.logic.query
 
 import molecule.ast.model.Element
+import moleculeadmin.client.app.logic.query.data.RowBuilder
 import moleculeadmin.shared.api.QueryApi
-import moleculeadmin.shared.ast.query.{Col, Filter, QueryCache, QueryDTO}
+import moleculeadmin.shared.ast.query.{Col, Filter, QueryDTO, QueryResult}
 import moleculeadmin.shared.ast.schema.{MetaSchema, Ns}
 import moleculeadmin.shared.ast.tree.Tree
 import rx.Var
@@ -59,19 +60,21 @@ object QueryState extends QueryApi {
   val offset     : Var[Int] = Var(0)
   val limit      : Var[Int] = Var(5)
 
+  // Caching (for paging) -----------------------------------
+  var cachedQueryResult    : QueryResult         = null
+  var cachedColumns        : Seq[Col]            = Seq.empty
+  var cachedFilters        : Map[Int, Filter[_]] = Map.empty
+  var cachedSortFilterIndex: Array[Int]          = Array.empty
+  var cachedIndexBridge    : Int => Int          = (i: Int) => i
+
+  // Current cell being edited
   var editCellId = ""
 
-  // Caching (for paging) -----------------------------------
-  var queryCache       : QueryCache          = null
-  var savedQueries     : Seq[QueryDTO]       = Seq.empty
-  var recentQueries    : Seq[QueryDTO]       = Seq.empty
-  var cachedCols       : Seq[Col]            = Seq.empty
-  var cachedSortIndex  : Array[Int]          = Array.empty
-  var cachedFilters    : Map[Int, Filter[_]] = Map.empty
-  var cachedFilterIndex: Array[Int]          = Array.empty
-  var cachedIndexBridge: Option[Int => Int]  = None
-
   val renderSubMenu: Var[String] = Var("trigger")
+
+  // Query view cache
+  var savedQueries : Seq[QueryDTO] = Seq.empty
+  var recentQueries: Seq[QueryDTO] = Seq.empty
 
   // Undo --------------------------------
   var showUndo: Var[Boolean] = Var(false)

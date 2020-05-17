@@ -3,7 +3,6 @@ package moleculeadmin.client.app.logic.query.data.groupEdit
 import autowire._
 import boopickle.Default._
 import moleculeadmin.client.app.logic.query.QueryState._
-import moleculeadmin.client.app.logic.query.data.Indexes
 import moleculeadmin.client.app.logic.query.keyEvents.Paging
 import moleculeadmin.client.queryWireAjax
 import moleculeadmin.shared.ast.query.Col
@@ -20,10 +19,8 @@ case class GroupRetract(col: Col)(implicit val ctx: Ctx.Owner)
   val Col(colIndex, _, nsAlias, nsFull, attr, attrType, colType, _,
   opt, enums, _, _, _, _, _) = col
 
-  val qr          = queryCache.queryResult
-  val sortCols    = columns.now.filter(_.sortDir.nonEmpty)
-  val unfiltered  = filters.now.isEmpty
-  val indexBridge = Indexes(qr, sortCols, unfiltered).getIndexBridge
+  val qr          = cachedQueryResult
+  val indexBridge = cachedIndexBridge
   val valueIndex  = qr.arrayIndexes(colIndex)
   val rowCount    = actualRowCount
   var i           = 0

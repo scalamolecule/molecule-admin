@@ -6,7 +6,7 @@ import moleculeadmin.client.app.logic.query.KeyEvents
 import moleculeadmin.client.app.logic.query.QueryState._
 import moleculeadmin.client.app.logic.query.data.groupEdit._
 import moleculeadmin.client.app.logic.query.marker.{Toggle, ToggleOffAll}
-import moleculeadmin.shared.ast.query.{Col, QueryResult}
+import moleculeadmin.shared.ast.query.Col
 import moleculeadmin.shared.ops.query.data.FilterFactory
 import moleculeadmin.shared.ops.query.{ColOps, ModelOps}
 import org.scalajs.dom.html.{TableCell, TableSection}
@@ -94,18 +94,7 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
       modelElements() = toggleEdit(modelElements.now, colIndex, nsFull, attr)
     }
 
-    val save = { _: MouseEvent =>
-      val indexBridge = cachedIndexBridge.getOrElse {
-        cachedIndexBridge = Some(Indexes(
-          queryCache.queryResult,
-          columns.now.filter(_.sortDir.nonEmpty),
-          filters.now.isEmpty
-        ).getIndexBridge)
-        cachedIndexBridge.get
-      }
-      GroupSave(col, indexBridge).save()
-    }
-
+    val save   = { _: MouseEvent => GroupSave(col).save() }
     val cancel = { _: MouseEvent =>
       resetEditColToOrigColCache(colIndex, colType)
       modelElements() = toggleEdit(modelElements.now, colIndex, nsFull, attr)
@@ -206,9 +195,8 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
 
 
   private def resetEditColToOrigColCache(colIndex: Int, colType: String): Unit = {
-    val curQueryCache   = queryCache
-    val qr: QueryResult = curQueryCache.queryResult
-    val arrayIndexes    = qr.arrayIndexes
+    val qr           = cachedQueryResult
+    val arrayIndexes = qr.arrayIndexes
 
     def revert[T](arrays: List[Array[Option[T]]]): List[Array[Option[T]]] = {
       val origColIndex = arrayIndexes(colIndex - 1)
@@ -227,7 +215,7 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
       case "mapString"  => qr.copy(mapStr = revert(qr.mapStr))
       case "mapDouble"  => qr.copy(mapNum = revert(qr.mapNum))
     }
-    queryCache = curQueryCache.copy(queryResult = origQueryResult)
+    cachedQueryResult = origQueryResult
   }
 
 
@@ -236,7 +224,7 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
     attrResolver: ResolveAttrs
   ): JsDom.TypedTag[TableCell] = {
     val Col(colIndex, _, _, _, _, attrType,
-    colType, card, opt, _, _, attrExpr, _, _, _) = col
+    colType, _, _, _, _, attrExpr, _, _, _) = col
 
     val filterId        = "filter-" + colIndex
     val attr            = attrResolver.postfixed(col)

@@ -13,7 +13,7 @@ case class SubMenuGrouped()(implicit val ctx: Ctx.Owner)
 
 
   def render: LI = {
-    if (queryCache != null && queryCache.queryResult.rowCountAll == 0) {
+    if (cachedQueryResult != null && cachedQueryResult.rowCountAll == 0) {
       _subMenu(
         "submenu-grouped",
         _shortcut("G", "rouped"),
