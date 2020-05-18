@@ -63,11 +63,11 @@ trait Insert extends BaseKeyEvents with BodyElements with TypeValidation {
           html.split("<br>").toList
         val vs   = if (attrType == "String" && enums.isEmpty) {
           strs.map(_
-            .replaceAllLiterally("&nbsp;", " ")
-            .replaceAllLiterally("&lt;", "<")
-            .replaceAllLiterally("&gt;", ">")
-            .replaceAllLiterally("&amp;", "&")
-            .replaceAllLiterally("<br>", "\n")
+            .replace("&nbsp;", " ")
+            .replace("&lt;", "<")
+            .replace("&gt;", ">")
+            .replace("&amp;", "&")
+            .replace("<br>", "\n")
             .trim)
             .filter(_.nonEmpty)
             .map(_html2str)
@@ -75,10 +75,10 @@ trait Insert extends BaseKeyEvents with BodyElements with TypeValidation {
           strs.flatMap(
             _.split("<br>")
               .map(_
-                .replaceAllLiterally("&nbsp;", " ")
-                .replaceAllLiterally("&lt;", "<")
-                .replaceAllLiterally("&gt;", ">")
-                .replaceAllLiterally("&amp;", "&")
+                .replace("&nbsp;", " ")
+                .replace("&lt;", "<")
+                .replace("&gt;", ">")
+                .replace("&amp;", "&")
                 .trim)
               .filter(_.nonEmpty)
           )
@@ -100,11 +100,11 @@ trait Insert extends BaseKeyEvents with BodyElements with TypeValidation {
         val vs = if (attrType == "String" && enums.isEmpty) {
           strs
             .map(_
-              .replaceAllLiterally("&nbsp;", " ")
-              .replaceAllLiterally("&lt;", "<")
-              .replaceAllLiterally("&gt;", ">")
-              .replaceAllLiterally("&amp;", "&")
-              .replaceAllLiterally("<br>", "\n")
+              .replace("&nbsp;", " ")
+              .replace("&lt;", "<")
+              .replace("&gt;", ">")
+              .replace("&amp;", "&")
+              .replace("<br>", "\n")
               .trim)
             .filter(_.nonEmpty)
             .map(_html2str)
@@ -112,10 +112,10 @@ trait Insert extends BaseKeyEvents with BodyElements with TypeValidation {
           strs.flatMap(
             _.split("<br>")
               .map(_
-                .replaceAllLiterally("&nbsp;", " ")
-                .replaceAllLiterally("&lt;", "<")
-                .replaceAllLiterally("&gt;", ">")
-                .replaceAllLiterally("&amp;", "&")
+                .replace("&nbsp;", " ")
+                .replace("&lt;", "<")
+                .replace("&gt;", ">")
+                .replace("&amp;", "&")
                 .trim)
               .filter(_.nonEmpty)
           )

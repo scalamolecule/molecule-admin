@@ -26,8 +26,8 @@ class BaseTestGroupEdit(col: Col) extends TestScalaFiddle {
 
 
     val attrStr = attr + " " * (15 - attr.length)
-    val errMsg  = error.replaceAllLiterally("\n", "\n       ")
-    val rhsStr  = rhs.replaceAllLiterally("\n", "\n                 ")
+    val errMsg  = error.replace("\n", "\n       ")
+    val rhsStr  = rhs.replace("\n", "\n                 ")
 
     //        println("----------------")
     //        println(newValue)

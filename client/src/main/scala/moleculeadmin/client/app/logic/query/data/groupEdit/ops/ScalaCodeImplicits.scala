@@ -34,7 +34,7 @@ abstract class ScalaCodeImplicits(cols: Seq[Col], col: Col, scalaExpr: String)
 
   val (shared, rhs) = {
     val (shared0, rhs0) = scalaExpr.split("\n---\n").toList match {
-      case List(a, b) => ("\n    " + a.replaceAllLiterally("\n", "\n    "), b)
+      case List(a, b) => ("\n    " + a.replace("\n", "\n    "), b)
       case List(b)    => ("", b)
       case _          => ("", "")
     }
@@ -43,7 +43,7 @@ abstract class ScalaCodeImplicits(cols: Seq[Col], col: Col, scalaExpr: String)
         if (rhs0.isEmpty || rhs0 == "None")
           s"Option.empty[$processType]"
         else
-          rhs0.replaceAllLiterally("\n", "\n      ")
+          rhs0.replace("\n", "\n      ")
 
       case _ =>
         if (rhs0.isEmpty || rhs0 == "Nil")
@@ -52,9 +52,9 @@ abstract class ScalaCodeImplicits(cols: Seq[Col], col: Col, scalaExpr: String)
           else
             s"Map.empty[String, $processType]"
         else if (opt && card > 1)
-          rhs0.replaceAllLiterally("\n", "\n      ").replace(attr, attr.init)
+          rhs0.replace("\n", "\n      ").replace(attr, attr.init)
         else
-          rhs0.replaceAllLiterally("\n", "\n      ")
+          rhs0.replace("\n", "\n      ")
     }
     (shared0, rhs1)
   }

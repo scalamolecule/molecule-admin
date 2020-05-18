@@ -66,7 +66,7 @@ case class GroupRetract(col: Col)(implicit val ctx: Ctx.Owner)
       }
       (
         data.length,
-        queryWireAjax().updateStr(db, attrFull, attrType, enumPrefix, data).call
+        queryWireAjax().updateStr(db, attrFull, attrType, enumPrefix, data.toSeq).call
       )
     }
 
@@ -82,7 +82,7 @@ case class GroupRetract(col: Col)(implicit val ctx: Ctx.Owner)
       }
       (
         data.length,
-        queryWireAjax().updateNum(db, attrFull, attrType, data).call
+        queryWireAjax().updateNum(db, attrFull, attrType, data.toSeq).call
       )
     }
 
@@ -99,7 +99,7 @@ case class GroupRetract(col: Col)(implicit val ctx: Ctx.Owner)
       }
       (
         data.length,
-        queryWireAjax().updateStr(db, attrFull, attrType, enumPrefix, data).call
+        queryWireAjax().updateStr(db, attrFull, attrType, enumPrefix, data.toSeq).call
       )
     }
 
@@ -115,7 +115,7 @@ case class GroupRetract(col: Col)(implicit val ctx: Ctx.Owner)
       }
       (
         data.length,
-        queryWireAjax().updateNum(db, attrFull, attrType, data).call
+        queryWireAjax().updateNum(db, attrFull, attrType, data.toSeq).call
       )
     }
 
@@ -137,7 +137,7 @@ case class GroupRetract(col: Col)(implicit val ctx: Ctx.Owner)
       }
       (
         data.length,
-        queryWireAjax().updateStr(db, attrFull, "String", "", data).call
+        queryWireAjax().updateStr(db, attrFull, "String", "", data.toSeq).call
       )
     }
 

@@ -5,7 +5,7 @@ import java.net.URI
 import java.util.{Date, UUID, Map => jMap}
 import clojure.lang.{Keyword, LazySeq, PersistentHashSet, PersistentVector}
 import moleculeadmin.shared.util.HelpersAdmin
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object rows2json extends HelpersAdmin {
 

@@ -9,7 +9,7 @@ import molecule.util.Helpers
 
 trait HelpersAdmin extends Helpers with SpecialNames {
 
-  def firstLow(str: Any): String = str.toString.head.toLower + str.toString.tail
+  def firstLow(str: Any): String = s"${str.toString.head.toLower}${str.toString.tail}"
 
   def mandatory(attr: String): Boolean = attr.last != '_' && attr.last != '$'
 
@@ -87,9 +87,9 @@ trait HelpersAdmin extends Helpers with SpecialNames {
     val month  = day * 30
     val year   = day * 365
 
-    if (millisDelta / year > 1) millisDelta / year + "years ago"
+    if (millisDelta / year > 1) s"${millisDelta / year} years ago"
     else if (millisDelta / year == 1) "1 year"
-    else if (millisDelta / month > 1) millisDelta / month + "months ago"
+    else if (millisDelta / month > 1) s"${millisDelta / month} months ago"
     else "xxx"
   }
 

@@ -13,7 +13,7 @@ trait UrlHandling extends RegexMatching {
 
   def pushUrl(): Unit = {
     val m      = if (curMolecule.now.isEmpty) "" else {
-      "&m=" + URIUtils.encodeURI(curMolecule.now.replaceAllLiterally("\n", ""))
+      "&m=" + URIUtils.encodeURI(curMolecule.now.replace("\n", ""))
     }
     val newUrl =
       window.location.protocol + "//" +
@@ -33,7 +33,7 @@ trait UrlHandling extends RegexMatching {
       .map(URIUtils.decodeURIComponent).map {
       case r"db=(.*)$db" => "db" -> db
       case r"m=(.*)$m"   => "m" -> m
-        .replaceAllLiterally("%20", " ")
+        .replace("%20", " ")
       case other         => throw new IllegalArgumentException(
         "Unexpected URL parameter/value pair: " + other)
     }.toMap
@@ -72,7 +72,7 @@ trait UrlHandling extends RegexMatching {
           modelElements() = Nil
         }
       } { m =>
-        if (m != curMolecule.now.replaceAllLiterally("\n", "")) {
+        if (m != curMolecule.now.replace("\n", "")) {
           setQuery(m)
         }
       }

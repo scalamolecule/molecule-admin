@@ -9,6 +9,7 @@ import moleculeadmin.client.queryWireAjax
 import moleculeadmin.shared.api.QueryApi
 import org.scalajs.dom.{document, window}
 import rx.Ctx
+import scala.collection.immutable.ArraySeq
 import scala.concurrent.ExecutionContext.Implicits.global
 
 
@@ -75,7 +76,7 @@ trait Undoing extends UndoElements with QueryApi {
             txResult._5.nonEmpty && // has datoms to undo
             !undone2new.contains(txResult._1) // not already undone
         => txResult._1
-      }.sorted
+      }.toIndexedSeq.sorted
 
     def cleanNext(t: Long): Seq[Long] =
       curLastTxResults.collect {
@@ -85,7 +86,7 @@ trait Undoing extends UndoElements with QueryApi {
             !undone2new.contains(txResult._1) && // not already undone
             !new2undone.contains(txResult._1) // not an undoing tx
         => txResult._1
-      }.sorted
+      }.toIndexedSeq.sorted
 
     var countDown = curLastTxResults.length
     var ePrev     = 0L
@@ -182,7 +183,7 @@ trait Undoing extends UndoElements with QueryApi {
               val more = dataDatoms.length - i + 1
               datomTable1.appendChild(
                 _txDataMoreRow(tx, isUndone,
-                  more + " more datoms in tx... (see all in Transaction view)"
+                  s"$more more datoms in tx... (see all in Transaction view)"
                 )
               )
               visible = false

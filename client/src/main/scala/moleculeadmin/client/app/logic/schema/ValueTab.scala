@@ -1,4 +1,5 @@
 package moleculeadmin.client.app.logic.schema
+
 import autowire._
 import boopickle.Default._
 import util.client.rx.RxBindings
@@ -62,12 +63,16 @@ case class ValueTab(db: String, flatSchema0: FlatSchema)(implicit val ctx: Ctx.O
       ),
       p(),
       Rx {
-        val partitions = metaSchema().map(_.part).distinct.length
-        val namespaces = metaSchema().map(_.ns).distinct.length
+        val partitions    = metaSchema().map(_.part).distinct.length
+        val namespaces    = metaSchema().map(_.ns).distinct.length
         val allAttributes = metaSchemaAll().length
-        val attributes = metaSchema().length
-        val withValue = metaSchemaAll().count(_.entityCount$.nonEmpty)
-        val withValuePct = withValue * 100 / allAttributes
+        val attributes    = metaSchema().length
+        val withValue     = metaSchemaAll().count(_.entityCount$.nonEmpty)
+        val withValuePct  = withValue * 100 / allAttributes
+        val calc          = if (showAll())
+          s"($withValue / $withValuePct% with value)"
+        else
+          s"/ $allAttributes ($withValuePct%)"
 
         table(cls := "table", width.auto)(
           thead(
@@ -78,12 +83,7 @@ case class ValueTab(db: String, flatSchema0: FlatSchema)(implicit val ctx: Ctx.O
               th(
                 colspan := 10,
                 verticalAlign.top,
-                attributes + (
-                  if (showAll())
-                    s" ($withValue / $withValuePct% with value)"
-                  else
-                    s" / $allAttributes ($withValuePct%)"
-                  )
+                s"$attributes $calc"
               ),
               th(
                 label(
@@ -134,14 +134,14 @@ case class ValueTab(db: String, flatSchema0: FlatSchema)(implicit val ctx: Ctx.O
           Rx(
             tbody(
               for (FlatAttr(i, part, _, nsAlias, _, _, attr, card, tpe0, _, ref, _, _, _, count0, distinctCount0, descrAttr0, topValues0) <- metaSchema()) yield {
-                val tpe = ref match {
+                val tpe           = ref match {
                   case Some(refNs) if refNs.contains('_') => "ref[" + refNs + "]"
                   case Some(refNs)                        => "ref[" + refNs.capitalize + "]"
                   case None                               => tpe0
                 }
-                val count = if (count0.isEmpty) "" else thousands(count0.get)
+                val count         = if (count0.isEmpty) "" else thousands(count0.get)
                 val distinctCount = if (distinctCount0.isEmpty) "" else thousands(distinctCount0.get)
-                val topValues = if (topValues0.isEmpty)
+                val topValues     = if (topValues0.isEmpty)
                   div("")
                 else if (topValues0.head.label$.nonEmpty) {
                   div(
@@ -157,7 +157,7 @@ case class ValueTab(db: String, flatSchema0: FlatSchema)(implicit val ctx: Ctx.O
                   )
                 }
 
-                val descrAttr = descrAttr0.getOrElse("")
+                val descrAttr    = descrAttr0.getOrElse("")
                 val attrSelector = if (
                   ref.nonEmpty && (
                     count0.isEmpty && distinctCount0.isEmpty
@@ -172,7 +172,7 @@ case class ValueTab(db: String, flatSchema0: FlatSchema)(implicit val ctx: Ctx.O
 
                 ) {
                   val attrsInRefNs: Seq[String] = metaSchema().filter(at => at.nsFull == ref.get).map(_.attr)
-                  val sel = select(
+                  val sel                       = select(
                     option("Select attr...", value := ""),
                     for (refNsAttr <- attrsInRefNs) yield {
                       option(

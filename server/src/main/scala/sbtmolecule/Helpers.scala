@@ -22,7 +22,7 @@ trait Helpers {
     str.length match {
       case 0 => ""
       case 1 => str.toLowerCase()
-      case _ => str.toString.head.toLower + str.toString.tail
+      case _ => s"${str.head.toLower}str.tail"
     }
   }
 
@@ -33,8 +33,8 @@ trait Helpers {
 
   final protected def cast(value: Any): String = value match {
     case (a, b)     => s"(${cast(a)}, ${cast(b)})"
-    case v: Long    => v + "L"
-    case v: Float   => v + "f"
+    case v: Long    => s"${v}L"
+    case v: Float   => s"${v}f"
     case date: Date => "\"" + format(date) + "\""
     case v: String  => "\"" + v + "\""
     case v: UUID    => "\"" + v + "\""

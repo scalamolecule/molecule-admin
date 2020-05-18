@@ -59,7 +59,7 @@ case class UpdateCardMap[T](
 
     val raw  = cell.innerHTML
     val strs = if (raw.endsWith("<ul></ul>")) {
-      raw.replaceAllLiterally("<ul></ul>", "").split("<br>").toList
+      raw.replace("<ul></ul>", "").split("<br>").toList
     } else
       raw
         .substring(8, raw.length - 10)
@@ -69,11 +69,11 @@ case class UpdateCardMap[T](
     val vs = if (attrType == "String" && enums.isEmpty) {
       strs
         .map(_
-          .replaceAllLiterally("&nbsp;", " ")
-          .replaceAllLiterally("&lt;", "<")
-          .replaceAllLiterally("&gt;", ">")
-          .replaceAllLiterally("&amp;", "&")
-          .replaceAllLiterally("<br>", "\n")
+          .replace("&nbsp;", " ")
+          .replace("&lt;", "<")
+          .replace("&gt;", ">")
+          .replace("&amp;", "&")
+          .replace("<br>", "\n")
           .trim)
         .filter(_.nonEmpty)
         .map(_html2str)
@@ -81,10 +81,10 @@ case class UpdateCardMap[T](
       strs.flatMap(
         _.split("<br>")
           .map(_
-            .replaceAllLiterally("&nbsp;", " ")
-            .replaceAllLiterally("&lt;", "<")
-            .replaceAllLiterally("&gt;", ">")
-            .replaceAllLiterally("&amp;", "&")
+            .replace("&nbsp;", " ")
+            .replace("&lt;", "<")
+            .replace("&gt;", ">")
+            .replace("&amp;", "&")
             .trim)
           .filter(_.nonEmpty)
       )
