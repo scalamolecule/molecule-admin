@@ -257,14 +257,15 @@ case class ScalaFiddle[TransferType](scalaCode: String) {
   }
 
   private def readCompilationResponse(jsonStr: String): CompilationResponse = {
-    val r = js.JSON.parse(jsonStr).asInstanceOf[CompilationResponseJS]
+    val r           = js.JSON.parse(jsonStr).asInstanceOf[CompilationResponseJS]
+    val annotations = r.annotations.map(a =>
+      EditorAnnotation(a.row, a.col, a.text, a.tpe)
+    )
     CompilationResponse(
       if (r.jsCode.isEmpty) None else Some(r.jsCode(0)),
       r.jsDeps,
       r.cssDeps,
-      r.annotations.map { a =>
-        EditorAnnotation(a.row, a.col, a.text, a.tpe)
-      },
+      annotations,
       r.log
     )
   }

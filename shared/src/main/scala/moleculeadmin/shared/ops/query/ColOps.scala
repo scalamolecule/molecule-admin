@@ -311,7 +311,7 @@ trait ColOps extends HelpersAdmin {
       case e         => throw new IllegalArgumentException("Unexpected element for table layout: " + e)
     }
 
-    cols
+    cols.toSeq
   }
 
 

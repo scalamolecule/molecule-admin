@@ -37,7 +37,7 @@ object Card3 extends TestScalaFiddle {
             case js.Tuple2(pairs, "")                  => (pairs.toList, "")
             case js.Tuple2(_, error)                   => (emptyMap, error)
           }
-          val newValuesMapStr = newValues.map { case (k, v) => s"$k -> $v" }.mkString("Map(", ", ", ")")
+          val newValuesMapStr    = newValues.map { case (k, v) => s"$k -> $v" }.mkString("Map(", ", ", ")")
           showResult(rhs, attrValues.toString, newValuesMapStr, expected, error, scalaCode)
         }
       }

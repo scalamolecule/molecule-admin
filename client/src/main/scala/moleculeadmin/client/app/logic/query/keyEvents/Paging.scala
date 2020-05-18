@@ -49,7 +49,7 @@ trait Paging extends BaseKeyEvents {
       t2 = js.Date.now
       delta = t2 - t1
       tProcess = tProcess + delta
-      avg = (tProcess / j).round
+      avg = (tProcess / j).toDouble.round
       ratio = avg / keyRepeatMs
       cycles = ratio.ceil.toInt
       // println(s"  $j  $delta    $avg    $ratio    $cycles    " + (t2 - beginning))

@@ -7,9 +7,8 @@ import db.admin.schema.MoleculeAdminSchema
 import molecule.api.out10._
 import molecule.facade.Conn
 import moleculeadmin.shared.api.DbsApi
-//import moleculeadmin.shared.Dbs._
 import moleculeadmin.server.utils.DefFile
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /*
 UC1: Choose action on db
@@ -60,7 +59,7 @@ class Dbs extends DbsApi {
   }
 
 
-  def dbList(): Either[List[String], List[(String, Option[Boolean], Option[String])]] = try {
+  override def dbList(): Either[List[String], List[(String, Option[Boolean], Option[String])]] = try {
 
     // 2. Prepare sync - get connection
     implicit val conn: Conn = try {
@@ -106,13 +105,13 @@ class Dbs extends DbsApi {
 
   // shared api ...............................................................
 
-  def ignore(db: String): Dbs = {
+  override def ignore(db: String): Dbs = {
     implicit val conn = moleculeAdminConn
     val dbId = meta_Db.e.name_(db).get.head
     meta_Db(dbId).isMolecular(false).defFilePath().partitions().update
     dbs_()
   }
-  def reset(db: String): Dbs = {
+  override def reset(db: String): Dbs = {
     implicit val conn = moleculeAdminConn
     val dbId = meta_Db.e.name_(db).get.head
     meta_Db(dbId).isMolecular().defFilePath().partitions().update
@@ -120,7 +119,7 @@ class Dbs extends DbsApi {
   }
 
 
-  def saveDefFilePath(db: String, path: String): Either[String, Dbs] = {
+  override def saveDefFilePath(db: String, path: String): Either[String, Dbs] = {
     val defFile = new File(path)
     if (!defFile.isFile) {
       Left(s"Can't find definition file in path '$path'")

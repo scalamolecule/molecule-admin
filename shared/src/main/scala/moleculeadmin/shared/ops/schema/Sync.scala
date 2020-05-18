@@ -150,7 +150,7 @@ case class Sync(baseSchema: Seq[FlatAttr], testSchema: Seq[FlatAttr]) extends Sc
 
     testSchema.groupBy(_.nsFull).toSeq.sortBy(_._2.head.pos).flatMap { case (_, attrs) =>
       val (okAttr, attrCardsWithError) = attrs.sortBy(_.pos).foldLeft(
-        true,
+        true: Boolean,
         Seq.empty[(String, Int, Int, Boolean, String)]
       ) {
         case ((prevOk, acc), a) =>
@@ -177,7 +177,7 @@ case class Sync(baseSchema: Seq[FlatAttr], testSchema: Seq[FlatAttr]) extends Sc
     testSchema.groupBy(_.nsFull).toSeq.sortBy(_._2.head.pos).flatMap { case (_, attrs) =>
 
       val (okAttr, attrTypesWithError) = attrs.sortBy(_.pos).foldLeft(
-        true,
+        true: Boolean,
         Seq.empty[(String, String, String, Boolean, String)]
       ) {
         case ((prevOk, acc), a) =>
@@ -217,7 +217,7 @@ case class Sync(baseSchema: Seq[FlatAttr], testSchema: Seq[FlatAttr]) extends Sc
     testSchema.groupBy(_.nsFull).toSeq.sortBy(_._2.head.pos).flatMap {
       case (_, attrs) =>
         val (okAttr, attrOptionsWithError) = attrs.sortBy(_.pos).foldLeft(
-          true,
+          true: Boolean,
           Seq.empty[(String, Seq[String], Seq[String], Boolean)]
         ) {
           case ((prevOk, acc), a) =>
@@ -244,7 +244,7 @@ case class Sync(baseSchema: Seq[FlatAttr], testSchema: Seq[FlatAttr]) extends Sc
     testSchema.groupBy(_.nsFull).toSeq.sortBy(_._2.head.pos).flatMap { case (_, attrs) =>
 
       val (okNs, attrRefsWithError) = attrs.sortBy(_.pos).foldLeft(
-        true,
+        true: Boolean,
         Seq.empty[(String, String, String, String, Boolean)]
       ) {
         case ((prevOk, acc), a) =>

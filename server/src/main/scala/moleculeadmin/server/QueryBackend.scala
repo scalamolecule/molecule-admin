@@ -5,7 +5,6 @@ import datomic.{Datom, Peer}
 import db.admin.dsl.moleculeAdmin._
 import db.core.dsl.coreTest.Ns
 import molecule.api.Entity
-//import molecule.api.Entity1
 import molecule.api.out10._
 import molecule.ast.model.{Atom, Bond, Model, NoValue}
 import molecule.ast.transactionModel.{Add, Retract, RetractEntity, Statement}
@@ -15,8 +14,8 @@ import moleculeadmin.server.query.{Rows2QueryResult, ToggleBackend}
 import moleculeadmin.shared.ast.query.{Col, QueryDTO, QueryResult}
 import moleculeadmin.shared.ops.transform.Molecule2Model
 import org.slf4j.LoggerFactory
-import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
+import scala.jdk.CollectionConverters._
 import scala.util.Try
 
 
@@ -276,7 +275,7 @@ class QueryBackend extends ToggleBackend {
             prevValue = v
             stmt
           }
-          val txR                   = conn.transact(Seq(stmts))
+          val txR                   = conn.transact(Seq(stmts.toSeq))
           val (newT, newTx, newTxI) = (txR.t, txR.tx, date2strLocal(txR.inst))
           newTxs(txIndex) = (
             newT, newTx, newTxI,
@@ -575,7 +574,7 @@ class QueryBackend extends ToggleBackend {
     rowValues: Seq[Seq[String]]
   ): Either[String, Long] = {
     // Model without initial entity id
-    val elements = new Molecule2Model(molecule, nsMap).getModel.right.get.collect {
+    val elements = new Molecule2Model(molecule, nsMap).getModel.getOrElse(Nil).collect {
       case a: Atom => a
       case b: Bond => b
     }

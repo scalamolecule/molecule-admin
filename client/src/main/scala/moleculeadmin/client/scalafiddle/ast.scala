@@ -34,26 +34,32 @@ object ast {
 
   trait CompilerResponse
 
-  case class EditorAnnotation(row: Int, col: Int, text: Seq[String], tpe: String)
+  case class EditorAnnotation(
+    row: Int,
+    col: Int,
+    text: js.Array[String],
+    tpe: String
+  )
 
   case class CompilationResponse(
-                                  jsCode: Option[String],
-                                  jsDeps: Seq[String],
-                                  cssDeps: Seq[String],
-                                  annotations: Seq[EditorAnnotation],
-                                  log: String
-                                ) extends CompilerResponse
-    with CompilerMessage
+    jsCode: Option[String],
+    jsDeps: js.Array[String],
+    cssDeps: js.Array[String],
+    annotations: js.Array[EditorAnnotation],
+    log: String
+  ) extends CompilerResponse with CompilerMessage
 
-  case class CompletionResponse(completions: List[(String, String)]) extends CompilerResponse with CompilerMessage
+  case class CompletionResponse(completions: List[(String, String)])
+    extends CompilerResponse with CompilerMessage
 
-  case class SourceFile(name: String,
-                        code: String,
-                        prefix: List[String] = Nil,
-                        postfix: List[String] = Nil,
-                        indent: Int = 0,
-                        fiddleId: Option[String] = None,
-                        id: String = UUID.randomUUID().toString)
+  case class SourceFile(
+    name: String,
+    code: String,
+    prefix: List[String] = Nil,
+    postfix: List[String] = Nil,
+    indent: Int = 0,
+    fiddleId: Option[String] = None,
+    id: String = UUID.randomUUID().toString)
 
   @js.native
   trait EditorAnnotationJS extends js.Object {

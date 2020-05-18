@@ -167,7 +167,7 @@ case class GroupSave(col: Col)(implicit val ctx: Ctx.Owner)
     }
 
     if (data.nonEmpty) {
-      save(data).map {
+      save(data.toSeq).map {
         case Right(_) =>
           println(s"Successfully saved ${data.length} changes for attr `$attrFull`")
 

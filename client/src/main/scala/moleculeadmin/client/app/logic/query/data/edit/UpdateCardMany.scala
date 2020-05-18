@@ -63,7 +63,7 @@ case class UpdateCardMany[T](
         .split("""</li><li class="eid(Chosen)*">""").toList
     } else if (raw.endsWith("<ul></ul>")) {
       // Consider line shifts not as new item but as line shift within string
-      List(raw.replaceAllLiterally("<ul></ul>", ""))
+      List(raw.replace("<ul></ul>", ""))
     } else if (cellType == "str") {
       raw.substring(8, raw.length - 10).split("</li><li>").toList
     } else {
@@ -72,11 +72,11 @@ case class UpdateCardMany[T](
 
     val vs = if (attrType == "String" && enums.isEmpty) {
       strs.map(_
-        .replaceAllLiterally("&nbsp;", " ")
-        .replaceAllLiterally("&lt;", "<")
-        .replaceAllLiterally("&gt;", ">")
-        .replaceAllLiterally("&amp;", "&")
-        .replaceAllLiterally("<br>", "\n")
+        .replace("&nbsp;", " ")
+        .replace("&lt;", "<")
+        .replace("&gt;", ">")
+        .replace("&amp;", "&")
+        .replace("<br>", "\n")
         .trim)
         .filter(_.nonEmpty)
         .map(_html2str)
@@ -84,10 +84,10 @@ case class UpdateCardMany[T](
       strs.flatMap(
         _.split("<br>")
           .map(_
-            .replaceAllLiterally("&nbsp;", " ")
-            .replaceAllLiterally("&lt;", "<")
-            .replaceAllLiterally("&gt;", ">")
-            .replaceAllLiterally("&amp;", "&")
+            .replace("&nbsp;", " ")
+            .replace("&lt;", "<")
+            .replace("&gt;", ">")
+            .replace("&amp;", "&")
             .trim)
           .filter(_.nonEmpty)
       )

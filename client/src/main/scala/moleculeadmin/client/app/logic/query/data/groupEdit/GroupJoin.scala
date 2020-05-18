@@ -58,7 +58,7 @@ case class GroupJoin(colIndex: Int, nsFull: String)(implicit val ctx: Ctx.Owner)
     }
     queryWireAjax().createJoins(
       db,
-      eids,
+      eids.toSeq,
       nsFull,
       refAttr,
       refCard,

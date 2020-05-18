@@ -35,9 +35,9 @@ trait AppElements extends RegexMatching {
 
   def _str2frags(s0: String): Seq[Frag] = {
     // All extra spaces as &nbsp;
-    val s = s0.replaceAllLiterally("  ", "\u00a0 ") // &nbsp;
+    val s = s0.replace("  ", "\u00a0 ") // &nbsp;
     if (s.contains('\n')) {
-      if (s0.replaceAllLiterally("\n", " ").trim.isEmpty)
+      if (s0.replace("\n", " ").trim.isEmpty)
         s"{$s}".split("\n").toSeq.flatMap(s1 => Seq(StringFrag(s1), br)).init
       else
         s.split("\n").toSeq.flatMap(s1 => Seq(StringFrag(s1), br)).init
@@ -46,7 +46,7 @@ trait AppElements extends RegexMatching {
     } else {
       if (s.head == ' ') {
         Seq(s match {
-          case r"^( +?)$sp(.*)$txt" => sp.replaceAllLiterally(" ", "\u00a0") + txt
+          case r"^( +?)$sp(.*)$txt" => sp.replace(" ", "\u00a0") + txt
           case other                => other
         })
       } else Seq(s)
@@ -57,15 +57,15 @@ trait AppElements extends RegexMatching {
     val str = html
       .replaceFirst("<span[^>]*>", "")
       .replaceFirst("</span>", "")
-      .replaceAllLiterally("<span></span>", "")
-      .replaceAllLiterally("&nbsp;", " ")
-      .replaceAllLiterally("&amp;", "&")
-      .replaceAllLiterally("&lt;", "<")
-      .replaceAllLiterally("&gt;", ">")
-      .replaceAllLiterally("<br>", "\n")
+      .replace("<span></span>", "")
+      .replace("&nbsp;", " ")
+      .replace("&amp;", "&")
+      .replace("&lt;", "<")
+      .replace("&gt;", ">")
+      .replace("<br>", "\n")
     if (str.startsWith("{"))
     // Invisible empty strings surrounded with { }
-      if (str.endsWith("}") && str.tail.init.replaceAllLiterally("\n", " ").trim.isEmpty)
+      if (str.endsWith("}") && str.tail.init.replace("\n", " ").trim.isEmpty)
         str.tail.init
       else
         str
@@ -138,7 +138,7 @@ trait AppElements extends RegexMatching {
 
     // Open/close large collections of items
     if (items.size > max) {
-      list.appendChild(li(a(href := "#", (items.size - max) + " more...")).render)
+      list.appendChild(li(a(href := "#", s"${items.size - max} more...")).render)
       list.onclick = _ => {
         // collapsed when last li has link element
         val collapsed = list.lastChild.lastChild.nodeType == 1
@@ -149,7 +149,7 @@ trait AppElements extends RegexMatching {
         } else {
           // collapse to max items and add expand link
           items.take(max).map(l => list.appendChild(l.render))
-          list.appendChild(li(a(href := "#", (items.size - max) + " more...")).render)
+          list.appendChild(li(a(href := "#", s"${items.size - max} more...")).render)
         }
       }
 

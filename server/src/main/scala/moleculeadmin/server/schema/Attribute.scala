@@ -10,7 +10,7 @@ import molecule.facade.Conn
 import moleculeadmin.server.Base
 import moleculeadmin.shared.ast.schema._
 import moleculeadmin.server.utils.DefFile
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 
 object Attribute extends SchemaBase with Base {

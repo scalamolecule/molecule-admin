@@ -10,7 +10,7 @@ object Settings {
     name := "molecule-admin",
     organization := "org.scalamolecule",
     version := "0.7",
-    scalaVersion := "2.12.10",
+    scalaVersion := "2.13.2",
     scalacOptions := Seq(
       "-deprecation",
       "-encoding",
@@ -24,12 +24,9 @@ object Settings {
   val client: Seq[Def.Setting[_]] = common ++ Seq(
     name := "client",
     libraryDependencies ++= Seq(
-      "org.scala-js" %%% "scalajs-dom" % "0.9.8",
-      "com.lihaoyi" %%% "scalarx" % "0.4.1",
-      "io.github.cquiroz" %%% "scala-java-time" % "2.0.0-RC3",
-
-
-      "org.scala-js" %% "scalajs-env-jsdom-nodejs" % "1.0.0"
+      "org.scala-js" %%% "scalajs-dom" % "1.0.0",
+      "com.lihaoyi" %%% "scalarx" % "0.4.2",
+      "io.github.cquiroz" %%% "scala-java-time" % "2.0.0"
     )
   )
 
@@ -43,8 +40,8 @@ object Settings {
     ),
     libraryDependencies ++= Seq(
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-      "org.scalamolecule" %% "molecule" % "0.22.2-SNAPSHOT",
-      "com.lihaoyi" %% "ammonite-ops" % "2.0.4",
+      "org.scalamolecule" %% "molecule" % "0.22.2",
+      "com.lihaoyi" %% "ammonite-ops" % "2.1.4",
       "com.datomic" % "datomic-free" % "0.9.5697",
       "org.webjars" % "jquery" % "3.3.1",
       "org.webjars.npm" % "popper.js" % "1.14.7",
@@ -54,12 +51,7 @@ object Settings {
       "org.webjars.bower" % "open-iconic" % "1.1.1",
       "org.webjars" % "font-awesome" % "5.5.0",
       "org.webjars.bower" % "highlightjs" % "9.12.0",
-
-//      "org.atteo" % "evo-inflector" % "1.2.2", // English pluralizer
-
-
-      //      "io.kamon" %% "kamon-bundle" % "2.1.0",
-//      "io.kamon" %% "kamon-apm-reporter" % "2.1.0",
+      //      "org.atteo" % "evo-inflector" % "1.2.2", // English pluralizer
       specs2 % Test,
       guice
     ).map(_.exclude("org.slf4j", "slf4j-nop")),
@@ -68,11 +60,11 @@ object Settings {
 
   val shared: Seq[Def.Setting[_]] = common ++ Seq(
     libraryDependencies ++= Seq(
-      "com.lihaoyi" %%% "scalatags" % "0.8.3",
-      "com.lihaoyi" %%% "autowire" % "0.2.6",
+      "com.lihaoyi" %%% "scalatags" % "0.9.1",
+      "com.lihaoyi" %%% "autowire" % "0.2.8-SNAPSHOT",
       "com.lihaoyi" %%% "utest" % "0.7.4",
-      "io.suzaku" %%% "boopickle" % "1.3.1",
-      ("org.scalamolecule" %%% "molecule" % "0.22.2-SNAPSHOT")
+      "io.suzaku" %%% "boopickle" % "1.3.2",
+      ("org.scalamolecule" %%% "molecule" % "0.22.2")
         .exclude("com.datomic", "datomic-free")
     ),
     testFrameworks += new TestFramework("utest.runner.Framework")
