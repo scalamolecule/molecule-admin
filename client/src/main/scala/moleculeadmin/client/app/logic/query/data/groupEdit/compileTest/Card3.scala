@@ -33,9 +33,13 @@ object Card3 extends TestScalaFiddle {
 
         ScalaFiddle[js.Dictionary[String]](scalaCode).lambda2.foreach { lambda =>
           val (newValues, error) = lambda(eid, attrValues.toJSDictionary) match {
-            case js.Tuple2(pairs, "") if pairs.isEmpty => (emptyMap, "")
-            case js.Tuple2(pairs, "")                  => (pairs.toList, "")
-            case js.Tuple2(_, error)                   => (emptyMap, error)
+            case js.Tuple2(pairs, err) =>
+              if (err.nonEmpty)
+                (emptyMap, err)
+              else if (pairs.asInstanceOf[Iterable[_]].isEmpty)
+                (emptyMap, "")
+              else
+                (pairs.toList, "")
           }
           val newValuesMapStr    = newValues.map { case (k, v) => s"$k -> $v" }.mkString("Map(", ", ", ")")
           showResult(rhs, attrValues.toString, newValuesMapStr, expected, error, scalaCode)

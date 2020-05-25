@@ -76,7 +76,7 @@ abstract class GroupedData[T](col: Col)(implicit ctx: Ctx.Owner)
           }
           rowIndex += 1
         }
-        rawStrings = vs.groupBy(identity).mapValues(_.length).toSeq
+        rawStrings = vs.groupBy(identity).view.mapValues(_.length).toSeq
         strings = vs.groupBy(identity).map { case (k, v) => (Some(k), v.length) }.toList
 
       case "double" =>
@@ -89,7 +89,7 @@ abstract class GroupedData[T](col: Col)(implicit ctx: Ctx.Owner)
           }
           rowIndex += 1
         }
-        rawDoubles = vs.groupBy(identity).mapValues(_.length).toSeq
+        rawDoubles = vs.groupBy(identity).view.mapValues(_.length).toSeq
         doubles = vs.groupBy(identity).map { case (k, v) => (Some(k), v.length) }.toList
     }
   }

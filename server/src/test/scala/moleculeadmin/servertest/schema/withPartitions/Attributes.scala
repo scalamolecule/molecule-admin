@@ -84,7 +84,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
 
         // Client schema
         createAttribute(partitionMetaSchema, "Partition", "a", "Aa",
-          "number", 1, "Int", Nil, None, Nil, Some("number description")).right.get.parts.head ==>
+          "number", 1, "Int", Nil, None, Nil, Some("number description")).getOrElse(MetaSchema(Nil)).parts.head ==>
           Part(1, "a", None, None, Seq(
             Ns(1, "Aa", "a_Aa", None, None, Seq(
               Attr(1, "number", 1, "Int", None, None, None, Some("number description"), None, None, None, None, List())))))
@@ -140,7 +140,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
 
         // Client schema
         createAttribute(partitionMetaSchema, "Partition", "a", "Aa",
-          "number", 1, "Int", Nil, None, Seq("noHistory"), Some("number description")).right.get.parts.head ==>
+          "number", 1, "Int", Nil, None, Seq("noHistory"), Some("number description")).getOrElse(MetaSchema(Nil)).parts.head ==>
           Part(1, "a", None, None, Seq(
             Ns(1, "Aa", "a_Aa", None, None, Seq(
               Attr(1, "number", 1, "Int", None, None, Some(Set("noHistory")), Some("number description"), None, None, None, None, List())))))
@@ -196,7 +196,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
         import ps._
 
         createAttribute(partitionMetaSchema, "Partition", "b", "Bb", "text",
-          2, "String", Seq("enum1", "enum2"), None, Seq("fulltext", "noHistory", "uniqueValue"), Some("descr"), 2).right.get.parts(1) ==>
+          2, "String", Seq("enum1", "enum2"), None, Seq("fulltext", "noHistory", "uniqueValue"), Some("descr"), 2).getOrElse(MetaSchema(Nil)).parts(1) ==>
           Part(2, "b", None, None, List(
             Ns(1, "Bb", "b_Bb", None, None, List(
               Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List()),
@@ -257,7 +257,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
         import ps._
 
         createAttribute(partitionMetaSchema, "Partition", "b", "Bc",
-          "ref", 1, "ref", Nil, Some("b_Bb")).right.get.parts(1) ==>
+          "ref", 1, "ref", Nil, Some("b_Bb")).getOrElse(MetaSchema(Nil)).parts(1) ==>
           Part(2, "b", None, None, List(
             Ns(1, "Bb", "b_Bb", None, None, List(
               Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List()),
@@ -947,7 +947,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
           val ps = new PartitionSetup
           import ps._
 
-          val schema1 = updateAttribute(partitionMetaSchema, "Partition", "b", "Bb", "bb1", "bb1", 2, "Int").right.get
+          val schema1 = updateAttribute(partitionMetaSchema, "Partition", "b", "Bb", "bb1", "bb1", 2, "Int").getOrElse(MetaSchema(Nil))
           schema1 ==> MetaSchema(List(
             Part(1, "a", None, None, List(
               Ns(1, "Aa", "a_Aa", None, None, List()))),
@@ -1768,7 +1768,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
 
           // Add `refAttr` pointing to `Bc`
           val schema1: MetaSchema = createAttribute(partition1MetaSchema, "Partition1", "b", "Bb", "refAttr",
-            1, "ref", Nil, Some("b_Bc")).right.get
+            1, "ref", Nil, Some("b_Bc")).getOrElse(MetaSchema(Nil))
 
           // Let `refAttr` point to Bd instead
           updateAttribute(schema1, "Partition1", "b", "Bb", "refAttr", "refAttr",
@@ -1858,11 +1858,11 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
 
           // Add `refAttr` pointing to `Bc`
           val schema1: MetaSchema = createAttribute(partition1MetaSchema, "Partition1", "b", "Bb", "refAttr",
-            1, "ref", Nil, Some("b_Bc")).right.get
+            1, "ref", Nil, Some("b_Bc")).getOrElse(MetaSchema(Nil))
 
           // Add attribute to namespace `Aa`
           val schema2: MetaSchema = createAttribute(schema1, "Partition1", "a", "Aa", "aa1",
-            1, "Int").right.get
+            1, "Int").getOrElse(MetaSchema(Nil))
 
           // Let `refAttr` point to Bd instead
           updateAttribute(schema2, "Partition1", "b", "Bb", "refAttr", "refAttr",
@@ -2200,7 +2200,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
 
           // Add ref attr
           val schema1: MetaSchema = createAttribute(partitionMetaSchema, "Partition", "b", "Bb", "refAttr",
-            1, "ref", Nil, Some("b_Bc")).right.get
+            1, "ref", Nil, Some("b_Bc")).getOrElse(MetaSchema(Nil))
 
           // Add isComponent to ref attr
           updateAttribute(schema1, "Partition", "b", "Bb", "refAttr", "refAttr",
@@ -2266,7 +2266,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
 
           // Add isComponent to ref attr
           val schema1 = updateAttribute(partitionMetaSchema, "Partition", "b", "Bb", "bb1", "bb1",
-            1, "Int", Nil, None, Seq("uniqueValue")).right.get
+            1, "Int", Nil, None, Seq("uniqueValue")).getOrElse(MetaSchema(Nil))
           schema1 ==> MetaSchema(List(
             Part(1, "a", None, None, List(
               Ns(1, "Aa", "a_Aa", None, None, List()))),
@@ -2395,11 +2395,11 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
 
           // Add ref attr so that we can add `isComponent` option
           val schema1: MetaSchema = createAttribute(partitionMetaSchema, "Partition", "b", "Bb", "ref",
-            1, "ref", Nil, Some("b_Bc")).right.get
+            1, "ref", Nil, Some("b_Bc")).getOrElse(MetaSchema(Nil))
 
           // Add some options
           val schema2 = updateAttribute(schema1, "Partition", "b", "Bb", "ref", "ref",
-            1, "ref", Nil, None, Seq("noHistory", "uniqueValue")).right.get
+            1, "ref", Nil, None, Seq("noHistory", "uniqueValue")).getOrElse(MetaSchema(Nil))
 
           schema2 ==> MetaSchema(List(
             Part(1, "a", None, None, List(
@@ -2526,7 +2526,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
 
           // Add doc text
           val schema1 = updateAttribute(partitionMetaSchema, "Partition", "b", "Bb", "bb1", "bb1",
-            1, "Int", Nil, None, Nil, Some("doc text")).right.get
+            1, "Int", Nil, None, Nil, Some("doc text")).getOrElse(MetaSchema(Nil))
 
           schema1 ==> MetaSchema(List(
             Part(1, "a", None, None, List(
@@ -2607,7 +2607,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
         import ps._
 
         // Rename attribute
-        val schema1 = updateAttribute(partitionMetaSchema, "Partition", "b", "Bb", "bb1", "bb7", 1, "Int").right.get
+        val schema1 = updateAttribute(partitionMetaSchema, "Partition", "b", "Bb", "bb1", "bb7", 1, "Int").getOrElse(MetaSchema(Nil))
         schema1 ==> MetaSchema(List(
           Part(1, "a", None, None, List(
             Ns(1, "Aa", "a_Aa", None, None, List()))),

@@ -6,7 +6,6 @@ lazy val client = (project in file("client"))
   .dependsOn(sharedJs)
   .settings(
     Settings.client,
-//    jsDependencies += RuntimeDOM,
 //    jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv()
   )
   .enablePlugins(ScalaJSWeb, TzdbPlugin)

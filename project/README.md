@@ -13,8 +13,10 @@ Scala-js:
     show as red in code (although it still compiles, oddly enough) 
 
 Autowire:
-- passing `None` results in `InvalidInput: null`
+- passing `None` results in `InvalidInput: null` 
+maybe not anymore...
 - default arguments only in interface, NOT in implementation! Otherwise you'll get weird compiler errors. 
+maybe not anymore...
 
 Molecule:
 - forgetting to add `update` after `assert(someValue)`

@@ -11,7 +11,7 @@ import moleculeadmin.client.queryWireAjax
 import moleculeadmin.shared.ops.query.builder.TreeOps
 import moleculeadmin.shared.ops.query.{ColOps, SchemaOps}
 import moleculeadmin.shared.ops.transform.Model2Molecule
-import org.scalajs.dom.document
+import org.scalajs.dom.{document, window}
 import rx.{Ctx, Rx}
 import scalatags.JsDom.all._
 import util.client.rx.RxBindings
@@ -29,8 +29,8 @@ object QueryClient
 
 
   @JSExport
-  def load(db0: String): Unit = queryWireAjax().loadMetaData(db0).call().map {
-    pageMetaData =>
+  def load(db0: String): Unit = queryWireAjax().loadMetaData(db0).call().foreach {
+    case Right(pageMetaData) =>
       val dbs = init(db0, pageMetaData)
       document.body.appendChild(
         TopMenu(dbs, db, "query", RenderSubMenu().dynRender).render
@@ -47,6 +47,9 @@ object QueryClient
         ).render
       }
       post()
+
+    case Left(err) =>
+      window.alert(s"Error loading Query page:\n$err")
   }
 
 

@@ -47,7 +47,19 @@ UC1: Choose action on db
 
 class Dbs extends DbsApi {
 
-  def moleculeAdminConn = Conn(base + "/MoleculeAdmin")
+  def moleculeAdminConn = try {
+    Conn(base + "/MoleculeAdmin")
+  } catch { // 2a
+    case e: RuntimeException =>
+      if (e.toString.contains(s"Could not find MoleculeAdmin in catalog")) {
+        // Create meta database if absent
+        println("Creating MoleculeAdmin database...")
+        recreateDbFrom(MoleculeAdminSchema, s"$dbHost/MoleculeAdmin", dbProtocol)
+      } else {
+        throw new RuntimeException("Couldn't connect to MoleculeAdmin meta database:\n" + e)
+      }
+  }
+
 
   def dbs(): Dbs = {
     implicit val conn = moleculeAdminConn
@@ -62,18 +74,7 @@ class Dbs extends DbsApi {
   override def dbList(): Either[List[String], List[(String, Option[Boolean], Option[String])]] = try {
 
     // 2. Prepare sync - get connection
-    implicit val conn: Conn = try {
-      moleculeAdminConn
-    } catch { // 2a
-      case e: RuntimeException =>
-        if (e.toString.contains(s"Could not find MoleculeAdmin in catalog")) {
-          // Create meta database if absent
-          println("Creating MoleculeAdmin database...")
-          recreateDbFrom(MoleculeAdminSchema, s"$dbHost/MoleculeAdmin", dbProtocol)
-        } else {
-          throw new RuntimeException("Couldn't connect to MoleculeAdmin meta database:\n" + e)
-        }
-    }
+    implicit val conn = moleculeAdminConn
 
     // 2. Sync meta/live dbs
 

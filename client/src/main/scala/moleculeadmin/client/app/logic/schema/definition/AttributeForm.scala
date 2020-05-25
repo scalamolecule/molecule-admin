@@ -1,4 +1,5 @@
 package moleculeadmin.client.app.logic.schema.definition
+
 import autowire._
 import boopickle.Default._
 import moleculeadmin.client.app.logic.schema.SchemaState._
@@ -169,8 +170,9 @@ case class AttributeForm(db: String,
     }
 
     def getAttrGroup: Option[String] = {
-      val attrGroupRadios                    = document.getElementsByName("attr-group-radio")
-      val List(optNone, optEmpty, optHeader) = Seq(0, 1, 2).map(attrGroupRadios.item(_).asInstanceOf[HTMLInputElement])
+      val attrGroupRadios = document.getElementsByName("attr-group-radio")
+      val optNone         = attrGroupRadios.item(0).asInstanceOf[HTMLInputElement]
+      val optEmpty        = attrGroupRadios.item(1).asInstanceOf[HTMLInputElement]
       if (optNone.checked)
         None
       else if (optEmpty.checked)
@@ -512,5 +514,5 @@ case class AttributeForm(db: String,
         false // don't send form / reload page - all rendering is triggered by Rx variables being updated
       } // onsubmit
     )
-    }
+  }
 }

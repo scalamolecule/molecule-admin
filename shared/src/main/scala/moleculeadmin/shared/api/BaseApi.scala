@@ -1,7 +1,8 @@
 package moleculeadmin.shared.api
 
 import moleculeadmin.shared.ast.query.QueryDTO
-import moleculeadmin.shared.ast.schema.{MetaSchema, _}
+import moleculeadmin.shared.ast.schema.MetaSchema
+
 
 trait BaseApi {
 
@@ -23,9 +24,7 @@ trait BaseApi {
 
   type PageMetaData = (Seq[String], MetaSchema, SettingsMetaData)
 
-  def loadMetaData(db: String): PageMetaData = ???
+  def loadMetaData(db: String): Either[String, PageMetaData] = ???
 
   def getMetaSchema(db: String): MetaSchema = ???
-
-  def getFlatMetaSchema(db: String): FlatSchema = ???
 }

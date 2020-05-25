@@ -827,7 +827,7 @@ object Namespaces extends TestSuite with TreeSchema with Helpers {
 
           // Add self-join
           val schema1: MetaSchema = createAttribute(partitionMetaSchema, "Partition", "b", "Bc",
-            "selfJoin", 1, "ref", Nil, Some("b_Bc")).right.get
+            "selfJoin", 1, "ref", Nil, Some("b_Bc")).getOrElse(MetaSchema(Nil))
 
           schema1 ==> MetaSchema(List(
             Part(1, "a", None, None, List(
