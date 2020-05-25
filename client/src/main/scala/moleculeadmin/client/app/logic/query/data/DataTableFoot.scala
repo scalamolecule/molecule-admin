@@ -33,7 +33,7 @@ case class DataTableFoot()(implicit val ctx: Ctx.Owner)
         limitSelector,
         _nextPage(isLast)(onclick := { () => nextPage }),
         _lastPage(isLast)(onclick := { () => lastPage }),
-        _rightSpace((offset.now + 1) + "-" + curLastRow, 7),
+        _rightSpace(s"${offset.now + 1}-$curLastRow}", 7),
         _rightSpace("of", 7),
         _rightSpace(thousands(actualRowCount), 12),
         if (maxRows.now != -1 && rowCountAll > maxRows.now) {

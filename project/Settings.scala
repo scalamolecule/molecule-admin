@@ -51,7 +51,9 @@ object Settings {
       "org.webjars.bower" % "open-iconic" % "1.1.1",
       "org.webjars" % "font-awesome" % "5.5.0",
       "org.webjars.bower" % "highlightjs" % "9.12.0",
+
       //      "org.atteo" % "evo-inflector" % "1.2.2", // English pluralizer
+      //      "org.webjars.npm" % "jsdom" % "13.0.0",
       specs2 % Test,
       guice
     ).map(_.exclude("org.slf4j", "slf4j-nop")),

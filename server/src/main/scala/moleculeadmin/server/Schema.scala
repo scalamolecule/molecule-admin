@@ -1,19 +1,15 @@
 package moleculeadmin.server
 
 import db.admin.dsl.moleculeAdmin._
-import molecule.api.out15._
+import molecule.api.out20._
 import molecule.facade.Conn
-import moleculeadmin.shared.api.SchemaApi
-import moleculeadmin.shared.ops.query.SchemaOps
 import moleculeadmin.server.schema._
+import moleculeadmin.server.utils.DefFile
 import moleculeadmin.shared.api.SchemaApi
 import moleculeadmin.shared.ast.schema._
-import moleculeadmin.server.utils.DefFile
+import moleculeadmin.shared.ops.query.SchemaOps
 
-class Schema extends SchemaApi
-  with SchemaBase
-  with SchemaOps
-  with Base {
+class Schema extends SchemaApi with SchemaBase with SchemaOps {
 
   override def getLiveSchema(db: String): FlatSchema = {
     implicit val conn = Conn(base + "/" + db)
@@ -40,10 +36,40 @@ class Schema extends SchemaApi
     implicit val conn = Conn(base + "/MoleculeAdmin")
     println(s"updateDescrAttr: ${getFullAttr(part, ns, attr)}   $descrAttr")
     val attrId: Long = meta_Db.name_(db).Partitions.name_(part).Namespaces.name_(ns).Attrs.e.name_(attr).get.head
+
     // Set describing attribute and retract topValues
     meta_Attribute(attrId).descrAttr$(descrAttr).topValues().update
-    getFlatMetaSchema(db)
+
+    // get flat meta schema
+    meta_Db.name_(db)
+      .Partitions.pos.name.descr$
+      .Namespaces.pos.name.nameFull.descr$
+      .Attrs.pos.name.card.tpe.enums$.refNs$.options$.doc$
+      .attrGroup$.entityCount$.distinctValueCount$.descrAttr$.TopValues.*?(
+      stats_TopValue.entityCount.value.label$
+    ).get.sortBy(t => (t._1, t._4, t._8)).zipWithIndex.map {
+      case ((_, part, partDescr, _, ns, nsFull, nsDescr, _, attr, card, tpe,
+      enums0, ref, options0, doc,
+      attrGroup, count, distinctCount, descrAttr, topValuesList), i) => {
+        val topValues1: Seq[TopValue] = topValuesList.map(TopValue tupled)
+        val topValues2: Seq[TopValue] = if (topValues1.isEmpty)
+          Nil
+        else if (topValues1.head.label$.isDefined)
+          topValues1.sortBy(r => (r.entityCount, r.label$.getOrElse("")))
+        else
+          topValues1.sortBy(r => (r.entityCount, r.value))
+
+        FlatAttr(
+          i + 1, part, partDescr, ns, nsFull, nsDescr, attr, card, tpe,
+          enums0.getOrElse(Nil).toSeq.sorted,
+          ref,
+          options0.getOrElse(Nil).toSeq.filterNot(_ == "indexed").sorted,
+          doc, attrGroup, count, distinctCount, descrAttr, topValues2
+        )
+      }
+    }
   }
+
 
   override def getFlatSchemas(db: String): (FlatSchema, FlatSchema, FlatSchema) = {
     val liveSchema: FlatSchema = getLiveSchema(db)
@@ -167,7 +193,7 @@ class Schema extends SchemaApi
 
 
   // Non-boot partitions
-  def getPartitions(conn: Conn) = conn.q(
+  def getPartitions(conn: Conn): List[String] = conn.q(
     """[:find ?part
       | :where [_ :db.install/partition ?partId]
       |        [(> ?partId 10)]

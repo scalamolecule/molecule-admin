@@ -352,7 +352,7 @@ trait BodyElements
     if (showAll || vs.size <= max) {
       vsSorted.foreach(v => addToList(v.toLong))
     } else {
-      val moreText     = (vs.size - max) + " more..."
+      val moreText     = s"${vs.size - max} more..."
       val collapseText = "Collapse..."
       val toggleLink   = a(href := "#", moreText).render
       val toggleItem   = li(toggleLink).render

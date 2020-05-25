@@ -31,9 +31,13 @@ object Card2 extends TestScalaFiddle {
 
         ScalaFiddle[js.Array[String]](scalaCode).lambda2.foreach { lambda =>
           val (newValues, error) = lambda(eid, attrValues.toJSArray) match {
-            case js.Tuple2(vs, "") if vs.isEmpty => (Nil, "")
-            case js.Tuple2(vs, "")               => (vs.toList, "")
-            case js.Tuple2(_, error)             => (Nil, error)
+            case js.Tuple2(vs, err) =>
+              if (err.nonEmpty)
+                (Nil, err)
+              else if (vs.asInstanceOf[Iterable[_]].isEmpty)
+                (Nil, "")
+              else
+                (vs.toList, "")
           }
           showResult(rhs, attrValues.toString, newValues.toString, expected, error, scalaCode)
         }

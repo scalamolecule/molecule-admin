@@ -80,8 +80,6 @@ object Values extends SchemaBase with Base {
       println("Total count: " + thousands(allValues))
       println("-------------------------------------------------------")
       println("done")
-
-      //      getFlatMetaSchema(db)
     }
   }
 

@@ -7,15 +7,6 @@ import moleculeadmin.shared.ast.schema._
 
 trait SchemaBase {
 
-  def withTransactor(body: => Either[String, MetaSchema])(implicit conn: Conn): Either[String, MetaSchema] = try {
-    // Check if transactor responds by sending a Future back
-    conn.datomicConn.sync()
-    // Execute body of work
-    body
-  } catch {
-    case e: Throwable => Left("Datomic Transactor unavailable. Please restart it and try the operation again.")
-  }
-
   def getFullNs(part: String, ns: String) = {
     if (part.isEmpty)
       throw new RuntimeException(s"Partition name can't be empty string.")

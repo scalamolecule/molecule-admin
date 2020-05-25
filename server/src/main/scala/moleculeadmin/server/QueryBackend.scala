@@ -578,8 +578,6 @@ class QueryBackend extends ToggleBackend {
       case a: Atom => a
       case b: Bond => b
     }
-    //    log.info(rowValues)
-    //    elements foreach println
     implicit val conn = Conn(base + "/" + db)
     var i              = 0
     val data: Seq[Any] = elements.collect {
@@ -605,7 +603,6 @@ class QueryBackend extends ToggleBackend {
     val stmtss = Model2Transaction(conn, Model(elements)).insertStmts(Seq(data))
     log.info(data.toString)
     stmtss.head.foreach(smts => log.info(smts.toString))
-    //    stmtss.head foreach println
     withTransactor {
       try {
         Right(conn.transact(stmtss).eid)
@@ -621,7 +618,6 @@ class QueryBackend extends ToggleBackend {
   ): Either[String, Long] = {
     implicit val conn = Conn(base + "/" + db)
     val stmtss = Seq(eids.toSeq.map(RetractEntity))
-    //    log.info("retractEntities:\n  " + stmtss.mkString("\n  "))
     withTransactor {
       try {
         val txR: TxReport = conn.transact(stmtss)
@@ -681,11 +677,8 @@ class QueryBackend extends ToggleBackend {
               Add(refId, s":$refNs/$valueAttr", castedValue, NoValue)
             )
           }
-          //          log.info("------------- SAVE STMTSS ---------------")
-          //          stmtss foreach println
           conn.transact(stmtss)
           Right(stmtss.length)
-          //          Left("test..")
         }
       } catch {
         case t: Throwable => Left(t.getMessage)

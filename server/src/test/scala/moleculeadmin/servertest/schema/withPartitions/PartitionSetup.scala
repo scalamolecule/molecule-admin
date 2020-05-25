@@ -9,7 +9,7 @@ import moleculeadmin.shared.ast.schema._
 
 trait Settings {
 
-  val pwd = home / 'molecule / "molecule-admin" / "molecule-admin"
+  val pwd = home / "molecule" / "molecule-admin" / "molecule-admin"
 
   val partitionDefFile =
     """package db.migration.schema
@@ -43,7 +43,7 @@ trait Settings {
       |}
       |""".stripMargin
 
-  val partitionDefFilePath = pwd / 'server / 'src / 'main / 'scala / 'db / 'migration / 'schema / "PartitionDefinition.scala"
+  val partitionDefFilePath = pwd / "server" / "src" / "main" / "scala" / "db" / "migration" / "schema" / "PartitionDefinition.scala"
 
   val partitionMetaSchema = MetaSchema(List(
     Part(1, "a", None, None, List(
@@ -97,7 +97,7 @@ trait Settings {
       |}
       |""".stripMargin
 
-  val partition1DefFilePath = pwd / 'server / 'src / 'main / 'scala / 'db / 'migration / 'schema / "Partition1Definition.scala"
+  val partition1DefFilePath = pwd / "server" / "src" / "main" / "scala" / "db" / "migration" / "schema" / "Partition1Definition.scala"
 
   val partition1MetaSchema = MetaSchema(List(
     Part(1, "a", None, None, List(
@@ -164,7 +164,7 @@ trait Settings {
       |}
       |""".stripMargin
 
-  val partition2DefFilePath = pwd / 'server / 'src / 'main / 'scala / 'db / 'migration / 'schema / "Partition2Definition.scala"
+  val partition2DefFilePath = pwd / "server" / "src" / "main" / "scala" / "db" / "migration" / "schema" / "Partition2Definition.scala"
 
 
   val coreDefFile =
@@ -243,7 +243,7 @@ trait Settings {
       |}
       |""".stripMargin
 
-  val coreDefFilePath = pwd / 'server / 'src / 'main / 'scala / 'db / 'core / 'schema / "CoreTestDefinition.scala"
+  val coreDefFilePath = pwd / "server" / "src" / "main" / "scala" / "db" / "core" / "schema" / "CoreTestDefinition.scala"
 
   val coreMetaSchema = MetaSchema(Seq(
     Part(1, "db.part/user", None, None, List(

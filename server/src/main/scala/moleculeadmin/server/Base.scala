@@ -2,7 +2,7 @@ package moleculeadmin.server
 
 import db.admin.dsl.moleculeAdmin._
 import molecule.api.Entity
-import molecule.api.out20._
+import molecule.api.out14._
 import molecule.facade.Conn
 import moleculeadmin.shared.api.BaseApi
 import moleculeadmin.shared.ast.query.QueryDTO
@@ -12,77 +12,42 @@ import moleculeadmin.shared.util.HelpersAdmin
 
 trait Base extends BaseApi with HelpersAdmin {
 
-  override def dbNames(): Seq[String] = {
+  def withTransactor[T](
+    body: => Either[String, T]
+  )(implicit conn: Conn): Either[String, T] = try {
+    // Check if transactor responds by sending a Future back
+    conn.datomicConn.sync()
+    // Execute body of work
+    body
+  } catch {
+    case _: Throwable => Left(
+      "Datomic Transactor unavailable. Please restart it and try the operation again.")
+  }
+
+  override def loadMetaData(db: String): Either[String, PageMetaData] = {
     implicit val conn = Conn(base + "/MoleculeAdmin")
+    withTransactor {
+      try {
+        //        Right((dbNames(), getMetaSchema(db), settings(db)))
+        Right((dbNames_, getMetaSchema_(db), settings(db)))
+      } catch {
+        case t: Throwable => Left(t.getMessage)
+      }
+    }
+  }
+
+  override def getMetaSchema(db: String): MetaSchema =
+    getMetaSchema_(db)(Conn(base + "/MoleculeAdmin"))
+
+  override def dbNames(): Seq[String] =
+    dbNames_(Conn(base + "/MoleculeAdmin"))
+
+
+  private def dbNames_(implicit conn: Conn): Seq[String] = {
     meta_Db.name.isMolecular_(true).get.sorted
   }
 
-  def settings(db: String): SettingsMetaData = {
-    implicit val conn = Conn(base + "/MoleculeAdmin")
-
-    // Use "admin" for now. Todo: users
-    val (userId, settingsOpt) = user_User.e.username_("admin").settings$.get match {
-      case List((eid, settingsOpt)) => (eid, settingsOpt)
-      case Nil                      => (user_User.username("admin").save.eid, None)
-    }
-
-    val dbId = meta_Db.e.name_(db).get.head
-
-    val dbSettingsId = user_User(userId).DbSettings.e.db_(dbId).get match {
-      case List(eid) => eid
-      case Nil       =>
-        val dbSettingsId1 = user_DbSettings.db(dbId).save.eid
-        user_User(userId).dbSettings.assert(dbSettingsId1).update
-        dbSettingsId1
-    }
-
-    val editExprs: Map[String, List[String]] =
-      user_DbSettings(dbSettingsId).Edits.attr.time.expr.get
-        .groupBy(_._1)
-        .map {
-          case (a, vs) => a -> vs
-            .sortBy(-_._2) // sort newest first
-            .map(t => t._3) // only return expressions
-        }
-
-    user_DbSettings(dbSettingsId)
-      .db.stars$.flags$.checks$.undoneTs$
-      .Queries.*?(
-      user_Query.molecule.part.ns.isFavorite.showGrouped.groupedCols$
-        .ColSettings.*?(
-        user_ColSetting.colIndex.sortDir.sortPos
-      )
-    ).get.head match {
-      case (_, stars$, flags$, checks$, undoneTs$, queryList) =>
-        (
-          settingsOpt.getOrElse(Map.empty[String, String]),
-          stars$.getOrElse(Set.empty[Long]),
-          flags$.getOrElse(Set.empty[Long]),
-          checks$.getOrElse(Set.empty[Long]),
-          undoneTs$.getOrElse(Set.empty[Long]),
-          queryList.sortBy(_._1).map {
-            case (molecule1, part, ns, isFavorite, showGrouped, groupedCols$, colSettings) =>
-              QueryDTO(
-                molecule1,
-                part,
-                ns,
-                isFavorite,
-                showGrouped,
-                groupedCols$.getOrElse(Set.empty[Int]),
-                colSettings
-              )
-          },
-          editExprs
-        )
-    }
-  }
-
-  override def loadMetaData(db: String): PageMetaData =
-    (dbNames(), getMetaSchema(db), settings(db))
-
-  override def getMetaSchema(db: String): MetaSchema = {
-    implicit val conn = Conn(base + "/MoleculeAdmin")
-
+  private def getMetaSchema_(db: String)(implicit conn: Conn): MetaSchema = {
     val dbE: Long = {
       val dbEntitites = meta_Db.e.name_(db).get
       if (dbEntitites.isEmpty)
@@ -179,35 +144,61 @@ trait Base extends BaseApi with HelpersAdmin {
     MetaSchema(parts.sortBy(_.pos))
   }
 
+  private def settings(db: String)(implicit conn: Conn): SettingsMetaData = {
+    // Use "admin" for now. Todo: users
+    val (userId, settingsOpt) = user_User.e.username_("admin").settings$.get match {
+      case List((eid, settingsOpt)) => (eid, settingsOpt)
+      case Nil                      => (user_User.username("admin").save.eid, None)
+    }
 
-  override def getFlatMetaSchema(db: String): FlatSchema = {
-    implicit val conn = Conn(base + "/MoleculeAdmin")
-    meta_Db.name_(db)
-      .Partitions.pos.name.descr$
-      .Namespaces.pos.name.nameFull.descr$
-      .Attrs.pos.name.card.tpe.enums$.refNs$.options$.doc$
-      .attrGroup$.entityCount$.distinctValueCount$.descrAttr$.TopValues.*?(
-      stats_TopValue.entityCount.value.label$
-    ).get.sortBy(t => (t._1, t._4, t._8)).zipWithIndex.map {
-      case ((_, part, partDescr, _, ns, nsFull, nsDescr, _, attr, card, tpe,
-      enums0, ref, options0, doc,
-      attrGroup, count, distinctCount, descrAttr, topValuesList), i) => {
-        val topValues1: Seq[TopValue] = topValuesList.map(TopValue tupled)
-        val topValues2: Seq[TopValue] = if (topValues1.isEmpty)
-          Nil
-        else if (topValues1.head.label$.isDefined)
-          topValues1.sortBy(r => (r.entityCount, r.label$.getOrElse("")))
-        else
-          topValues1.sortBy(r => (r.entityCount, r.value))
+    val dbId = meta_Db.e.name_(db).get.head
 
-        FlatAttr(
-          i + 1, part, partDescr, ns, nsFull, nsDescr, attr, card, tpe,
-          enums0.getOrElse(Nil).toSeq.sorted,
-          ref,
-          options0.getOrElse(Nil).toSeq.filterNot(_ == "indexed").sorted,
-          doc, attrGroup, count, distinctCount, descrAttr, topValues2
+    val dbSettingsId = user_User(userId).DbSettings.e.db_(dbId).get match {
+      case List(eid) => eid
+      case Nil       =>
+        val dbSettingsId1 = user_DbSettings.db(dbId).save.eid
+        user_User(userId).dbSettings.assert(dbSettingsId1).update
+        dbSettingsId1
+    }
+
+    val editExprs: Map[String, List[String]] =
+      user_DbSettings(dbSettingsId).Edits.attr.time.expr.get
+        .groupBy(_._1)
+        .map {
+          case (a, vs) => a -> vs
+            .sortBy(-_._2) // sort newest first
+            .map(t => t._3) // only return expressions
+        }
+
+    user_DbSettings(dbSettingsId)
+      .db.stars$.flags$.checks$.undoneTs$
+      .Queries.*?(
+      user_Query.molecule.part.ns.isFavorite.showGrouped.groupedCols$
+        .ColSettings.*?(
+        user_ColSetting.colIndex.sortDir.sortPos
+      )
+    ).get.head match {
+      case (_, stars$, flags$, checks$, undoneTs$, queryList) =>
+        (
+          settingsOpt.getOrElse(Map.empty[String, String]),
+          stars$.getOrElse(Set.empty[Long]),
+          flags$.getOrElse(Set.empty[Long]),
+          checks$.getOrElse(Set.empty[Long]),
+          undoneTs$.getOrElse(Set.empty[Long]),
+          queryList.sortBy(_._1).map {
+            case (molecule1, part, ns, isFavorite, showGrouped, groupedCols$, colSettings) =>
+              QueryDTO(
+                molecule1,
+                part,
+                ns,
+                isFavorite,
+                showGrouped,
+                groupedCols$.getOrElse(Set.empty[Int]),
+                colSettings
+              )
+          },
+          editExprs
         )
-      }
     }
   }
 }

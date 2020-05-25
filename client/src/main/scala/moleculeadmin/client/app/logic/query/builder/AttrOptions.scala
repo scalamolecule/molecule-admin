@@ -334,11 +334,11 @@ case class AttrOptions(
       case Fn(`fn`, _) => modelElements() =
         upsertAttr(
           modelElements.now, path, attr, attrType, car, enums, "", ""
-        ).right.get
+        ).getOrElse(Nil)
       case Distinct    => modelElements() =
         upsertAttr(
           modelElements.now, path, attr, attrType, car, enums, "", ""
-        ).right.get
+        ).getOrElse(Nil)
       case _           =>
         upsertAttr(
           modelElements.now, path, attr, attrType, car, enums, fn, ""
@@ -367,7 +367,7 @@ case class AttrOptions(
         modelElements() =
           upsertAttr(
             modelElements.now, path, attr, attrType, car, enums, fn, ""
-          ).right.get
+          ).getOrElse(Nil)
       }
     ),
     label(

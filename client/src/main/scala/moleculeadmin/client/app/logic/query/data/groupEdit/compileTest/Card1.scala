@@ -59,9 +59,13 @@ object Card1 extends TestScalaFiddle with ColOps {
         ScalaFiddle[js.UndefOr[String]](scalaCode).lambda2.foreach { lambda =>
           def process[T](input: T): (Option[String], String) = {
             lambda(eid, input) match {
-              case js.Tuple2(v, "") if v.isEmpty => (None, "")
-              case js.Tuple2(v, "")              => (v.toOption, "")
-              case js.Tuple2(_, error)           => (None, error)
+              case js.Tuple2(v, err) =>
+                if (err.nonEmpty)
+                  (None, err)
+                else if (v.asInstanceOf[js.UndefOr[_]].isEmpty)
+                  (None, "")
+                else
+                  (v.toOption, "")
             }
           }
 

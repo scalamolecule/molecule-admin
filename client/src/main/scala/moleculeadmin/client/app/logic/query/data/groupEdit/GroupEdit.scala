@@ -94,10 +94,13 @@ case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
           j = indexBridge(i)
           oldVopt = origArray(j)
           newVopt = toTransferType(j) match {
-            case js.Tuple2(v, "")
-              if v.asInstanceOf[js.UndefOr[_]].isEmpty => None
-            case js.Tuple2(v, "")                      => Some(toColType(v))
-            case js.Tuple2(_, error)                   => alert(error)
+            case js.Tuple2(v, err) =>
+              if (err.nonEmpty)
+                alert(err)
+              else if (v.asInstanceOf[js.UndefOr[_]].isEmpty)
+                None
+              else
+                Some(toColType(v))
           }
           updateClient(i)
           editArray(j) = newVopt
@@ -107,9 +110,13 @@ case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
           j = indexBridge(i)
           oldVopt = origArray(j)
           newVopt = toTransferType(j) match {
-            case js.Tuple2(Nil, "")  => None
-            case js.Tuple2(vs, "")   => Some(toColType(vs))
-            case js.Tuple2(_, error) => alert(error)
+            case js.Tuple2(vs, err) =>
+              if (err.nonEmpty)
+                alert(err)
+              else if (vs.asInstanceOf[Iterable[_]].isEmpty)
+                None
+              else
+                Some(toColType(vs))
           }
           updateClient(i)
           editArray(j) = newVopt

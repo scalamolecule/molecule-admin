@@ -10,9 +10,6 @@ trait SchemaApi extends BaseApi {
   def getFlatSchemas(db: String): (FlatSchema, FlatSchema, FlatSchema) = ???
   def getSchemas(db: String): (FlatSchema, FlatSchema, FlatSchema, MetaSchema) = ???
   def getSchemas2(db: String): (Seq[String], FlatSchema, MetaSchema) = ???
-  //  def getDefSchema(db: String): FlatSchema = ???
-
-
 
   def createPartition(schema: MetaSchema, db: String, part: String,
                       descr: Option[String] = None, pos0: Int = 0
@@ -26,7 +23,6 @@ trait SchemaApi extends BaseApi {
                      ): Either[String, MetaSchema] = ???
 
 
-
   def createNamespace(schema: MetaSchema, db: String, part: String, ns: String,
                       descr: Option[String] = None, pos0: Int = 0
                      ): Either[String, MetaSchema] = ???
@@ -37,7 +33,6 @@ trait SchemaApi extends BaseApi {
 
   def deleteNamespace(schema: MetaSchema, db: String, part: String, ns: String
                      ): Either[String, MetaSchema] = ???
-
 
 
   def createAttribute(schema: MetaSchema, db: String, part: String, ns: String, attr: String, card: Int, tpe: String,

@@ -31,7 +31,7 @@ object Datalog extends ModelOps with ViewElements {
         if (q.i.inputs.nonEmpty) {
           div(
             p(),
-            q.inputs.zipWithIndex.map(r => (r._2 + 1) + "  " + r._1)
+            q.inputs.zipWithIndex.map(r => s"${r._2 + 1}  ${r._1}")
               .mkString("INPUTS:\n", "\n", "")
           )
         } else ()

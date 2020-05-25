@@ -10,17 +10,16 @@ import moleculeadmin.shared.testdata.TreeSchema
 import utest.{TestSuite, Tests, test}
 import scala.collection.mutable.ListBuffer
 import molecule.api.out10._
+import moleculeadmin.shared.api.QueryApi
 import utest._
 
 
-object LatestTxs extends TestSuite {
+object LatestTxs extends TestSuite with QueryApi {
 
 
   val tests = Tests {
-
     test("tx meta data") {
       implicit val conn = recreateDbFrom(CoreTestSchema, "localhost:4334/CoreTest", protocol)
-
 
       val tx1 = Ns.long(1).save
       val List(e11) = tx1.eids
@@ -38,7 +37,8 @@ object LatestTxs extends TestSuite {
       val List(e51, e52, e53, e54) = tx5.eids
 
 
-      val txData = (new QueryBackend).getLastTxs("CoreTest", 0L, Nil).right.get
+      val txData = (new QueryBackend).getLastTxs("CoreTest", 0L, Nil)
+        .getOrElse(Array.empty[TxResult])
 
 
       txData(0) ==> (tx1.t, tx1.tx, date2strLocal(tx1.inst),
@@ -86,7 +86,6 @@ object LatestTxs extends TestSuite {
           (e51, ":Ns/ref1", e52.toString, true),
           (e52, ":Ref1/int1", "6", true))
       )
-
     }
   }
 }
