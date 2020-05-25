@@ -21,7 +21,7 @@ trait Base extends BaseApi with HelpersAdmin {
     body
   } catch {
     case _: Throwable => Left(
-      "Datomic Transactor unavailable. Please restart it and try the operation again.")
+      "Datomic Transactor unavailable. Please restart it and refresh the page.")
   }
 
   override def loadMetaData(db: String): Either[String, PageMetaData] = {
