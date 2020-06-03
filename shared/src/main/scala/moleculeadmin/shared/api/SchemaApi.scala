@@ -20,12 +20,14 @@ trait SchemaApi extends BaseApi {
 
   def createPartition(
     schema: MetaSchema, db: String, part: String,
-    descr: Option[String] = None, pos0: Int = 0
+    descr: Option[String] = None,
+    pos0: Int = 0
   ): Either[String, MetaSchema] = ???
 
   def updatePartition(
     schema: MetaSchema, db: String, curPart: String, newPart: String,
-    descr: Option[String] = None, pos0: Int = 0
+    descr: Option[String] = None,
+    pos0: Int = 0
   ): Either[String, MetaSchema] = ???
 
   def deletePartition(
@@ -35,12 +37,14 @@ trait SchemaApi extends BaseApi {
 
   def createNamespace(
     schema: MetaSchema, db: String, part: String, ns: String,
-    descr: Option[String] = None, pos0: Int = 0
+    descr: Option[String] = None,
+    pos0: Int = 0
   ): Either[String, MetaSchema] = ???
 
   def updateNamespace(
     schema: MetaSchema, db: String, part: String, curNs: String, newNs: String,
-    descr: Option[String] = None, pos0: Int = 0
+    descr: Option[String] = None,
+    pos0: Int = 0
   ): Either[String, MetaSchema] = ???
 
   def deleteNamespace(
@@ -50,9 +54,12 @@ trait SchemaApi extends BaseApi {
 
   def createAttribute(
     schema: MetaSchema, db: String, part: String, ns: String, attr: String,
-    card: Int, tpe: String, enums: Seq[String] = Nil,
-    optRefNs: Option[String] = None, options: Seq[String] = Nil,
-    doc: Option[String] = None, pos0: Int = 0): Either[String, MetaSchema] = ???
+    card: Int, tpe: String,
+    enums: Seq[String] = Nil,
+    optRefNs: Option[String] = None,
+    options: Seq[String] = Nil,
+    doc: Option[String] = None,
+    pos0: Int = 0): Either[String, MetaSchema] = ???
 
   def updateAttribute(
     schema: MetaSchema, db: String, part: String, ns: String,

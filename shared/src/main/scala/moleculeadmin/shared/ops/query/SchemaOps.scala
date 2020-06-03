@@ -5,7 +5,7 @@ import moleculeadmin.shared.ast.query.Col
 import moleculeadmin.shared.ast.schema._
 
 
-trait SchemaOps extends QueryApi with BaseQuery {
+trait SchemaOps {
 
   def getFilteredSchema(schema: MetaSchema, selection: String): MetaSchema = selection match {
     case "v" => MetaSchema(

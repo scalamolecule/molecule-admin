@@ -838,7 +838,7 @@ object Namespaces extends TestSuite with TreeSchema with Helpers {
                 Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()))),
               Ns(2, "Bc", "b_Bc", None, None, List(
                 Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-                Attr(2, "selfJoin", 1, "ref", None, Some("b_Bc"), None, None, None, None, None, None, List())
+                Attr(2, "selfJoin", 1, "ref", None, Some("b_Bc"), Some(Set("indexed")), None, None, None, None, None, List())
               )))),
             Part(3, "c", None, None, List()),
           ))
@@ -853,7 +853,7 @@ object Namespaces extends TestSuite with TreeSchema with Helpers {
                   Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()))),
                 Ns(2, "Bc1", "b_Bc1", None, None, List(
                   Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-                  Attr(2, "selfJoin", 1, "ref", None, Some("b_Bc1"), None, None, None, None, None, None, List())
+                  Attr(2, "selfJoin", 1, "ref", None, Some("b_Bc1"), Some(Set("indexed")), None, None, None, None, None, List())
                 )))),
               Part(3, "c", None, None, List()),
             ))

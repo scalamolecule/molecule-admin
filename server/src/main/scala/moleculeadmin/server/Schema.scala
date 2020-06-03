@@ -9,7 +9,7 @@ import moleculeadmin.shared.api.SchemaApi
 import moleculeadmin.shared.ast.schema._
 import moleculeadmin.shared.ops.query.SchemaOps
 
-class Schema extends SchemaApi with SchemaBase with SchemaOps {
+class Schema extends SchemaApi with SchemaBase with Base with SchemaOps {
 
   override def getLiveSchema(db: String): FlatSchema = {
     implicit val conn = Conn(base + "/" + db)
@@ -70,7 +70,6 @@ class Schema extends SchemaApi with SchemaBase with SchemaOps {
     }
   }
 
-
   override def getFlatSchemas(db: String): (FlatSchema, FlatSchema, FlatSchema) = {
     val liveSchema: FlatSchema = getLiveSchema(db)
     val defSchema : FlatSchema = DefFile(db).getDefFileSchema
@@ -87,9 +86,8 @@ class Schema extends SchemaApi with SchemaBase with SchemaOps {
 
   override def getSchemas2(db: String): (Seq[String], FlatSchema, MetaSchema) = {
     val metaSchema: MetaSchema = getMetaSchema(db)
-    (dbNames(), mkFlatAttrs(metaSchema), metaSchema)
+    (dbNames, mkFlatAttrs(metaSchema), metaSchema)
   }
-
 
   override def createPartition(
     schema: MetaSchema,

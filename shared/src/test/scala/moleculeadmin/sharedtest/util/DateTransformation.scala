@@ -303,7 +303,7 @@ object DateTransformation extends TestSuite with DateHandling {
 
       // (presuming local +1 time zone)
       // Date is adjusted to current (+2) timezone
-      date2str(str2date(d3)) ==> "2019-02-12 01:00"
+      date2str(str2date(d3)) ==> "2019-02-12 02:00"
 //      date2str(str2date(d3), myPlus2hourZone) ==> "2019-02-12 02:00"
 //      date2str(str2date(d3), plus1hourZone) ==> "2019-02-12 01:00 +01:00"
 //      date2str(str2date(d3), utcZone) ==> "2019-02-12 00:00 Z"
@@ -314,7 +314,7 @@ object DateTransformation extends TestSuite with DateHandling {
 
       // (presuming local +1 time zone)
       // Date is adjusted to current (+2) timezone
-      date2str(str2date(d4)) ==> "2019-02-12 03:00"
+      date2str(str2date(d4)) ==> "2019-02-12 04:00"
       //      date2str(str2date(d4), myPlus2hourZone) ==> "2019-02-12 04:00"
       //      date2str(str2date(d4), plus1hourZone) ==> "2019-02-12 03:00 +01:00"
       //      date2str(str2date(d4), utcZone) ==> "2019-02-12 02:00 Z"
@@ -339,7 +339,7 @@ object DateTransformation extends TestSuite with DateHandling {
         "2001-11-23 15:44:00.000 -05:00"
       ).foreach { str =>
         // (presuming local +1 time zone)
-        date2str(str2date(str)) ==> "2001-11-23 21:44"
+        date2str(str2date(str)) ==> "2001-11-23 22:44"
         //        date2str(str2date(str), plus1hourZone) ==> "2001-11-23 21:44 +01:00"
       }
     }
@@ -355,7 +355,7 @@ object DateTransformation extends TestSuite with DateHandling {
         "2001-11-23 15:44:33.768 -05:00"
       ).foreach { str =>
         // (presuming local +1 time zone)
-        date2str(str2date(str)) ==> "2001-11-23 21:44:33.768"
+        date2str(str2date(str)) ==> "2001-11-23 22:44:33.768"
         //        date2str(str2date(str), plus1hourZone) ==> "2001-11-23 21:44:33.768 +01:00"
       }
     }

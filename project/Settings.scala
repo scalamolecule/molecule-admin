@@ -25,8 +25,7 @@ object Settings {
     name := "client",
     libraryDependencies ++= Seq(
       "org.scala-js" %%% "scalajs-dom" % "1.0.0",
-      "com.lihaoyi" %%% "scalarx" % "0.4.2",
-      "io.github.cquiroz" %%% "scala-java-time" % "2.0.0"
+      "com.lihaoyi" %%% "scalarx" % "0.4.2"
     )
   )
 
@@ -40,7 +39,7 @@ object Settings {
     ),
     libraryDependencies ++= Seq(
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-      "org.scalamolecule" %% "molecule" % "0.22.2",
+      "org.scalamolecule" %% "molecule" % "0.22.3-SNAPSHOT",
       "com.lihaoyi" %% "ammonite-ops" % "2.1.4",
       "com.datomic" % "datomic-free" % "0.9.5697",
       "org.webjars" % "jquery" % "3.3.1",
@@ -63,10 +62,11 @@ object Settings {
   val shared: Seq[Def.Setting[_]] = common ++ Seq(
     libraryDependencies ++= Seq(
       "com.lihaoyi" %%% "scalatags" % "0.9.1",
-      "com.lihaoyi" %%% "autowire" % "0.2.8-SNAPSHOT",
+      "com.lihaoyi" %%% "autowire" % "0.3.2",
       "com.lihaoyi" %%% "utest" % "0.7.4",
       "io.suzaku" %%% "boopickle" % "1.3.2",
-      ("org.scalamolecule" %%% "molecule" % "0.22.2")
+      "io.github.cquiroz" %%% "scala-java-time" % "2.0.0",
+      ("org.scalamolecule" %%% "molecule" % "0.22.3-SNAPSHOT")
         .exclude("com.datomic", "datomic-free")
     ),
     testFrameworks += new TestFramework("utest.runner.Framework")

@@ -5,8 +5,8 @@ import boopickle.Default._
 import moleculeadmin.client.app.html.AppElements
 import moleculeadmin.client.app.logic.common.TopMenu
 import moleculeadmin.client.app.logic.query.QueryState._
+import moleculeadmin.client.app.logic.query._
 import moleculeadmin.client.app.logic.query.data.DataTable
-import moleculeadmin.client.app.logic.query.{RenderGrouped, RenderQueryBuilder, RenderSubMenu, RenderViews, _}
 import moleculeadmin.client.queryWireAjax
 import moleculeadmin.shared.ops.query.builder.TreeOps
 import moleculeadmin.shared.ops.query.{ColOps, SchemaOps}

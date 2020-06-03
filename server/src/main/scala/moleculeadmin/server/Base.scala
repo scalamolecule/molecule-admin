@@ -28,7 +28,6 @@ trait Base extends BaseApi with HelpersAdmin {
     implicit val conn = Conn(base + "/MoleculeAdmin")
     withTransactor {
       try {
-        //        Right((dbNames(), getMetaSchema(db), settings(db)))
         Right((dbNames_, getMetaSchema_(db), settings(db)))
       } catch {
         case t: Throwable => Left(t.getMessage)
@@ -39,7 +38,7 @@ trait Base extends BaseApi with HelpersAdmin {
   override def getMetaSchema(db: String): MetaSchema =
     getMetaSchema_(db)(Conn(base + "/MoleculeAdmin"))
 
-  override def dbNames(): Seq[String] =
+  override def dbNames: Seq[String] =
     dbNames_(Conn(base + "/MoleculeAdmin"))
 
 
