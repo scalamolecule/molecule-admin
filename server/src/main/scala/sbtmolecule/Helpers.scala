@@ -22,7 +22,7 @@ trait Helpers {
     str.length match {
       case 0 => ""
       case 1 => str.toLowerCase()
-      case _ => s"${str.head.toLower}str.tail"
+      case _ => s"${str.head.toLower}${str.tail}"
     }
   }
 

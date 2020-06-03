@@ -87,7 +87,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
           "number", 1, "Int", Nil, None, Nil, Some("number description")).getOrElse(MetaSchema(Nil)).parts.head ==>
           Part(1, "a", None, None, Seq(
             Ns(1, "Aa", "a_Aa", None, None, Seq(
-              Attr(1, "number", 1, "Int", None, None, None, Some("number description"), None, None, None, None, List())))))
+              Attr(1, "number", 1, "Int", None, None, Some(Set("indexed")), Some("number description"), None, None, None, None, List())))))
 
         // def file has namespace prepared, here positioned first
         read ! partitionDefFilePath ==>
@@ -143,7 +143,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
           "number", 1, "Int", Nil, None, Seq("noHistory"), Some("number description")).getOrElse(MetaSchema(Nil)).parts.head ==>
           Part(1, "a", None, None, Seq(
             Ns(1, "Aa", "a_Aa", None, None, Seq(
-              Attr(1, "number", 1, "Int", None, None, Some(Set("noHistory")), Some("number description"), None, None, None, None, List())))))
+              Attr(1, "number", 1, "Int", None, None, Some(Set("indexed", "noHistory")), Some("number description"), None, None, None, None, List())))))
 
         // def file has namespace prepared, here positioned first
         read ! partitionDefFilePath ==>
@@ -180,7 +180,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
 
         // meta schema (saving meta partition for possible ns/attr additions)
         meta_Db.name_("Partition").Partitions.name_("a").Namespaces.name_("Aa")
-          .Attrs.name.options.get(moleculeAdminConn) ==> List(("number", Set("noHistory")))
+          .Attrs.name.options.get(moleculeAdminConn) ==> List(("number", Set("indexed", "noHistory")))
 
         // live namespaces having defined attributes
         Schema.ns_("Aa").attr.noHistory.get(partitionConn) ==> List(("number", true))
@@ -200,7 +200,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
           Part(2, "b", None, None, List(
             Ns(1, "Bb", "b_Bb", None, None, List(
               Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-              Attr(2, "text", 2, "String", Some(Set("enum1", "enum2")), None, Some(Set("fulltext", "noHistory", "uniqueValue")), Some("descr"), None, None, None, None, List()),
+              Attr(2, "text", 2, "String", Some(Set("enum1", "enum2")), None, Some(Set("indexed", "fulltext", "noHistory", "uniqueValue")), Some("descr"), None, None, None, None, List()),
               Attr(3, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()))),
             Ns(2, "Bc", "b_Bc", None, None, List(
               Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List())))))
@@ -264,7 +264,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
               Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()))),
             Ns(2, "Bc", "b_Bc", None, None, List(
               Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-              Attr(2, "ref", 1, "ref", None, Some("b_Bb"), None, None, None, None, None, None, List())))))
+              Attr(2, "ref", 1, "ref", None, Some("b_Bb"), Some(Set("indexed")), None, None, None, None, None, List())))))
 
         read ! partitionDefFilePath ==>
           """package db.migration.schema
@@ -328,7 +328,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
           MetaSchema(List(
             Part(1, "a", None, None, List(
               Ns(1, "Aa", "a_Aa", None, None, List(
-                Attr(1, "ref", 2, "ref", None, Some("b_Bb"), None, None, None, None, None, None, List()),
+                Attr(1, "ref", 2, "ref", None, Some("b_Bb"), Some(Set("indexed")), None, None, None, None, None, List()),
               )))),
             Part(2, "b", None, None, List(
               Ns(1, "Bb", "b_Bb", None, None, List(
@@ -1782,7 +1782,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
                   Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()),
                   Attr(3, "bb3", 1, "Int", None, None, None, None, None, None, None, None, List()),
                   Attr(4, "bb4", 1, "Int", None, None, None, None, None, None, None, None, List()),
-                  Attr(5, "refAttr", 1, "ref", None, Some("b_Bd"), None, None, None, None, None, None, List())
+                  Attr(5, "refAttr", 1, "ref", None, Some("b_Bd"), Some(Set("indexed")), None, None, None, None, None, List())
                 )),
                 Ns(2, "Bc", "b_Bc", None, None, List(
                   Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()))),
@@ -1870,7 +1870,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
             MetaSchema(List(
               Part(1, "a", None, None, List(
                 Ns(1, "Aa", "a_Aa", None, None, List(
-                  Attr(1, "aa1", 1, "Int", None, None, None, None, None, None, None, None, List())
+                  Attr(1, "aa1", 1, "Int", None, None, Some(Set("indexed")), None, None, None, None, None, List())
                 )))),
               Part(2, "b", None, None, List(
                 Ns(1, "Bb", "b_Bb", None, None, List(
@@ -1878,7 +1878,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
                   Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()),
                   Attr(3, "bb3", 1, "Int", None, None, None, None, None, None, None, None, List()),
                   Attr(4, "bb4", 1, "Int", None, None, None, None, None, None, None, None, List()),
-                  Attr(5, "refAttr", 1, "ref", None, Some("a_Aa"), None, None, None, None, None, None, List())
+                  Attr(5, "refAttr", 1, "ref", None, Some("a_Aa"), Some(Set("indexed")), None, None, None, None, None, List())
                 )),
                 Ns(2, "Bc", "b_Bc", None, None, List(
                   Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()))),
@@ -2631,7 +2631,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
               Ns(1, "Bb", "b_Bb", None, None, List(
                 Attr(1, "bb7", 1, "Int", None, None, None, None, None, None, None, None, List()),
                 Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()),
-                Attr(3, "bb1", 1, "String", None, None, None, None, None, None, None, None, List())
+                Attr(3, "bb1", 1, "String", None, None, Some(Set("indexed")), None, None, None, None, None, List())
               )),
               Ns(2, "Bc", "b_Bc", None, None, List(
                 Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()))))),

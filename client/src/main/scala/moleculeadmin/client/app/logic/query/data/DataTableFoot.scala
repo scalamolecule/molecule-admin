@@ -25,20 +25,27 @@ case class DataTableFoot()(implicit val ctx: Ctx.Owner)
       limit() = limitSelector.value.toInt
       (new Callbacks).saveSetting("limit" -> limit.now.toString)
     }
-    val footRow = tr(
+    val actualCount = actualRowCount
+    val lastRow     = curLastRow
+    val footRow     = tr(
       td(
         colspan := 100,
+
         _firstPage(isFirst)(onclick := { () => firstPage }),
         _prevPage(isFirst)(onclick := { () => prevPage }),
         limitSelector,
         _nextPage(isLast)(onclick := { () => nextPage }),
         _lastPage(isLast)(onclick := { () => lastPage }),
-        _rightSpace(s"${offset.now + 1}-$curLastRow}", 7),
+
+        if (lastRow == 0)
+          "0" else _rightSpace(s"${offset.now + 1}-$lastRow", 7),
+
         _rightSpace("of", 7),
-        _rightSpace(thousands(actualRowCount), 12),
+
+        _rightSpace(thousands(actualCount), 12),
         if (maxRows.now != -1 && rowCountAll > maxRows.now) {
           _rightSpace(" ( " + thousands(rowCountAll) + " in total )", 7)
-        } else if (actualRowCount != rowCount) {
+        } else if (actualCount != rowCount) {
           _rightSpace("/ " + thousands(rowCount), 7)
         } else ()
       )

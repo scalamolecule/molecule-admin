@@ -10,7 +10,7 @@ trait BaseApi {
   def dbHost() = "localhost:4334"
   def base() = s"datomic:$dbProtocol://$dbHost"
 
-  def dbNames(): Seq[String] = ???
+  def dbNames: Seq[String] = ???
 
   type SettingsMetaData = (
     Map[String, String],

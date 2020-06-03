@@ -15,6 +15,8 @@ import moleculeadmin.shared.testdata.{CoreSchema, ExampleData}
 import moleculeadmin.shared.util.HelpersAdmin
 import utest._
 import scala.languageFeature.implicitConversions._
+import scala.concurrent.ExecutionContext.Implicits.global
+import boopickle.Default._
 
 
 object Adhoc extends TestSuite

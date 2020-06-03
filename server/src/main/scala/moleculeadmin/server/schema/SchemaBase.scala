@@ -3,7 +3,6 @@ package moleculeadmin.server.schema
 import db.admin.dsl.moleculeAdmin._
 import molecule.api.out15._
 import molecule.facade.Conn
-import moleculeadmin.shared.ast.schema._
 
 trait SchemaBase {
 

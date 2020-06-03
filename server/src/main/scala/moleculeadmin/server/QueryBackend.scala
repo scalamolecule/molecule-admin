@@ -86,7 +86,6 @@ class QueryBackend extends ToggleBackend {
       }
   }
 
-
   override def getTxData(
     db: String,
     tx: Long,
