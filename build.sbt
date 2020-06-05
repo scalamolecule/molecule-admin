@@ -4,10 +4,7 @@ import sbtcrossproject.CrossType
 
 lazy val client = (project in file("client"))
   .dependsOn(sharedJS)
-  .settings(
-    Settings.client,
-//    jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv()
-  )
+  .settings(Settings.client)
   .enablePlugins(ScalaJSWeb)
 //  .enablePlugins(ScalaJSWeb, TzdbPlugin)
 
