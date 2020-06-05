@@ -1,6 +1,5 @@
 package moleculeadmin.shared.api
 
-import molecule.ast.model.Model
 import moleculeadmin.shared.ast.query.{Col, QueryDTO, QueryResult}
 import moleculeadmin.shared.ast.schema
 import scala.collection.mutable.ListBuffer
@@ -26,7 +25,6 @@ trait QueryApi extends BaseApi {
   ): Either[Seq[String], QueryResult] = ???
 
   def touchEntity(db: String, eid: Long): List[(String, String)] = ???
-
 
   def getTFromTx(t: Long): Long = ???
   def getTxFromT(t: Long): Long = ???

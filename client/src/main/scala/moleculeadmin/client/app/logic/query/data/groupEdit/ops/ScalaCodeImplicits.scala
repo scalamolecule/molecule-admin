@@ -89,6 +89,15 @@ abstract class ScalaCodeImplicits(cols: Seq[Col], col: Col, scalaExpr: String)
   val str2uuid = "implicit def str2uuid(s: String): UUID = UUID.fromString(s)"
   val str2uri  = "implicit def str2uri(s: String): URI = new URI(s)"
 
+  /*
+  // Use with pattern matching
+  someTxt match {
+    case r"(.*)$a Op\. (\d+)$b" => b // to get the opus numbers
+
+    // prepend `(?i)` for case-insensitive searches
+    case r"(?i)(.*)$a in . (major|minor)$b => b // Major/major/Minor/minor
+  }
+   */
   val regex =
     s"""implicit class Regex(sc: StringContext) {
        |    def r = new scala.util.matching.Regex(sc.parts.mkString, sc.parts.tail.map(_ => "x"): _*)
