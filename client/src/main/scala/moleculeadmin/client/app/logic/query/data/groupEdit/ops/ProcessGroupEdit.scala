@@ -6,7 +6,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js
 
 object ProcessGroupEdit {
-  var i = 0
 
   def apply[TransferType](
     colIndexes: Seq[Int],
@@ -127,6 +126,7 @@ object ProcessGroupEdit {
     val Seq(v1, v2) = colType2StringLambdas
     scalafiddle.lambda2.foreach { fn =>
       val applyFn = (j: Int) => fn(js.Tuple2(v1(j), v2(j)))
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -144,6 +144,7 @@ object ProcessGroupEdit {
     val Seq(v1, v2, v3) = colType2StringLambdas
     scalafiddle.lambda3.foreach { fn =>
       val applyFn = (j: Int) => fn(js.Tuple3(v1(j), v2(j), v3(j)))
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -161,6 +162,7 @@ object ProcessGroupEdit {
     val Seq(v1, v2, v3, v4) = colType2StringLambdas
     scalafiddle.lambda4.foreach { fn =>
       val applyFn = (j: Int) => fn(js.Tuple4(v1(j), v2(j), v3(j), v4(j)))
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -178,6 +180,7 @@ object ProcessGroupEdit {
     val Seq(v1, v2, v3, v4, v5) = colType2StringLambdas
     scalafiddle.lambda5.foreach { fn =>
       val applyFn = (j: Int) => fn(js.Tuple5(v1(j), v2(j), v3(j), v4(j), v5(j)))
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -196,6 +199,7 @@ object ProcessGroupEdit {
     val Seq(v1, v2, v3, v4, v5, v6) = colType2StringLambdas
     scalafiddle.lambda6.foreach { fn =>
       val applyFn = (j: Int) => fn(js.Tuple6(v1(j), v2(j), v3(j), v4(j), v5(j), v6(j)))
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -213,6 +217,7 @@ object ProcessGroupEdit {
     val Seq(v1, v2, v3, v4, v5, v6, v7) = colType2StringLambdas
     scalafiddle.lambda7.foreach { fn =>
       val applyFn = (j: Int) => fn(js.Tuple7(v1(j), v2(j), v3(j), v4(j), v5(j), v6(j), v7(j)))
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -230,6 +235,7 @@ object ProcessGroupEdit {
     val Seq(v1, v2, v3, v4, v5, v6, v7, v8) = colType2StringLambdas
     scalafiddle.lambda8.foreach { fn =>
       val applyFn = (j: Int) => fn(js.Tuple8(v1(j), v2(j), v3(j), v4(j), v5(j), v6(j), v7(j), v8(j)))
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -247,6 +253,7 @@ object ProcessGroupEdit {
     val Seq(v1, v2, v3, v4, v5, v6, v7, v8, v9) = colType2StringLambdas
     scalafiddle.lambda9.foreach { fn =>
       val applyFn = (j: Int) => fn(js.Tuple9(v1(j), v2(j), v3(j), v4(j), v5(j), v6(j), v7(j), v8(j), v9(j)))
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -264,6 +271,7 @@ object ProcessGroupEdit {
     val Seq(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10) = colType2StringLambdas
     scalafiddle.lambda10.foreach { fn =>
       val applyFn = (j: Int) => fn(js.Tuple10(v1(j), v2(j), v3(j), v4(j), v5(j), v6(j), v7(j), v8(j), v9(j), v10(j)))
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -281,6 +289,7 @@ object ProcessGroupEdit {
     val Seq(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11) = colType2StringLambdas
     scalafiddle.lambda11.foreach { fn =>
       val applyFn = (j: Int) => fn(js.Tuple11(v1(j), v2(j), v3(j), v4(j), v5(j), v6(j), v7(j), v8(j), v9(j), v10(j), v11(j)))
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -298,6 +307,7 @@ object ProcessGroupEdit {
     val Seq(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12) = colType2StringLambdas
     scalafiddle.lambda12.foreach { fn =>
       val applyFn = (j: Int) => fn(js.Tuple12(v1(j), v2(j), v3(j), v4(j), v5(j), v6(j), v7(j), v8(j), v9(j), v10(j), v11(j), v12(j)))
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -315,6 +325,7 @@ object ProcessGroupEdit {
     val Seq(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13) = colType2StringLambdas
     scalafiddle.lambda13.foreach { fn =>
       val applyFn = (j: Int) => fn(js.Tuple13(v1(j), v2(j), v3(j), v4(j), v5(j), v6(j), v7(j), v8(j), v9(j), v10(j), v11(j), v12(j), v13(j)))
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -332,6 +343,7 @@ object ProcessGroupEdit {
     val Seq(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14) = colType2StringLambdas
     scalafiddle.lambda14.foreach { fn =>
       val applyFn = (j: Int) => fn(js.Tuple14(v1(j), v2(j), v3(j), v4(j), v5(j), v6(j), v7(j), v8(j), v9(j), v10(j), v11(j), v12(j), v13(j), v14(j)))
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -349,6 +361,7 @@ object ProcessGroupEdit {
     val Seq(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15) = colType2StringLambdas
     scalafiddle.lambda15.foreach { fn =>
       val applyFn = (j: Int) => fn(js.Tuple15(v1(j), v2(j), v3(j), v4(j), v5(j), v6(j), v7(j), v8(j), v9(j), v10(j), v11(j), v12(j), v13(j), v14(j), v15(j)))
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -366,6 +379,7 @@ object ProcessGroupEdit {
     val Seq(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16) = colType2StringLambdas
     scalafiddle.lambda16.foreach { fn =>
       val applyFn = (j: Int) => fn(js.Tuple16(v1(j), v2(j), v3(j), v4(j), v5(j), v6(j), v7(j), v8(j), v9(j), v10(j), v11(j), v12(j), v13(j), v14(j), v15(j), v16(j)))
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -383,6 +397,7 @@ object ProcessGroupEdit {
     val Seq(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17) = colType2StringLambdas
     scalafiddle.lambda17.foreach { fn =>
       val applyFn = (j: Int) => fn(js.Tuple17(v1(j), v2(j), v3(j), v4(j), v5(j), v6(j), v7(j), v8(j), v9(j), v10(j), v11(j), v12(j), v13(j), v14(j), v15(j), v16(j), v17(j)))
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -400,6 +415,7 @@ object ProcessGroupEdit {
     val Seq(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18) = colType2StringLambdas
     scalafiddle.lambda18.foreach { fn =>
       val applyFn = (j: Int) => fn(js.Tuple18(v1(j), v2(j), v3(j), v4(j), v5(j), v6(j), v7(j), v8(j), v9(j), v10(j), v11(j), v12(j), v13(j), v14(j), v15(j), v16(j), v17(j), v18(j)))
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -417,6 +433,7 @@ object ProcessGroupEdit {
     val Seq(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19) = colType2StringLambdas
     scalafiddle.lambda19.foreach { fn =>
       val applyFn = (j: Int) => fn(js.Tuple19(v1(j), v2(j), v3(j), v4(j), v5(j), v6(j), v7(j), v8(j), v9(j), v10(j), v11(j), v12(j), v13(j), v14(j), v15(j), v16(j), v17(j), v18(j), v19(j)))
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -434,6 +451,7 @@ object ProcessGroupEdit {
     val Seq(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19, v20) = colType2StringLambdas
     scalafiddle.lambda20.foreach { fn =>
       val applyFn = (j: Int) => fn(js.Tuple20(v1(j), v2(j), v3(j), v4(j), v5(j), v6(j), v7(j), v8(j), v9(j), v10(j), v11(j), v12(j), v13(j), v14(j), v15(j), v16(j), v17(j), v18(j), v19(j), v20(j)))
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -451,6 +469,7 @@ object ProcessGroupEdit {
     val Seq(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19, v20, v21) = colType2StringLambdas
     scalafiddle.lambda21.foreach { fn =>
       val applyFn = (j: Int) => fn(js.Tuple21(v1(j), v2(j), v3(j), v4(j), v5(j), v6(j), v7(j), v8(j), v9(j), v10(j), v11(j), v12(j), v13(j), v14(j), v15(j), v16(j), v17(j), v18(j), v19(j), v20(j), v21(j)))
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -468,6 +487,7 @@ object ProcessGroupEdit {
     val Seq(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19, v20, v21, v22) = colType2StringLambdas
     scalafiddle.lambda22.foreach { fn =>
       val applyFn = (j: Int) => fn(js.Tuple22(v1(j), v2(j), v3(j), v4(j), v5(j), v6(j), v7(j), v8(j), v9(j), v10(j), v11(j), v12(j), v13(j), v14(j), v15(j), v16(j), v17(j), v18(j), v19(j), v20(j), v21(j), v22(j)))
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -512,6 +532,7 @@ object ProcessGroupEdit {
           js.Tuple3(v21(j), v22(j), v23(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -557,6 +578,7 @@ object ProcessGroupEdit {
           js.Tuple4(v21(j), v22(j), v23(j), v24(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -603,6 +625,7 @@ object ProcessGroupEdit {
           js.Tuple5(v21(j), v22(j), v23(j), v24(j), v25(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -650,6 +673,7 @@ object ProcessGroupEdit {
           js.Tuple6(v21(j), v22(j), v23(j), v24(j), v25(j), v26(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -698,6 +722,7 @@ object ProcessGroupEdit {
           js.Tuple7(v21(j), v22(j), v23(j), v24(j), v25(j), v26(j), v27(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -747,6 +772,7 @@ object ProcessGroupEdit {
           js.Tuple8(v21(j), v22(j), v23(j), v24(j), v25(j), v26(j), v27(j), v28(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -797,6 +823,7 @@ object ProcessGroupEdit {
           js.Tuple9(v21(j), v22(j), v23(j), v24(j), v25(j), v26(j), v27(j), v28(j), v29(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -848,6 +875,7 @@ object ProcessGroupEdit {
           js.Tuple10(v21(j), v22(j), v23(j), v24(j), v25(j), v26(j), v27(j), v28(j), v29(j), v30(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -900,6 +928,7 @@ object ProcessGroupEdit {
           js.Tuple11(v21(j), v22(j), v23(j), v24(j), v25(j), v26(j), v27(j), v28(j), v29(j), v30(j), v31(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -953,6 +982,7 @@ object ProcessGroupEdit {
           js.Tuple12(v21(j), v22(j), v23(j), v24(j), v25(j), v26(j), v27(j), v28(j), v29(j), v30(j), v31(j), v32(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -1007,6 +1037,7 @@ object ProcessGroupEdit {
           js.Tuple13(v21(j), v22(j), v23(j), v24(j), v25(j), v26(j), v27(j), v28(j), v29(j), v30(j), v31(j), v32(j), v33(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -1062,6 +1093,7 @@ object ProcessGroupEdit {
           js.Tuple14(v21(j), v22(j), v23(j), v24(j), v25(j), v26(j), v27(j), v28(j), v29(j), v30(j), v31(j), v32(j), v33(j), v34(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -1118,6 +1150,7 @@ object ProcessGroupEdit {
           js.Tuple15(v21(j), v22(j), v23(j), v24(j), v25(j), v26(j), v27(j), v28(j), v29(j), v30(j), v31(j), v32(j), v33(j), v34(j), v35(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -1175,6 +1208,7 @@ object ProcessGroupEdit {
           js.Tuple16(v21(j), v22(j), v23(j), v24(j), v25(j), v26(j), v27(j), v28(j), v29(j), v30(j), v31(j), v32(j), v33(j), v34(j), v35(j), v36(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -1233,6 +1267,7 @@ object ProcessGroupEdit {
           js.Tuple17(v21(j), v22(j), v23(j), v24(j), v25(j), v26(j), v27(j), v28(j), v29(j), v30(j), v31(j), v32(j), v33(j), v34(j), v35(j), v36(j), v37(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -1292,6 +1327,7 @@ object ProcessGroupEdit {
           js.Tuple18(v21(j), v22(j), v23(j), v24(j), v25(j), v26(j), v27(j), v28(j), v29(j), v30(j), v31(j), v32(j), v33(j), v34(j), v35(j), v36(j), v37(j), v38(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -1352,6 +1388,7 @@ object ProcessGroupEdit {
           js.Tuple19(v21(j), v22(j), v23(j), v24(j), v25(j), v26(j), v27(j), v28(j), v29(j), v30(j), v31(j), v32(j), v33(j), v34(j), v35(j), v36(j), v37(j), v38(j), v39(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -1412,6 +1449,7 @@ object ProcessGroupEdit {
           js.Tuple20(v21(j), v22(j), v23(j), v24(j), v25(j), v26(j), v27(j), v28(j), v29(j), v30(j), v31(j), v32(j), v33(j), v34(j), v35(j), v36(j), v37(j), v38(j), v39(j), v40(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -1474,6 +1512,7 @@ object ProcessGroupEdit {
           js.Tuple21(v21(j), v22(j), v23(j), v24(j), v25(j), v26(j), v27(j), v28(j), v29(j), v30(j), v31(j), v32(j), v33(j), v34(j), v35(j), v36(j), v37(j), v38(j), v39(j), v40(j), v41(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -1537,6 +1576,7 @@ object ProcessGroupEdit {
           js.Tuple22(v21(j), v22(j), v23(j), v24(j), v25(j), v26(j), v27(j), v28(j), v29(j), v30(j), v31(j), v32(j), v33(j), v34(j), v35(j), v36(j), v37(j), v38(j), v39(j), v40(j), v41(j), v42(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -1602,6 +1642,7 @@ object ProcessGroupEdit {
           js.Tuple3(v41(j), v42(j), v43(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -1668,6 +1709,7 @@ object ProcessGroupEdit {
           js.Tuple4(v41(j), v42(j), v43(j), v44(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -1735,6 +1777,7 @@ object ProcessGroupEdit {
           js.Tuple5(v41(j), v42(j), v43(j), v44(j), v45(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -1803,6 +1846,7 @@ object ProcessGroupEdit {
           js.Tuple6(v41(j), v42(j), v43(j), v44(j), v45(j), v46(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -1872,6 +1916,7 @@ object ProcessGroupEdit {
           js.Tuple7(v41(j), v42(j), v43(j), v44(j), v45(j), v46(j), v47(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -1942,6 +1987,7 @@ object ProcessGroupEdit {
           js.Tuple8(v41(j), v42(j), v43(j), v44(j), v45(j), v46(j), v47(j), v48(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -2013,6 +2059,7 @@ object ProcessGroupEdit {
           js.Tuple9(v41(j), v42(j), v43(j), v44(j), v45(j), v46(j), v47(j), v48(j), v49(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -2085,6 +2132,7 @@ object ProcessGroupEdit {
           js.Tuple10(v41(j), v42(j), v43(j), v44(j), v45(j), v46(j), v47(j), v48(j), v49(j), v50(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -2158,6 +2206,7 @@ object ProcessGroupEdit {
           js.Tuple11(v41(j), v42(j), v43(j), v44(j), v45(j), v46(j), v47(j), v48(j), v49(j), v50(j), v51(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -2232,6 +2281,7 @@ object ProcessGroupEdit {
           js.Tuple12(v41(j), v42(j), v43(j), v44(j), v45(j), v46(j), v47(j), v48(j), v49(j), v50(j), v51(j), v52(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -2307,6 +2357,7 @@ object ProcessGroupEdit {
           js.Tuple13(v41(j), v42(j), v43(j), v44(j), v45(j), v46(j), v47(j), v48(j), v49(j), v50(j), v51(j), v52(j), v53(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -2383,6 +2434,7 @@ object ProcessGroupEdit {
           js.Tuple14(v41(j), v42(j), v43(j), v44(j), v45(j), v46(j), v47(j), v48(j), v49(j), v50(j), v51(j), v52(j), v53(j), v54(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -2460,6 +2512,7 @@ object ProcessGroupEdit {
           js.Tuple15(v41(j), v42(j), v43(j), v44(j), v45(j), v46(j), v47(j), v48(j), v49(j), v50(j), v51(j), v52(j), v53(j), v54(j), v55(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -2538,6 +2591,7 @@ object ProcessGroupEdit {
           js.Tuple16(v41(j), v42(j), v43(j), v44(j), v45(j), v46(j), v47(j), v48(j), v49(j), v50(j), v51(j), v52(j), v53(j), v54(j), v55(j), v56(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -2617,6 +2671,7 @@ object ProcessGroupEdit {
           js.Tuple17(v41(j), v42(j), v43(j), v44(j), v45(j), v46(j), v47(j), v48(j), v49(j), v50(j), v51(j), v52(j), v53(j), v54(j), v55(j), v56(j), v57(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -2697,6 +2752,7 @@ object ProcessGroupEdit {
           js.Tuple18(v41(j), v42(j), v43(j), v44(j), v45(j), v46(j), v47(j), v48(j), v49(j), v50(j), v51(j), v52(j), v53(j), v54(j), v55(j), v56(j), v57(j), v58(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -2778,6 +2834,7 @@ object ProcessGroupEdit {
           js.Tuple19(v41(j), v42(j), v43(j), v44(j), v45(j), v46(j), v47(j), v48(j), v49(j), v50(j), v51(j), v52(j), v53(j), v54(j), v55(j), v56(j), v57(j), v58(j), v59(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -2860,6 +2917,7 @@ object ProcessGroupEdit {
           js.Tuple20(v41(j), v42(j), v43(j), v44(j), v45(j), v46(j), v47(j), v48(j), v49(j), v50(j), v51(j), v52(j), v53(j), v54(j), v55(j), v56(j), v57(j), v58(j), v59(j), v60(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -2943,6 +3001,7 @@ object ProcessGroupEdit {
           js.Tuple21(v41(j), v42(j), v43(j), v44(j), v45(j), v46(j), v47(j), v48(j), v49(j), v50(j), v51(j), v52(j), v53(j), v54(j), v55(j), v56(j), v57(j), v58(j), v59(j), v60(j), v61(j)),
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -3027,6 +3086,7 @@ object ProcessGroupEdit {
           js.Tuple22(v41(j), v42(j), v43(j), v44(j), v45(j), v46(j), v47(j), v48(j), v49(j), v50(j), v51(j), v52(j), v53(j), v54(j), v55(j), v56(j), v57(j), v58(j), v59(j), v60(j), v61(j), v62(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -3113,6 +3173,7 @@ object ProcessGroupEdit {
           js.Tuple3(v61(j), v62(j), v63(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -3200,6 +3261,7 @@ object ProcessGroupEdit {
           js.Tuple4(v61(j), v62(j), v63(j), v64(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -3288,6 +3350,7 @@ object ProcessGroupEdit {
           js.Tuple5(v61(j), v62(j), v63(j), v64(j), v65(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -3377,6 +3440,7 @@ object ProcessGroupEdit {
           js.Tuple6(v61(j), v62(j), v63(j), v64(j), v65(j), v66(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -3467,6 +3531,7 @@ object ProcessGroupEdit {
           js.Tuple7(v61(j), v62(j), v63(j), v64(j), v65(j), v66(j), v67(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -3558,6 +3623,7 @@ object ProcessGroupEdit {
           js.Tuple8(v61(j), v62(j), v63(j), v64(j), v65(j), v66(j), v67(j), v68(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -3650,6 +3716,7 @@ object ProcessGroupEdit {
           js.Tuple9(v61(j), v62(j), v63(j), v64(j), v65(j), v66(j), v67(j), v68(j), v69(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -3743,6 +3810,7 @@ object ProcessGroupEdit {
           js.Tuple10(v61(j), v62(j), v63(j), v64(j), v65(j), v66(j), v67(j), v68(j), v69(j), v70(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -3837,6 +3905,7 @@ object ProcessGroupEdit {
           js.Tuple11(v61(j), v62(j), v63(j), v64(j), v65(j), v66(j), v67(j), v68(j), v69(j), v70(j), v71(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -3932,6 +4001,7 @@ object ProcessGroupEdit {
           js.Tuple12(v61(j), v62(j), v63(j), v64(j), v65(j), v66(j), v67(j), v68(j), v69(j), v70(j), v71(j), v72(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -4028,6 +4098,7 @@ object ProcessGroupEdit {
           js.Tuple13(v61(j), v62(j), v63(j), v64(j), v65(j), v66(j), v67(j), v68(j), v69(j), v70(j), v71(j), v72(j), v73(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -4125,6 +4196,7 @@ object ProcessGroupEdit {
           js.Tuple14(v61(j), v62(j), v63(j), v64(j), v65(j), v66(j), v67(j), v68(j), v69(j), v70(j), v71(j), v72(j), v73(j), v74(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -4223,6 +4295,7 @@ object ProcessGroupEdit {
           js.Tuple15(v61(j), v62(j), v63(j), v64(j), v65(j), v66(j), v67(j), v68(j), v69(j), v70(j), v71(j), v72(j), v73(j), v74(j), v75(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -4322,6 +4395,7 @@ object ProcessGroupEdit {
           js.Tuple16(v61(j), v62(j), v63(j), v64(j), v65(j), v66(j), v67(j), v68(j), v69(j), v70(j), v71(j), v72(j), v73(j), v74(j), v75(j), v76(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -4422,6 +4496,7 @@ object ProcessGroupEdit {
           js.Tuple17(v61(j), v62(j), v63(j), v64(j), v65(j), v66(j), v67(j), v68(j), v69(j), v70(j), v71(j), v72(j), v73(j), v74(j), v75(j), v76(j), v77(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -4523,6 +4598,7 @@ object ProcessGroupEdit {
           js.Tuple18(v61(j), v62(j), v63(j), v64(j), v65(j), v66(j), v67(j), v68(j), v69(j), v70(j), v71(j), v72(j), v73(j), v74(j), v75(j), v76(j), v77(j), v78(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -4625,6 +4701,7 @@ object ProcessGroupEdit {
           js.Tuple19(v61(j), v62(j), v63(j), v64(j), v65(j), v66(j), v67(j), v68(j), v69(j), v70(j), v71(j), v72(j), v73(j), v74(j), v75(j), v76(j), v77(j), v78(j), v79(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -4728,6 +4805,7 @@ object ProcessGroupEdit {
           js.Tuple20(v61(j), v62(j), v63(j), v64(j), v65(j), v66(j), v67(j), v68(j), v69(j), v70(j), v71(j), v72(j), v73(j), v74(j), v75(j), v76(j), v77(j), v78(j), v79(j), v80(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -4832,6 +4910,7 @@ object ProcessGroupEdit {
           js.Tuple21(v61(j), v62(j), v63(j), v64(j), v65(j), v66(j), v67(j), v68(j), v69(j), v70(j), v71(j), v72(j), v73(j), v74(j), v75(j), v76(j), v77(j), v78(j), v79(j), v80(j), v81(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -4937,6 +5016,7 @@ object ProcessGroupEdit {
           js.Tuple22(v61(j), v62(j), v63(j), v64(j), v65(j), v66(j), v67(j), v68(j), v69(j), v70(j), v71(j), v72(j), v73(j), v74(j), v75(j), v76(j), v77(j), v78(j), v79(j), v80(j), v81(j), v82(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -5044,6 +5124,7 @@ object ProcessGroupEdit {
           js.Tuple3(v81(j), v82(j), v83(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -5152,6 +5233,7 @@ object ProcessGroupEdit {
           js.Tuple4(v81(j), v82(j), v83(j), v84(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -5261,6 +5343,7 @@ object ProcessGroupEdit {
           js.Tuple5(v81(j), v82(j), v83(j), v84(j), v85(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -5371,6 +5454,7 @@ object ProcessGroupEdit {
           js.Tuple6(v81(j), v82(j), v83(j), v84(j), v85(j), v86(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -5482,6 +5566,7 @@ object ProcessGroupEdit {
           js.Tuple7(v81(j), v82(j), v83(j), v84(j), v85(j), v86(j), v87(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -5594,6 +5679,7 @@ object ProcessGroupEdit {
           js.Tuple8(v81(j), v82(j), v83(j), v84(j), v85(j), v86(j), v87(j), v88(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -5707,6 +5793,7 @@ object ProcessGroupEdit {
           js.Tuple9(v81(j), v82(j), v83(j), v84(j), v85(j), v86(j), v87(j), v88(j), v89(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -5821,6 +5908,7 @@ object ProcessGroupEdit {
           js.Tuple10(v81(j), v82(j), v83(j), v84(j), v85(j), v86(j), v87(j), v88(j), v89(j), v90(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -5936,6 +6024,7 @@ object ProcessGroupEdit {
           js.Tuple11(v81(j), v82(j), v83(j), v84(j), v85(j), v86(j), v87(j), v88(j), v89(j), v90(j), v91(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -6052,6 +6141,7 @@ object ProcessGroupEdit {
           js.Tuple12(v81(j), v82(j), v83(j), v84(j), v85(j), v86(j), v87(j), v88(j), v89(j), v90(j), v91(j), v92(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -6169,6 +6259,7 @@ object ProcessGroupEdit {
           js.Tuple13(v81(j), v82(j), v83(j), v84(j), v85(j), v86(j), v87(j), v88(j), v89(j), v90(j), v91(j), v92(j), v93(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -6287,6 +6378,7 @@ object ProcessGroupEdit {
           js.Tuple14(v81(j), v82(j), v83(j), v84(j), v85(j), v86(j), v87(j), v88(j), v89(j), v90(j), v91(j), v92(j), v93(j), v94(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -6406,6 +6498,7 @@ object ProcessGroupEdit {
           js.Tuple15(v81(j), v82(j), v83(j), v84(j), v85(j), v86(j), v87(j), v88(j), v89(j), v90(j), v91(j), v92(j), v93(j), v94(j), v95(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -6526,6 +6619,7 @@ object ProcessGroupEdit {
           js.Tuple16(v81(j), v82(j), v83(j), v84(j), v85(j), v86(j), v87(j), v88(j), v89(j), v90(j), v91(j), v92(j), v93(j), v94(j), v95(j), v96(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -6647,6 +6741,7 @@ object ProcessGroupEdit {
           js.Tuple17(v81(j), v82(j), v83(j), v84(j), v85(j), v86(j), v87(j), v88(j), v89(j), v90(j), v91(j), v92(j), v93(j), v94(j), v95(j), v96(j), v97(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -6769,6 +6864,7 @@ object ProcessGroupEdit {
           js.Tuple18(v81(j), v82(j), v83(j), v84(j), v85(j), v86(j), v87(j), v88(j), v89(j), v90(j), v91(j), v92(j), v93(j), v94(j), v95(j), v96(j), v97(j), v98(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -6892,6 +6988,7 @@ object ProcessGroupEdit {
           js.Tuple19(v81(j), v82(j), v83(j), v84(j), v85(j), v86(j), v87(j), v88(j), v89(j), v90(j), v91(j), v92(j), v93(j), v94(j), v95(j), v96(j), v97(j), v98(j), v99(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
@@ -7016,6 +7113,7 @@ object ProcessGroupEdit {
           js.Tuple20(v81(j), v82(j), v83(j), v84(j), v85(j), v86(j), v87(j), v88(j), v89(j), v90(j), v91(j), v92(j), v93(j), v94(j), v95(j), v96(j), v97(j), v98(j), v99(j), v100(j))
         )
       )
+      var i = 0
       while (i < lastRow) {
         resolve(i, applyFn)
         i += 1
