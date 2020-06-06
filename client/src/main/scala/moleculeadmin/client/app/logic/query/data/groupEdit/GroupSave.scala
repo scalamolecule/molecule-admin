@@ -24,29 +24,20 @@ case class GroupSave(col: Col)(implicit val ctx: Ctx.Owner)
   val Col(colIndex, _, nsAlias, nsFull, attr, attrType, colType,
   _, _, enums, _, _, _, _, _) = col
 
-  val attrFull   = s":$nsFull/${clean(attr)}"
-  val enumPrefix = if (enums.isEmpty) "" else s":$nsAlias.${clean(attr)}/"
-  val filterId   = "filter-" + colIndex
-
-  // Start spinner since saving to db can take time
-  processing() = filterId
-
-  val qr          = cachedQueryResult
-  val indexBridge = cachedIndexBridge
-
-  val eidIndex = getEidColIndex(columns.now, colIndex, nsAlias, nsFull)
-  val eidArray = qr.num(qr.arrayIndexes(eidIndex))
-  var eid      = 0L
-
-  val origIndex = qr.arrayIndexes(colIndex - 1)
-  val editIndex = qr.arrayIndexes(colIndex)
-
+  val attrFull            = s":$nsFull/${clean(attr)}"
+  val enumPrefix          = if (enums.isEmpty) "" else s":$nsAlias.${clean(attr)}/"
+  val filterId            = "filter-" + colIndex
+  val qr                  = cachedQueryResult
+  val indexBridge         = cachedIndexBridge
+  val eidIndex            = getEidColIndex(columns.now, colIndex, nsAlias, nsFull)
+  val eidArray            = qr.num(qr.arrayIndexes(eidIndex))
+  var eid                 = 0L
+  val origIndex           = qr.arrayIndexes(colIndex - 1)
+  val editIndex           = qr.arrayIndexes(colIndex)
   val tableRows           = document.getElementById("tableBody").childNodes
   var tableRowIndexOffset = offset.now
   var tableRowIndexMax    = curLastRow
-
-  val lastRow = actualRowCount
-
+  val lastRow             = actualRowCount
 
   case class CellUpdater[ColType](cellBaseClass: String) {
     var cells   : NodeList  = null
@@ -174,17 +165,11 @@ case class GroupSave(col: Col)(implicit val ctx: Ctx.Owner)
           // Reset cache to avoid old attr data to hang over
           cachedQueryResult = qr
 
-          // Turn spinner off
-          processing() = ""
-
         case Left(err) =>
           window.alert(s"Error saving $attrFull changes:\n$err")
       }
     } else {
       println("No changes")
-
-      // Turn spinner off
-      processing() = ""
     }
   } catch {
     case e: Throwable =>
