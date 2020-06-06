@@ -103,19 +103,19 @@ trait Editing extends Paging {
     }
   }
 
-  def saveEditMoveUp(e: KeyboardEvent): Unit = {
+  def saveEditMoveUp(e: KeyboardEvent)(implicit ctx: Ctx.Owner): Unit = {
     // prevent creating new line within cell
     e.preventDefault()
     val curCell = document.activeElement
-    val curRow  = curCell.parentNode
-    val rowAbove = curRow.previousSibling
     editCellId = curCell.id
+    val colNo    = getColNo(editCellId)
+    val curRow   = curCell.parentNode
+    val rowAbove = curRow.previousSibling
     if (rowAbove != null) {
-      val colNo     = getColNo(editCellId)
-      val cellBelow = rowAbove.childNodes.item(colNo)
-      // Select content of cell below
+      val cellAbove = rowAbove.childNodes.item(colNo)
+      // Select content of cell above
       // Fires blur-callback (save) on current cell
-      selectContent(cellBelow.asInstanceOf[HTMLInputElement])
+      selectContent(cellAbove.asInstanceOf[HTMLInputElement])
       if (editCellId.isEmpty) {
         // Re-select content in original cell if invalid data
         selectContent(curCell)
@@ -123,25 +123,38 @@ trait Editing extends Paging {
         markNewRow(curRow, rowAbove)
       }
     } else {
-      curCell.asInstanceOf[HTMLInputElement].blur()
+      // Current row is first row
+      if (isFirstPage) {
+        // On first page, re-select cell to not loose focus
+        selectContent(curCell)
+        markRow(curRow)
+      } else {
+        // Go to previous page and select cell of same column on last row
+        prevPage
+        val lastRow   = document.getElementById("tableBody")
+          .lastChild.asInstanceOf[TableRow]
+        val cellAbove = lastRow.childNodes.item(colNo).asInstanceOf[HTMLInputElement]
+        markRow(lastRow)
+        selectContent(cellAbove)
+      }
     }
     // reset current edit cell id
     editCellId = ""
   }
 
-  def saveEditMoveDown(e: KeyboardEvent): Unit = {
+  def saveEditMoveDown(e: KeyboardEvent)(implicit ctx: Ctx.Owner): Unit = {
     // prevent creating new line within cell
     e.preventDefault()
-    val curCell = document.activeElement
-    val curRow  = curCell.parentNode
-    val rowUnder = curRow.nextSibling
+    val curCell = document.activeElement.asInstanceOf[HTMLInputElement]
     editCellId = curCell.id
+    val colNo    = getColNo(editCellId)
+    val curRow   = curCell.parentNode
+    val rowUnder = curRow.nextSibling
     if (rowUnder != null) {
-      val colNo     = getColNo(editCellId)
-      val cellBelow = rowUnder.childNodes.item(colNo)
+      val cellBelow = rowUnder.childNodes.item(colNo).asInstanceOf[HTMLInputElement]
       // Select content of cell below
       // Fires blur-callback (save) on current cell
-      selectContent(cellBelow.asInstanceOf[HTMLInputElement])
+      selectContent(cellBelow)
       if (editCellId.isEmpty) {
         // Re-select content in original cell if invalid data
         selectContent(curCell)
@@ -149,12 +162,24 @@ trait Editing extends Paging {
         markNewRow(curRow, rowUnder)
       }
     } else {
-      curCell.asInstanceOf[HTMLInputElement].blur()
+      // Current row is last row
+      if (isLastPage) {
+        // On last page, re-select cell to not loose focus
+        selectContent(curCell)
+        markRow(curRow)
+      } else {
+        // Go to next page and select cell of same column on first row
+        nextPage
+        val firstRow = document.getElementById("tableBody")
+          .firstChild.asInstanceOf[TableRow]
+        markRow(firstRow)
+        val cellBelow = firstRow.childNodes.item(colNo).asInstanceOf[HTMLInputElement]
+        selectContent(cellBelow)
+      }
     }
     // reset current edit cell id
     editCellId = ""
   }
-
 
   def saveEditMoveForward(e: KeyboardEvent)(implicit ctx: Ctx.Owner): Unit = {
     // prevent immediately moving to next cell
@@ -162,6 +187,7 @@ trait Editing extends Paging {
     val curCell = document.activeElement.asInstanceOf[HTMLInputElement]
     editCellId = curCell.id
 
+    @scala.annotation.tailrec
     def nextEditableCell(testCell: HTMLInputElement): Option[HTMLInputElement] = {
       val sibling = testCell.nextSibling.asInstanceOf[HTMLInputElement]
       if (sibling == null)
@@ -175,15 +201,15 @@ trait Editing extends Paging {
     nextEditableCell(curCell).fold {
       // Trigger update with blur
       curCell.blur()
-      // Go to first selectable cell in next row
-      val curRow  = curCell.parentNode
+      val curRow   = curCell.parentNode
       val rowUnder = curRow.nextSibling
       if (rowUnder != null) {
+        // Go to first selectable cell in next row
         val firstCellNextRow = rowUnder.firstChild.asInstanceOf[HTMLInputElement]
         selectContent(nextEditableCell(firstCellNextRow).get)
         markNewRow(curRow, rowUnder)
       } else {
-        if (isLast) {
+        if (isLastPage) {
           // Re-select cell to not loose focus
           selectContent(curCell)
           markRow(curRow)
@@ -196,7 +222,6 @@ trait Editing extends Paging {
           markRow(firstRow)
           selectContent(nextEditableCell(firstCell).get)
         }
-
       }
     } { nextCell =>
       // Select content of next editable cell
@@ -219,6 +244,7 @@ trait Editing extends Paging {
     val curCell = document.activeElement.asInstanceOf[HTMLInputElement]
     editCellId = curCell.id
 
+    @scala.annotation.tailrec
     def previousEditableCell(testCell: HTMLInputElement): Option[HTMLInputElement] = {
       val sibling = testCell.previousSibling.asInstanceOf[HTMLInputElement]
       if (sibling == null)
@@ -232,15 +258,15 @@ trait Editing extends Paging {
     previousEditableCell(curCell).fold {
       // Trigger update with blur
       curCell.blur()
-      // Go to last selectable cell in previous row
-      val curRow  = curCell.parentNode
+      val curRow   = curCell.parentNode
       val rowAbove = curRow.previousSibling
       if (rowAbove != null) {
+        // Go to last selectable cell in previous row
         val lastCellPrevRow = rowAbove.lastChild.asInstanceOf[HTMLInputElement]
         selectContent(previousEditableCell(lastCellPrevRow).get)
         markNewRow(curRow, rowAbove)
       } else {
-        if (isFirst) {
+        if (isFirstPage) {
           // Re-select cell to not loose focus
           selectContent(curCell)
           markRow(curRow)

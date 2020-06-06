@@ -96,9 +96,9 @@ trait Paging extends BaseKeyEvents {
   def actualRowCount: Int = if (filters.now.isEmpty)
     rowCount else cachedSortFilterIndex.length
 
-  def isFirst: Boolean = offset.now == 0
+  def isFirstPage: Boolean = offset.now == 0
 
-  def isLast: Boolean = offset.now + limit.now >= actualRowCount
+  def isLastPage: Boolean = offset.now + limit.now >= actualRowCount
 
   def remainingRows: Int = actualRowCount - offset.now
   def curLastRow: Int = {
@@ -128,24 +128,24 @@ trait Paging extends BaseKeyEvents {
 
 
   def firstPage(implicit ctx: Ctx.Owner): Unit =
-    if (!isFirst) offset() = 0
+    if (!isFirstPage) offset() = 0
 
   def prevChunk(implicit ctx: Ctx.Owner): Unit =
     if (hasChunkBefore)
       offset() = offset.now - limit.now * chunkSize else firstPage
 
   def prevPage(implicit ctx: Ctx.Owner): Unit =
-    if (!isFirst) offset() = offset.now - limit.now
+    if (!isFirstPage) offset() = offset.now - limit.now
 
   def nextPage(implicit ctx: Ctx.Owner): Unit =
-    if (!isLast) offset() = offset.now + limit.now
+    if (!isLastPage) offset() = offset.now + limit.now
 
   def nextChunk(implicit ctx: Ctx.Owner): Unit =
     if (hasChunkAfter)
       offset() = offset.now + limit.now * chunkSize else lastPage
 
   def lastPage(implicit ctx: Ctx.Owner): Unit =
-    if (!isLast) {
+    if (!isLastPage) {
       offset() = {
         val curRowCount1 = actualRowCount
         val rest         = curRowCount1 % limit.now

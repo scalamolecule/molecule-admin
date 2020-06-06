@@ -31,11 +31,11 @@ case class DataTableFoot()(implicit val ctx: Ctx.Owner)
       td(
         colspan := 100,
 
-        _firstPage(isFirst)(onclick := { () => firstPage }),
-        _prevPage(isFirst)(onclick := { () => prevPage }),
+        _firstPage(isFirstPage)(onclick := { () => firstPage }),
+        _prevPage(isFirstPage)(onclick := { () => prevPage }),
         limitSelector,
-        _nextPage(isLast)(onclick := { () => nextPage }),
-        _lastPage(isLast)(onclick := { () => lastPage }),
+        _nextPage(isLastPage)(onclick := { () => nextPage }),
+        _lastPage(isLastPage)(onclick := { () => lastPage }),
 
         if (lastRow == 0)
           "0" else _rightSpace(s"${offset.now + 1}-$lastRow", 7),
