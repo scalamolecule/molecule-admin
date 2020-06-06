@@ -127,6 +127,46 @@ case class ScalaFiddle[TransferType](scalaCode: String) {
   type L58 = js.Tuple3[T20, T20, T18] => ResultPair
   type L59 = js.Tuple3[T20, T20, T19] => ResultPair
   type L60 = js.Tuple3[T20, T20, T20] => ResultPair
+  type L61 = js.Tuple3[T20, T20, T21] => ResultPair
+  type L62 = js.Tuple3[T20, T20, T22] => ResultPair
+  type L63 = js.Tuple4[T20, T20, T20, T3] => ResultPair
+  type L64 = js.Tuple4[T20, T20, T20, T4] => ResultPair
+  type L65 = js.Tuple4[T20, T20, T20, T5] => ResultPair
+  type L66 = js.Tuple4[T20, T20, T20, T6] => ResultPair
+  type L67 = js.Tuple4[T20, T20, T20, T7] => ResultPair
+  type L68 = js.Tuple4[T20, T20, T20, T8] => ResultPair
+  type L69 = js.Tuple4[T20, T20, T20, T9] => ResultPair
+  type L70 = js.Tuple4[T20, T20, T20, T10] => ResultPair
+  type L71 = js.Tuple4[T20, T20, T20, T11] => ResultPair
+  type L72 = js.Tuple4[T20, T20, T20, T12] => ResultPair
+  type L73 = js.Tuple4[T20, T20, T20, T13] => ResultPair
+  type L74 = js.Tuple4[T20, T20, T20, T14] => ResultPair
+  type L75 = js.Tuple4[T20, T20, T20, T15] => ResultPair
+  type L76 = js.Tuple4[T20, T20, T20, T16] => ResultPair
+  type L77 = js.Tuple4[T20, T20, T20, T17] => ResultPair
+  type L78 = js.Tuple4[T20, T20, T20, T18] => ResultPair
+  type L79 = js.Tuple4[T20, T20, T20, T19] => ResultPair
+  type L80 = js.Tuple4[T20, T20, T20, T20] => ResultPair
+  type L81 = js.Tuple4[T20, T20, T20, T21] => ResultPair
+  type L82 = js.Tuple4[T20, T20, T20, T22] => ResultPair
+  type L83 = js.Tuple5[T20, T20, T20, T20, T3] => ResultPair
+  type L84 = js.Tuple5[T20, T20, T20, T20, T4] => ResultPair
+  type L85 = js.Tuple5[T20, T20, T20, T20, T5] => ResultPair
+  type L86 = js.Tuple5[T20, T20, T20, T20, T6] => ResultPair
+  type L87 = js.Tuple5[T20, T20, T20, T20, T7] => ResultPair
+  type L88 = js.Tuple5[T20, T20, T20, T20, T8] => ResultPair
+  type L89 = js.Tuple5[T20, T20, T20, T20, T9] => ResultPair
+  type L90 = js.Tuple5[T20, T20, T20, T20, T10] => ResultPair
+  type L91 = js.Tuple5[T20, T20, T20, T20, T11] => ResultPair
+  type L92 = js.Tuple5[T20, T20, T20, T20, T12] => ResultPair
+  type L93 = js.Tuple5[T20, T20, T20, T20, T13] => ResultPair
+  type L94 = js.Tuple5[T20, T20, T20, T20, T14] => ResultPair
+  type L95 = js.Tuple5[T20, T20, T20, T20, T15] => ResultPair
+  type L96 = js.Tuple5[T20, T20, T20, T20, T16] => ResultPair
+  type L97 = js.Tuple5[T20, T20, T20, T20, T17] => ResultPair
+  type L98 = js.Tuple5[T20, T20, T20, T20, T18] => ResultPair
+  type L99 = js.Tuple5[T20, T20, T20, T20, T19] => ResultPair
+  type L100 = js.Tuple5[T20, T20, T20, T20, T20] => ResultPair
 
   def lambda2: Future[L2] = getLambda[L2]
   def lambda3: Future[L3] = getLambda[L3]
@@ -187,6 +227,46 @@ case class ScalaFiddle[TransferType](scalaCode: String) {
   def lambda58: Future[L58] = getLambda[L58]
   def lambda59: Future[L59] = getLambda[L59]
   def lambda60: Future[L60] = getLambda[L60]
+  def lambda61: Future[L61] = getLambda[L61]
+  def lambda62: Future[L62] = getLambda[L62]
+  def lambda63: Future[L63] = getLambda[L63]
+  def lambda64: Future[L64] = getLambda[L64]
+  def lambda65: Future[L65] = getLambda[L65]
+  def lambda66: Future[L66] = getLambda[L66]
+  def lambda67: Future[L67] = getLambda[L67]
+  def lambda68: Future[L68] = getLambda[L68]
+  def lambda69: Future[L69] = getLambda[L69]
+  def lambda70: Future[L70] = getLambda[L70]
+  def lambda71: Future[L71] = getLambda[L71]
+  def lambda72: Future[L72] = getLambda[L72]
+  def lambda73: Future[L73] = getLambda[L73]
+  def lambda74: Future[L74] = getLambda[L74]
+  def lambda75: Future[L75] = getLambda[L75]
+  def lambda76: Future[L76] = getLambda[L76]
+  def lambda77: Future[L77] = getLambda[L77]
+  def lambda78: Future[L78] = getLambda[L78]
+  def lambda79: Future[L79] = getLambda[L79]
+  def lambda80: Future[L80] = getLambda[L80]
+  def lambda81: Future[L81] = getLambda[L81]
+  def lambda82: Future[L82] = getLambda[L82]
+  def lambda83: Future[L83] = getLambda[L83]
+  def lambda84: Future[L84] = getLambda[L84]
+  def lambda85: Future[L85] = getLambda[L85]
+  def lambda86: Future[L86] = getLambda[L86]
+  def lambda87: Future[L87] = getLambda[L87]
+  def lambda88: Future[L88] = getLambda[L88]
+  def lambda89: Future[L89] = getLambda[L89]
+  def lambda90: Future[L90] = getLambda[L90]
+  def lambda91: Future[L91] = getLambda[L91]
+  def lambda92: Future[L92] = getLambda[L92]
+  def lambda93: Future[L93] = getLambda[L93]
+  def lambda94: Future[L94] = getLambda[L94]
+  def lambda95: Future[L95] = getLambda[L95]
+  def lambda96: Future[L96] = getLambda[L96]
+  def lambda97: Future[L97] = getLambda[L97]
+  def lambda98: Future[L98] = getLambda[L98]
+  def lambda99: Future[L99] = getLambda[L99]
+  def lambda100: Future[L100] = getLambda[L100]
 
 
   private def getLambda[Lambda]: Future[Lambda] = {
