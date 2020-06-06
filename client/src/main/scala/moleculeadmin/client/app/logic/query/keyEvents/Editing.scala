@@ -106,7 +106,7 @@ trait Editing extends Paging {
   def saveEditMoveUp(e: KeyboardEvent)(implicit ctx: Ctx.Owner): Unit = {
     // prevent creating new line within cell
     e.preventDefault()
-    val curCell = document.activeElement
+    val curCell = document.activeElement.asInstanceOf[HTMLInputElement]
     editCellId = curCell.id
     val colNo    = getColNo(editCellId)
     val curRow   = curCell.parentNode
@@ -115,7 +115,7 @@ trait Editing extends Paging {
       val cellAbove = rowAbove.childNodes.item(colNo)
       // Select content of cell above
       // Fires blur-callback (save) on current cell
-      selectContent(cellAbove.asInstanceOf[HTMLInputElement])
+      selectContent(cellAbove)
       if (editCellId.isEmpty) {
         // Re-select content in original cell if invalid data
         selectContent(curCell)
@@ -126,6 +126,7 @@ trait Editing extends Paging {
       // Current row is first row
       if (isFirstPage) {
         // On first page, re-select cell to not loose focus
+        curCell.blur()
         selectContent(curCell)
         markRow(curRow)
       } else {
@@ -133,7 +134,7 @@ trait Editing extends Paging {
         prevPage
         val lastRow   = document.getElementById("tableBody")
           .lastChild.asInstanceOf[TableRow]
-        val cellAbove = lastRow.childNodes.item(colNo).asInstanceOf[HTMLInputElement]
+        val cellAbove = lastRow.childNodes.item(colNo)
         markRow(lastRow)
         selectContent(cellAbove)
       }
@@ -151,7 +152,7 @@ trait Editing extends Paging {
     val curRow   = curCell.parentNode
     val rowUnder = curRow.nextSibling
     if (rowUnder != null) {
-      val cellBelow = rowUnder.childNodes.item(colNo).asInstanceOf[HTMLInputElement]
+      val cellBelow = rowUnder.childNodes.item(colNo)
       // Select content of cell below
       // Fires blur-callback (save) on current cell
       selectContent(cellBelow)
@@ -164,7 +165,8 @@ trait Editing extends Paging {
     } else {
       // Current row is last row
       if (isLastPage) {
-        // On last page, re-select cell to not loose focus
+        // On last page, save (blur) and re-select cell to not loose focus
+        curCell.blur()
         selectContent(curCell)
         markRow(curRow)
       } else {
@@ -173,7 +175,7 @@ trait Editing extends Paging {
         val firstRow = document.getElementById("tableBody")
           .firstChild.asInstanceOf[TableRow]
         markRow(firstRow)
-        val cellBelow = firstRow.childNodes.item(colNo).asInstanceOf[HTMLInputElement]
+        val cellBelow = firstRow.childNodes.item(colNo)
         selectContent(cellBelow)
       }
     }
