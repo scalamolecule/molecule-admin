@@ -158,15 +158,10 @@ trait Editing extends Paging {
     val rowUnder = curRow.nextSibling
 
     if (curCell.classList.contains("header")) {
-      // Trigger group edit calculation (blur current cell)
-      // by focusing cell for this column in first row of body
-      // Get col no from header `id="filter-23" contenteditable...`
-      val colNo = curCell.id.substring(7, 10).trim.replace("\"","").toInt + 1
+      // Trigger group edit calculation (blur current cell) and stay in cell
+      curCell.blur()
       groupEditId() = curCell.id
-      println(colNo)
-      val firstRow = getFirstRow
-      val cellBelow = firstRow.childNodes.item(colNo)
-      selectContent(cellBelow)
+      selectContent(curCell)
 
     } else if (rowUnder != null) {
       val cellBelow = rowUnder.childNodes.item(getColNo(editCellId))
