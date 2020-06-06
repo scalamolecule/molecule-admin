@@ -1,6 +1,6 @@
 package moleculeadmin.client.app.logic.query.keyEvents
 
-import moleculeadmin.client.app.logic.query.QueryState.editCellId
+import moleculeadmin.client.app.logic.query.QueryState.{editCellId, groupEditId}
 import org.scalajs.dom.html.TableRow
 import org.scalajs.dom.raw.{HTMLInputElement, HTMLUListElement, KeyboardEvent}
 import org.scalajs.dom.{Node, document, window}
@@ -12,6 +12,12 @@ trait Editing extends Paging {
 
   def getColNo(id: String): Int =
     if (id.startsWith("grouped-cell-")) 1 else id.substring(4, 6).trim.toInt
+
+  def getFirstRow: TableRow = document.getElementById("tableBody")
+    .firstChild.asInstanceOf[TableRow]
+
+  def getLastRow: TableRow = document.getElementById("tableBody")
+    .lastChild.asInstanceOf[TableRow]
 
   def selectContent(elem: Node): Unit = {
     val range = document.createRange()
@@ -108,12 +114,12 @@ trait Editing extends Paging {
     e.preventDefault()
     val curCell = document.activeElement.asInstanceOf[HTMLInputElement]
     editCellId = curCell.id
-    val colNo    = getColNo(editCellId)
     val curRow   = curCell.parentNode
     val rowAbove = curRow.previousSibling
-    if (rowAbove != null) {
-
-      val cellAbove = rowAbove.childNodes.item(colNo)
+    if (curCell.classList.contains("header")) {
+      // Ignore moving upwards from header cell
+    } else if (rowAbove != null) {
+      val cellAbove = rowAbove.childNodes.item(getColNo(editCellId))
       // Select content of cell above
       // Fires blur-callback (save) on current cell
       selectContent(cellAbove)
@@ -133,9 +139,8 @@ trait Editing extends Paging {
       } else {
         // Go to previous page and select cell of same column on last row
         prevPage
-        val lastRow   = document.getElementById("tableBody")
-          .lastChild.asInstanceOf[TableRow]
-        val cellAbove = lastRow.childNodes.item(colNo)
+        val lastRow   = getLastRow
+        val cellAbove = lastRow.childNodes.item(getColNo(editCellId))
         markRow(lastRow)
         selectContent(cellAbove)
       }
@@ -151,8 +156,18 @@ trait Editing extends Paging {
     editCellId = curCell.id
     val curRow   = curCell.parentNode
     val rowUnder = curRow.nextSibling
+
     if (curCell.classList.contains("header")) {
-      curCell.blur()
+      // Trigger group edit calculation (blur current cell)
+      // by focusing cell for this column in first row of body
+      // Get col no from header `id="filter-23" contenteditable...`
+      val colNo = curCell.id.substring(7, 10).trim.replace("\"","").toInt + 1
+      groupEditId() = curCell.id
+      println(colNo)
+      val firstRow = getFirstRow
+      val cellBelow = firstRow.childNodes.item(colNo)
+      selectContent(cellBelow)
+
     } else if (rowUnder != null) {
       val cellBelow = rowUnder.childNodes.item(getColNo(editCellId))
       // Select content of cell below
@@ -174,8 +189,7 @@ trait Editing extends Paging {
       } else {
         // Go to next page and select cell of same column on first row
         nextPage
-        val firstRow = document.getElementById("tableBody")
-          .firstChild.asInstanceOf[TableRow]
+        val firstRow = getFirstRow
         markRow(firstRow)
         val cellBelow = firstRow.childNodes.item(getColNo(editCellId))
         selectContent(cellBelow)
@@ -225,8 +239,7 @@ trait Editing extends Paging {
           } else {
             // Go to next page and select first editable cell on first row
             nextPage
-            val firstRow  = document.getElementById("tableBody")
-              .firstChild.asInstanceOf[TableRow]
+            val firstRow  = getFirstRow
             val firstCell = firstRow.firstChild.asInstanceOf[HTMLInputElement]
             markRow(firstRow)
             selectContent(nextEditableCell(firstCell).get)
@@ -288,8 +301,7 @@ trait Editing extends Paging {
           } else {
             // Go to previous page and select last editable cell on last row
             prevPage
-            val lastRow  = document.getElementById("tableBody")
-              .lastChild.asInstanceOf[TableRow]
+            val lastRow  = getLastRow
             val lastCell = lastRow.lastChild.asInstanceOf[HTMLInputElement]
             markRow(lastRow)
             selectContent(previousEditableCell(lastCell).get)

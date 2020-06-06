@@ -68,7 +68,8 @@ object QueryState extends QueryApi {
   var cachedIndexBridge    : Int => Int          = (i: Int) => i
 
   // Current cell being edited
-  var editCellId = ""
+  var editCellId  = ""
+  val groupEditId = Var("")
 
   val renderSubMenu: Var[String] = Var("trigger")
 

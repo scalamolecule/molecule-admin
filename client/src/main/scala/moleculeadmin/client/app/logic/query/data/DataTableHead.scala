@@ -57,7 +57,7 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
 
       colIndex += 1
       attrCells(colIndex) = attrCell(col, attrResolver)
-      inputCells(colIndex) = inputCell(col, attrResolver)
+      inputCells(colIndex) = inputCell(col)
     }
     val toggleCell = _openCloseQueryBuilder(
       querySelection() == "",
@@ -85,6 +85,7 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
     val Col(colIndex, _, nsAlias, nsFull, attr, _, colType, card, _, _,
     aggrType, expr, sortDir, sortPos, _) = col
 
+    val syncId   = "filter-" + colIndex
     val postfix  = attrResolver.postfix(col)
     val sortable = card == 1 || singleAggrTypes.contains(aggrType)
     val sort     = sortAction(colIndex)
@@ -117,7 +118,7 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
         joinVars(colIndex, nsFull) else (Nil, null)
 
       _attrHeaderSortable(
-        attr, postfix, expr, sortDir, sortPos, sort,
+        syncId, attr, postfix, expr, sortDir, sortPos, sort,
         editable, edit, save, cancel,
         retractEntities, retractValues,
         togglers,
@@ -219,15 +220,11 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
   }
 
 
-  def inputCell(
-    col: Col,
-    attrResolver: ResolveAttrs
-  ): JsDom.TypedTag[TableCell] = {
+  def inputCell(col: Col): JsDom.TypedTag[TableCell] = {
     val Col(colIndex, _, _, _, _, attrType,
     colType, _, _, _, _, attrExpr, _, _, _) = col
 
     val filterId        = "filter-" + colIndex
-    val attr            = attrResolver.postfixed(col)
     val defaultEditExpr = EditExprs(col).defaultEditExpr
 
     def editCell(): JsDom.TypedTag[TableCell] = {
@@ -244,8 +241,7 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
           }
         }
       }
-      val skipSpin    = { () => processing() = "" }
-      _attrEditCell(filterId, defaultEditExpr, applyLambda, skipSpin)
+      _attrEditCell(filterId, defaultEditExpr, applyLambda)
     }
 
     def filterCell(): JsDom.TypedTag[TableCell] = {

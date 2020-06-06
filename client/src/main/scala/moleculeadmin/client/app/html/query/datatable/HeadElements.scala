@@ -3,7 +3,7 @@ package moleculeadmin.client.app.html.query.datatable
 import java.net.URI
 import java.util.UUID
 import util.client.rx.RxBindings
-import moleculeadmin.client.app.logic.query.QueryState.processing
+import moleculeadmin.client.app.logic.query.QueryState.groupEditId
 import moleculeadmin.client.app.html.query.SchemaDropdownElements
 import moleculeadmin.shared.ops.query.ColOps
 import moleculeadmin.shared.styles.Color
@@ -229,6 +229,7 @@ trait HeadElements extends ColOps
   def _pf(postfix: String): Frag = span(postfix, cls := "postfix")
 
   def _attrHeaderSortable(
+    syncId: String,
     attribute: String,
     postfix: String,
     expr: String,
@@ -246,7 +247,7 @@ trait HeadElements extends ColOps
     joinMaker: JoinMaker,
     editDropdownId: String,
     editExprItems: List[Frag],
-  ): TypedTag[TableCell] = {
+  )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = {
     val attrCell = {
       if (expr == "orig") {
         td(
@@ -266,7 +267,6 @@ trait HeadElements extends ColOps
             editDropdownId = editDropdownId,
             editExprItems = editExprItems,
           ),
-          onchange := { () => processing() = "" }
         )
       } else if (nonMenuExprs.contains(expr)) {
         // non-editable aggr/tx
@@ -309,23 +309,28 @@ trait HeadElements extends ColOps
         )
       }
     }
-    val sortCell =
-      td(
-        cursor.pointer,
-        width := "30%",
-        minWidth := 26,
-        sortDir match {
-          case "asc"  => _sortIcon("oi oi-caret-top", sortPos)
-          case "desc" => _sortIcon("oi oi-caret-bottom", sortPos)
-          case _      => span(
-            cls := "oi oi-elevator",
-            paddingRight := 6,
-            float.right,
-            color := "#bbbbbb"
-          )
-        },
-        onclick := sort
-      )
+
+    val spinCell = td(
+      width := "5%",
+      Rx(if (groupEditId() == syncId) _sync() else span())
+    )
+
+    val sortCell = td(
+      cursor.pointer,
+      width := "25%",
+      minWidth := 26,
+      sortDir match {
+        case "asc"  => _sortIcon("oi oi-caret-top", sortPos)
+        case "desc" => _sortIcon("oi oi-caret-bottom", sortPos)
+        case _      => span(
+          cls := "oi oi-elevator",
+          paddingRight := 6,
+          float.right,
+          color := "#bbbbbb"
+        )
+      },
+      onclick := sort
+    )
 
     td(
       cls := "header",
@@ -333,6 +338,7 @@ trait HeadElements extends ColOps
         width := "100%",
         tr(
           attrCell(width := "70%"),
+          spinCell,
           sortCell
         )
       )
@@ -406,8 +412,7 @@ trait HeadElements extends ColOps
   def _attrEditCell(
     filterId: String,
     lambdaRaw: String,
-    applyLambda: () => Unit,
-    skipSpin: () => Unit,
+    applyLambda: () => Unit
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = {
     val lambdaHtml: Seq[Frag] =
       lambdaRaw.split("\n").toSeq.flatMap(s => Seq(StringFrag(s), br)).init
@@ -417,14 +422,12 @@ trait HeadElements extends ColOps
       contenteditable := true,
       lambdaHtml,
       onblur := applyLambda,
-      onfocus := skipSpin,
       onpaste := { e: ClipboardEvent =>
         // Paste raw text and no html soup
         e.preventDefault()
         dom.document.getElementById(filterId).innerHTML =
           e.clipboardData.getData("text/plain").replace("\n", "<br>")
       },
-      Rx(if (processing() == filterId) _sync(15) else span())
     )
   }
 }

@@ -42,14 +42,9 @@ case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
   }
 
   // Scala expression to be applied
-  val editExpr: String = _html2str(document.getElementById(filterId).innerHTML).trim
-
-  // Start spinner since compilation can take some seconds
-  processing() = filterId
-
-  val qr = cachedQueryResult
-
-  val tableRows: NodeList = document.getElementById("tableBody").childNodes
+  val editExpr  = _html2str(document.getElementById(filterId).innerHTML).trim
+  val qr        = cachedQueryResult
+  val tableRows = document.getElementById("tableBody").childNodes
 
   val colType2StringLambdas: Seq[Int => Any] = ColType2TransferTypeLambdas(qr).get
 
@@ -126,11 +121,7 @@ case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
 
     // Insert/update used edit expression
     EditExprs(col).upsert(editExpr)
-
     ProcessGroupEdit(colIndexes, colType2StringLambdas, scalaFiddle, lastRow, resolve)
-
-    // Group edit completed - stop spinner
-    processing() = ""
   }
 
 

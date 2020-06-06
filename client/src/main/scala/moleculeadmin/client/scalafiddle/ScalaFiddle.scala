@@ -218,7 +218,7 @@ case class ScalaFiddle[TransferType](scalaCode: String) {
       // Evaluate js code to bring ScalaFiddle into js scope
       js.eval(jsCode)
 
-      // Return js edit lambda and cast it back in to Scala land
+      // Return js edit lambda and cast it back into Scala land
       js.eval("ScalaFiddle.lambda").asInstanceOf[Lambda]
 
     } recover {
