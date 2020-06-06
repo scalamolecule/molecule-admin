@@ -82,7 +82,7 @@ case class ScalaCode(cols: Seq[Col], col: Col, scalaExpr: String)
            |    )""".stripMargin
       )
 
-    } else {
+    } else if (n <= 62)  {
       (
         s"""js.Tuple3[
            |      js.Tuple20[${transferTypes0.take(20).mkString(", ")}],
@@ -112,6 +112,93 @@ case class ScalaCode(cols: Seq[Col], col: Col, scalaExpr: String)
            |      ${processParams0.slice(20, 40).mkString(",\n      ")}
            |    ) => (
            |      ${processParams0.drop(40).mkString(",\n      ")}
+           |    )""".stripMargin
+      )
+
+    } else if (n <= 82)  {
+      (
+        s"""js.Tuple4[
+           |      js.Tuple20[${transferTypes0.take(20).mkString(", ")}],
+           |      js.Tuple20[${transferTypes0.slice(20, 40).mkString(", ")}],
+           |      js.Tuple20[${transferTypes0.slice(40, 60).mkString(", ")}],
+           |      js.Tuple${n - 60}[${transferTypes0.drop(60).mkString(", ")}]
+           |    ]""".stripMargin,
+
+        s"""js.Tuple4(
+           |      js.Tuple20(${transferParams0.take(20).mkString(", ")}),
+           |      js.Tuple20(${transferParams0.slice(20, 40).mkString(", ")}),
+           |      js.Tuple20(${transferParams0.slice(40, 60).mkString(", ")}),
+           |      js.Tuple${n - 60}(${transferParams0.drop(60).mkString(", ")})
+           |    )""".stripMargin,
+
+        s"""${conversions0.take(20).mkString(",\n        ")}
+           |      )(
+           |        ${conversions0.slice(20, 40).mkString(",\n        ")}
+           |      )(
+           |        ${conversions0.slice(40, 60).mkString(",\n        ")}
+           |      )(
+           |        ${conversions0.drop(60).mkString(",\n        ")}""".stripMargin,
+
+        s"""(${processTypes0.take(20).mkString(", ")}) =>
+           |    (${processTypes0.slice(20, 40).mkString(", ")}) =>
+           |      (${processTypes0.slice(40, 60).mkString(", ")}) =>
+           |        (${processTypes0.drop(60).mkString(", ")})""".stripMargin,
+
+        s"""(
+           |      ${processParams0.take(20).mkString(",\n      ")}
+           |    ) => (
+           |      ${processParams0.slice(20, 40).mkString(",\n      ")}
+           |    ) => (
+           |      ${processParams0.slice(40, 60).mkString(",\n      ")}
+           |    ) => (
+           |      ${processParams0.drop(60).mkString(",\n      ")}
+           |    )""".stripMargin
+      )
+
+    } else  {
+      (
+        s"""js.Tuple5[
+           |      js.Tuple20[${transferTypes0.take(20).mkString(", ")}],
+           |      js.Tuple20[${transferTypes0.slice(20, 40).mkString(", ")}],
+           |      js.Tuple20[${transferTypes0.slice(40, 60).mkString(", ")}],
+           |      js.Tuple20[${transferTypes0.slice(60, 80).mkString(", ")}],
+           |      js.Tuple${n - 80}[${transferTypes0.drop(80).mkString(", ")}]
+           |    ]""".stripMargin,
+
+        s"""js.Tuple5(
+           |      js.Tuple20(${transferParams0.take(20).mkString(", ")}),
+           |      js.Tuple20(${transferParams0.slice(20, 40).mkString(", ")}),
+           |      js.Tuple20(${transferParams0.slice(40, 60).mkString(", ")}),
+           |      js.Tuple20(${transferParams0.slice(60, 80).mkString(", ")}),
+           |      js.Tuple${n - 80}(${transferParams0.drop(80).mkString(", ")})
+           |    )""".stripMargin,
+
+        s"""${conversions0.take(20).mkString(",\n        ")}
+           |      )(
+           |        ${conversions0.slice(20, 40).mkString(",\n        ")}
+           |      )(
+           |        ${conversions0.slice(40, 60).mkString(",\n        ")}
+           |      )(
+           |        ${conversions0.slice(60, 80).mkString(",\n        ")}
+           |      )(
+           |        ${conversions0.drop(80).mkString(",\n        ")}""".stripMargin,
+
+        s"""(${processTypes0.take(20).mkString(", ")}) =>
+           |    (${processTypes0.slice(20, 40).mkString(", ")}) =>
+           |      (${processTypes0.slice(40, 60).mkString(", ")}) =>
+           |        (${processTypes0.slice(60, 80).mkString(", ")}) =>
+           |          (${processTypes0.drop(80).mkString(", ")})""".stripMargin,
+
+        s"""(
+           |      ${processParams0.take(20).mkString(",\n      ")}
+           |    ) => (
+           |      ${processParams0.slice(20, 40).mkString(",\n      ")}
+           |    ) => (
+           |      ${processParams0.slice(40, 60).mkString(",\n      ")}
+           |    ) => (
+           |      ${processParams0.slice(60, 80).mkString(",\n      ")}
+           |    ) => (
+           |      ${processParams0.drop(80).mkString(",\n      ")}
            |    )""".stripMargin
       )
     }
