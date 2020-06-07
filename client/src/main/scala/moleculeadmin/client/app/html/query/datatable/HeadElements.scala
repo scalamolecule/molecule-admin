@@ -417,7 +417,7 @@ trait HeadElements extends ColOps
     val lambdaHtml: Seq[Frag] =
       lambdaRaw.split("\n").toSeq.flatMap(s => Seq(StringFrag(s), br)).init
     td(
-      cls := "header input",
+      cls := "header input groupEdit",
       id := filterId,
       contenteditable := true,
       lambdaHtml,

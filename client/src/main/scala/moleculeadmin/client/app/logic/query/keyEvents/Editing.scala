@@ -118,6 +118,7 @@ trait Editing extends Paging {
     val rowAbove = curRow.previousSibling
     if (curCell.classList.contains("header")) {
       // Ignore moving upwards from header cell
+
     } else if (rowAbove != null) {
       val cellAbove = rowAbove.childNodes.item(getColNo(editCellId))
       // Select content of cell above
@@ -157,11 +158,14 @@ trait Editing extends Paging {
     val curRow   = curCell.parentNode
     val rowUnder = curRow.nextSibling
 
-    if (curCell.classList.contains("header")) {
+    if (curCell.classList.contains("groupEdit")) {
       // Trigger group edit calculation (blur current cell) and stay in cell
       curCell.blur()
       groupEditId() = curCell.id
       selectContent(curCell)
+
+    } else if (curCell.classList.contains("header")) {
+      // Ignore moving downwards in filter cells
 
     } else if (rowUnder != null) {
       val cellBelow = rowUnder.childNodes.item(getColNo(editCellId))
