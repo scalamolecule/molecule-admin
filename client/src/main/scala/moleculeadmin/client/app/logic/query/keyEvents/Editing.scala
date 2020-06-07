@@ -13,6 +13,9 @@ trait Editing extends Paging {
   def getColNo(id: String): Int =
     if (id.startsWith("grouped-cell-")) 1 else id.substring(4, 6).trim.toInt
 
+  def getFilterRow: TableRow = document.getElementById("tableHead")
+    .lastChild.asInstanceOf[TableRow]
+
   def getFirstRow: TableRow = document.getElementById("tableBody")
     .firstChild.asInstanceOf[TableRow]
 
@@ -28,12 +31,12 @@ trait Editing extends Paging {
   }
 
   def markNewRow(curRow: Node, newRow: Node): Unit = {
-    curRow.asInstanceOf[TableRow].className = "view"
-    newRow.asInstanceOf[TableRow].className = "edit"
+    markRow(curRow, "view")
+    markRow(newRow)
   }
 
-  def markRow(curRow: Node): Unit = {
-    curRow.asInstanceOf[TableRow].className = "edit"
+  def markRow(row: Node, status: String = "edit"): Unit = {
+    row.asInstanceOf[TableRow].className = status
   }
 
   def deleteItem(e: KeyboardEvent): Unit = {
@@ -133,10 +136,13 @@ trait Editing extends Paging {
     } else {
       // Current row is first row
       if (isFirstPage) {
-        // On first page, re-select cell to not loose focus
+        // Trigger save
         curCell.blur()
-        selectContent(curCell)
-        markRow(curRow)
+        // Unmark edit row
+        markRow(curRow, "")
+        // Select filter cell
+        selectContent(getFilterRow.childNodes.item(getColNo(editCellId)))
+
       } else {
         // Go to previous page and select cell of same column on last row
         prevPage
