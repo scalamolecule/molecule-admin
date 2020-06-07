@@ -24,6 +24,7 @@ case class ScalaCode(cols: Seq[Col], col: Col, scalaExpr: String)
   val processTypes0   = new ListBuffer[String]
   val processParams0  = new ListBuffer[String]
 
+  // Aggregate mutable buffers with attr code
   var n = 0
   cols.collect {
     case col@Col(_, _, _, _, _, tpe, _, card, opt, _, _, attrExpr, _, _, _)
@@ -82,7 +83,7 @@ case class ScalaCode(cols: Seq[Col], col: Col, scalaExpr: String)
            |    )""".stripMargin
       )
 
-    } else if (n <= 62)  {
+    } else if (n <= 62) {
       (
         s"""js.Tuple3[
            |      js.Tuple20[${transferTypes0.take(20).mkString(", ")}],
@@ -115,7 +116,7 @@ case class ScalaCode(cols: Seq[Col], col: Col, scalaExpr: String)
            |    )""".stripMargin
       )
 
-    } else if (n <= 82)  {
+    } else if (n <= 82) {
       (
         s"""js.Tuple4[
            |      js.Tuple20[${transferTypes0.take(20).mkString(", ")}],
@@ -155,7 +156,7 @@ case class ScalaCode(cols: Seq[Col], col: Col, scalaExpr: String)
            |    )""".stripMargin
       )
 
-    } else  {
+    } else {
       (
         s"""js.Tuple5[
            |      js.Tuple20[${transferTypes0.take(20).mkString(", ")}],
@@ -212,13 +213,8 @@ case class ScalaCode(cols: Seq[Col], col: Col, scalaExpr: String)
       |import java.net.URI
       |""".stripMargin
 
-  val versions: String =
-    """// $ScalaVersion 2.12
-      |// $ScalaJSVersion 0.6""".stripMargin
-
-
-  def card1: String = {
-    val decImplicits = Seq(
+  val implicits = {
+    lazy val decImplicits1 = Seq(
       // whitelist
       int2bigDec,
       long2bigDec,
@@ -227,16 +223,71 @@ case class ScalaCode(cols: Seq[Col], col: Col, scalaExpr: String)
       // blacklist
       float2bigDecErr
     )
-    val implicits    = (regex +: (attrType match {
-      // Exclude using Float
-      case "Float" | "Double" | "BigDecimal" => decImplicits
-      case "String"                          => Nil
-      case "Date"                            => Seq(dateImplicits)
-      case "UUID"                            => Seq(str2uuid)
-      case "URI"                             => Seq(str2uri)
-      case _                                 => Nil // no conversions
-    })).mkString("  ", "\n  ", "")
+    lazy val decImplicits2 = Seq(
+      iter2arr,
+      int2bigDec,
+      long2bigDec,
+      bigInt2bigDec,
+      double2bigDec,
+      float2bigDecErr,
+      iterAny2iterBigDec,
+    )
+    lazy val decImplicits3 = Seq(
+      map2dict,
+      int2bigDec,
+      long2bigDec,
+      bigInt2bigDec,
+      double2bigDec,
+      float2bigDecErr,
+      mapAny2mapBigDec,
+    )
+    val implicitsList = cols.flatMap(col =>
+      col.card match {
+        case 1 => col.attrType match {
+          case "Float" | "Double" | "BigDecimal" => decImplicits1
+          case "String"                          => Nil
+          case "Date"                            => Seq(dateImplicits)
+          case "UUID"                            => Seq(str2uuid)
+          case "URI"                             => Seq(str2uri)
+          case _                                 => Nil
+        }
+        case 2 => attrType match {
+          case "String"                 => Seq(iterStr2arr)
+          case "Int"                    => Seq(iter2arr)
+          case "Long" | "datom" | "ref" => Seq(iter2arr, iterAnyLong2iterBigInt)
+          case "BigInt"                 => Seq(iter2arr, iterAny2iterBigInt)
+          case "Float"                  => decImplicits2
+          case "Double"                 => decImplicits2
+          case "BigDecimal"             => decImplicits2
+          case "Boolean"                => Seq(iter2arr)
+          case "Date"                   => Seq(iterLDT2arr, dateImplicits, iterAnyLDT2iterLDT)
+          case "UUID"                   => Seq(iter2arr, str2uuid, iterAny2iterUUID)
+          case "URI"                    => Seq(iter2arr, str2uri, iterAny2iterURI)
+        }
+        case 3 => attrType match {
+          case "String"                 => Seq(mapStr2dict)
+          case "Int"                    => Seq(map2dict)
+          case "Long" | "datom" | "ref" => Seq(map2dict, mapAnyLong2mapBigInt)
+          case "BigInt"                 => Seq(map2dict, mapAny2mapBigInt)
+          case "Float"                  => decImplicits3
+          case "Double"                 => decImplicits3
+          case "BigDecimal"             => decImplicits3
+          case "Boolean"                => Seq(map2dict)
+          case "Date"                   => Seq(mapLDT2dict, dateImplicits, mapAnyLDT2mapLDT)
+          case "UUID"                   => Seq(map2dict, str2uuid, mapAny2mapUUID)
+          case "URI"                    => Seq(map2dict, str2uri, mapAny2mapURI)
+        }
+      }
+    ).distinct
+    (regex +: implicitsList).mkString("  ", "\n  ", "")
+  }
 
+  val versions: String =
+    """// $ScalaVersion 2.12
+      |// $ScalaJSVersion 0.6""".stripMargin
+
+
+  def card1: String = {
     val mapToString = if (attrType == "Date")
       "v => v.withNano(v.getNano/1000000*1000000).toString"
     else
@@ -267,32 +318,7 @@ case class ScalaCode(cols: Seq[Col], col: Col, scalaExpr: String)
        |$versions""".stripMargin.trim
   }
 
-
   def card2: String = {
-    val decImplicits = Seq(
-      iter2arr,
-      int2bigDec,
-      long2bigDec,
-      bigInt2bigDec,
-      double2bigDec,
-      float2bigDecErr,
-      iterAny2iterBigDec,
-    )
-
-    val implicits = (regex +: (attrType match {
-      case "String"                 => Seq(iterStr2arr)
-      case "Int"                    => Seq(iter2arr)
-      case "Long" | "datom" | "ref" => Seq(iter2arr, iterAnyLong2iterBigInt)
-      case "BigInt"                 => Seq(iter2arr, iterAny2iterBigInt)
-      case "Float"                  => decImplicits
-      case "Double"                 => decImplicits
-      case "BigDecimal"             => decImplicits
-      case "Boolean"                => Seq(iter2arr)
-      case "Date"                   => Seq(iterLDT2arr, dateImplicits, iterAnyLDT2iterLDT)
-      case "UUID"                   => Seq(iter2arr, str2uuid, iterAny2iterUUID)
-      case "URI"                    => Seq(iter2arr, str2uri, iterAny2iterURI)
-    })).mkString("  ", "\n  ", "")
-
     s"""$imports
        |@JSExportTopLevel("ScalaFiddle")
        |object ScalaFiddle {
@@ -319,32 +345,7 @@ case class ScalaCode(cols: Seq[Col], col: Col, scalaExpr: String)
        |$versions""".stripMargin.trim
   }
 
-
   def card3: String = {
-    val decImplicits = Seq(
-      map2dict,
-      int2bigDec,
-      long2bigDec,
-      bigInt2bigDec,
-      double2bigDec,
-      float2bigDecErr,
-      mapAny2mapBigDec,
-    )
-
-    val implicits = regex +: (attrType match {
-      case "String"                 => Seq(mapStr2dict)
-      case "Int"                    => Seq(map2dict)
-      case "Long" | "datom" | "ref" => Seq(map2dict, mapAnyLong2mapBigInt)
-      case "BigInt"                 => Seq(map2dict, mapAny2mapBigInt)
-      case "Float"                  => decImplicits
-      case "Double"                 => decImplicits
-      case "BigDecimal"             => decImplicits
-      case "Boolean"                => Seq(map2dict)
-      case "Date"                   => Seq(mapLDT2dict, dateImplicits, mapAnyLDT2mapLDT)
-      case "UUID"                   => Seq(map2dict, str2uuid, mapAny2mapUUID)
-      case "URI"                    => Seq(map2dict, str2uri, mapAny2mapURI)
-    }).mkString("  ", "\n  ", "")
-
     // Empty Option is simply treated as an empty Map
     s"""$imports
        |@JSExportTopLevel("ScalaFiddle")
