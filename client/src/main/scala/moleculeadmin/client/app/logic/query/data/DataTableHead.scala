@@ -10,7 +10,7 @@ import moleculeadmin.shared.ast.query.Col
 import moleculeadmin.shared.ops.query.data.FilterFactory
 import moleculeadmin.shared.ops.query.{ColOps, ModelOps}
 import org.scalajs.dom.html.{TableCell, TableSection}
-import org.scalajs.dom.raw.Node
+import org.scalajs.dom.raw.{Element, Node}
 import org.scalajs.dom.{MouseEvent, document, window}
 import rx.{Ctx, Rx}
 import scalatags.JsDom
@@ -251,13 +251,18 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
       ) "" else " editable"
       val filterExpr  = filters.now.get(colIndex).fold("")(_.filterExpr)
       val applyFilter = { () =>
-        val filterExpr = document.getElementById(filterId).textContent.trim
+        val filterCell = document.getElementById(filterId)
+        val filterExpr = filterCell.textContent.trim
         // Let only filters() propagate change
         offset.kill()
         offset() = 0
         if (filterExpr.isEmpty) {
+          _markFilterCell(filterCell, false)
+          filterCell.setAttribute("style", "background-color: white")
           filters() = filters.now - colIndex
         } else {
+          _markFilterCell(filterCell, true)
+          filterCell.setAttribute("style", "background-color: #9de9ff")
           createFilter(col, filterExpr, attrType != "String") match {
             case Some(filter) => filters() = filters.now + (colIndex -> filter)
             case None         => filters() = filters.now - colIndex
