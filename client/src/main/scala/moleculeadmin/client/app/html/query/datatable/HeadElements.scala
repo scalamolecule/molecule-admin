@@ -392,6 +392,7 @@ trait HeadElements extends ColOps
   }
 
   def _attrFilterCell(
+    editable: String,
     filterId: String,
     filterExpr: String,
     applyFilter: () => Unit
@@ -401,7 +402,7 @@ trait HeadElements extends ColOps
     else
       Seq(filterExpr)
     td(
-      cls := "header input",
+      cls := "header input" + editable,
       id := filterId,
       contenteditable := true,
       htmlFilter,

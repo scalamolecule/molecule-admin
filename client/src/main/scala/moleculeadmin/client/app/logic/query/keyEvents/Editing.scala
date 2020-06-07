@@ -164,8 +164,17 @@ trait Editing extends Paging {
       groupEditId() = curCell.id
       selectContent(curCell)
 
+    } else if (curCell.classList.contains("editable")) {
+      // Jump into first row in data body
+      // Get col no from header `id="filter-23" contenteditable...`
+      val colNo     = curCell.id.substring(7, 10).trim.replace("\"", "").toInt + 1
+      val firstRow  = getFirstRow
+      val cellBelow = firstRow.childNodes.item(colNo)
+      selectContent(cellBelow)
+      markRow(firstRow)
+
     } else if (curCell.classList.contains("header")) {
-      // Ignore moving downwards in filter cells
+      // Ignore moving downwards in eid/t/tx/txInstant columns
 
     } else if (rowUnder != null) {
       val cellBelow = rowUnder.childNodes.item(getColNo(editCellId))

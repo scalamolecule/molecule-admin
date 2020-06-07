@@ -245,6 +245,10 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
     }
 
     def filterCell(): JsDom.TypedTag[TableCell] = {
+      val editable    = if (
+        attrType == "datom" ||
+          Seq("orig", "t", "tx", "txInstant").contains(attrExpr)
+      ) "" else " editable"
       val filterExpr  = filters.now.get(colIndex).fold("")(_.filterExpr)
       val applyFilter = { () =>
         val filterExpr = document.getElementById(filterId).textContent.trim
@@ -262,7 +266,7 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
         // Update grouped values
         groupedColIndexes.recalc()
       }
-      _attrFilterCell(filterId, filterExpr, applyFilter)
+      _attrFilterCell(editable, filterId, filterExpr, applyFilter)
     }
     if (attrExpr == "edit") editCell() else filterCell()
   }
