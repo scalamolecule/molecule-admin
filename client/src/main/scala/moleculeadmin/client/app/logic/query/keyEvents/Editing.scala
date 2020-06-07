@@ -156,6 +156,15 @@ trait Editing extends Paging {
     editCellId = ""
   }
 
+  def headerCellToFirstCell(curCell: HTMLInputElement): Unit = {
+    // Get col no from header `id="filter-23" contenteditable...`
+    val colNo     = curCell.id.substring(7, 10).trim.replace("\"", "").toInt + 1
+    val firstRow  = getFirstRow
+    val cellBelow = firstRow.childNodes.item(colNo)
+    selectContent(cellBelow)
+    markRow(firstRow)
+  }
+
   def saveEditMoveDown(e: KeyboardEvent)(implicit ctx: Ctx.Owner): Unit = {
     // prevent creating new line within cell
     e.preventDefault()
@@ -165,19 +174,13 @@ trait Editing extends Paging {
     val rowUnder = curRow.nextSibling
 
     if (curCell.classList.contains("groupEdit")) {
-      // Trigger group edit calculation (blur current cell) and stay in cell
-      curCell.blur()
+      // Trigger group edit spin and go to cell below
       groupEditId() = curCell.id
-      selectContent(curCell)
+      headerCellToFirstCell(curCell)
 
     } else if (curCell.classList.contains("editable")) {
-      // Jump into first row in data body
-      // Get col no from header `id="filter-23" contenteditable...`
-      val colNo     = curCell.id.substring(7, 10).trim.replace("\"", "").toInt + 1
-      val firstRow  = getFirstRow
-      val cellBelow = firstRow.childNodes.item(colNo)
-      selectContent(cellBelow)
-      markRow(firstRow)
+      // Go to cell below
+      headerCellToFirstCell(curCell)
 
     } else if (curCell.classList.contains("header")) {
       // Ignore moving downwards in eid/t/tx/txInstant columns
