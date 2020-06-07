@@ -220,7 +220,7 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
     )
   )
 
-  lazy val tableHead: TableSection = thead().render
+  lazy val tableHead: TableSection = thead(id := "tableHead").render
   lazy val tableBody: TableSection = tbody(id := "tableBody",
     tr(td(), td(colspan := columns.now.size, "fetching data..."))
   ).render
