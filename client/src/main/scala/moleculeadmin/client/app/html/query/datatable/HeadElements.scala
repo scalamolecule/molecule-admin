@@ -9,7 +9,7 @@ import moleculeadmin.shared.ops.query.ColOps
 import moleculeadmin.shared.styles.Color
 import org.scalajs.dom
 import org.scalajs.dom.html._
-import org.scalajs.dom.raw.HTMLInputElement
+import org.scalajs.dom.raw
 import org.scalajs.dom.{ClipboardEvent, Event, MouseEvent, document, window}
 import rx.{Ctx, Rx}
 import scalatags.JsDom.TypedTag
@@ -391,6 +391,11 @@ trait HeadElements extends ColOps
     }
   }
 
+  def _markFilterCell(filterCell: raw.Element, on: Boolean) = {
+    val color = if (on) Color.filter else Color.white
+    filterCell.setAttribute("style", s"background-color: $color")
+  }
+
   def _attrFilterCell(
     editable: String,
     filterId: String,
@@ -401,10 +406,13 @@ trait HeadElements extends ColOps
       filterExpr.split("\n").toSeq.flatMap(s => Seq(StringFrag(s), br)).init
     else
       Seq(filterExpr)
+
+    val bgColor = if (filterExpr.nonEmpty) Color.filter else Color.white
     td(
       cls := "header input" + editable,
       id := filterId,
       contenteditable := true,
+      backgroundColor := bgColor,
       htmlFilter,
       oninput := applyFilter
     )
