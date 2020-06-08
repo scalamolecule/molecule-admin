@@ -195,7 +195,10 @@ class QueryBackend extends ToggleBackend {
           } else if (isData) {
             if (a.startsWith(":db.") || a.startsWith(":db/"))
               valid = false
-            dataDatoms.+=((e, a, v, op))
+            // For some reason Datomic txMaps sometimes contain duplicate datoms
+            // We don't want to show them twice
+            if (!dataDatoms.contains((e, a, v, op)))
+              dataDatoms.+=((e, a, v, op))
           } else {
             txMetaDatoms.+=((e, a, v, op))
           }
@@ -222,6 +225,7 @@ class QueryBackend extends ToggleBackend {
     ts: Seq[Long],
     enumAttrs: Seq[String]
   ): Either[String, Array[TxResult]] = {
+    log.info("==============================")
     log.info(s"Undoing txs from t ${ts.head}...")
     val timer     = Timer()
     val conn      = Conn(base + "/" + db)
