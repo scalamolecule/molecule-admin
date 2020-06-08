@@ -377,7 +377,7 @@ object Partitions extends TestSuite with TreeSchema with Helpers {
             Part(3, "c", None, None, List()),
             Part(4, "x", None, None, List(
               Ns(1, "Xx", "x_Xx", None, None, List(
-                Attr(1, "xx1", 1, "Int", None, None, None, None, None, None, None, None, List())
+                Attr(1, "xx1", 1, "Int", None, None, Some(Set("indexed")), None, None, None, None, None, List())
               ))))
           ))
         )
