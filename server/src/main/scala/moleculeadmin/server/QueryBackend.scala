@@ -291,14 +291,16 @@ class QueryBackend extends ToggleBackend {
         val moleculeAdminConn = Conn(base + "/MoleculeAdmin")
         val dbSettingsId      = user_User.username_("admin")
           .DbSettings.e.Db.name_(db).get(moleculeAdminConn)
-        user_DbSettings(dbSettingsId).undoneTs.assert(undoneTs)
-          .update(moleculeAdminConn)
+        user_DbSettings(dbSettingsId).undoneTs.assert(undoneTs).update(moleculeAdminConn)
 
         log.info("Saved internal meta data in " + timer.ms)
         log.info("Sending reversing txs to client...")
         Right(newTxs)
       } catch {
-        case t: Throwable => Left(t.getMessage)
+        case t: Throwable =>
+          log.error(t.getMessage)
+          log.error(t.getStackTrace.mkString("\n"))
+          Left(t.getMessage)
       }
     }(conn)
   }

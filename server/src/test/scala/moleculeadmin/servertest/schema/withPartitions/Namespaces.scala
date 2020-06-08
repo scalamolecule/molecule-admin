@@ -334,7 +334,7 @@ object Namespaces extends TestSuite with TreeSchema with Helpers {
               Ns(2, "Bc", "b_Bc", None, None, List(
                 Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()))),
               Ns(3, "Bx", "b_Bx", None, None, List(
-                Attr(1, "bx1", 1, "Int", None, None, None, None, None, None, None, None, List()))))),
+                Attr(1, "bx1", 1, "Int", None, None, Some(Set("indexed")), None, None, None, None, None, List()))))),
             Part(3, "c", None, None, List()),
           ))
         )

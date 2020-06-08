@@ -241,7 +241,7 @@ object Attribute extends SchemaBase with Base {
 
                     // attribute pos ............................................................................
 
-                    var schema: MetaSchema = if (pos > 0 && pos != curPos) {
+                    val schema: MetaSchema = if (pos > 0 && pos != curPos) {
                       MetaSchema(schema0.parts.map {
                         case partDef@Part(_, `part`, _, _, nss) => {
                           val nsDefs: Seq[Ns] = nss.map {

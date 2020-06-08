@@ -290,7 +290,7 @@ trait Settings {
         Attr(40, "uuidMap", 3, "UUID", None, None, None, None, None, None, None, None, List()),
         Attr(41, "uriMap", 3, "URI", None, None, None, None, None, None, None, None, List()))),
       Ns(2, "Ref1", "Ref1", None, None, List(
-        Attr(1, "str1", 1, "String", None, None, None, None, None, None, None, None, List()),
+        Attr(1, "str1", 1, "String", None, None, Some(Set("fulltext")), None, None, None, None, None, List()),
         Attr(2, "int1", 1, "Int", None, None, None, None, None, None, None, None, List()),
         Attr(3, "enum1", 1, "String", Some(Set("enum12", "enum10", "enum11")), None, None, None, None, None, None, None, List()),
         Attr(4, "ref2", 1, "ref", None, Some("Ref2"), None, None, None, None, None, None, List()),

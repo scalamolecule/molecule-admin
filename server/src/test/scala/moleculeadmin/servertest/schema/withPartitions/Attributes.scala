@@ -1177,7 +1177,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
                   Attr(40, "uuidMap", 3, "UUID", None, None, None, None, None, None, None, None, List()),
                   Attr(41, "uriMap", 3, "URI", None, None, None, None, None, None, None, None, List()))),
                 Ns(2, "Ref1", "Ref1", None, None, List(
-                  Attr(1, "str1", 1, "String", None, None, None, None, None, None, None, None, List()),
+                  Attr(1, "str1", 1, "String", None, None, Some(Set("fulltext")), None, None, None, None, None, List()),
                   Attr(2, "int1", 1, "Int", None, None, None, None, None, None, None, None, List()),
                   Attr(3, "enum1", 1, "String", Some(Set("enum12", "enum10", "enum11")), None, None, None, None, None, None, None, List()),
                   Attr(4, "ref2", 1, "ref", None, Some("Ref2"), None, None, None, None, None, None, List()),
@@ -1309,7 +1309,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
                   Attr(40, "uuidMap", 3, "UUID", None, None, None, None, None, None, None, None, List()),
                   Attr(41, "uriMap", 3, "URI", None, None, None, None, None, None, None, None, List()))),
                 Ns(2, "Ref1", "Ref1", None, None, List(
-                  Attr(1, "str1", 1, "String", None, None, None, None, None, None, None, None, List()),
+                  Attr(1, "str1", 1, "String", None, None, Some(Set("fulltext")), None, None, None, None, None, List()),
                   Attr(2, "int1", 1, "Int", None, None, None, None, None, None, None, None, List()),
                   Attr(3, "enum1", 1, "String", Some(Set("enum12", "enum10", "enum11")), None, None, None, None, None, None, None, List()),
                   Attr(4, "ref2", 1, "ref", None, Some("Ref2"), None, None, None, None, None, None, List()),
@@ -1531,7 +1531,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
                   Attr(40, "uuidMap", 3, "UUID", None, None, None, None, None, None, None, None, List()),
                   Attr(41, "uriMap", 3, "URI", None, None, None, None, None, None, None, None, List()))),
                 Ns(2, "Ref1", "Ref1", None, None, List(
-                  Attr(1, "str1", 1, "String", None, None, None, None, None, None, None, None, List()),
+                  Attr(1, "str1", 1, "String", None, None, Some(Set("fulltext")), None, None, None, None, None, List()),
                   Attr(2, "int1", 1, "Int", None, None, None, None, None, None, None, None, List()),
                   Attr(3, "enum1", 1, "String", Some(Set("enum12", "enum10", "enum11")), None, None, None, None, None, None, None, List()),
                   Attr(4, "ref2", 1, "ref", None, Some("Ref2"), None, None, None, None, None, None, List()),
@@ -1696,7 +1696,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
                   Attr(40, "uuidMap", 3, "UUID", None, None, None, None, None, None, None, None, List()),
                   Attr(41, "uriMap", 3, "URI", None, None, None, None, None, None, None, None, List()))),
                 Ns(2, "Ref1", "Ref1", None, None, List(
-                  Attr(1, "str1", 1, "String", None, None, None, None, None, None, None, None, List()),
+                  Attr(1, "str1", 1, "String", None, None, Some(Set("fulltext")), None, None, None, None, None, List()),
                   Attr(2, "int1", 1, "Int", None, None, None, None, None, None, None, None, List()),
                   Attr(3, "enum1", 1, "String", Some(Set("enum12", "enum10", "enum11")), None, None, None, None, None, None, None, List()),
                   Attr(4, "ref2", 1, "ref", None, Some("Ref2"), None, None, None, None, None, None, List()),
@@ -2001,7 +2001,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
                   Attr(40, "uuidMap", 3, "UUID", None, None, None, None, None, None, None, None, List()),
                   Attr(41, "uriMap", 3, "URI", None, None, None, None, None, None, None, None, List()))),
                 Ns(2, "Ref1", "Ref1", None, None, List(
-                  Attr(1, "str1", 1, "String", None, None, None, None, None, None, None, None, List()),
+                  Attr(1, "str1", 1, "String", None, None, Some(Set("fulltext")), None, None, None, None, None, List()),
                   Attr(2, "int1", 1, "Int", None, None, None, None, None, None, None, None, List()),
                   Attr(3, "enum1", 1, "String", Some(Set("enum12", "enum10", "enum11")), None, None, None, None, None, None, None, List()),
                   Attr(4, "ref2", 1, "ref", None, Some("Ref2"), None, None, None, None, None, None, List()),
@@ -2346,7 +2346,7 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
           import ps._
 
           // Can't add fulltext option
-          updateAttribute(coreMetaSchema, "CoreTest", "db.part/user", "Ref1", "str1", "str1",
+          updateAttribute(coreMetaSchema, "CoreTest", "db.part/user", "Ref2", "str2", "str2",
             1, "String", Nil, None, Seq("fulltext")) ==> Left(
             "Successfully rolled back from error: Can't add fulltext option to existing attribute."
           )
@@ -2360,7 +2360,13 @@ object Attributes extends TestSuite with TreeSchema with Helpers {
           read ! coreDefFilePath ==> coreDefFile
 
           // meta
-          meta_Db.name_("CoreTest").Partitions.name_("db.part/user").Namespaces.name_("Ref1").Attrs.name_("str1").pos.card.tpe.options$.get(moleculeAdminConn) ==> List((1, 1, "String", Some(Set("indexed"))))
+          meta_Db.name_("CoreTest")
+            .Partitions.name_("db.part/user")
+            .Namespaces.name_("Ref1")
+            .Attrs.name_("str1").pos.card.tpe.options$
+            .get(moleculeAdminConn) ==> List(
+            (1, 1, "String", Some(Set("indexed")))
+          )
 
           // live schema
           Schema.attr("str1").card.tpe.fulltext$.get(coreConn) ==> List(("str1", "one", "string", None))
