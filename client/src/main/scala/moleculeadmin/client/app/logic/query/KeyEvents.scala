@@ -65,7 +65,7 @@ trait KeyEvents
 
       } else if (document.activeElement.isInstanceOf[TableCell]) {
         e.key match {
-          case x if insertMode      => x match {
+          case x if insertMode                   => x match {
             case "Escape"         => abortInsert()
             case "Enter" if shift => multilineSoftNewLine(e)
             case "Enter" if ctrl  => multilineAddItem(e)
@@ -73,19 +73,25 @@ trait KeyEvents
             case "Tab"            => continueInserting()
             case _                => ()
           }
-          case "Escape"             => blur()
-          case "ArrowUp" if ctrl    => saveEditMoveUp(e)
-          case "ArrowDown" if ctrl  => saveEditMoveDown(e)
-          case "ArrowLeft" if ctrl  => saveEditMoveBackwards(e)
-          case "ArrowRight" if ctrl => saveEditMoveForward(e)
-          case "Backspace"          => deleteItem(e)
-          case "Enter" if shift     => multilineSoftNewLine(e)
-          case "Enter" if ctrl      => multilineAddItem(e)
-          case "Enter"              => saveEditMoveDown(e)
-          case "Tab" if shift       => saveEditMoveBackwards(e)
-          case "Tab"                => saveEditMoveForward(e)
-          case "z" if cmd           => undoLastClean
-          case _                    => ()
+          case "Escape"                          => blur()
+          case "ArrowUp" if ctrl && alt && cmd   => first(e)
+          case "ArrowUp" if ctrl && alt          => pageUp(e)
+          case "ArrowUp" if ctrl                 => cellUp(e)
+          case "ArrowDown" if ctrl && alt && cmd => last(e)
+          case "ArrowDown" if ctrl && alt        => pageDown(e)
+          case "ArrowDown" if ctrl               => cellDown(e)
+          case "ArrowLeft" if ctrl && alt        => startOfRow(e)
+          case "ArrowLeft" if ctrl               => cellLeft(e)
+          case "ArrowRight" if ctrl && alt       => endOfRow(e)
+          case "ArrowRight" if ctrl              => cellRight(e)
+          case "Backspace"                       => deleteItem(e)
+          case "Enter" if shift                  => multilineSoftNewLine(e)
+          case "Enter" if ctrl                   => multilineAddItem(e)
+          case "Enter"                           => cellDown(e)
+          case "Tab" if shift                    => cellLeft(e)
+          case "Tab"                             => cellRight(e)
+          case "z" if cmd                        => undoLastClean
+          case _                                 => ()
         }
       }
     }
