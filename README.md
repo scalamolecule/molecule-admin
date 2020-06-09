@@ -1,3 +1,5 @@
+[![Gitter](https://badges.gitter.im/scalamolecule/Lobby.svg)](https://gitter.im/scalamolecule/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+
 # Molecule Admin
 
 ScalaJS client app to administrate your Datomic/molecule database schema, data queries and updates etc.

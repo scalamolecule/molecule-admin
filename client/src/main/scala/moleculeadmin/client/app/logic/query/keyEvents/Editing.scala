@@ -10,17 +10,18 @@ import scalatags.JsDom.all._
 
 trait Editing extends Paging {
 
-  def getColNo(id: String): Int =
+  private def getColNo(id: String): Int =
     if (id.startsWith("grouped-cell-")) 1 else id.substring(4, 6).trim.toInt
 
-  def getFilterRow: TableRow = document.getElementById("tableHead")
+  private def getFilterRow: TableRow = document.getElementById("tableHead")
     .lastChild.asInstanceOf[TableRow]
 
-  def getFirstRow: TableRow = document.getElementById("tableBody")
+  private def getFirstRow: TableRow = document.getElementById("tableBody")
     .firstChild.asInstanceOf[TableRow]
 
-  def getLastRow: TableRow = document.getElementById("tableBody")
+  private def getLastRow: TableRow = document.getElementById("tableBody")
     .lastChild.asInstanceOf[TableRow]
+
 
   def selectContent(elem: Node): Unit = {
     val range = document.createRange()
@@ -40,7 +41,7 @@ trait Editing extends Paging {
   }
 
   @scala.annotation.tailrec
-  final def previousEditableCell(testCell: HTMLInputElement): Option[HTMLInputElement] = {
+  final private def previousEditableCell(testCell: HTMLInputElement): Option[HTMLInputElement] = {
     val prevCell = testCell.previousSibling.asInstanceOf[HTMLInputElement]
     if (prevCell == null)
       None
@@ -51,7 +52,7 @@ trait Editing extends Paging {
   }
 
   @scala.annotation.tailrec
-  final def nextEditableCell(testCell: HTMLInputElement): Option[HTMLInputElement] = {
+  final private def nextEditableCell(testCell: HTMLInputElement): Option[HTMLInputElement] = {
     val nextCell = testCell.nextSibling.asInstanceOf[HTMLInputElement]
     if (nextCell == null)
       None
@@ -79,7 +80,7 @@ trait Editing extends Paging {
     }
   }
 
-  def headerCellToFirstCell(curCell: HTMLInputElement): Unit = {
+  private def headerCellToFirstCell(curCell: HTMLInputElement): Unit = {
     // Get col no from header `id="filter-23" contenteditable...`
     val colNo           = curCell.id.substring(7, 10).trim.replace("\"", "").toInt + 1
     val firstRow        = getFirstRow
@@ -88,6 +89,8 @@ trait Editing extends Paging {
     markRow(firstRow)
   }
 
+
+  // Editing -------------------------------------------------------------------
 
   def deleteItem(e: KeyboardEvent): Unit = {
     val curCell = document.activeElement
@@ -165,7 +168,7 @@ trait Editing extends Paging {
 
   // Cell navigation -----------------------------------------------------------
 
-  def up(e: KeyboardEvent, kind: Int)(implicit ctx: Ctx.Owner): Unit = {
+  private def up(e: KeyboardEvent, kind: Int)(implicit ctx: Ctx.Owner): Unit = {
     e.preventDefault()
     val curCell = document.activeElement.asInstanceOf[HTMLInputElement]
     editCellId = curCell.id
@@ -212,7 +215,7 @@ trait Editing extends Paging {
     editCellId = ""
   }
 
-  def down(e: KeyboardEvent, kind: Int)(implicit ctx: Ctx.Owner): Unit = {
+  private def down(e: KeyboardEvent, kind: Int)(implicit ctx: Ctx.Owner): Unit = {
     e.preventDefault()
     val curCell = document.activeElement.asInstanceOf[HTMLInputElement]
     editCellId = curCell.id
@@ -269,7 +272,7 @@ trait Editing extends Paging {
     editCellId = ""
   }
 
-  def left(
+  private def left(
     e: KeyboardEvent,
     curCell: HTMLInputElement,
     leftCellOpt: Option[HTMLInputElement]
@@ -327,7 +330,7 @@ trait Editing extends Paging {
     }
   }
 
-  def right(
+  private def right(
     e: KeyboardEvent,
     curCell: HTMLInputElement,
     rightCellOpt: Option[HTMLInputElement]
@@ -404,7 +407,7 @@ trait Editing extends Paging {
     right(e, curCell, rightOptCell)
   }
 
-  // Page movements -----------------------------------------------------
+  // Page movements ------------------------------------------------------------
 
   def pageUp(e: KeyboardEvent)(implicit ctx: Ctx.Owner): Unit = up(e, 2)
 
