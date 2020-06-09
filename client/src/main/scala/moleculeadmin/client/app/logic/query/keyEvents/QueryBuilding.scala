@@ -11,8 +11,8 @@ trait QueryBuilding {
   def queryBuilderOpen: Boolean = querySelection.now.nonEmpty
 
   def saveSelection(implicit ctx: Ctx.Owner): Unit = {
-    (new Callbacks).saveSetting("querySelection" -> querySelection.now)
-    (new Callbacks).saveSetting("queryBaseSelection" -> queryBaseSelection)
+    new Callbacks().saveSetting("querySelection" -> querySelection.now)
+    new Callbacks().saveSetting("queryBaseSelection" -> queryBaseSelection)
   }
 
   def withValuesCounted(action: => Unit): Unit = {

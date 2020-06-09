@@ -65,6 +65,13 @@ object query extends HelpersAdmin {
     markerPred: Markers => Option[T] => Boolean
   )
 
+  case class ColSetting(
+    colIndex: Int,
+    sortDir: String,
+    sortPos: Int,
+    filterExpr: String
+  )
+
   case class QueryDTO(
     molecule: String,
     part: String,
@@ -72,6 +79,6 @@ object query extends HelpersAdmin {
     isFavorite: Boolean,
     showGrouped: Boolean,
     groupedColIndexes: Set[Int],
-    colSettings: Seq[(Int, String, Int)]
+    colSettings: Seq[ColSetting]
   )
 }

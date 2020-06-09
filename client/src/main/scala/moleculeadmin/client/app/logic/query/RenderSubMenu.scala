@@ -15,7 +15,7 @@ case class RenderSubMenu()(implicit val ctx: Ctx.Owner)
   // Initialize max row onchange callback
   _maxRowsSelector.onchange = _ => {
     maxRows() = _maxRowsSelector.value.toInt
-    (new Callbacks).saveSetting("maxRows" -> maxRows.now.toString)
+    new Callbacks().saveSetting("maxRows" -> maxRows.now.toString)
     _maxRowsSelector.blur()
   }
 

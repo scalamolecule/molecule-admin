@@ -114,9 +114,10 @@ object MoleculeAdminDefinition {
       val colSettings = many[ColSetting].noHistory.isComponent.doc("Column settings for query result")
     }
     trait ColSetting {
-      val colIndex = oneInt.noHistory.doc("Column index")
-      val sortDir  = oneString.noHistory.doc("asc/desc or empty string if not sorted")
-      val sortPos  = oneInt.noHistory.doc("If multiple sort columns, an index from 1 to max 5")
+      val colIndex   = oneInt.noHistory.doc("Column index")
+      val sortDir    = oneString.noHistory.doc("asc/desc or empty string if not sorted")
+      val sortPos    = oneInt.noHistory.doc("If multiple sort columns, an index from 1 to max 5")
+      val filterExpr = oneString.noHistory.doc("Filter expression")
     }
     trait EditExpr {
       val attr = oneString.noHistory.doc("Full ns-prefixed attribute name that expr was applied to")

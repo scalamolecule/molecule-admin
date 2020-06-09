@@ -10,7 +10,7 @@ import moleculeadmin.shared.ast.query.Col
 import moleculeadmin.shared.ops.query.data.FilterFactory
 import moleculeadmin.shared.ops.query.{ColOps, ModelOps}
 import org.scalajs.dom.html.{TableCell, TableSection}
-import org.scalajs.dom.raw.{Element, Node}
+import org.scalajs.dom.raw.Node
 import org.scalajs.dom.{MouseEvent, document, window}
 import rx.{Ctx, Rx}
 import scalatags.JsDom
@@ -136,9 +136,7 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
     }
   }
 
-  private def sortAction(
-    colIndex: Int
-  ): MouseEvent => Unit = { e: MouseEvent =>
+  private def sortAction(colIndex: Int): MouseEvent => Unit = { e: MouseEvent =>
     if (columns.now.size == 5 &&
       !columns.now.exists(_.colIndex == colIndex)) {
       window.alert("Can sort maximum 5 columns.")
@@ -154,7 +152,7 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
       // update sorting for matching recent if any
       recentQueries = recentQueries.map {
         case q if q.molecule == curMolecule.now =>
-          q.copy(colSettings = colSettings(columns.now))
+          q.copy(colSettings = colSettings(columns.now, filters.now))
         case q                                  => q
       }
     }
@@ -252,19 +250,21 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
       val filterExpr  = filters.now.get(colIndex).fold("")(_.filterExpr)
       val applyFilter = { () =>
         val filterCell = document.getElementById(filterId)
-        val filterExpr = filterCell.textContent.trim
+        val newFilterExpr = filterCell.textContent.trim
         // Let only filters() propagate change
         offset.kill()
         offset() = 0
-        if (filterExpr.isEmpty) {
+        if (newFilterExpr.isEmpty) {
           _markFilterCell(filterCell, false)
           filterCell.setAttribute("style", "background-color: white")
           filters() = filters.now - colIndex
         } else {
           _markFilterCell(filterCell, true)
           filterCell.setAttribute("style", "background-color: #9de9ff")
-          createFilter(col, filterExpr, attrType != "String") match {
-            case Some(filter) => filters() = filters.now + (colIndex -> filter)
+          createFilter(col, newFilterExpr, attrType != "String") match {
+            case Some(filter) =>
+              // Overwrite filter at colIndex
+              filters() = filters.now + (colIndex -> filter)
             case None         => filters() = filters.now - colIndex
           }
         }

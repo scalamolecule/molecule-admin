@@ -23,7 +23,7 @@ case class DataTableFoot()(implicit val ctx: Ctx.Owner)
       offset.kill()
       offset() = 0
       limit() = limitSelector.value.toInt
-      (new Callbacks).saveSetting("limit" -> limit.now.toString)
+      new Callbacks().saveSetting("limit" -> limit.now.toString)
     }
     val actualCount = actualRowCount
     val lastRow     = curLastRow

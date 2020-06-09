@@ -40,7 +40,7 @@ object ResetDbs extends TestSuite with ExampleData with Settings {
     //    }
 
     //    test("Reset all and poplulate") {
-    //      //              resetDbs()
+    //      resetDbs()
     //      populateCoreTest(Conn("datomic:free://localhost:4334/CoreTest"))
     //      populatePartition(Conn("datomic:free://localhost:4334/Partition"))
     //      populateTree(Conn("datomic:free://localhost:4334/Tree"))
@@ -281,11 +281,11 @@ object ResetDbs extends TestSuite with ExampleData with Settings {
     Ns.long(222).Tx(Ns.str("meta info")).save
     Ns.long(333).Tx(Ns.str("meta with ref").Ref1.int1(444)).save
 
-//    for {
-//      a <- 1 to 3
-//      b <- 1 to 3
-//      c <- 1 to 3
-//    } yield println(s"($a, $b, $c),")
+    //    for {
+    //      a <- 1 to 3
+    //      b <- 1 to 3
+    //      c <- 1 to 3
+    //    } yield println(s"($a, $b, $c),")
 
     // sorting
     Ns.int.long.float insert List(

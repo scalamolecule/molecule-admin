@@ -1,4 +1,5 @@
 package moleculeadmin.client.app.logic.query.submenu
+
 import moleculeadmin.client.app.logic.query.Callbacks
 import moleculeadmin.client.app.logic.query.QueryState._
 import moleculeadmin.client.app.html.query.SubMenuElements
@@ -16,7 +17,7 @@ case class SubMenuQueryList()(implicit val ctx: Ctx.Owner)
 
     // Organize saved molecules by part/ns/molecule hierarchy
     val queriesByPartNs = savedQueries.sortBy(_.molecule).foldLeft(
-      "", "",
+      "": String, "": String,
       Seq.empty[(String, Seq[(String, Seq[(String, QueryDTO)])])]
     ) {
       case ((p0, _, pp), q@QueryDTO(m, p, ns, _, _, _, _)) if p0 != p =>

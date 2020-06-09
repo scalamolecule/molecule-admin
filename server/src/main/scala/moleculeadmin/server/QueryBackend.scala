@@ -383,8 +383,20 @@ class QueryBackend extends ToggleBackend {
             val newQueryId =
               user_Query.molecule.part.ns.isFavorite.showGrouped.groupedCols
                 .ColSettings.*(
-                user_ColSetting.colIndex.sortDir.sortPos
-              ).insert(List(QueryDTO.unapply(query).get)).eid
+                user_ColSetting.colIndex.sortDir.sortPos.filterExpr
+              ).insert(List(
+                (
+                  query.molecule,
+                  query.part,
+                  query.ns,
+                  query.isFavorite,
+                  query.showGrouped,
+                  query.groupedColIndexes,
+                  query.colSettings.map(cs =>
+                    (cs.colIndex, cs.sortDir, cs.sortPos, cs.filterExpr)
+                  )
+                )
+              )).eid
 
             user_DbSettings(dbSettingsId).queries.assert(newQueryId).update
             Right("Successfully inserted query")
@@ -393,7 +405,11 @@ class QueryBackend extends ToggleBackend {
             // Re-insert col settings
             user_Query(queryId).colSettings().update
             val colSettingIds =
-              user_ColSetting.colIndex.sortDir.sortPos.insert(colSettings).eidSet
+              user_ColSetting.colIndex.sortDir.sortPos.filterExpr.insert(
+                colSettings.map(cs =>
+                  (cs.colIndex, cs.sortDir, cs.sortPos, cs.filterExpr)
+                )
+              ).eidSet
 
             user_Query(queryId)
               .isFavorite(isFavorite)
@@ -412,6 +428,7 @@ class QueryBackend extends ToggleBackend {
       }
     }
   }
+
 
   override def updateQuery(db: String, query: QueryDTO): Either[String, String] = {
     implicit val conn = Conn(base + "/MoleculeAdmin")
@@ -452,7 +469,11 @@ class QueryBackend extends ToggleBackend {
           // Re-insert col settings
           user_Query(queryId).colSettings().update
           val colSettingIds =
-            user_ColSetting.colIndex.sortDir.sortPos.insert(colSettings).eidSet
+            user_ColSetting.colIndex.sortDir.sortPos.filterExpr.insert(
+              colSettings.map(cs =>
+                (cs.colIndex, cs.sortDir, cs.sortPos, cs.filterExpr)
+              )
+            ).eidSet
           user_Query(queryId)
             .isFavorite(isFavorite)
             .showGrouped(showGrouped)
@@ -475,7 +496,7 @@ class QueryBackend extends ToggleBackend {
       try {
         user_User.username_("admin")
           .DbSettings.Db.name_(db)
-          ._DbSettings.Queries.e.molecule_(molecule1)
+          ._user_DbSettings.Queries.e.molecule_(molecule1)
           .get match {
           case Nil           => Left(
             s"Unexpectedly couldn't find saved molecule `$molecule1` in meta database."
@@ -781,7 +802,7 @@ class QueryBackend extends ToggleBackend {
       try {
         user_User.username_("admin")
           .DbSettings.Db.name_(db)
-          ._DbSettings.Edits.e.attr_(fullAttr).expr_(editExpr)
+          ._user_DbSettings.Edits.e.attr_(fullAttr).expr_(editExpr)
           .get match {
           case Nil              => Left(
             s"Unexpectedly couldn't find saved edit expression `$editExpr` " +

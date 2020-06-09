@@ -6,7 +6,8 @@ import util.client.rx.RxBindings
 import moleculeadmin.client.app.logic.query.QueryState._
 import moleculeadmin.client.app.html.query.SubMenuElements
 import moleculeadmin.client.queryWireAjax
-import moleculeadmin.shared.ast.query.{Col, QueryDTO}
+import moleculeadmin.shared.ast.query.{Col, ColSetting, Filter, QueryDTO}
+import moleculeadmin.shared.ops.query.data.FilterFactory
 import moleculeadmin.shared.ops.query.{ColOps, MoleculeOps}
 import moleculeadmin.shared.ops.transform.Molecule2Model
 import org.scalajs.dom.raw.HTMLInputElement
@@ -16,7 +17,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 
 class Callbacks(implicit ctx: Ctx.Owner)
-  extends RxBindings with MoleculeOps with ColOps with SubMenuElements {
+  extends RxBindings
+    with MoleculeOps with ColOps
+    with SubMenuElements with FilterFactory {
 
   def saveSettings2(pairs: Seq[(String, String)]): Unit =
     queryWireAjax().saveSettings(pairs).call().foreach {
@@ -36,20 +39,32 @@ class Callbacks(implicit ctx: Ctx.Owner)
 
   // Query list ------------------------------
 
-  private def sorted(query: QueryDTO): QueryDTO = query.copy(
-    colSettings = columns.now.map(c => (c.colIndex, c.sortDir, c.sortPos)))
-
-  def setColumns(query: QueryDTO): Unit = {
-    val colSettings = query.colSettings.map(cs => cs._1 -> cs).toMap
-    //    colSettings foreach println
-    //    columns.now foreach println
-    columns() = columns.now.map { column =>
-      val (_, sort, sortPos) = colSettings(column.colIndex)
-      column.copy(sortDir = sort, sortPos = sortPos)
-    }
+  private def sorted(query: QueryDTO): QueryDTO = {
+    val curFilters = filters.now
+    query.copy(
+      colSettings = columns.now.map(c =>
+        ColSetting(
+          c.colIndex, c.sortDir, c.sortPos, curFilters(c.colIndex).filterExpr
+        )
+      )
+    )
   }
 
-  private def updateQueryCaches(query: QueryDTO) = {
+  def setColumnsAndFilters(query: QueryDTO): Unit = {
+    val colSettings = query.colSettings
+    var tempFilters = Map.empty[Int, Filter[_]]
+    columns() = columns.now.map { c =>
+      val ColSetting(colIndex, sortDir, sortPos, filterExpr) = colSettings(c.colIndex)
+      if(filterExpr.nonEmpty) {
+        tempFilters = tempFilters +
+          (colIndex -> createFilter(c, filterExpr, splitComma = false).get)
+      }
+      c.copy(sortDir = sortDir, sortPos = sortPos)
+    }
+    filters() = tempFilters
+  }
+
+  private def updateQueryCaches(query: QueryDTO): Unit = {
     val m = query.molecule
     savedQueries = savedQueries.map {
       case QueryDTO(`m`, _, _, _, _, _, _) => query
@@ -65,7 +80,7 @@ class Callbacks(implicit ctx: Ctx.Owner)
     queryWireAjax().upsertQuery(db, query).call().foreach {
       case Right("Successfully inserted query") =>
         savedQueries = savedQueries :+ query
-        setColumns(query)
+        setColumnsAndFilters(query)
         if (refreshSubmenu) {
           curMolecule.recalc()
           renderSubMenu.recalc()
@@ -73,7 +88,7 @@ class Callbacks(implicit ctx: Ctx.Owner)
 
       case Right("Successfully updated query") =>
         updateQueryCaches(query)
-        setColumns(query)
+        setColumnsAndFilters(query)
         if (refreshSubmenu) {
           curMolecule.recalc()
           renderSubMenu.recalc()
@@ -145,10 +160,8 @@ class Callbacks(implicit ctx: Ctx.Owner)
   def useQuery(query: QueryDTO): Rx.Dynamic[Unit] = Rx {
     Molecule2Model(query.molecule) match {
       case Right(elements) =>
-        //        println("useQuery " + modelElements.now)
-        //        println("useQuery " + elements)
         modelElements() = elements
-        setColumns(query)
+        setColumnsAndFilters(query)
 
       case Left(err) =>
         window.alert(s"Error using query: $err")
@@ -171,7 +184,7 @@ class Callbacks(implicit ctx: Ctx.Owner)
       part, ns, true,
       showGrouped,
       groupedColIndexes.now,
-      colSettings(columns.now)
+      colSettings(columns.now, filters.now)
     )
   }
 

@@ -87,7 +87,7 @@ trait SubMenuToggling extends BaseKeyEvents with RegexMatching {
   def favoriteQuery(i: Int)(implicit ctx: Ctx.Owner): Unit = {
     val favoriteQueries = savedQueries.filter(_.isFavorite)
     if (i < favoriteQueries.size) {
-      (new Callbacks).useQuery(
+      new Callbacks().useQuery(
         favoriteQueries.sortBy(_.molecule).apply(i)
       )
     } else {
@@ -128,14 +128,14 @@ trait SubMenuToggling extends BaseKeyEvents with RegexMatching {
     e.preventDefault()
     document.getElementById("checkbox-grouped-showGrouped")
       .asInstanceOf[HTMLInputElement].checked = !showGrouped
-    (new Callbacks).toggleShowGrouped()
+    new Callbacks().toggleShowGrouped()
   }
 
   def toggleGrouped(i: Int)(implicit ctx: Ctx.Owner): Unit = {
     if (i == -1 || i >= groupableCols.size)
       window.alert(s"Unrecognized shortcut for grouped attribute: $i")
     else
-      (new Callbacks).toggleGrouped(groupableCols(i))
+      new Callbacks().toggleGrouped(groupableCols(i))
   }
 
 
@@ -158,13 +158,13 @@ trait SubMenuToggling extends BaseKeyEvents with RegexMatching {
     e.preventDefault()
     document.getElementById("checkbox-view-showViews")
       .asInstanceOf[HTMLInputElement].checked = !showViews
-    (new Callbacks).toggleShowViews()
+    new Callbacks().toggleShowViews()
   }
 
   def toggleView(i: Int)(implicit ctx: Ctx.Owner): Unit = {
     if (i == -1 || i >= allViews.size)
       window.alert(s"Unrecognized shortcut for view: $i")
     else
-      (new Callbacks).toggleView(allViews(i)._1)
+      new Callbacks().toggleView(allViews(i)._1)
   }
 }
