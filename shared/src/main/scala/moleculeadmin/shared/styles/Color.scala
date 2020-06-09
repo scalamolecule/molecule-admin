@@ -13,6 +13,7 @@ object Color {
 
   val icon = "#616161"
   val iconGray = "#bbb"
+  val sortIcon = "#00baef"
 
   val white = "white"
   val filter = "#9de9ff"

@@ -345,15 +345,19 @@ trait HeadElements extends ColOps
     )
   }
 
-  def _sortIcon(clazz: String, sortPos: Int): TypedTag[Span] = span(
+  def _sortIcon(iconClazz: String, sortPos: Int): TypedTag[Span] = span(
     float.right,
     paddingRight := 4,
-    color := Color.icon,
+    color := Color.sortIcon,
     whiteSpace.nowrap,
-    span(cls := clazz, verticalAlign.middle,
+    marginTop := -3,
+    fontSize := 13.px,
+    span(
+      cls := iconClazz,
+      verticalAlign.middle,
       paddingLeft := 0,
     ),
-    if (sortPos == 0) () else span(sortPos)
+    if (sortPos == 0) () else span(sortPos, fontSize := 11.px)
   )
 
   def _attrHeader(
