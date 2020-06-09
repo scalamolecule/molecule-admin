@@ -101,38 +101,6 @@ trait FilterFactory extends RegexMatching with DateHandling {
     }
   }
 
-  def mergedPredicateXX[T](
-    filterExpr: String,
-    predicateFactory: String => Option[Option[T] => Boolean],
-    splitComma: Boolean
-  ): Option[Option[T] => Boolean] = {
-    val predicates: Seq[Option[T] => Boolean] =
-      filterExpr match {
-        case r"!?i?/.*" =>
-          // Ignore line shifts in regex expressions to allow overviewing complex
-          // expressions on multiple lines without affecting regex execution
-          Seq(predicateFactory(filterExpr.replaceAll("\n", "")).get)
-
-        case expr if splitComma =>
-          (for {
-            lines <- expr.split('\n')
-            token <- lines.split(',')
-            predicate <- predicateFactory(token)
-          } yield predicate).toList
-
-        case expr =>
-          (for {
-            token <- expr.split('\n')
-            predicate <- predicateFactory(token)
-          } yield predicate).toList
-      }
-
-    predicates.length match {
-      case 0 => None
-      case 1 => Some(predicates.head)
-      case _ => Some(predicates.tail.foldLeft(predicates.head)(_ or _))
-    }
-  }
 
   def predEid(token: String): Option[Markers => Option[Double] => Boolean] = {
     token.trim match {

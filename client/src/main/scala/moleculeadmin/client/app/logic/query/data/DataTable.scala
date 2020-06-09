@@ -35,6 +35,10 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
     offset.kill()
     limit.kill()
 
+    // Reset filters on change
+    // Could be set again if query matches a saved query with filters
+    filters() = Map.empty[Int, Filter[_]]
+
     // de-select markers
     curEntity() = 0
     curT() = 0L
@@ -107,14 +111,13 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
 
     // See if we have a matching sorting from before
     recentQueries.find(_.molecule == curMolecule.now) match {
-      case Some(q) => setColumns(q)
-      case None    => savedQueries.find(_.molecule == curMolecule.now).foreach { q =>
-        setColumns(q)
-      }
+      case Some(q) => setColumnsAndFilters(q)
+      case None    => savedQueries.find(_.molecule == curMolecule.now)
+        .foreach(setColumnsAndFilters)
+
     }
 
     eidCols = getEidTableColIndexes(columns.now)
-    filters() = Map.empty[Int, Filter[_]]
     offset() = 0
     curAttrs = columns.now.map(c => s":${c.nsFull}/${c.attr}")
 

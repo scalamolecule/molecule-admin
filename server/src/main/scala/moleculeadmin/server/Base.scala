@@ -5,7 +5,7 @@ import molecule.api.Entity
 import molecule.api.out14._
 import molecule.facade.Conn
 import moleculeadmin.shared.api.BaseApi
-import moleculeadmin.shared.ast.query.QueryDTO
+import moleculeadmin.shared.ast.query.{ColSetting, QueryDTO}
 import moleculeadmin.shared.ast.schema._
 import moleculeadmin.shared.util.HelpersAdmin
 
@@ -174,7 +174,7 @@ trait Base extends BaseApi with HelpersAdmin {
       .Queries.*?(
       user_Query.molecule.part.ns.isFavorite.showGrouped.groupedCols$
         .ColSettings.*?(
-        user_ColSetting.colIndex.sortDir.sortPos
+        user_ColSetting.colIndex.sortDir.sortPos.filterExpr
       )
     ).get.head match {
       case (_, stars$, flags$, checks$, undoneTs$, queryList) =>
@@ -193,7 +193,7 @@ trait Base extends BaseApi with HelpersAdmin {
                 isFavorite,
                 showGrouped,
                 groupedCols$.getOrElse(Set.empty[Int]),
-                colSettings
+                colSettings.map(cs => ColSetting(cs._1, cs._2, cs._3, cs._4))
               )
           },
           editExprs
