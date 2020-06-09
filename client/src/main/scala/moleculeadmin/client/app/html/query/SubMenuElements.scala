@@ -1,4 +1,5 @@
 package moleculeadmin.client.app.html.query
+
 import moleculeadmin.client.app.logic.query.QueryState._
 import moleculeadmin.client.app.html.AppElements
 import moleculeadmin.client.app.html.common.DropdownMenu
@@ -206,7 +207,6 @@ trait SubMenuElements extends AppElements with DropdownMenu {
                       }
                     )
                   ),
-                  td(m, paddingRight := 20, if (cur) () else onclick := use(q)),
                   td(
                     textAlign.right,
                     a(
@@ -218,6 +218,7 @@ trait SubMenuElements extends AppElements with DropdownMenu {
                       onclick := { () => action }
                     )
                   ),
+                  td(m, paddingRight := 20, if (cur) () else onclick := use(q)),
                 )
               }
             )
@@ -297,22 +298,51 @@ trait SubMenuElements extends AppElements with DropdownMenu {
       val action: generic.AttrPair[dom.Element, () => Unit] =
         onclick := (if (cur) () => () else use(q))
 
-      tr(
-        id := "favorite" + i,
-        cls := (if (cur) "current" else "other"),
-        th(i + 1, action),
-        td(q.molecule, paddingRight := 20, action),
-        td(
-          textAlign.right,
-          a(cls := "discrete", href := "#",
-            "unfav",
-            onclick := { () =>
-              document.getElementById("favorite" + i).innerText = ""
-              unfavorite(q)()
-            }
+      val favoriteId = "favorite" + i
+
+      if (cur) {
+        tr(
+          id := favoriteId,
+          cls := "current",
+          th(i + 1),
+          td(
+            textAlign.left,
+            a(
+              href := "#",
+              "unfav",
+              onclick := { () =>
+                document.getElementById(favoriteId).innerText = ""
+                unfavorite(q)()
+              }
+            )
+          ),
+          td(q.molecule)
+        )
+      } else {
+        tr(
+          id := favoriteId,
+          cls := "other",
+          th(i + 1),
+          td(
+            textAlign.left,
+            a(
+              href := "#",
+              "unfav",
+              onclick := { () =>
+                document.getElementById(favoriteId).innerText = ""
+                unfavorite(q)()
+              }
+            )
+          ),
+          td(
+            a(
+              href := "#",
+              q.molecule,
+              action
+            )
           )
         )
-      )
+      }
     }
   }
 
@@ -335,7 +365,7 @@ trait SubMenuElements extends AppElements with DropdownMenu {
         upsert,
         unfavorite
       )
-  )
+    )
 
 
   // Grouped -------------------------------------------------------------------
