@@ -165,12 +165,18 @@ table.tableRowLink {
 table.tableRowLink tr.current {
     color: #ababab;
 }
+table.tableRowLink tr.current a:hover {
+    color: #00a4db;
+}
 table.tableRowLink tr.current:hover {
-    color: #ababab;
     cursor: default;
     background-color: default;
 }
+
 table.tableRowLink tr.other:hover {
+    background-color: #eee;
+}
+table.tableRowLink tr.other a:hover {
     color: #00a4db;
     cursor: pointer;
     background-color: #eee;
