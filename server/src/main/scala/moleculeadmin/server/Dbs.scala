@@ -8,10 +8,13 @@ import molecule.facade.Conn
 import moleculeadmin.server.utils.DefFile
 import moleculeadmin.servertest._
 import moleculeadmin.shared.api.DbsApi
+import org.slf4j.LoggerFactory
 import scala.jdk.CollectionConverters._
 
 
 class Dbs extends DbsApi with ResetDbsCmds {
+
+  private val log = LoggerFactory.getLogger(getClass)
 
   def dbs(): Dbs = {
     implicit val conn = Conn(base + "/MoleculeAdmin")
@@ -24,7 +27,11 @@ class Dbs extends DbsApi with ResetDbsCmds {
 
   override def dbList(): Either[List[String], List[(String, Option[Boolean], Option[String])]] = try {
     // Live database names
-    val allDbs = Peer.getDatabaseNames(base + "/*").asScala.toList.sorted
+    val rawDbs = Peer.getDatabaseNames(s"$base/*")
+    if (rawDbs == null)
+      throw new RuntimeException("No databases found - maybe the mBrainz sample db wasn't restored?")
+    val allDbs = rawDbs.asScala.toList.sorted
+
     implicit val conn = if (allDbs.contains("MoleculeAdmin")) {
       Conn(base + "/MoleculeAdmin")
     } else {
