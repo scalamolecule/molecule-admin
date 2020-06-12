@@ -55,13 +55,13 @@ trait ResetDbsCmds extends SchemaResets with ExampleData {
 
       case "Tree" =>
         log.info("- Tree")
-        val defFilePath = pwd / "server" / "src" / "main" / "scala" / "db" / "core" / "schema" / "TreeDefinition.scala"
+        val defFilePath = projectHome / "server" / "src" / "main" / "scala" / "db" / "core" / "schema" / "TreeDefinition.scala"
         DefFile("Tree", Some(defFilePath.toString)).saveToMetaDb
         recreateDbFrom(TreeSchema, host + "/Tree", protocol)
 
       case "mbrainz-1968-1973" =>
         log.info("- mbrainz-1968-1973")
-        val defFilePath = pwd / "server" / "src" / "main" / "scala" / "db" / "integration" / "schema" / "MBrainzDefinition.scala"
+        val defFilePath = projectHome / "server" / "src" / "main" / "scala" / "db" / "integration" / "schema" / "MBrainzDefinition.scala"
         DefFile("mbrainz-1968-1973", Some(defFilePath.toString)).saveToMetaDb
         implicit val mbrainzConn = Conn(base + "/mbrainz-1968-1973")
         if (Schema.a(":Artist/name").get.isEmpty) {
