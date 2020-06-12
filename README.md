@@ -56,7 +56,8 @@ To explore MoleculeAdmin with the mBrainz sample database,
 
 Having downloaded and installed all the necessary parts listed above,
 
-1. Start the Datomic transactor in its own process, something like this (might already be running):
+1. Start the Datomic transactor in its own process, something like this (might 
+already be running):
    ```
    cd datomic-free-0.9.5703.21
    bin/transactor -Xmx4g -Xms4g -Ddatomic.txTimeoutMsec=120000 config/samples/free-transactor-template.properties
@@ -70,14 +71,28 @@ Having downloaded and installed all the necessary parts listed above,
    ```
    (Server started, use Enter to stop and go back to the console...)
    ```
-4. Then open [localhost:9001](http://localhost:9001) - this can take a while the first time since
-   all dependencies are resolved and the whole project compiled (check progress in terminal).
+4. Then open [localhost:9001](http://localhost:9001) - this can take a while the 
+first time since all dependencies are resolved and the whole project compiled 
+(check progress in terminal).
    
+You should arrive at a list of current databases, something like this (with your 
+paths):
 
-First time MoleculeAdmin is opened, it creates a few small generic sample 
-databases that tests are run against. You can freely play around with these to test 
-partitions, trees and how all the database types are uniquely represented in 
-the query builder for instance.
+![](project/resources/StartPage.png)
+
+A few small generic sample databases were installed that you can freely play 
+around with by exploring their `Schema` or perform a `Query`:
+- CoreTest - contains all possible data types. Note how the Schema defines those
+and how the query builder takes each type into consideration and only allow 
+valid settings.
+- Partition/Partition1 - exploring multiple partitions that each contains one or 
+more namespaces.
+- Tree - Used to test building complex hierarchies with the query builder. 
+- mBrainz - large real data set that can give a sense of the query builder
+capabilities and the scrolling/editing features.
+
+MoleculeAdmin is built using the Google Chrome browser. So it's recommended to 
+use this for expected look and behaviour.
 
 
 ## Enable your own Datomic database
