@@ -1,7 +1,7 @@
 
 ![](project/resources/Molecule-logo-M.png)
 
-# Molecule Admin
+# MoleculeAdmin for Datomic dbs
 
 [![Gitter](https://badges.gitter.im/scalamolecule/Lobby.svg)](https://gitter.im/scalamolecule/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
