@@ -6,18 +6,18 @@
 [![Gitter](https://badges.gitter.im/scalamolecule/Lobby.svg)](https://gitter.im/scalamolecule/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 An advanced web app (built with [ScalaJS](http://www.scala-js.org)) to 
-administrate Datomic databases:
+administrate [Datomic](https://www.datomic.com/on-prem.html) databases:
 
-- build and update Datomic database schemas
-- build and run complex queries from a graphical query builder or directly with [molecules](http://www.scalamolecule.org)
-- sort, filter, group and browse large data sets easily and fast 
-- add/edit data directly in table cells with easy key-command navigation
-- perform custom group edits on any number of entities
-- recursively expand entities with simple mouseovers for fast exploration
-- watch/undo transaction history
-- see/edit grouped values
-- shows queries as molecules and datalog queries (for easy copy/paste)
-- automatic query optimization for fast query performance
+- Build and update Datomic database schemas.
+- Build and run complex queries from a graphical query builder or directly with [molecules](http://www.scalamolecule.org).
+- Sort, filter, group and browse large data sets easily and fast.
+- Add/edit data directly in table cells with easy key-command navigation.
+- Perform custom group edits on any number of entities.
+- Recursively expand entities with simple mouseovers for fast exploration.
+- Watch/undo transaction history.
+- See/edit grouped values.
+- Shows queries as molecules and datalog queries (for easy copy/paste).
+- Automatic query optimization for fast query performance.
 
 MoleculeAdmin uses [molecules](http://www.scalamolecule.org) as a query representation. 
 But it can be used without knowing about/using molecules or Scala for that matter 
