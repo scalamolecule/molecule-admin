@@ -1,13 +1,11 @@
-package moleculeadmin.servertest.schema.withPartitions
+package moleculeadmin.servertest
 
 import ammonite.ops._
-import molecule.facade.Conn
-import moleculeadmin.server.Schema
-import moleculeadmin.servertest.ResetDbs
+import db.DatomicUri
 import moleculeadmin.shared.ast.schema._
 
 
-trait Settings {
+trait SchemaResets extends DatomicUri {
 
   val pwd = home / "molecule" / "molecule-admin" / "molecule-admin"
 
@@ -116,56 +114,6 @@ trait Settings {
     )),
     Part(3, "c", None, None, List()),
   ))
-
-
-
-  // Reset def file
-  val partition2DefFile =
-    """package db.migration.schema
-      |
-      |import molecule.schema.definition._
-      |
-      |@InOut(0, 5)
-      |object Partition2Definition {
-      |
-      |  object a {
-      |
-      |    trait Aa {
-      |      val aa1 = oneInt
-      |      val abb = one[b.Bb]
-      |      val abc = one[b.Bc]
-      |      val abd = one[b.Bd]
-      |    }
-      |  }
-      |
-      |  object b {
-      |
-      |    trait Bb {
-      |      val bb1 = oneInt
-      |      val bb2 = oneInt
-      |      val bb3 = oneInt
-      |      val bb4 = oneInt
-      |    }
-      |
-      |    trait Bc {
-      |      val bc1 = oneInt
-      |    }
-      |
-      |    trait Bd {
-      |      val bd1 = oneInt
-      |    }
-      |  }
-      |
-      |  object c {
-      |    trait Cc {
-      |      val cc1 = oneInt
-      |    }
-      |  }
-      |}
-      |""".stripMargin
-
-  val partition2DefFilePath = pwd / "server" / "src" / "main" / "scala" / "db" / "migration" / "schema" / "Partition2Definition.scala"
-
 
   val coreDefFile =
     """package db.core.schema
@@ -306,19 +254,4 @@ trait Settings {
         Attr(4, "strs2", 2, "String", None, None, None, None, None, None, None, None, List()),
         Attr(5, "ints2", 2, "Int", None, None, Some(Set("noHistory")), None, None, None, None, None, List())))))
   ))
-}
-
-
-class PartitionSetup extends Schema with Settings {
-  ResetDbs.resetDbs(Seq("CoreTest", "Partition"))
-  val moleculeAdminConn = Conn("datomic:free://localhost:4334/MoleculeAdmin")
-  val coreConn          = Conn("datomic:free://localhost:4334/CoreTest")
-  val partitionConn     = Conn("datomic:free://localhost:4334/Partition")
-}
-
-class PartitionSetup1 extends Schema with Settings {
-  ResetDbs.resetDbs(Seq("CoreTest", "Partition1"))
-  val moleculeAdminConn = Conn("datomic:free://localhost:4334/MoleculeAdmin")
-  val coreConn          = Conn("datomic:free://localhost:4334/CoreTest")
-  val partition1Conn    = Conn("datomic:free://localhost:4334/Partition1")
 }

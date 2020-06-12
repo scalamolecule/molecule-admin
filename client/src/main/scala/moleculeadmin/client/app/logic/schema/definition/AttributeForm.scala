@@ -255,7 +255,12 @@ case class AttributeForm(db: String,
       }
     ).render
 
-    val submitButton = button(id := "attrFormSubmit", tpe := "submit", if (update) "Update attribute" else "Create attribute").render
+    val submitButton = button(
+      id := "attrFormSubmit",
+      cls := "btn btn-outline-dark btn-sm",
+      tpe := "submit",
+      if (update) "Update attribute" else "Create attribute"
+    ).render
 
 
     val submitErr   = err("attr-err")

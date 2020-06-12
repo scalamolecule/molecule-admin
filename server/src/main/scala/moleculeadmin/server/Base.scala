@@ -1,5 +1,6 @@
 package moleculeadmin.server
 
+import db.DatomicUri
 import db.admin.dsl.moleculeAdmin._
 import molecule.api.Entity
 import molecule.api.out14._
@@ -10,7 +11,7 @@ import moleculeadmin.shared.ast.schema._
 import moleculeadmin.shared.util.HelpersAdmin
 
 
-trait Base extends BaseApi with HelpersAdmin {
+trait Base extends BaseApi with DatomicUri with HelpersAdmin {
 
   def withTransactor[T](
     body: => Either[String, T]

@@ -2,6 +2,7 @@ package moleculeadmin.server.utils
 
 import java.io.File
 import ammonite.ops._
+import db.DatomicUri
 import db.admin.dsl.moleculeAdmin._
 import molecule.api.out10._
 import molecule.facade.Conn
@@ -12,7 +13,11 @@ import sbtmolecule.Ast._
 import sbtmolecule.DefinitionParser
 import scala.io.Source
 
-case class DefFile(db: String, path: Option[String] = None, schemaDefFile: Option[File] = None) extends BaseApi with HelpersAdmin {
+case class DefFile(
+  db: String,
+  path: Option[String] = None,
+  schemaDefFile: Option[File] = None
+) extends BaseApi with DatomicUri with HelpersAdmin {
 
   implicit val conn = Conn(base + "/MoleculeAdmin")
 

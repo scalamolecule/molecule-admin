@@ -1,4 +1,5 @@
 package moleculeadmin.client.app.logic
+
 import autowire._
 import boopickle.Default._
 import util.client.rx.RxBindings
@@ -8,6 +9,7 @@ import moleculeadmin.client.app.logic.common.TopMenu
 import moleculeadmin.client.dbsWire
 import moleculeadmin.shared.api.DbsApi
 import org.scalajs.dom._
+import org.scalajs.dom.html.Table
 import rx._
 import scalatags.JsDom
 import scalatags.JsDom.all._
@@ -31,15 +33,13 @@ object DbsClient extends RxBindings with DbsElements {
       case ((acc, first), ((db, None, path), i)) if first =>
         (acc :+ (i, db, None, path, Var(""), Var(true)), false)
 
-      case ((acc, first), ((db, isM, path), i))           =>
+      case ((acc, first), ((db, isM, path), i)) =>
         (acc :+ (i, db, isM, path, Var(""), Var(false)), first)
     }._1
   }
-  def reload2(dbs0: Future[DbsApi#Dbs]) = dbs0 map init
 
-
-  def validateDefFilePath(path0: String) = {
-    val path = path0.trim
+  def validateDefFilePath(path0: String): Either[String, String] = {
+    val path     = path0.trim
     val segments = path.trim.split("/")
 
     // Validate fastest evaluable mistakes first
@@ -70,15 +70,21 @@ object DbsClient extends RxBindings with DbsElements {
       case (Some(false), _)         => Seq("(Non-molecule database)")
       case (Some(true), Some(path)) => Seq(
         path, // Validated path
-        Rx {pre(if (msg().isEmpty) display.none else ())(msg())},
+        Rx {
+          pre(if (msg().isEmpty) display.none else ())(msg())
+        },
         button(
-          "New path", marginLeft := "10px",
+          cls := "btn btn-outline-dark btn-sm",
+          "New path",
+          marginLeft := "10px",
           onclick := { () =>
             dbsWire().reset(db).call() map init
           }
         ),
         button(
-          "Re-parse", marginLeft := "5px",
+          cls := "btn btn-outline-dark btn-sm",
+          "Re-parse",
+          marginLeft := "5px",
           onclick := { () =>
             // Client validation
             validateDefFilePath(path) match {
@@ -110,14 +116,15 @@ object DbsClient extends RxBindings with DbsElements {
         Seq(
           form(
             input_,
-            button(tpe := "submit", marginLeft := "5px", "Save path"),
-            button(tpe := "submit", marginLeft := "5px", "Non-molecular db",
-              onclick := { () =>
-                reload2(dbsWire().ignore(db).call())
-                false // don't send form
-              }
+            button(
+              cls := "btn btn-outline-dark btn-sm",
+              tpe := "submit",
+              marginLeft := "5px",
+              "Save path"
             ),
-            Rx {pre(if (msg().isEmpty) display.none else ())(msg())},
+            Rx {
+              pre(if (msg().isEmpty) display.none else ())(msg())
+            },
             onsubmit := { () =>
               // Client validation
               validateDefFilePath(input_.value) match {
@@ -137,7 +144,7 @@ object DbsClient extends RxBindings with DbsElements {
     }
   }
 
-  def dbTable(dbs0: DbsApi#Dbs) = {
+  def dbTable(dbs0: DbsApi#Dbs): JsDom.TypedTag[Table] = {
     init(dbs0)
     table(cls := "table table-bordered",
       thead(

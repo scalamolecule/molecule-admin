@@ -39,7 +39,12 @@ case class PartitionForm(db: String,
         }
       }
     ).render
-    val submitButton = button(id := "partFormSubmit", tpe := "submit", if (update) "Update partition" else "Create partition").render
+    val submitButton = button(
+      id := "partFormSubmit",
+      cls := "btn btn-outline-dark btn-sm",
+      tpe := "submit",
+      if (update) "Update partition" else "Create partition"
+    ).render
 
     val partErr = err("part-err")
     val partNameErr = err("part-name-err")

@@ -55,6 +55,10 @@ input, button, select, optgroup, textarea {
     line-height: normal;
 }
 
+.btn-sm {
+    font-size: 12px;
+}
+
 
 /* Delete-x */
 i.oi-x {

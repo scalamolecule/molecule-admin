@@ -45,7 +45,12 @@ case class NamespaceForm(db: String,
       }
     ).render
 
-    val submitButton = button(id := "nsFormSubmit", tpe := "submit", if (update) "Update namespace" else "Create namespace").render
+    val submitButton = button(
+      id := "nsFormSubmit",
+      cls := "btn btn-outline-dark btn-sm",
+      tpe := "submit",
+      if (update) "Update namespace" else "Create namespace"
+    ).render
 
     val nsNameErr = err("ns-name-err")
     val submitErr = err("ns-err")

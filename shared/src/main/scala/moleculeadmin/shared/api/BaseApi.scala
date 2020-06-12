@@ -6,12 +6,6 @@ import moleculeadmin.shared.ast.schema.MetaSchema
 
 trait BaseApi {
 
-  def dbProtocol() = "free"
-  def dbHost() = "localhost:4334"
-  def base() = s"datomic:$dbProtocol://$dbHost"
-
-  def dbNames: Seq[String] = ???
-
   type SettingsMetaData = (
     Map[String, String],
       Set[Long],
@@ -23,6 +17,8 @@ trait BaseApi {
     )
 
   type PageMetaData = (Seq[String], MetaSchema, SettingsMetaData)
+
+  def dbNames: Seq[String] = ???
 
   def loadMetaData(db: String): Either[String, PageMetaData] = ???
 

@@ -8,8 +8,11 @@ import moleculeadmin.server.utils.DefFile
 import moleculeadmin.shared.api.SchemaApi
 import moleculeadmin.shared.ast.schema._
 import moleculeadmin.shared.ops.query.SchemaOps
+import org.slf4j.LoggerFactory
 
 class Schema extends SchemaApi with SchemaBase with Base with SchemaOps {
+
+  private val log = LoggerFactory.getLogger(getClass)
 
   override def getLiveSchema(db: String): FlatSchema = {
     implicit val conn = Conn(base + "/" + db)
@@ -34,7 +37,7 @@ class Schema extends SchemaApi with SchemaBase with Base with SchemaOps {
 
   override def updateDescrAttr(db: String, part: String, ns: String, attr: String, descrAttr: Option[String]): FlatSchema = {
     implicit val conn = Conn(base + "/MoleculeAdmin")
-    println(s"updateDescrAttr: ${getFullAttr(part, ns, attr)}   $descrAttr")
+    log.info(s"updateDescrAttr: ${getFullAttr(part, ns, attr)}   $descrAttr")
     val attrId: Long = meta_Db.name_(db).Partitions.name_(part).Namespaces.name_(ns).Attrs.e.name_(attr).get.head
 
     // Set describing attribute and retract topValues
