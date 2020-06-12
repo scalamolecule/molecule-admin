@@ -354,6 +354,7 @@ case class SyncTab(db: String)(implicit val ctx: Ctx.Owner)
           tr(
             td(
               button(
+                cls := "btn btn-outline-dark btn-sm",
                 "Check sync",
                 //          if (syncing() ) i(cls := "oi oi-delete oi-spin", color := "#de5454") else sync()),
                 onclick := { () =>

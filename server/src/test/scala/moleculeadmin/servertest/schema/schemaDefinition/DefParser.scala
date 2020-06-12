@@ -1,4 +1,4 @@
-package moleculeadmin.servertest.schema.withPartitions
+package moleculeadmin.servertest.schema.schemaDefinition
 
 import molecule.util.Helpers
 import moleculeadmin.shared.testdata.TreeSchema
