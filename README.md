@@ -78,7 +78,7 @@ first time since all dependencies are resolved and the whole project compiled
 You should arrive at a list of current databases, something like this (with your 
 paths):
 
-![](project/resources/StartPage.png)
+![](project/resources/StartPage1.png)
 
 A few small generic sample databases were installed that you can freely play 
 around with by exploring their `Schema` or perform a `Query`:
