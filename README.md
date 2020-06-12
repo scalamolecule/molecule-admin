@@ -28,7 +28,7 @@ For performing Datalog queries, please use the official
 or using a Pro version of Datomic).
 
 
-### Download
+## Download
 
 To explore MoleculeAdmin with the mBrainz sample database,
 1. Download a Datomic distribution like the [free version](https://my.datomic.com/downloads/free)
@@ -52,7 +52,6 @@ To explore MoleculeAdmin with the mBrainz sample database,
    git clone https://github.com/scalamolecule/molecule-admin.git
    ```
 
-
 ## Use MoleculeAdmin
 
 Having downloaded and installed all the necessary parts listed above,
@@ -71,7 +70,7 @@ Having downloaded and installed all the necessary parts listed above,
    ```
    (Server started, use Enter to stop and go back to the console...)
    ```
-4. Then open [localhost:9001](localhost:9001) - this can take a while the first time since
+4. Then open [localhost:9001](http://localhost:9001) - this can take a while the first time since
    all dependencies are resolved and the whole project compiled (check progress in terminal).
    
 
@@ -159,3 +158,9 @@ server> sharedJS/testOnly moleculeadmin.sharedtest.util.DateTransformation
 > sbt clean compile
 > sbt sharedJS/fastOptJS
 ```
+
+#### Author
+Marc Grue
+
+#### License
+Molecule is licensed under the [Apache License 2.0](http://en.wikipedia.org/wiki/Apache_license)
