@@ -73,8 +73,7 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
           _rowCol1("Please add at least one mandatory attribute")
         }
 
-        case elements =>
-          renderDataTable(elements)
+        case elements => renderDataTable(elements)
       }
     } catch {
       case e: Throwable => {
@@ -109,12 +108,11 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
     curEntityLocked() = false
     columns() = getCols(elements1)
 
-    // See if we have a matching sorting from before
+    // See if we have a matching recent/saved query
     recentQueries.find(_.molecule == curMolecule.now) match {
       case Some(q) => setColumnsAndFilters(q)
       case None    => savedQueries.find(_.molecule == curMolecule.now)
         .foreach(setColumnsAndFilters)
-
     }
 
     eidCols = getEidTableColIndexes(columns.now)
