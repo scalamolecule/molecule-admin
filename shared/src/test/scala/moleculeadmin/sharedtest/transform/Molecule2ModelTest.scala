@@ -520,8 +520,151 @@ object Molecule2ModelTest extends TestSuite with TreeSchema with Helpers with Ex
     }
 
 
-    test("edit2") {
+    test("group edit") {
 
+      // When an `e` (entity id) column in a namespace is selected, any attribute
+      // chosen twice activates a group edit. See examples of rules below:
+
+      import moleculeadmin.shared.testdata.mBrainzSchema
+      implicit val nsMap = mBrainzSchema.nsMap
+
+      // Correct group edit when eid + attr twice
+      // Notice the `orig` and `edit` markers created for a group edit column
+      Molecule2Model(
+        """Artist.e.name.name"""
+      ) ==> Right(List(
+        Generic("Artist", "e", "datom", EntValue),
+        Atom("Artist", "name", "String", 1, VarValue, None, Seq(), Seq("orig")),
+        Atom("Artist", "name", "String", 1, VarValue, None, Seq(), Seq("edit"))
+      ))
+
+      // Function on first attr ok
+      Molecule2Model(
+        """Artist.e.name.<("A").name"""
+      ) ==> Right(List(
+        Generic("Artist", "e", "datom", EntValue),
+        Atom("Artist", "name", "String", 1, Lt("A"), None, Seq(), Seq("orig")),
+        Atom("Artist", "name", "String", 1, VarValue, None, Seq(), Seq("edit"))
+      ))
+
+      // Function on second attr prevents group edit an is simply treated as
+      // a redundant column.
+      Molecule2Model(
+        """Artist.e.name.name.<("A")"""
+      ) ==> Right(List(
+        Generic("Artist", "e", "datom", EntValue),
+        Atom("Artist", "name", "String", 1, VarValue, None, Seq(), Seq()),
+        Atom("Artist", "name", "String", 1, Lt("A"), None, Seq(), Seq()),
+      ))
+
+      // One or more attributes before group edit attributes
+      Molecule2Model(
+        """Artist.e.startYear.name.name"""
+      ) ==> Right(List(
+        Generic("Artist", "e", "datom", EntValue),
+        Atom("Artist", "startYear", "Long", 1, VarValue, None, Seq(), Seq()),
+        Atom("Artist", "name", "String", 1, VarValue, None, Seq(), Seq("orig")),
+        Atom("Artist", "name", "String", 1, VarValue, None, Seq(), Seq("edit"))
+      ))
+
+      // One or more attributes after group edit attributes
+      Molecule2Model(
+        """Artist.e.name.name.startYear"""
+      ) ==> Right(List(
+        Generic("Artist", "e", "datom", EntValue),
+        Atom("Artist", "name", "String", 1, VarValue, None, Seq(), Seq("orig")),
+        Atom("Artist", "name", "String", 1, VarValue, None, Seq(), Seq("edit")),
+        Atom("Artist", "startYear", "Long", 1, VarValue, None, Seq(), Seq()),
+      ))
+
+      // Same-named attributes have to be adjacent to become a group edit
+      Molecule2Model(
+        """Artist.e.name.startYear.name"""
+      ) ==> Right(List(
+        Generic("Artist", "e", "datom", EntValue),
+        Atom("Artist", "name", "String", 1, VarValue, None, Seq(), Seq()),
+        Atom("Artist", "startYear", "Long", 1, VarValue, None, Seq(), Seq()),
+        Atom("Artist", "name", "String", 1, VarValue, None, Seq(), Seq()),
+      ))
+
+
+      // Attr twice without eid not a group edit
+      Molecule2Model(
+        "Country.name.name"
+      ) ==> Right(List(
+        Atom("Country", "name", "String", 1, VarValue, None, Seq(), Seq()),
+        Atom("Country", "name", "String", 1, VarValue, None, Seq(), Seq())
+      ))
+
+      // No eid column and fn still doesn't activate group edit
+      Molecule2Model(
+        """Artist.name.<("A").name"""
+      ) ==> Right(List(
+        Atom("Artist", "name", "String", 1, Lt("A"), None, Seq(), Seq()),
+        Atom("Artist", "name", "String", 1, VarValue, None, Seq(), Seq()),
+      ))
+
+      // With refs
+
+      // Correct group edit of attribute in ref ns
+      Molecule2Model(
+        """Artist.name.Country.e.name.name"""
+      ) ==> Right(List(
+        Atom("Artist", "name", "String", 1, VarValue, None, Seq(), Seq()),
+        Bond("Artist", "country", "Country", 1, Seq()),
+        Generic("Country", "e", "datom", EntValue),
+        Atom("Country", "name", "String", 1, VarValue, None, Seq(), Seq("orig")),
+        Atom("Country", "name", "String", 1, VarValue, None, Seq(), Seq("edit"))
+      ))
+
+      // Same attr name across two namespaces not a group edit
+      Molecule2Model(
+        "Artist.name.Country.name"
+      ) ==> Right(List(
+        Atom("Artist", "name", "String", 1, VarValue, None, Seq(), Seq()),
+        Bond("Artist", "country", "Country", 1, Seq()),
+        Atom("Country", "name", "String", 1, VarValue, None, Seq(), Seq())
+      ))
+
+      // fn inbetween still doesn't activate group edit
+      Molecule2Model(
+        """Artist.name.<("A").Country.name"""
+      ) ==> Right(List(
+        Atom("Artist", "name", "String", 1, Lt("A"), None, Seq(), Seq()),
+        Bond("Artist", "country", "Country", 1, Seq()),
+        Atom("Country", "name", "String", 1, VarValue, None, Seq(), Seq())
+      ))
+
+      // Attr twice without eid not a group edit
+      Molecule2Model(
+        "Artist.name.Country.name.name"
+      ) ==> Right(List(
+        Atom("Artist", "name", "String", 1, VarValue, None, Seq(), Seq()),
+        Bond("Artist", "country", "Country", 1, Seq()),
+        Atom("Country", "name", "String", 1, VarValue, None, Seq(), Seq()),
+        Atom("Country", "name", "String", 1, VarValue, None, Seq(), Seq())
+      ))
+
+      // 3 correct group edits
+      Molecule2Model(
+        "Release.e.name.name.Artists.e.name.name.Country.e.name.name"
+      ) ==> Right(List(
+        Generic("Release", "e", "datom", EntValue),
+        Atom("Release", "name", "String", 1, VarValue, None, Seq(), Seq("orig")),
+        Atom("Release", "name", "String", 1, VarValue, None, Seq(), Seq("edit")),
+        Bond("Release", "artists", "Artist", 2, Seq()),
+        Generic("Artist", "e", "datom", EntValue),
+        Atom("Artist", "name", "String", 1, VarValue, None, Seq(), Seq("orig")),
+        Atom("Artist", "name", "String", 1, VarValue, None, Seq(), Seq("edit")),
+        Bond("Artist", "country", "Country", 1, Seq()),
+        Generic("Country", "e", "datom", EntValue),
+        Atom("Country", "name", "String", 1, VarValue, None, Seq(), Seq("orig")),
+        Atom("Country", "name", "String", 1, VarValue, None, Seq(), Seq("edit"))
+      ))
+    }
+
+
+    test("Rebond") {
       import moleculeadmin.shared.testdata.mBrainzSchema
       implicit val nsMap = mBrainzSchema.nsMap
 
