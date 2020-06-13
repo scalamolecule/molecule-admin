@@ -1,4 +1,5 @@
 package moleculeadmin.sharedtest.query.col
+
 import moleculeadmin.shared.ast.query.Col
 import molecule.ast.model._
 import moleculeadmin.shared.ops.query.ColOps
@@ -64,6 +65,96 @@ object GroupableCols extends TestSuite with TreeSchema with ColOps {
       ) ==> List(
         Col(2, 1, "Ref1", "Ref1", "int1", "Int", "double", 1, false, Seq(), "", "", "", 0)
       )
+    }
+
+    test("two ns with eid") {
+      getGroupableCols(
+        List(
+          Col(0, 0, "Release", "Release", "e", "datom", "double", 1, false, Seq(), "", "", "", 0, ""),
+          Col(1, 0, "Release", "Release", "month", "Long", "double", 1, false, Seq(), "", "", "", 0, ""),
+          Col(2, 0, "Release", "Release", "day", "Long", "double", 1, false, Seq(), "", "", "", 0, ""),
+          Col(3, 1, "Artists", "Artist", "e", "datom", "double", 1, false, Seq(), "", "", "", 0, ""),
+          Col(4, 1, "Artists", "Artist", "startYear", "Long", "double", 1, false, Seq(), "", "", "", 0, ""),
+          Col(5, 1, "Artists", "Artist", "name", "String", "string", 1, false, Seq(), "", "", "", 0, "")
+        )
+      ) ==> List(
+        Col(1, 0, "Release", "Release", "month", "Long", "double", 1, false, Seq(), "", "", "", 0, ""),
+        Col(2, 0, "Release", "Release", "day", "Long", "double", 1, false, Seq(), "", "", "", 0, ""),
+        Col(4, 1, "Artists", "Artist", "startYear", "Long", "double", 1, false, Seq(), "", "", "", 0, ""),
+        Col(5, 1, "Artists", "Artist", "name", "String", "string", 1, false, Seq(), "", "", "", 0, "")
+      )
+
+      // tx Data
+
+      getGroupableCols(
+        List(
+          Col(0, 0, "Release", "Release", "e", "datom", "double", 1, false, Seq(), "", "", "", 0, ""),
+          Col(1, 0, "Release", "Release", "month", "Long", "double", 1, false, Seq(), "", "", "", 0, ""),
+          Col(2, 0, "Release", "Release", "month", "Long", "double", 1, false, Seq(), "", "txInstant", "", 0, ""),
+          Col(3, 0, "Release", "Release", "day", "Long", "double", 1, false, Seq(), "", "", "", 0, ""),
+          Col(4, 1, "Artists", "Artist", "e", "datom", "double", 1, false, Seq(), "", "", "", 0, ""),
+          Col(5, 1, "Artists", "Artist", "startYear", "Long", "double", 1, false, Seq(), "", "", "", 0, ""),
+          Col(6, 1, "Artists", "Artist", "name", "String", "string", 1, false, Seq(), "", "", "", 0, "")
+        )
+      ) ==> List(
+        Col(1, 0, "Release", "Release", "month", "Long", "double", 1, false, Seq(), "", "", "", 0, ""),
+        Col(3, 0, "Release", "Release", "day", "Long", "double", 1, false, Seq(), "", "", "", 0, ""),
+        Col(5, 1, "Artists", "Artist", "startYear", "Long", "double", 1, false, Seq(), "", "", "", 0, ""),
+        Col(6, 1, "Artists", "Artist", "name", "String", "string", 1, false, Seq(), "", "", "", 0, "")
+      )
+
+      getGroupableCols(
+        List(
+          Col(0, 0, "Release", "Release", "e", "datom", "double", 1, false, Seq(), "", "", "", 0, ""),
+          Col(1, 0, "Release", "Release", "month", "Long", "double", 1, false, Seq(), "", "", "", 0, ""),
+          Col(3, 0, "Release", "Release", "day", "Long", "double", 1, false, Seq(), "", "", "", 0, ""),
+          Col(3, 0, "Release", "Release", "day", "Long", "double", 1, false, Seq(), "", "txInstant", "", 0, ""),
+          Col(4, 1, "Artists", "Artist", "e", "datom", "double", 1, false, Seq(), "", "", "", 0, ""),
+          Col(5, 1, "Artists", "Artist", "startYear", "Long", "double", 1, false, Seq(), "", "", "", 0, ""),
+          Col(6, 1, "Artists", "Artist", "name", "String", "string", 1, false, Seq(), "", "", "", 0, "")
+        )
+      ) ==> List(
+        Col(1, 0, "Release", "Release", "month", "Long", "double", 1, false, Seq(), "", "", "", 0, ""),
+        Col(3, 0, "Release", "Release", "day", "Long", "double", 1, false, Seq(), "", "", "", 0, ""),
+        Col(5, 1, "Artists", "Artist", "startYear", "Long", "double", 1, false, Seq(), "", "", "", 0, ""),
+        Col(6, 1, "Artists", "Artist", "name", "String", "string", 1, false, Seq(), "", "", "", 0, "")
+      )
+
+      getGroupableCols(
+        List(
+          Col(0, 0, "Release", "Release", "e", "datom", "double", 1, false, Seq(), "", "", "", 0, ""),
+          Col(1, 0, "Release", "Release", "month", "Long", "double", 1, false, Seq(), "", "", "", 0, ""),
+          Col(3, 0, "Release", "Release", "day", "Long", "double", 1, false, Seq(), "", "", "", 0, ""),
+          Col(4, 1, "Artists", "Artist", "e", "datom", "double", 1, false, Seq(), "", "", "", 0, ""),
+          Col(5, 1, "Artists", "Artist", "startYear", "Long", "double", 1, false, Seq(), "", "", "", 0, ""),
+          Col(5, 1, "Artists", "Artist", "startYear", "Long", "double", 1, false, Seq(), "", "txInstant", "", 0, ""),
+          Col(6, 1, "Artists", "Artist", "name", "String", "string", 1, false, Seq(), "", "", "", 0, "")
+        )
+      ) ==> List(
+        Col(1, 0, "Release", "Release", "month", "Long", "double", 1, false, Seq(), "", "", "", 0, ""),
+        Col(3, 0, "Release", "Release", "day", "Long", "double", 1, false, Seq(), "", "", "", 0, ""),
+        Col(5, 1, "Artists", "Artist", "startYear", "Long", "double", 1, false, Seq(), "", "", "", 0, ""),
+        Col(6, 1, "Artists", "Artist", "name", "String", "string", 1, false, Seq(), "", "", "", 0, "")
+      )
+
+      getGroupableCols(
+        List(
+          Col(0, 0, "Release", "Release", "e", "datom", "double", 1, false, Seq(), "", "", "", 0, ""),
+          Col(1, 0, "Release", "Release", "month", "Long", "double", 1, false, Seq(), "", "", "", 0, ""),
+          Col(3, 0, "Release", "Release", "day", "Long", "double", 1, false, Seq(), "", "", "", 0, ""),
+          Col(4, 1, "Artists", "Artist", "e", "datom", "double", 1, false, Seq(), "", "", "", 0, ""),
+          Col(5, 1, "Artists", "Artist", "startYear", "Long", "double", 1, false, Seq(), "", "", "", 0, ""),
+          Col(6, 1, "Artists", "Artist", "name", "String", "string", 1, false, Seq(), "", "", "", 0, ""),
+          Col(6, 1, "Artists", "Artist", "name", "String", "string", 1, false, Seq(), "", "txInstant", "", 0, "")
+        )
+      ) ==> List(
+        Col(1, 0, "Release", "Release", "month", "Long", "double", 1, false, Seq(), "", "", "", 0, ""),
+        Col(3, 0, "Release", "Release", "day", "Long", "double", 1, false, Seq(), "", "", "", 0, ""),
+        Col(5, 1, "Artists", "Artist", "startYear", "Long", "double", 1, false, Seq(), "", "", "", 0, ""),
+        Col(6, 1, "Artists", "Artist", "name", "String", "string", 1, false, Seq(), "", "", "", 0, "")
+      )
+
+
     }
   }
 }
