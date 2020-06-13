@@ -19,22 +19,23 @@ abstract class GroupedData[T](col: Col)(implicit ctx: Ctx.Owner)
   val mandatory     = !opt
   val valueColIndex = colIndex + 1
   val eidIndex      = getEidColIndex(columns.now, colIndex, nsAlias, nsFull)
-  val eidArray      = qr.num(eidIndex)
+  val eidArray      = qr.num(qr.arrayIndexes(eidIndex))
   val arrayIndex    = qr.arrayIndexes(colIndex)
   val valueArray    = (
-    if (colType == "double") qr.num(arrayIndex) else qr.str(arrayIndex)
+    if (colType == "double")
+      qr.num(arrayIndex)
+    else
+      qr.str(arrayIndex)
     ).asInstanceOf[Array[Option[T]]]
 
-  private var rawData    = Seq.empty[(T, Int)]
   private var countEmpty = 0
   private var rawDoubles = Seq.empty[(Double, Int)]
   private var rawStrings = Seq.empty[(String, Int)]
+  private var doubles    = List.empty[(Option[Double], Int)]
+  private var strings    = List.empty[(Option[String], Int)]
 
-  private var doubles = List.empty[(Option[Double], Int)]
-  private var strings = List.empty[(Option[String], Int)]
   var groupedData = List.empty[(Option[T], Int)]
   val none        = "__none__"
-
 
   def rowId(rowIndex: Int) = s"grouped-row-$colIndex-$rowIndex"
 
@@ -49,7 +50,7 @@ abstract class GroupedData[T](col: Col)(implicit ctx: Ctx.Owner)
         case 3 => vs.sortBy(_._1)
         case 4 => vs.sortBy(_._1).reverse
       }
-    }else {
+    } else {
       val vs = if (countEmpty > 0) (None, countEmpty) +: strings else strings
       ordering match {
         case 1 => vs.sortBy { case (v, c) => (-c, v) }
