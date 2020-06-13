@@ -221,18 +221,18 @@ trait ColOps extends HelpersAdmin {
   }
 
   def getGroupableCols(cols: Seq[Col]): Seq[Col] = {
-    cols.foldLeft(-1: Int, "": String, Seq.empty[Col]) {
-      // eid is first in new ns
-      case ((-1, "", cols), Col(_, _, nsAlias, _, "e", _, _, _, _, _, _, _, _, _, _)) =>
-        (1, nsAlias, cols)
-
-      // new namespace
-      case ((0, curNsAlias, cols), Col(_, _, nsAlias, _, "e", _, _, _, _, _, _, _, _, _, _))
+    cols.foldLeft(0: Int, "": String, Seq.empty[Col]) {
+      // new namespace with eid
+      case ((_, curNsAlias, cols), Col(_, _, nsAlias, _, "e", _, _, _, _, _, _, _, _, _, _))
         if curNsAlias != nsAlias =>
         (1, nsAlias, cols)
 
       case ((1, curNsAlias, cols), col@Col(_, _, nsAlias, _, _, _, _, _, _, _, _, attrExpr, _, _, _))
-        if curNsAlias == nsAlias && !nonMenuExprs.contains(attrExpr) =>
+        if curNsAlias == nsAlias && nonMenuExprs.contains(attrExpr) =>
+        (1, nsAlias, cols)
+
+      case ((1, curNsAlias, cols), col@Col(_, _, nsAlias, _, _, _, _, _, _, _, _, attrExpr, _, _, _))
+        if curNsAlias == nsAlias =>
         (1, nsAlias, cols :+ col)
 
       case ((_, _, cols), Col(_, _, nsAlias, _, _, _, _, _, _, _, _, _, _, _, _)) =>
