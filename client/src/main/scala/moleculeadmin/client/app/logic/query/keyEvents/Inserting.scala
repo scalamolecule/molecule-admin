@@ -26,8 +26,8 @@ trait Inserting extends Insert with BaseQuery with Editing {
   }
 
   def addInsertNewDataRow()(implicit ctx: Ctx.Owner): Unit = {
-    if (groupableCols.isEmpty) {
-      window.alert("Add `e` first to allow inserting new data")
+    if (columns.now.head.attr != "e") {
+      window.alert("Please add `e` of first namespace to allow inserting new data")
       return
     }
     insertMode = true
@@ -63,7 +63,6 @@ trait Inserting extends Insert with BaseQuery with Editing {
         eidCell.appendChild(i(cls := mark.flagOff).render)
         eidCell.appendChild(i(cls := mark.checkOff).render)
         Toggle(tableBody, "star", false, eid = eid)
-
 
       // Show inserted data
         println(s"Inserted entity $eid:\n  " +
