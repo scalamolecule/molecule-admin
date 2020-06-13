@@ -72,14 +72,17 @@ class Molecule2Model(molecule0: String, nsMap: Map[String, Ns])
   // Building vars
   var first         = true
   var expectElement = true
-  var curNsFull     = ""
   var prevAttr      = ""
+  var prevNsFull    = ""
+  var curNsFull     = ""
+  var eidNsFull     = ""
   var molecule      = molecule0.replace("\n", "").trim
   val elements      = new ListBuffer[Element]
 
   def debug(token: String = "not suplied...") = {
     println("=====================================")
-    println(s"nsFull   : `$curNsFull`")
+    println(s"prevNs   : `$prevNsFull`")
+    println(s"curNsFull: `$curNsFull`")
     println(s"token    : `$token`")
     println("attrNames : " + attrNames)
     println("refs      : " + refs)
@@ -128,6 +131,7 @@ class Molecule2Model(molecule0: String, nsMap: Map[String, Ns])
     val firstNs = extractCleanToken
     // First ns
     if (nssFull.contains(firstNs)) {
+      prevNsFull = firstNs
       curNsFull = firstNs
     } else {
       throw new IllegalArgumentException(
@@ -195,7 +199,7 @@ class Molecule2Model(molecule0: String, nsMap: Map[String, Ns])
 
   def addGenericTx(attr: String): Unit = {
     val (ns, prevAttr1) = (curNsFull, prevAttr)
-    val updatedElements = elements.foldLeft(0, List.empty[Element]) {
+    val updatedElements = elements.foldLeft(0: Int, List.empty[Element]) {
       case ((0, acc), a@Atom(`ns`, `prevAttr1`, _, _, _, _, _, _)) => (1, acc :+ a.copy(keys = a.keys :+ attr))
       case ((done, acc), e)                                        => (done, acc :+ e)
     }._2
@@ -206,7 +210,7 @@ class Molecule2Model(molecule0: String, nsMap: Map[String, Ns])
   def addEdit(attr: String, tpe: String, card: Int): Unit = {
     val aggrs           = Seq("count", "count-distinct", "sum", "avg", "median", "variance", "stddev")
     val (ns, prevAttr1) = (curNsFull, prevAttr)
-    val updatedElements = elements.foldLeft(0, List.empty[Element]) {
+    val updatedElements = elements.foldLeft(0: Int, List.empty[Element]) {
       case ((0, _), Atom(`ns`, `prevAttr1`, _, _, Fn(fn, _), _, _, _))
         if aggrs.contains(fn) =>
         throw new IllegalArgumentException(
@@ -215,8 +219,10 @@ class Molecule2Model(molecule0: String, nsMap: Map[String, Ns])
             s"\nExpecting: `$attr.$attr($fn)`"
         )
 
-      case ((0, acc), a@Atom(`ns`, `prevAttr1`, _, _, _, _, _, _)) => (1, acc :+ a.copy(keys = a.keys :+ "orig"))
-      case ((done, acc), e)                                        => (done, acc :+ e)
+      case ((0, acc), a@Atom(`ns`, `prevAttr1`, _, _, value, _, _, _)) =>
+        (1, acc :+ a.copy(keys = a.keys :+ "orig", value = value))
+      case ((done, acc), e)                                        =>
+        (done, acc :+ e)
     }._2
     elements.clear()
     elements ++= updatedElements :+ Atom(ns, attr, tpe, card, VarValue, None, Seq(), Seq("edit"))
@@ -228,12 +234,19 @@ class Molecule2Model(molecule0: String, nsMap: Map[String, Ns])
       addGenericTx(attr)
     } else if (attrNames(curNsFull).contains(attr)) {
       attr match {
-        case "e"  => elements += Generic(curNsFull, "e", "datom", EntValue)
+        case "e" =>
+          eidNsFull = curNsFull
+          elements += Generic(curNsFull, "e", "datom", EntValue)
+
         case "e_" => throw new IllegalArgumentException(
           s"`e_` can only be tacit if an id is applied to it (`e_(12345L)`) in molecule: $molecule0")
-        case _    =>
+
+        case _ =>
           val a = attrDefs(curNsFull)(attr)
-          if (attr == prevAttr) {
+          if (eidNsFull == curNsFull && // only group edit if eid is present in ns
+            prevNsFull == curNsFull &&  // same ns
+            prevAttr == attr // same attr name
+          ) {
             addEdit(attr, a.tpe, a.card)
           } else {
             val (value, enumPrefix) = if (a.enums$.isDefined)
@@ -241,6 +254,7 @@ class Molecule2Model(molecule0: String, nsMap: Map[String, Ns])
             elements += Atom(curNsFull, attr, a.tpe, a.card, value, enumPrefix)
           }
       }
+      prevNsFull = curNsFull
       prevAttr = attr
     } else {
       throw new IllegalArgumentException(s"Unrecognized attribute name `$attr` in molecule: $molecule0")
@@ -284,6 +298,7 @@ class Molecule2Model(molecule0: String, nsMap: Map[String, Ns])
                 s"Unrecognized expression function `$fn` for attribute `$attr` in molecule: $molecule0")
           }
       }
+      prevNsFull = curNsFull
       prevAttr = attr
     } else {
       throw new IllegalArgumentException(s"Unrecognized attribute name `$attr` (having expression) in molecule: $molecule0")
@@ -321,7 +336,7 @@ class Molecule2Model(molecule0: String, nsMap: Map[String, Ns])
 
   def aggr(attr: String, fn: String, tpe: String, card: Int): Unit = {
     val (ns, prevAttr1) = (curNsFull, prevAttr)
-    val updatedElements = elements.foldLeft(0, List.empty[Element]) {
+    val updatedElements = elements.foldLeft(0: Int, List.empty[Element]) {
       case ((0, acc), a@Atom(`ns`, `prevAttr1`, _, _, _, _, _, _)) => (1, acc :+ a.copy(keys = a.keys :+ fn))
       case ((done, acc), e)                                        => (done, acc :+ e)
     }._2
