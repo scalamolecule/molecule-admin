@@ -1,4 +1,5 @@
 package moleculeadmin.client.app.logic.query.keyEvents
+
 import autowire._
 import boopickle.Default._
 import moleculeadmin.client.app.logic.query.QueryState._
@@ -56,15 +57,19 @@ trait Inserting extends Insert with BaseQuery with Editing {
     queryWireAjax().insert(db, curMolecule.now, nsMap, rowValues).call().foreach {
       case Right(eid) =>
         // Render eid cell and toggle star
-        eidCell.setAttribute("style", "color: " + Color.textDarkGray).render
-        eidCell.appendChild(_xRetract(() => RetractEid(eid)).render)
-        eidCell.appendChild(eid.render)
-        eidCell.appendChild(i(cls := mark.starOff).render)
-        eidCell.appendChild(i(cls := mark.flagOff).render)
-        eidCell.appendChild(i(cls := mark.checkOff).render)
+        eidCell.appendChild(
+          span(
+            color := Color.textDarkGray,
+            _xRetract(() => ())(visibility.hidden),
+            eid,
+            i(cls := mark.starOff),
+            i(cls := mark.flagOff, visibility.hidden),
+            i(cls := mark.checkOff, visibility.hidden)
+          ).render
+        )
         Toggle(tableBody, "star", false, eid = eid)
 
-      // Show inserted data
+        // Show inserted data
         println(s"Inserted entity $eid:\n  " +
           valuePairs(rowValues).mkString("\n  "))
 
@@ -115,7 +120,7 @@ trait Inserting extends Insert with BaseQuery with Editing {
           contenteditable := true,
           onblur := { () =>
             if (error) {
-              // Correct invalid input
+              // Invalid input - stay and correct
               error = false
             } else if (keepInserting) {
               // Next blur should be an abort unless tabbing

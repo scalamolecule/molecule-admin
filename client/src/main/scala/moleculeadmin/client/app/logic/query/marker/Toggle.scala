@@ -154,7 +154,7 @@ case class Toggle(
       }
   }
 
-  // Toggle of table row markers
+  // Toggle markers
   val rows = tableBody.children
   eidCols.length match {
     case 1 => {
@@ -270,7 +270,8 @@ case class Toggle(
 
   def toggleIcon(eidCol: Int): Unit = {
     span = cells(eidCol).firstElementChild
-    if (eidStrs.contains(span.innerText))
+    // (ignoring last row in insertion mode that has no span inside)
+    if (span != null && eidStrs.contains(span.innerText))
       span.children(iconIndex).setAttribute("class", newCls)
   }
 }
