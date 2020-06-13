@@ -3,7 +3,7 @@ package moleculeadmin.client.app.logic.query.keyEvents
 import autowire._
 import boopickle.Default._
 import moleculeadmin.client.app.logic.query.QueryState._
-import moleculeadmin.client.app.logic.query.data.edit.{Insert, RetractEid}
+import moleculeadmin.client.app.logic.query.data.edit.Insert
 import moleculeadmin.client.app.logic.query.marker.Toggle
 import moleculeadmin.client.queryWireAjax
 import moleculeadmin.shared.ast.query.Col
@@ -82,6 +82,9 @@ trait Inserting extends Insert with BaseQuery with Editing {
 
   def abortInsert(): Unit = {
     insertMode = false
+    // Force re-calculation of IndexBridge (sorting/filtering) in
+    // DataTableBodyFoot after rows have been inserted
+    cachedColumns = Nil
     modelElements.recalc()
   }
 
@@ -125,10 +128,12 @@ trait Inserting extends Insert with BaseQuery with Editing {
             } else if (keepInserting) {
               // Next blur should be an abort unless tabbing
               keepInserting = false
-            } else {
+            } else if (insertMode) {
+              // When aborting insert by clicking somewhere
               keepInserting = false
-              insertMode = false
-              modelElements.recalc()
+              abortInsert()
+            } else {
+              // `Escape` pressed, calling `abortInsert` (insertMode set to false)
             }
           },
         )

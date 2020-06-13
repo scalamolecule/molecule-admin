@@ -27,6 +27,9 @@ case class DataTableBodyFoot()(implicit val ctx: Ctx.Owner)
     offset()
     limit()
 
+    // Force re-calculation of index bridge when columns/filters have changed or
+    // new rows have been inserted.
+    // Otherwise use cached index bridge to avoid re-calculating when paging.
     if (cachedColumns != columns.now || cachedFilters != filters.now) {
       cachedColumns = columns.now
       cachedFilters = filters.now

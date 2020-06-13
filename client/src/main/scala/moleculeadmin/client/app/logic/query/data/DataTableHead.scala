@@ -149,7 +149,7 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
       columns() = getSortedColumns(
         columns.now, colIndex, e.getModifierState("Shift")
       )
-      // update sorting for matching recent if any
+      // update sorting for matching recent queries if any
       recentQueries = recentQueries.map {
         case q if q.molecule == curMolecule.now =>
           q.copy(colSettings = colSettings(columns.now, filters.now))
@@ -249,7 +249,7 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
       ) "" else " editable"
       val filterExpr  = filters.now.get(colIndex).fold("")(_.filterExpr)
       val applyFilter = { () =>
-        val filterCell = document.getElementById(filterId)
+        val filterCell    = document.getElementById(filterId)
         val newFilterExpr = filterCell.textContent.trim
         // Let only filters() propagate change
         offset.kill()
