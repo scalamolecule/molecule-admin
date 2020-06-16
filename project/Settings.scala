@@ -6,7 +6,7 @@ import sbt._
 
 object Settings {
 
-  private val moleculeVersion = "0.22.4"
+  private val moleculeVersion = "0.22.5"
 
   val common: Seq[Def.Setting[_]] = Seq(
     name := "molecule-admin",
