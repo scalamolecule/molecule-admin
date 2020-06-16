@@ -8,6 +8,7 @@ object MoleculeAdminDefinition {
   object meta {
     trait Db {
       val name        = oneString.uniqueValue.doc("Database name")
+      val mb          = oneInt.doc("Size of database in MB")
       val isMolecular = oneBoolean.noHistory.doc("Marker for non-molecule db without definition file")
       val codeRoot    = oneString.noHistory.doc("Full path to root of source code files where db is used")
       val defFilePath = oneString.noHistory.doc("Full path to definition file for database")
