@@ -17,7 +17,7 @@ class Dbs extends DbsApi with Base with ResetDbsCmds {
   private val log = LoggerFactory.getLogger(getClass)
 
   def dbs()(implicit conn: Conn): Seq[Db] = {
-    meta_Db.name.defFilePath$.get.sortBy(_._1).tail.zipWithIndex.map {
+    meta_Db.name.defFilePath$.get.sortBy(_._1).zipWithIndex.map {
       case ((name, df), i) => Db(i + 1, name, df.getOrElse(""), false, "", "")
     }
   }
