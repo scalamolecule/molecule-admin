@@ -10,6 +10,10 @@ object DbsPage extends Base {
       moleculeAdminTitle,
       favicon,
       bootstrap,
+
+      fontAwesome,
+      openIconic,
+
       mainCss,
       clientJs
     ),

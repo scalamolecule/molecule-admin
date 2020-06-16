@@ -9,6 +9,7 @@ import moleculeadmin.shared.api.BaseApi
 import moleculeadmin.shared.ast.query.{ColSetting, QueryDTO}
 import moleculeadmin.shared.ast.schema._
 import moleculeadmin.shared.util.HelpersAdmin
+import org.slf4j.LoggerFactory
 
 
 trait Base extends BaseApi with DatomicUri with HelpersAdmin {
@@ -21,18 +22,22 @@ trait Base extends BaseApi with DatomicUri with HelpersAdmin {
     // Execute body of work
     body
   } catch {
-    case _: Throwable => Left(
-      "Datomic Transactor unavailable. Please restart it and refresh the page.")
+    case e: Throwable if e.toString.contains("Connection is broken") =>
+      LoggerFactory.getLogger(getClass).error(e.getMessage)
+      Left(
+        "Datomic Transactor unavailable. Please restart it and refresh the page.")
+
+    case e: Throwable =>
+      val log = LoggerFactory.getLogger(getClass)
+      log.error(e.getMessage)
+      log.error(e.getStackTrace.mkString("\n"))
+      Left(e.getMessage)
   }
 
   override def loadMetaData(db: String): Either[String, PageMetaData] = {
     implicit val conn = Conn(base + "/MoleculeAdmin")
     withTransactor {
-      try {
-        Right((dbNames_, getMetaSchema_(db), settings(db)))
-      } catch {
-        case t: Throwable => Left(t.getMessage)
-      }
+      Right((dbNames_, getMetaSchema_(db), settings(db)))
     }
   }
 

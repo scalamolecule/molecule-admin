@@ -55,10 +55,6 @@ input, button, select, optgroup, textarea {
     line-height: normal;
 }
 
-.btn-sm {
-    font-size: 12px;
-}
-
 
 /* Delete-x */
 i.oi-x {
@@ -492,23 +488,40 @@ table.undoTxs ul {
     height: 24px;
 }
 
-.btn-sm {
-    padding: 0.0rem 0.4rem;
-    background-color: white;
-    border-color: #80808073;
-    transition: none;
+
+
+
+.btn-sm.warning {
+    border-color: #c00000;
+}
+.btn-sm.warning:hover {
+    color: #000;
+    background-color: #ffb0b0;
 }
 
+.btn-sm {
+    padding: 0.0rem 0.4rem;
+    margin-top: -1px;
+    XXmargin-bottom: 8px;
+    background-color: white;
+    XX-border-color: #80808073;
+    border-color: #7b7b7b;
+    transition: none;
+    font-size: 12px;
+}
+.btn-sm:hover, .btn-sm.active {
+    color: #000;
+    background-color: #afe1ff;
+}
+
+/*
 .btn-light:not(:disabled):not(.disabled):active,
 .btn-light:not(:disabled):not(.disabled).active,
 .show > .btn-light.dropdown-toggle{
     background-color: #00baf047;
     border-color: #80808073;
 }
-
-.btn-sm:hover, .btn-sm.active {
-    background-color: #00baf047;
-}
+*/
 
 .btn.btn-light.btn-sm.no2 {
     background-color: #e9ecef;
@@ -523,6 +536,7 @@ table.undoTxs ul {
 .btn.btn-light.btn-sm.no2.marked {
     background-color: #00baf047;
 }
+
 
 
 

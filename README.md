@@ -8,6 +8,7 @@
 An advanced web app (built with [ScalaJS](http://www.scala-js.org)) to 
 administrate [Datomic](https://www.datomic.com/on-prem.html) databases:
 
+- Create and delete Datomic databases.
 - Build and update Datomic database schemas.
 - Build and run complex queries from a graphical query builder or directly with [molecules](http://www.scalamolecule.org).
 - Sort, filter, group and browse large data sets easily and fast.
@@ -75,12 +76,12 @@ already be running):
 first time since all dependencies are resolved and the whole project compiled 
 (check progress in terminal).
    
-You should arrive at a list of current databases, something like this (with your 
-paths):
+You should arrive at a list of current databases, something like this (if you
+haven't already created other databases):
 
-![](project/resources/StartPage1.png)
+![](project/resources/StartPage.png)
 
-A few small generic sample databases were installed that you can freely play 
+A few more sample databases were also created that you can freely play 
 around with by exploring their `Schema` or perform a `Query`:
 - CoreTest - contains all possible data types. Note how the Schema defines those
 and how the query builder takes each type into consideration and only allow 
@@ -89,46 +90,43 @@ valid settings.
 more namespaces.
 - Tree - Used to test building complex hierarchies with the query builder. 
 - mBrainz - large real data set that can give a sense of the query builder
-capabilities and the scrolling/editing features.
+capabilities and the paging/editing features.
 
-MoleculeAdmin is built using the Google Chrome browser. So it's recommended to 
-use this for expected look and behaviour.
+It's recommended to use MoleculeAdmin in the Google Chrome browser for expected 
+look and behaviour.
 
 
 ## Enable your own Datomic database
 
-The first page you arrive to and that can be accessed by clicking on the M logo 
-in the top left corner shows a list of all installed databases that the 
-transactor knows of.
-
 For MoleculeAdmin to be able to work with a database it needs a path to a
 [schema definition file](http://www.scalamolecule.org/manual/schema/) which is
-a `molecule` representation of a Datomic database schema. The schema definition
-file is the template for molecule to generate Scala boilerplate code to make 
-type safe molecule queries. 
+a `molecule` representation of a Datomic database schema. You don't need to use
+molecules or Scala to use MoleculeAdmin, as long as you provide a schema 
+definition file that defines your Datomic database schema. Once you have created 
+such file you can enter its full path into MoleculeAdmin:
 
-So when you
-have made changes to the schema definition file, you recompile your 
-project code to have boilerplate code generated using the changed schema
-definition file as a blueprint. That way you are guaranteed to only be able to 
-make correct and type safe queries in your code.
+![](project/resources/createDb.png)
 
-In the first life cycles of a project, you'll likely develop your database schema
-by writing a lot of changes directly to the schema definition file. But when the schema 
+
+### Schema development in Scala
+
+Molecule uses the schema definition file as a blueprint for generating Scala
+boilerplate code that you can use to make type safe queries in Scala against 
+a Datomic database.
+
+In the first life cycles of a Scala project, you'll likely develop your database schema
+by writing a lot of changes directly to the schema definition file and re-compile
+the project regularly to have the boilerplate code reflecting your changes.
+
+But when the schema 
 stabilizes and you start to enter real data into the database, you'll want a more
 flexible way to make changes to the schema and at the same time have those
 changes continuously propagated to your generated boilerplate. This is when
 MoleculeAdmin can "take over" the responsibility of keeping your schema definition
 file in sync with your database. So instead of you writing manually to the schema 
-definition file, you let MoleculeAdmin write changes directly to it. That is why 
-MoleculeAdmin asks for a path to the schema definition file for those 
-databases/schema definition files that you want it to administrate for you.
+definition file, you let MoleculeAdmin write changes directly to it. 
 
-You can also simply ignore giving a path to some database if you don't want to
-work with it in MoleculeAdmin.
-
-You also still have to recompile your project whenever you make schema changes this 
-way via MoleculeAdmin and the schema definition file got changed.
+### Clojue/Java users
 
 For Clojure/Java users not using Scala, it would be cool if we could use the newer
 Datomic feature of exporting the schema definition for a database
@@ -145,7 +143,8 @@ If you have questions or ideas, please feel free to discuss in the gitter channe
 
 [![Gitter](https://badges.gitter.im/scalamolecule/Lobby.svg)](https://gitter.im/scalamolecule/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
-Or you can submit issues/pull requests too.
+Or you can submit [issues](https://github.com/scalamolecule/molecule-admin/issues) /
+[pull requests](https://github.com/scalamolecule/molecule-admin/pulls) too.
 
 
 ## Test
@@ -173,6 +172,16 @@ server> sharedJS/testOnly moleculeadmin.sharedtest.util.DateTransformation
 > sbt clean compile
 > sbt sharedJS/fastOptJS
 ```
+
+## Credits
+
+- Big credits go to Datomic's own [Console](https://my.datomic.com/account/create)
+that can make all possible queries with Datalog against Datomic databases. 
+MoleculeAdmin can make a subset of those queries, but hopefully enough to be 
+useful, also given its capability to edit data and schema.
+- [OpenRefine](https://openrefine.org) (earlier "GoogleRefine") - a sophisticated 
+editor of tabular data that has served as a great inspiration for MoleculeAdmin!
+
 
 #### Author
 Marc Grue

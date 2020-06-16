@@ -13,7 +13,7 @@ import molecule.transform.Model2Transaction
 import moleculeadmin.server.query.{Rows2QueryResult, ToggleBackend}
 import moleculeadmin.shared.ast.query.{Col, QueryDTO, QueryResult}
 import moleculeadmin.shared.ops.transform.Molecule2Model
-import org.slf4j.LoggerFactory
+import org.slf4j.{Logger, LoggerFactory}
 import scala.collection.mutable.ListBuffer
 import scala.jdk.CollectionConverters._
 import scala.util.Try
@@ -21,7 +21,7 @@ import scala.util.Try
 
 class QueryBackend extends ToggleBackend {
 
-  val log = LoggerFactory.getLogger(getClass)
+  val log: Logger = LoggerFactory.getLogger(getClass)
 
   override def query(
     db: String,
@@ -228,7 +228,7 @@ class QueryBackend extends ToggleBackend {
     log.info("==============================")
     log.info(s"Undoing txs from t ${ts.head}...")
     val timer     = Timer()
-    val conn      = Conn(base + "/" + db)
+    val dbConn    = Conn(base + "/" + db)
     val datoms    = new ListBuffer[DatomTuple]
     val undoneTs  = new ListBuffer[Long]
     var txIndex   = 0
@@ -237,78 +237,70 @@ class QueryBackend extends ToggleBackend {
     var v         = ""
     var prevValue = ""
     withTransactor {
-      try {
-        val txMaps =
-          if (ts.length == 1) {
-            conn.datomicConn.log.txRange(ts.head, ts.head + 1).asScala.toList
-          } else {
-            conn.datomicConn.log.txRange(ts.head, null).asScala.toList
-              .filter(txMap =>
-                ts.contains(txMap.get(datomic.Log.T).asInstanceOf[Long]))
-              .reverse // Undo transactions backwards
-          }
-        log.info("Fetched targeted " + txMaps.length + " txs in " + timer.ms)
-        val newTxs = new Array[TxResult](txMaps.size)
-        txMaps.foreach { txMap =>
-          val undoneT   = txMap.get(datomic.Log.T).asInstanceOf[Long]
-          val tx        = Peer.toTx(undoneT).asInstanceOf[Long]
-          val rawDatoms = txMap.get(datomic.Log.DATA)
-            .asInstanceOf[jList[Datom]].asScala.distinct
-
-          datoms.clear()
-          val stmts                 = rawDatoms.flatMap { d =>
-            e = d.e.asInstanceOf[Long]
-            a = conn.db.ident(d.a).toString
-            v = formatValue(conn, a, d.v, enumAttrs)
-            val stmt: Option[Statement] =
-              if (
-                a == ":db/txInstant" || e == tx ||
-                  Try(prevValue.toLong).isSuccess && e == prevValue.toLong
-              ) {
-                // metadata - todo: do we catch all this way?
-                None
-              } else {
-                datoms += ((e, a, v, !d.added))
-                if (d.added) {
-                  Some(Retract(e, a, d.v, NoValue))
-                } else {
-                  Some(Add(e, a, d.v, NoValue))
-                }
-              }
-            prevValue = v
-            stmt
-          }
-          val txR                   = conn.transact(Seq(stmts.toSeq))
-          val (newT, newTx, newTxI) = (txR.t, txR.tx, date2strLocal(txR.inst))
-          newTxs(txIndex) = (
-            newT, newTx, newTxI,
-            ListBuffer.empty[DatomTuple],
-            datoms.sortBy(t => (t._1, t._2, t._4, t._3))
-          )
-          // Bit-encode newT/undoneT
-          undoneTs += newT << 32 | undoneT
-          txIndex += 1
+      val txMaps =
+        if (ts.length == 1) {
+          dbConn.datomicConn.log.txRange(ts.head, ts.head + 1).asScala.toList
+        } else {
+          dbConn.datomicConn.log.txRange(ts.head, null).asScala.toList
+            .filter(txMap =>
+              ts.contains(txMap.get(datomic.Log.T).asInstanceOf[Long]))
+            .reverse // Undo transactions backwards
         }
-        log.info("Saved reversing txs in " + timer.ms)
+      log.info("Fetched targeted " + txMaps.length + " txs in " + timer.ms)
+      val newTxs = new Array[TxResult](txMaps.size)
+      txMaps.foreach { txMap =>
+        val undoneT   = txMap.get(datomic.Log.T).asInstanceOf[Long]
+        val tx        = Peer.toTx(undoneT).asInstanceOf[Long]
+        val rawDatoms = txMap.get(datomic.Log.DATA)
+          .asInstanceOf[jList[Datom]].asScala.distinct
 
-        // Add newT/undoneT pairs to meta db
-        val moleculeAdminConn = Conn(base + "/MoleculeAdmin")
-        val dbSettingsId      = user_User.username_("admin")
-          .DbSettings.e.Db.name_(db).get(moleculeAdminConn)
-        user_DbSettings(dbSettingsId).undoneTs.assert(undoneTs).update(moleculeAdminConn)
-
-        log.info("Saved internal meta data in " + timer.ms)
-        log.info("Sending reversing txs to client...")
-        Right(newTxs)
-      } catch {
-        case t: Throwable =>
-          log.error(t.getMessage)
-          log.error(t.getStackTrace.mkString("\n"))
-          Left(t.getMessage)
+        datoms.clear()
+        val stmts                 = rawDatoms.flatMap { d =>
+          e = d.e.asInstanceOf[Long]
+          a = dbConn.db.ident(d.a).toString
+          v = formatValue(dbConn, a, d.v, enumAttrs)
+          val stmt: Option[Statement] =
+            if (
+              a == ":db/txInstant" || e == tx ||
+                Try(prevValue.toLong).isSuccess && e == prevValue.toLong
+            ) {
+              // metadata - todo: do we catch all this way?
+              None
+            } else {
+              datoms += ((e, a, v, !d.added))
+              if (d.added) {
+                Some(Retract(e, a, d.v, NoValue))
+              } else {
+                Some(Add(e, a, d.v, NoValue))
+              }
+            }
+          prevValue = v
+          stmt
+        }
+        val txR                   = dbConn.transact(Seq(stmts.toSeq))
+        val (newT, newTx, newTxI) = (txR.t, txR.tx, date2strLocal(txR.inst))
+        newTxs(txIndex) = (
+          newT, newTx, newTxI,
+          ListBuffer.empty[DatomTuple],
+          datoms.sortBy(t => (t._1, t._2, t._4, t._3))
+        )
+        // Bit-encode newT/undoneT
+        undoneTs += newT << 32 | undoneT
+        txIndex += 1
       }
-    }(conn)
-  }
+      log.info("Saved reversing txs in " + timer.ms)
 
+      // Add newT/undoneT pairs to meta db
+      val conn         = Conn(base + "/MoleculeAdmin")
+      val dbSettingsId = user_User.username_("admin")
+        .DbSettings.e.Db.name_(db).get(conn)
+      user_DbSettings(dbSettingsId).undoneTs.assert(undoneTs).update(conn)
+
+      log.info("Saved internal meta data in " + timer.ms)
+      log.info("Sending reversing txs to client...")
+      Right(newTxs)
+    }(dbConn)
+  }
 
   override def getEntityHistory(
     db: String,
@@ -353,119 +345,54 @@ class QueryBackend extends ToggleBackend {
   override def upsertQuery(db: String, query: QueryDTO): Either[String, String] = {
     implicit val conn = Conn(base + "/MoleculeAdmin")
     withTransactor {
-      try {
-        // Use admin for now
-        val userId = user_User.e.username_("admin").get match {
-          case List(eid) => eid
-          case Nil       => user_User.username("admin").save.eid
-        }
-        val dbId   = meta_Db.e.name_(db).get.headOption match {
-          case Some(eid) => eid
-          case None      =>
-            throw new RuntimeException(
-              s"Unexpectedly couldn't find database name `$db` in meta database.")
-        }
+      // Use admin for now
+      val userId = user_User.e.username_("admin").get match {
+        case List(eid) => eid
+        case Nil       => user_User.username("admin").save.eid
+      }
+      val dbId   = meta_Db.e.name_(db).get.headOption match {
+        case Some(eid) => eid
+        case None      =>
+          throw new RuntimeException(
+            s"Unexpectedly couldn't find database name `$db` in meta database.")
+      }
 
-        // One DbSettings per db for now
-        val dbSettingsId = user_User(userId).DbSettings.e.db_(dbId).get match {
-          case List(eid) => eid
-          case Nil       =>
-            val dbSettingsId1 = user_DbSettings.db(dbId).save.eid
-            user_User(userId).dbSettings.assert(dbSettingsId1).update
-            dbSettingsId1
-        }
+      // One DbSettings per db for now
+      val dbSettingsId = user_User(userId).DbSettings.e.db_(dbId).get match {
+        case List(eid) => eid
+        case Nil       =>
+          val dbSettingsId1 = user_DbSettings.db(dbId).save.eid
+          user_User(userId).dbSettings.assert(dbSettingsId1).update
+          dbSettingsId1
+      }
 
-        val QueryDTO(molecule1, _, _,
-        isFavorite, showGrouped, groupedCols, colSettings) = query
+      val QueryDTO(molecule1, _, _,
+      isFavorite, showGrouped, groupedCols, colSettings) = query
 
-        user_DbSettings(dbSettingsId).Queries.e.molecule_(molecule1).get match {
-          case Nil =>
-            val newQueryId =
-              user_Query.molecule.part.ns.isFavorite.showGrouped.groupedCols
-                .ColSettings.*(
-                user_ColSetting.colIndex.sortDir.sortPos.filterExpr
-              ).insert(List(
-                (
-                  query.molecule,
-                  query.part,
-                  query.ns,
-                  query.isFavorite,
-                  query.showGrouped,
-                  query.groupedColIndexes,
-                  query.colSettings.map(cs =>
-                    (cs.colIndex, cs.sortDir, cs.sortPos, cs.filterExpr)
-                  )
-                )
-              )).eid
-
-            user_DbSettings(dbSettingsId).queries.assert(newQueryId).update
-            Right("Successfully inserted query")
-
-          case Seq(queryId) =>
-            // Re-insert col settings
-            user_Query(queryId).colSettings().update
-            val colSettingIds =
-              user_ColSetting.colIndex.sortDir.sortPos.filterExpr.insert(
-                colSettings.map(cs =>
+      user_DbSettings(dbSettingsId).Queries.e.molecule_(molecule1).get match {
+        case Nil =>
+          val newQueryId =
+            user_Query.molecule.part.ns.isFavorite.showGrouped.groupedCols
+              .ColSettings.*(
+              user_ColSetting.colIndex.sortDir.sortPos.filterExpr
+            ).insert(List(
+              (
+                query.molecule,
+                query.part,
+                query.ns,
+                query.isFavorite,
+                query.showGrouped,
+                query.groupedColIndexes,
+                query.colSettings.map(cs =>
                   (cs.colIndex, cs.sortDir, cs.sortPos, cs.filterExpr)
                 )
-              ).eidSet
+              )
+            )).eid
 
-            user_Query(queryId)
-              .isFavorite(isFavorite)
-              .showGrouped(showGrouped)
-              .groupedCols(groupedCols)
-              .colSettings(colSettingIds)
-              .update
+          user_DbSettings(dbSettingsId).queries.assert(newQueryId).update
+          Right("Successfully inserted query")
 
-            Right("Successfully updated query")
-
-          case queryIds =>
-            Left(s"`$molecule1` unexpectedly found ${queryIds.length} times.")
-        }
-      } catch {
-        case t: Throwable => Left(t.getMessage)
-      }
-    }
-  }
-
-
-  override def updateQuery(db: String, query: QueryDTO): Either[String, String] = {
-    implicit val conn = Conn(base + "/MoleculeAdmin")
-    withTransactor {
-      try {
-        // Use admin for now
-        val userId = user_User.e.username_("admin").get match {
-          case List(eid) => eid
-          case Nil       => user_User.username("admin").save.eid
-        }
-        val dbId   = meta_Db.e.name_(db).get.headOption match {
-          case Some(eid) => eid
-          case None      =>
-            throw new RuntimeException(
-              s"Unexpectedly couldn't find database name `$db` in meta database.")
-        }
-
-        // One DbSettings per db for now
-        val dbSettingsId = user_User(userId).DbSettings.e.db_(dbId).get match {
-          case List(eid) => eid
-          case Nil       =>
-            val dbSettingsId1 = user_DbSettings.db(dbId).save.eid
-            user_User(userId).dbSettings.assert(dbSettingsId1).update
-            dbSettingsId1
-        }
-
-        val QueryDTO(molecule1, _, _,
-        isFavorite, showGrouped, groupedCols, colSettings) = query
-
-        val queryIds = user_DbSettings(dbSettingsId).Queries.e.molecule_(molecule1).get
-
-        if (queryIds.isEmpty) {
-          Left(s"`$molecule1` unexpectedly not found.")
-        } else if (queryIds.length > 1) {
-          Left(s"`$molecule1` unexpectedly found ${queryIds.length} times.")
-        } else {
-          val queryId = queryIds.head
+        case Seq(queryId) =>
           // Re-insert col settings
           user_Query(queryId).colSettings().update
           val colSettingIds =
@@ -474,6 +401,7 @@ class QueryBackend extends ToggleBackend {
                 (cs.colIndex, cs.sortDir, cs.sortPos, cs.filterExpr)
               )
             ).eidSet
+
           user_Query(queryId)
             .isFavorite(isFavorite)
             .showGrouped(showGrouped)
@@ -481,10 +409,66 @@ class QueryBackend extends ToggleBackend {
             .colSettings(colSettingIds)
             .update
 
-          Right("ok")
-        }
-      } catch {
-        case t: Throwable => Left(t.getMessage)
+          Right("Successfully updated query")
+
+        case queryIds =>
+          Left(s"`$molecule1` unexpectedly found ${queryIds.length} times.")
+      }
+    }
+  }
+
+
+  override def updateQuery(db: String, query: QueryDTO): Either[String, String] = {
+    implicit val conn = Conn(base + "/MoleculeAdmin")
+    withTransactor {
+      // Use admin for now
+      val userId = user_User.e.username_("admin").get match {
+        case List(eid) => eid
+        case Nil       => user_User.username("admin").save.eid
+      }
+      val dbId   = meta_Db.e.name_(db).get.headOption match {
+        case Some(eid) => eid
+        case None      =>
+          throw new RuntimeException(
+            s"Unexpectedly couldn't find database name `$db` in meta database.")
+      }
+
+      // One DbSettings per db for now
+      val dbSettingsId = user_User(userId).DbSettings.e.db_(dbId).get match {
+        case List(eid) => eid
+        case Nil       =>
+          val dbSettingsId1 = user_DbSettings.db(dbId).save.eid
+          user_User(userId).dbSettings.assert(dbSettingsId1).update
+          dbSettingsId1
+      }
+
+      val QueryDTO(molecule1, _, _,
+      isFavorite, showGrouped, groupedCols, colSettings) = query
+
+      val queryIds = user_DbSettings(dbSettingsId).Queries.e.molecule_(molecule1).get
+
+      if (queryIds.isEmpty) {
+        Left(s"`$molecule1` unexpectedly not found.")
+      } else if (queryIds.length > 1) {
+        Left(s"`$molecule1` unexpectedly found ${queryIds.length} times.")
+      } else {
+        val queryId = queryIds.head
+        // Re-insert col settings
+        user_Query(queryId).colSettings().update
+        val colSettingIds =
+          user_ColSetting.colIndex.sortDir.sortPos.filterExpr.insert(
+            colSettings.map(cs =>
+              (cs.colIndex, cs.sortDir, cs.sortPos, cs.filterExpr)
+            )
+          ).eidSet
+        user_Query(queryId)
+          .isFavorite(isFavorite)
+          .showGrouped(showGrouped)
+          .groupedCols(groupedCols)
+          .colSettings(colSettingIds)
+          .update
+
+        Right("ok")
       }
     }
   }
@@ -493,23 +477,19 @@ class QueryBackend extends ToggleBackend {
     implicit val conn = Conn(base + "/MoleculeAdmin")
     val molecule1 = query.molecule
     withTransactor {
-      try {
-        user_User.username_("admin")
-          .DbSettings.Db.name_(db)
-          ._user_DbSettings.Queries.e.molecule_(molecule1)
-          .get match {
-          case Nil           => Left(
-            s"Unexpectedly couldn't find saved molecule `$molecule1` in meta database."
-          )
-          case List(queryId) =>
-            queryId.retract
-            Right("ok")
-          case favIds        =>
-            Left(s"Unexpectedly found ${favIds.size} instances of saved " +
-              s"molecule `$molecule1` in meta database.")
-        }
-      } catch {
-        case t: Throwable => Left(t.getMessage)
+      user_User.username_("admin")
+        .DbSettings.Db.name_(db)
+        ._user_DbSettings.Queries.e.molecule_(molecule1)
+        .get match {
+        case Nil           => Left(
+          s"Unexpectedly couldn't find saved molecule `$molecule1` in meta database."
+        )
+        case List(queryId) =>
+          queryId.retract
+          Right("ok")
+        case favIds        =>
+          Left(s"Unexpectedly found ${favIds.size} instances of saved " +
+            s"molecule `$molecule1` in meta database.")
       }
     }
   }
@@ -518,18 +498,14 @@ class QueryBackend extends ToggleBackend {
   override def saveSettings(pairs: Seq[(String, String)]): Either[String, String] = {
     implicit val conn = Conn(base + "/MoleculeAdmin")
     withTransactor {
-      try {
-        // Use admin for now
-        val userId = user_User.e.username_("admin").get match {
-          case List(eid) => eid
-          case Nil       => user_User.username("admin").save.eid
-        }
-        // Save key/value settings
-        user_User(userId).settings.assert(pairs).update
-        Right("ok")
-      } catch {
-        case t: Throwable => Left(t.getMessage)
+      // Use admin for now
+      val userId = user_User.e.username_("admin").get match {
+        case List(eid) => eid
+        case Nil       => user_User.username("admin").save.eid
       }
+      // Save key/value settings
+      user_User(userId).settings.assert(pairs).update
+      Right("ok")
     }
   }
 
@@ -548,25 +524,21 @@ class QueryBackend extends ToggleBackend {
     }
 
     withTransactor {
-      try {
-        if (stmtss.length < 1000) {
-          val txR: TxReport = conn.transact(stmtss)
-          Right((txR.t, txR.tx, date2strLocal(txR.inst)))
-        } else {
-          var first             = 1
-          var last              = 1
-          var lastTxR: TxReport = null
-          log.info("Transacting " + stmtss.length + " statements:")
-          stmtss.grouped(1000).foreach { stmtGroup =>
-            lastTxR = conn.transact(stmtGroup)
-            last = first + stmtGroup.length - 1
-            log.info(s"$first - $last")
-            first = last + 1
-          }
-          Right((lastTxR.t, lastTxR.tx, date2strLocal(lastTxR.inst)))
+      if (stmtss.length < 1000) {
+        val txR: TxReport = conn.transact(stmtss)
+        Right((txR.t, txR.tx, date2strLocal(txR.inst)))
+      } else {
+        var first             = 1
+        var last              = 1
+        var lastTxR: TxReport = null
+        log.info("Transacting " + stmtss.length + " statements:")
+        stmtss.grouped(1000).foreach { stmtGroup =>
+          lastTxR = conn.transact(stmtGroup)
+          last = first + stmtGroup.length - 1
+          log.info(s"$first - $last")
+          first = last + 1
         }
-      } catch {
-        case t: Throwable => Left(t.getMessage)
+        Right((lastTxR.t, lastTxR.tx, date2strLocal(lastTxR.inst)))
       }
     }
   }
@@ -630,11 +602,7 @@ class QueryBackend extends ToggleBackend {
     log.info(data.toString)
     stmtss.head.foreach(smts => log.info(smts.toString))
     withTransactor {
-      try {
-        Right(conn.transact(stmtss).eid)
-      } catch {
-        case t: Throwable => Left(t.getMessage)
-      }
+      Right(conn.transact(stmtss).eid)
     }
   }
 
@@ -645,12 +613,8 @@ class QueryBackend extends ToggleBackend {
     implicit val conn = Conn(base + "/" + db)
     val stmtss = Seq(eids.toSeq.map(RetractEntity))
     withTransactor {
-      try {
-        val txR: TxReport = conn.transact(stmtss)
-        Right(txR.tx)
-      } catch {
-        case t: Throwable => Left(t.getMessage)
-      }
+      val txR: TxReport = conn.transact(stmtss)
+      Right(txR.tx)
     }
   }
 
@@ -682,32 +646,28 @@ class QueryBackend extends ToggleBackend {
       eids
     }
     withTransactor {
-      try {
-        if (eligibleEids.isEmpty) {
-          Left("All entities already have card-one joins to attribute ``")
-        } else {
-          val part = if (nsFull.contains('_'))
-            ":" + nsFull.split('_')(0)
-          else
-            ":db.part/user"
+      if (eligibleEids.isEmpty) {
+        Left("All entities already have card-one joins to attribute ``")
+      } else {
+        val part = if (nsFull.contains('_'))
+          ":" + nsFull.split('_')(0)
+        else
+          ":db.part/user"
 
-          val castedValue = if (isEnum)
-            s":$refNs.$valueAttr/$value"
-          else
-            getCaster(attrType, "")(value)
+        val castedValue = if (isEnum)
+          s":$refNs.$valueAttr/$value"
+        else
+          getCaster(attrType, "")(value)
 
-          val stmtss = eligibleEids.map { eid =>
-            val refId = Peer.tempid(part)
-            Seq(
-              Add(eid, refAttrFull, refId, NoValue),
-              Add(refId, s":$refNs/$valueAttr", castedValue, NoValue)
-            )
-          }
-          conn.transact(stmtss)
-          Right(stmtss.length)
+        val stmtss = eligibleEids.map { eid =>
+          val refId = Peer.tempid(part)
+          Seq(
+            Add(eid, refAttrFull, refId, NoValue),
+            Add(refId, s":$refNs/$valueAttr", castedValue, NoValue)
+          )
         }
-      } catch {
-        case t: Throwable => Left(t.getMessage)
+        conn.transact(stmtss)
+        Right(stmtss.length)
       }
     }
   }
@@ -747,47 +707,43 @@ class QueryBackend extends ToggleBackend {
   ): Either[String, String] = {
     implicit val conn = Conn(base + "/MoleculeAdmin")
     withTransactor {
-      try {
-        // Use admin for now
-        val userId: Long = user_User.e.username_("admin").get match {
-          case List(eid) => eid
-          case Nil       => user_User.username("admin").save.eid
-        }
-        val dbId  : Long = meta_Db.e.name_(db).get.headOption match {
-          case Some(eid) => eid
-          case None      =>
-            throw new RuntimeException(
-              s"Unexpectedly couldn't find database name `$db` in meta database.")
-        }
+      // Use admin for now
+      val userId: Long = user_User.e.username_("admin").get match {
+        case List(eid) => eid
+        case Nil       => user_User.username("admin").save.eid
+      }
+      val dbId  : Long = meta_Db.e.name_(db).get.headOption match {
+        case Some(eid) => eid
+        case None      =>
+          throw new RuntimeException(
+            s"Unexpectedly couldn't find database name `$db` in meta database.")
+      }
 
-        // One DbSettings per db for now
-        val dbSettingsId = user_User(userId).DbSettings.e.db_(dbId).get match {
-          case List(eid) => eid
-          case Nil       =>
-            val dbSettingsId1 = user_DbSettings.db(dbId).save.eid
-            user_User(userId).dbSettings.assert(dbSettingsId1).update
-            dbSettingsId1
-        }
+      // One DbSettings per db for now
+      val dbSettingsId = user_User(userId).DbSettings.e.db_(dbId).get match {
+        case List(eid) => eid
+        case Nil       =>
+          val dbSettingsId1 = user_DbSettings.db(dbId).save.eid
+          user_User(userId).dbSettings.assert(dbSettingsId1).update
+          dbSettingsId1
+      }
 
-        val time = System.currentTimeMillis()
-        user_DbSettings(dbSettingsId)
-          .Edits.e.attr_(fullAttr).expr_(editExpr)
-          .get match {
-          case Nil =>
-            val newId = user_EditExpr.attr(fullAttr).time(time).expr(editExpr).save.eid
-            user_DbSettings(dbSettingsId).edits.assert(newId).update
-            Right(s"Successfully inserted edit expression `$editExpr`")
+      val time = System.currentTimeMillis()
+      user_DbSettings(dbSettingsId)
+        .Edits.e.attr_(fullAttr).expr_(editExpr)
+        .get match {
+        case Nil =>
+          val newId = user_EditExpr.attr(fullAttr).time(time).expr(editExpr).save.eid
+          user_DbSettings(dbSettingsId).edits.assert(newId).update
+          Right(s"Successfully inserted edit expression `$editExpr`")
 
-          case Seq(exprId) =>
-            // Update timestamp of existing expr
-            user_EditExpr(exprId).time(time).update
-            Right(s"Successfully updated edit expr `$editExpr`")
+        case Seq(exprId) =>
+          // Update timestamp of existing expr
+          user_EditExpr(exprId).time(time).update
+          Right(s"Successfully updated edit expr `$editExpr`")
 
-          case exprIds => Left(
-            s"Unexpectedly found edit expression `$editExpr` ${exprIds.length} times.")
-        }
-      } catch {
-        case t: Throwable => Left(t.getMessage)
+        case exprIds => Left(
+          s"Unexpectedly found edit expression `$editExpr` ${exprIds.length} times.")
       }
     }
   }
@@ -799,24 +755,20 @@ class QueryBackend extends ToggleBackend {
   ): Either[String, String] = {
     implicit val conn = Conn(base + "/MoleculeAdmin")
     withTransactor {
-      try {
-        user_User.username_("admin")
-          .DbSettings.Db.name_(db)
-          ._user_DbSettings.Edits.e.attr_(fullAttr).expr_(editExpr)
-          .get match {
-          case Nil              => Left(
-            s"Unexpectedly couldn't find saved edit expression `$editExpr` " +
-              s"for attr `$fullAttr` in meta database."
-          )
-          case List(editExprId) =>
-            editExprId.retract
-            Right(s"Successfully retracted edit expression `$editExpr`")
-          case favIds           =>
-            Left(s"Unexpectedly found ${favIds.size} instances of saved " +
-              s"edit expression `$editExpr` for attr `$fullAttr` in meta database.")
-        }
-      } catch {
-        case t: Throwable => Left(t.getMessage)
+      user_User.username_("admin")
+        .DbSettings.Db.name_(db)
+        ._user_DbSettings.Edits.e.attr_(fullAttr).expr_(editExpr)
+        .get match {
+        case Nil              => Left(
+          s"Unexpectedly couldn't find saved edit expression `$editExpr` " +
+            s"for attr `$fullAttr` in meta database."
+        )
+        case List(editExprId) =>
+          editExprId.retract
+          Right(s"Successfully retracted edit expression `$editExpr`")
+        case favIds           =>
+          Left(s"Unexpectedly found ${favIds.size} instances of saved " +
+            s"edit expression `$editExpr` for attr `$fullAttr` in meta database.")
       }
     }
   }
