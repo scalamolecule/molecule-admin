@@ -38,7 +38,7 @@ case class DataTableFoot()(implicit val ctx: Ctx.Owner)
         _lastPage(isLastPage)(onclick := { () => lastPage }),
 
         if (lastRow == 0)
-          "0" else _rightSpace(s"${offset.now + 1}-$lastRow", 7),
+          "0 " else _rightSpace(s"${offset.now + 1}-$lastRow", 7),
 
         _rightSpace("of", 7),
 
