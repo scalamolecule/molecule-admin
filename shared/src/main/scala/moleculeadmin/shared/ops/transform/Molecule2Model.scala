@@ -37,8 +37,11 @@ class Molecule2Model(molecule0: String, nsMap: Map[String, Ns])
     case (nsFull, nsDef) => nsFull ->
       (("e" -> nsDef.attrs.head) +:
         nsDef.attrs.tail
-          .flatMap(a => Seq(a.name -> a, noTick(a.name) + "$" -> a, noTick(a.name) + "_" -> a)))
-        .toMap
+          .flatMap(a => Seq(
+            a.name -> a,
+            noTick(a.name) + "$" -> a,
+            noTick(a.name) + "_" -> a)
+          )).toMap
   }
 
   val refs: Map[String, Seq[String]] = nsMap.map {
@@ -149,7 +152,8 @@ class Molecule2Model(molecule0: String, nsMap: Map[String, Ns])
       curNsFull = ref.refNs$.get
     } else {
       throw new IllegalArgumentException(
-        s"Unrecognized ref namespace `$token` from namespace `$curNsFull` in molecule: $molecule0")
+        s"Unrecognized ref namespace `$token` from namespace `$curNsFull` " +
+          s"in molecule: $molecule0")
     }
     resolve()
   }
@@ -165,11 +169,13 @@ class Molecule2Model(molecule0: String, nsMap: Map[String, Ns])
       } else {
         // un-allowed backRef
         throw new IllegalArgumentException(
-          s"Namespace `$curNsFull` can't reference directly back to namespace `$backRefNs` in molecule: $molecule0")
+          s"Namespace `$curNsFull` can't reference directly back to namespace " +
+            s"`$backRefNs` in molecule: $molecule0")
       }
     } else {
       throw new IllegalArgumentException(
-        s"Unrecognized back ref namespace `$token` from namespace `$curNsFull` in molecule: $molecule0")
+        s"Unrecognized back ref namespace `$token` from namespace `$curNsFull` " +
+          s"in molecule: $molecule0")
     }
     resolve()
   }
@@ -200,8 +206,10 @@ class Molecule2Model(molecule0: String, nsMap: Map[String, Ns])
   def addGenericTx(attr: String): Unit = {
     val (ns, prevAttr1) = (curNsFull, prevAttr)
     val updatedElements = elements.foldLeft(0: Int, List.empty[Element]) {
-      case ((0, acc), a@Atom(`ns`, `prevAttr1`, _, _, _, _, _, _)) => (1, acc :+ a.copy(keys = a.keys :+ attr))
-      case ((done, acc), e)                                        => (done, acc :+ e)
+      case ((0, acc), a@Atom(`ns`, `prevAttr1`, _, _, _, _, _, _)) =>
+        (1, acc :+ a.copy(keys = a.keys :+ attr))
+      case ((done, acc), e)                                        =>
+        (done, acc :+ e)
     }._2
     elements.clear()
     elements ++= updatedElements :+ Generic(curNsFull, attr, "datom", NoValue)
@@ -221,11 +229,12 @@ class Molecule2Model(molecule0: String, nsMap: Map[String, Ns])
 
       case ((0, acc), a@Atom(`ns`, `prevAttr1`, _, _, value, _, _, _)) =>
         (1, acc :+ a.copy(keys = a.keys :+ "orig", value = value))
-      case ((done, acc), e)                                        =>
+      case ((done, acc), e)                                            =>
         (done, acc :+ e)
     }._2
     elements.clear()
-    elements ++= updatedElements :+ Atom(ns, attr, tpe, card, VarValue, None, Seq(), Seq("edit"))
+    elements ++= updatedElements :+
+      Atom(ns, attr, tpe, card, VarValue, None, Seq(), Seq("edit"))
   }
 
   def resolveCleanAttr(attr: String): Unit = {
@@ -239,12 +248,13 @@ class Molecule2Model(molecule0: String, nsMap: Map[String, Ns])
           elements += Generic(curNsFull, "e", "datom", EntValue)
 
         case "e_" => throw new IllegalArgumentException(
-          s"`e_` can only be tacit if an id is applied to it (`e_(12345L)`) in molecule: $molecule0")
+          s"`e_` can only be tacit if an id is applied to it (`e_(12345L)`) in " +
+            s"molecule: $molecule0")
 
         case _ =>
           val a = attrDefs(curNsFull)(attr)
           if (eidNsFull == curNsFull && // only group edit if eid is present in ns
-            prevNsFull == curNsFull &&  // same ns
+            prevNsFull == curNsFull && // same ns
             prevAttr == attr // same attr name
           ) {
             addEdit(attr, a.tpe, a.card)
@@ -257,7 +267,8 @@ class Molecule2Model(molecule0: String, nsMap: Map[String, Ns])
       prevNsFull = curNsFull
       prevAttr = attr
     } else {
-      throw new IllegalArgumentException(s"Unrecognized attribute name `$attr` in molecule: $molecule0")
+      throw new IllegalArgumentException(s"Unrecognized attribute name `$attr` " +
+        s"in molecule: $molecule0")
     }
   }
 
@@ -273,26 +284,37 @@ class Molecule2Model(molecule0: String, nsMap: Map[String, Ns])
                 .split(",").toSeq
                 .map(_.trim.replace("L", "").toLong)
               elements += Generic(curNsFull, attr, "datom", Eq(numbers))
-            case "count"                   => elements += Generic(curNsFull, attr, "datom", Fn("count"))
-            case _                         => throw new IllegalArgumentException(
-              s"Unrecognized expression value `$expr` for entity id attribute `$attr` in molecule: $molecule0")
+            case "count"                   =>
+              elements += Generic(curNsFull, attr, "datom", Fn("count"))
+
+            case _ => throw new IllegalArgumentException(
+              s"Unrecognized expression value `$expr` for entity id attribute " +
+                s"`$attr` in molecule: $molecule0")
           }
           case _       => throw new IllegalArgumentException(
-            s"Un-allowed expression function `$fn` for entity id attribute `$attr` in molecule: $molecule0")
+            s"Un-allowed expression function `$fn` for entity id attribute " +
+              s"`$attr` in molecule: $molecule0")
         }
 
         case _ =>
-          val a                       = attrDefs(curNsFull)(attr)
-          val (tpe, card, enumPrefix) = (a.tpe, a.card, a.enums$.fold(Option.empty[String])(_ => Some(s":$curNsFull.$attr/")))
+          val a                            = attrDefs(curNsFull)(attr)
+          val (tpe, card, enumPrefix, opt) = (
+            a.tpe,
+            a.card,
+            a.enums$.fold(Option.empty[String])(_ => Some(s":$curNsFull.$attr/")),
+            attr.last == '$'
+          )
           fn match {
-            case "apply"      => resolveApply(attr, tpe, card, expr, enumPrefix)
-            case ">"          => resolveComparison(attr, tpe, card, expr, vs => Gt(vs.head), enumPrefix)
-            case ">="         => resolveComparison(attr, tpe, card, expr, vs => Ge(vs.head), enumPrefix)
-            case "<"          => resolveComparison(attr, tpe, card, expr, vs => Lt(vs.head), enumPrefix)
-            case "<="         => resolveComparison(attr, tpe, card, expr, vs => Le(vs.head), enumPrefix)
-            case "!=" | "not" => resolveComparison(attr, tpe, card, expr, vs => Neq(vs), enumPrefix)
-            case "contains"   => resolveComparison(attr, tpe, card, expr, vs => Fulltext(vs), enumPrefix, true)
-            case _            =>
+            case "apply" if opt => throw new IllegalArgumentException(
+              s"Can't apply value to optional attribute `$attr` in molecule: $molecule0")
+            case "apply"        => resolveApply(attr, tpe, card, expr, enumPrefix)
+            case ">"            => resolveComparison(attr, tpe, card, expr, vs => Gt(vs.head), enumPrefix)
+            case ">="           => resolveComparison(attr, tpe, card, expr, vs => Ge(vs.head), enumPrefix)
+            case "<"            => resolveComparison(attr, tpe, card, expr, vs => Lt(vs.head), enumPrefix)
+            case "<="           => resolveComparison(attr, tpe, card, expr, vs => Le(vs.head), enumPrefix)
+            case "!=" | "not"   => resolveComparison(attr, tpe, card, expr, vs => Neq(vs), enumPrefix)
+            case "contains"     => resolveComparison(attr, tpe, card, expr, vs => Fulltext(vs), enumPrefix, true)
+            case _              =>
               // Function names have already been verified, so we should never get here (unless fn name list is wrong)
               throw new IllegalArgumentException(
                 s"Unrecognized expression function `$fn` for attribute `$attr` in molecule: $molecule0")
