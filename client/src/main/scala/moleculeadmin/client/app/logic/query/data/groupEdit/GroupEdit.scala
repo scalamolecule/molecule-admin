@@ -106,12 +106,16 @@ case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
           oldVopt = origArray(j)
           newVopt = toTransferType(j) match {
             case js.Tuple2(vs, err) =>
-              if (err.nonEmpty)
+              if (err.nonEmpty) {
                 alert(err)
-              else if (vs.asInstanceOf[Iterable[_]].isEmpty)
-                None
-              else
-                Some(toColType(vs))
+              } else {
+                // Avoid resolving lambda twice
+                val colVs = toColType(vs)
+                if (colVs.asInstanceOf[Iterable[_]].isEmpty)
+                  None
+                else
+                  Some(colVs)
+              }
           }
           updateClient(i)
           editArray(j) = newVopt
