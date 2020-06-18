@@ -292,6 +292,17 @@ object Molecule2ModelTest extends TestSuite with TreeSchema with Helpers with Ex
     }
 
 
+    test("apply, optional attr") {
+      Molecule2Model("Ns.int$(1)") ==> Left(
+        "Can't apply value to optional attribute `int$` in molecule: Ns.int$(1)")
+
+      // fulltext search on optional string attribute is fine
+      Molecule2Model("""Ns.str$.contains("b")""") ==> Right(Seq(
+        Atom("Ns", "str$", "String", 1, Fulltext(Seq("b")), None, List(), List())))
+
+    }
+
+
     test("apply, e") {
 
       // Unrecognized function (seen as a wrong attribute name having a value applied)
