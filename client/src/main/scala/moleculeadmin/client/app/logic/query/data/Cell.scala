@@ -348,9 +348,9 @@ abstract class Cell(
         if (editable) {
           val getCls = getClassLambda(origArray, editArray)
           cellType match {
-            case "str" =>
+            case "str" if enums.isEmpty =>
               (rowIndex: Int) =>
-                _tdManyStringEdit(
+                _tdManyStringItemEdit(
                   mkId(rowIndex),
                   getCls("items", rowIndex),
                   e,
@@ -364,20 +364,9 @@ abstract class Cell(
                   markRow
                 )
 
-            case "date" =>
-              (rowIndex: Int) =>
-                _tdManyDateEdit(
-                  mkId(rowIndex),
-                  getCls("str", rowIndex),
-                  e,
-                  editArray(rowIndex).getOrElse(List.empty[String]).sorted,
-                  update(origArray, editArray, rowIndex, "str"),
-                  markRow
-                )
-
             case "big" =>
               (rowIndex: Int) =>
-                _tdManyStringBigEdit(
+                _tdManyStringEdit(
                   mkId(rowIndex),
                   getCls("num", rowIndex),
                   e,
@@ -388,7 +377,7 @@ abstract class Cell(
 
             case _ =>
               (rowIndex: Int) =>
-                _tdManyStringOtherEdit(
+                _tdManyStringEdit(
                   mkId(rowIndex),
                   getCls("str", rowIndex),
                   e,

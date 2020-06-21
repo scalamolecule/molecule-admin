@@ -375,7 +375,7 @@ trait BodyElements
   }
 
 
-  def _tdManyStringEdit(
+  def _tdManyStringItemEdit(
     cellId: String,
     cellClass: String,
     eid: Long,
@@ -393,7 +393,7 @@ trait BodyElements
     ul(strFrags.map(li(_)))
   )
 
-  def _tdManyDateEdit(
+  def _tdManyStringEdit(
     cellId: String,
     cellClass: String,
     eid: Long,
@@ -408,43 +408,7 @@ trait BodyElements
     contenteditable := true,
     onclick := markRow(cellId),
     onblur := update,
-    ul(vs.map(li(_)))
-  )
-
-  def _tdManyStringOtherEdit(
-    cellId: String,
-    cellClass: String,
-    eid: Long,
-    vs: List[String],
-    update: () => Unit,
-    markRow: String => () => Unit,
-  ): TypedTag[TableCell] = td(
-    id := cellId,
-    cls := cellClass,
-    attr("card") := 2,
-    attr("eid") := eid,
-    contenteditable := true,
-    onclick := markRow(cellId),
-    onblur := update,
-    ul(vs.map(li(_)))
-  )
-
-  def _tdManyStringBigEdit(
-    cellId: String,
-    cellClass: String,
-    eid: Long,
-    vs: List[String],
-    update: () => Unit,
-    markRow: String => () => Unit,
-  ): TypedTag[TableCell] = td(
-    id := cellId,
-    cls := cellClass,
-    attr("card") := 2,
-    attr("eid") := eid,
-    contenteditable := true,
-    onclick := markRow(cellId),
-    onblur := update,
-    ul(vs.map(li(_)))
+    vs.flatMap(v => Seq(v: Frag, br))
   )
 
   def _tdManyDoubleEdit(
