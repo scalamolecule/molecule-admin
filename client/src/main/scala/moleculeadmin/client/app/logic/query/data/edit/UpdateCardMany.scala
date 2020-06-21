@@ -202,7 +202,7 @@ case class UpdateCardMany[T](
 
     def redrawCell(): Node = {
       cell.innerHTML = ""
-      val vs: Seq[Frag] = if (cellType == "ref")
+      val vs: Seq[Frag] = if (cellType == "ref") {
         newStrs.map(_.toLong).sorted.map { ref =>
           span(
             cls := Rx(if (ref == curEntity()) "eidChosen" else "eid"),
@@ -210,19 +210,14 @@ case class UpdateCardMany[T](
             onmouseover := { () => curEntity() = ref }
           )
         }
-      else if (isNum)
-        newStrs.map(_.toDouble).sorted.map(n => n: Frag)
-      else if (attrType == "String")
-        newStrs.sorted.map { s =>
-          span(_str2frags(s))
-        }
-      else
-        newStrs.sorted.map(n => n: Frag)
-
-      vs.foreach { v =>
-        cell.appendChild(v.render)
-        cell.appendChild(br.render)
+      } else if (isNum) {
+        newStrs.map(_.toDouble).sorted.flatMap(Seq(_, br))
+      } else if (attrType == "String" && enums.isEmpty) {
+        Seq(ul(newStrs.sorted.map(s => li(_str2frags(s)))))
+      } else {
+        newStrs.sorted.flatMap(Seq(_, br))
       }
+      vs.foreach(v => cell.appendChild(v.render))
       cell
     }
   }
