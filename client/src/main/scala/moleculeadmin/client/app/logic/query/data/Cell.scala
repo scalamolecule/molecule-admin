@@ -35,7 +35,7 @@ abstract class Cell(
     val arrayIndex = qr.arrayIndexes(colIndex)
 
     val Col(_, related, nsAlias, nsFull, attr, attrType, colType,
-    card, _, enums, _, expr, _, _, _) = cols(colIndex)
+    card, _, enums, _, expr, _, _, _, kind) = cols(colIndex)
 
     lazy val noCount    = expr != "count" && expr != "count-distinct"
     lazy val aggregates = Seq(
@@ -46,9 +46,9 @@ abstract class Cell(
       case _ if aggregates.contains(expr)             => "aggr"
       case _ if attr == "e" && noCount                => "eid"
       case _ if attrType == "ref" && noCount          => "ref"
-      case _ if expr == "t"                           => "t"
-      case _ if expr == "tx"                          => "tx"
-      case _ if expr == "txInstant"                   => "txI"
+      case _ if kind == "t"                           => "t"
+      case _ if kind == "tx"                          => "tx"
+      case _ if kind == "txInstant"                   => "txI"
       case _ if attrType == "String" && enums.isEmpty => "str"
       case _ if attrType == "Date"                    => "date"
       case _ if attrType.startsWith("Big")            => "big"
@@ -56,9 +56,9 @@ abstract class Cell(
     }
 
     // e has to be first within namespace to allow editing
-    val isGroupEdit = expr == "edit"
+    val isGroupEdit = kind == "edit"
     val editable    = isGroupEdit || isEditable(cols, colIndex, nsAlias, nsFull)
-    lazy val showAll = expr == "orig" || expr == "edit"
+    lazy val showAll = kind == "orig" || kind == "edit"
 
 
     def idBase(colIndex: Int): Int => String =
@@ -90,15 +90,15 @@ abstract class Cell(
       val updater         = card match {
         case 1 => UpdateCardOne(
           cols, qr, origArray, editArray, baseClass, colType, colIndex, rowIndex,
-          related, nsAlias, nsFull, attr, attrType, enums, expr
+          related, nsAlias, nsFull, attr, attrType, enums, kind
         )
         case 2 => UpdateCardMany(
           cols, qr, origArray, editArray, baseClass, colType, rowIndex,
-          related, nsAlias, nsFull, attr, attrType, enums, cellType, expr
+          related, nsAlias, nsFull, attr, attrType, enums, cellType, kind
         )
         case 3 => UpdateCardMap(
           cols, qr, origArray, editArray, baseClass, rowIndex,
-          related, nsAlias, nsFull, attr, attrType, enums, expr
+          related, nsAlias, nsFull, attr, attrType, enums, kind
         )
       }
       () => {

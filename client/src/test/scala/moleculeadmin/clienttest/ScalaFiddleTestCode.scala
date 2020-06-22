@@ -16,8 +16,8 @@ object ScalaFiddleTestCode extends TestSuite with AppElements {
 
       val cols = List(
         Col(0, 0, "Ns", "Ns", "e", "datom", "double", 1, false, Seq(), "", "", "", 0, ""),
-        Col(1, 0, "Ns", "Ns", "long", "Long", "double", 1, false, Seq(), "", "orig", "", 0, ""),
-        Col(2, 0, "Ns", "Ns", "long", "Long", "double", 1, false, Seq(), "", "edit", "", 0, ""))
+        Col(1, 0, "Ns", "Ns", "long", "Long", "double", 1, false, Seq(), "", "", "", 0, "", "orig"),
+        Col(2, 0, "Ns", "Ns", "long", "Long", "double", 1, false, Seq(), "", "", "", 0, "", "edit"))
 
 
       ScalaCode(cols, cols.last,

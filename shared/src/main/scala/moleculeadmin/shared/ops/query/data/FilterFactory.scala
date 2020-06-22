@@ -14,7 +14,7 @@ trait FilterFactory extends RegexMatching with DateHandling {
     splitComma: Boolean = true
   ): Option[Filter[_]] = {
     val Col(colIndex, _, _, _, _, attrType,
-    colType, _, _, _, aggrType, _, _, _, _) = col
+    colType, _, _, _, aggrType, _, _, _, _, _) = col
 
     def filter[T](
       predicateFactory: String => Option[Markers => Option[T] => Boolean]

@@ -1,15 +1,13 @@
 package moleculeadmin.client.app.logic.query
 
-import util.client.rx.RxBindings
+import moleculeadmin.client.app.html.query.SchemaDropdownElements
 import moleculeadmin.client.app.logic.query.QueryState.{queryBaseSelection, querySelection}
 import moleculeadmin.client.app.logic.query.builder.{QueryBranches, SchemaDropdown}
-import moleculeadmin.client.app.html.AppElements
-import moleculeadmin.client.app.html.query.SchemaDropdownElements
 import moleculeadmin.shared.ast.schema.MetaSchema
-import moleculeadmin.shared.styles.Color
 import org.scalajs.dom.Node
 import rx.Ctx
 import scalatags.JsDom.all._
+import util.client.rx.RxBindings
 
 case class RenderQueryBuilder(metaSchema: MetaSchema)(implicit val ctx: Ctx.Owner)
   extends RxBindings with SchemaDropdownElements {

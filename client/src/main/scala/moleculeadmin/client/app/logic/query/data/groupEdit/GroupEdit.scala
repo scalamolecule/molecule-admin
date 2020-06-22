@@ -35,10 +35,10 @@ case class GroupEdit(col: Col, filterId: String)(implicit val ctx: Ctx.Owner)
     with KeyEvents with TypeMappings {
 
   val Col(colIndex, _, _, nsFull, attr, attrType, _,
-  card, opt, enums, _, _, _, _, _) = col
+  card, opt, enums, _, _, _, _, _, _) = col
 
   val colIndexes: Seq[Int] = columns.now.collect {
-    case col if col.attrExpr != "edit" => col.colIndex
+    case col if col.kind != "edit" => col.colIndex
   }
 
   // Scala expression to be applied

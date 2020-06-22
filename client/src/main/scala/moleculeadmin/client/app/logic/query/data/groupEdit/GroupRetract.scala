@@ -17,7 +17,7 @@ case class GroupRetract(col: Col)(implicit val ctx: Ctx.Owner)
   extends Paging with ColOps {
 
   val Col(colIndex, _, nsAlias, nsFull, attr, attrType, colType, _,
-  opt, enums, _, _, _, _, _) = col
+  opt, enums, _, _, _, _, _, _) = col
 
   val qr          = cachedQueryResult
   val indexBridge = cachedIndexBridge

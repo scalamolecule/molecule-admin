@@ -38,10 +38,11 @@ object query extends HelpersAdmin {
     attrExpr: String = "",
     sortDir: String = "",
     sortPos: Int = 0,
-    filterExpr: String = ""
+    filterExpr: String = "",
+    kind: String = ""
   ) {
     override def toString = {
-      s"""Col($colIndex, $related, "$nsAlias", "$nsFull", "$attr", "$attrType", "$colType", $card, $opt, ${seq(enums)}, "$aggrType", "$attrExpr", "$sortDir", $sortPos, "$filterExpr")"""
+      s"""Col($colIndex, $related, "$nsAlias", "$nsFull", "$attr", "$attrType", "$colType", $card, $opt, ${seq(enums)}, "$aggrType", "$attrExpr", "$sortDir", $sortPos, "$filterExpr", "$kind")"""
     }
   }
 

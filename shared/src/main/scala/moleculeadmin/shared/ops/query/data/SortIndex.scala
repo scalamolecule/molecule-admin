@@ -44,7 +44,7 @@ trait SortIndex {
   }
 
   private def sortArray1(qr: QueryResult, sortCols: Seq[Col]): Array[Int] = {
-    val Col(colIndex1, _, _, _, _, t1, dt1, _, _, _, at1, _, s1, _, _) = sortCols.head
+    val Col(colIndex1, _, _, _, _, t1, dt1, _, _, _, at1, _, s1, _, _, _) = sortCols.head
 
     val i1 = qr.arrayIndexes(colIndex1)
     tpe(t1, dt1, at1) match {
@@ -62,9 +62,9 @@ trait SortIndex {
 
 
   private def sortArray2(qr: QueryResult, sortCols: Seq[Col], numRows: Int): Array[Int] = {
-    val sortColsSorted = sortCols.sortBy(_.sortPos)
-    val Col(colIndex1, _, _, _, _, t1, dt1, _, _, _, at1, _, s1, _, _) = sortColsSorted.head
-    val Col(colIndex2, _, _, _, _, t2, dt2, _, _, _, at2, _, s2, _, _) = sortColsSorted(1)
+    val sortColsSorted                                                    = sortCols.sortBy(_.sortPos)
+    val Col(colIndex1, _, _, _, _, t1, dt1, _, _, _, at1, _, s1, _, _, _) = sortColsSorted.head
+    val Col(colIndex2, _, _, _, _, t2, dt2, _, _, _, at2, _, s2, _, _, _) = sortColsSorted(1)
 
     val i1 = qr.arrayIndexes(colIndex1)
     val i2 = qr.arrayIndexes(colIndex2)
@@ -88,7 +88,7 @@ trait SortIndex {
     ord1: Ordering[T1],
     ord2: Ordering[T2]): Array[Int] = {
     val indexArray = new Array[(Int, T1, T2)](rowCount)
-    var i = 0
+    var i          = 0
     while (i < rowCount) {
       indexArray(i) = (i, array1(i), array2(i))
       i += 1
@@ -99,10 +99,10 @@ trait SortIndex {
 
 
   private def sortArray3(qr: QueryResult, sortCols: Seq[Col], numRows: Int): Array[Int] = {
-    val sortColsSorted = sortCols.sortBy(_.sortPos)
-    val Col(colIndex1, _, _, _, _, t1, dt1, _, _, _, at1, _, s1, _, _) = sortColsSorted.head
-    val Col(colIndex2, _, _, _, _, t2, dt2, _, _, _, at2, _, s2, _, _) = sortColsSorted(1)
-    val Col(colIndex3, _, _, _, _, t3, dt3, _, _, _, at3, _, s3, _, _) = sortColsSorted(2)
+    val sortColsSorted                                                    = sortCols.sortBy(_.sortPos)
+    val Col(colIndex1, _, _, _, _, t1, dt1, _, _, _, at1, _, s1, _, _, _) = sortColsSorted.head
+    val Col(colIndex2, _, _, _, _, t2, dt2, _, _, _, at2, _, s2, _, _, _) = sortColsSorted(1)
+    val Col(colIndex3, _, _, _, _, t3, dt3, _, _, _, at3, _, s3, _, _, _) = sortColsSorted(2)
 
     val i1 = qr.arrayIndexes(colIndex1)
     val i2 = qr.arrayIndexes(colIndex2)
@@ -134,7 +134,7 @@ trait SortIndex {
     ord2: Ordering[T2],
     ord3: Ordering[T3]): Array[Int] = {
     val indexArray = new Array[(Int, T1, T2, T3)](rowCount)
-    var i = 0
+    var i          = 0
     while (i < rowCount) {
       indexArray(i) = (i, array1(i), array2(i), array3(i))
       i += 1
@@ -150,11 +150,11 @@ trait SortIndex {
 
 
   private def sortArray4(qr: QueryResult, sortCols: Seq[Col], numRows: Int): Array[Int] = {
-    val sortColsSorted = sortCols.sortBy(_.sortPos)
-    val Col(colIndex1, _, _, _, _, t1, dt1, _, _, _, at1, _, s1, _, _) = sortColsSorted.head
-    val Col(colIndex2, _, _, _, _, t2, dt2, _, _, _, at2, _, s2, _, _) = sortColsSorted(1)
-    val Col(colIndex3, _, _, _, _, t3, dt3, _, _, _, at3, _, s3, _, _) = sortColsSorted(2)
-    val Col(colIndex4, _, _, _, _, t4, dt4, _, _, _, at4, _, s4, _, _) = sortColsSorted(3)
+    val sortColsSorted                                                    = sortCols.sortBy(_.sortPos)
+    val Col(colIndex1, _, _, _, _, t1, dt1, _, _, _, at1, _, s1, _, _, _) = sortColsSorted.head
+    val Col(colIndex2, _, _, _, _, t2, dt2, _, _, _, at2, _, s2, _, _, _) = sortColsSorted(1)
+    val Col(colIndex3, _, _, _, _, t3, dt3, _, _, _, at3, _, s3, _, _, _) = sortColsSorted(2)
+    val Col(colIndex4, _, _, _, _, t4, dt4, _, _, _, at4, _, s4, _, _, _) = sortColsSorted(3)
 
     val i1 = qr.arrayIndexes(colIndex1)
     val i2 = qr.arrayIndexes(colIndex2)
@@ -198,7 +198,7 @@ trait SortIndex {
     ord3: Ordering[T3],
     ord4: Ordering[T4]): Array[Int] = {
     val indexArray = new Array[(Int, T1, T2, T3, T4)](rowCount)
-    var i = 0
+    var i          = 0
     while (i < rowCount) {
       indexArray(i) = (i, array1(i), array2(i), array3(i), array4(i))
       i += 1
@@ -215,12 +215,12 @@ trait SortIndex {
 
 
   private def sortArray5(qr: QueryResult, sortCols: Seq[Col], numRows: Int): Array[Int] = {
-    val sortColsSorted = sortCols.sortBy(_.sortPos)
-    val Col(colIndex1, _, _, _, _, t1, dt1, _, _, _, at1, _, s1, _, _) = sortColsSorted.head
-    val Col(colIndex2, _, _, _, _, t2, dt2, _, _, _, at2, _, s2, _, _) = sortColsSorted(1)
-    val Col(colIndex3, _, _, _, _, t3, dt3, _, _, _, at3, _, s3, _, _) = sortColsSorted(2)
-    val Col(colIndex4, _, _, _, _, t4, dt4, _, _, _, at4, _, s4, _, _) = sortColsSorted(3)
-    val Col(colIndex5, _, _, _, _, t5, dt5, _, _, _, at5, _, s5, _, _) = sortColsSorted(4)
+    val sortColsSorted                                                    = sortCols.sortBy(_.sortPos)
+    val Col(colIndex1, _, _, _, _, t1, dt1, _, _, _, at1, _, s1, _, _, _) = sortColsSorted.head
+    val Col(colIndex2, _, _, _, _, t2, dt2, _, _, _, at2, _, s2, _, _, _) = sortColsSorted(1)
+    val Col(colIndex3, _, _, _, _, t3, dt3, _, _, _, at3, _, s3, _, _, _) = sortColsSorted(2)
+    val Col(colIndex4, _, _, _, _, t4, dt4, _, _, _, at4, _, s4, _, _, _) = sortColsSorted(3)
+    val Col(colIndex5, _, _, _, _, t5, dt5, _, _, _, at5, _, s5, _, _, _) = sortColsSorted(4)
 
     val i1 = qr.arrayIndexes(colIndex1)
     val i2 = qr.arrayIndexes(colIndex2)
@@ -284,7 +284,7 @@ trait SortIndex {
     ord4: Ordering[T4],
     ord5: Ordering[T5]): Array[Int] = {
     val indexArray = new Array[(Int, T1, T2, T3, T4, T5)](rowCount)
-    var i = 0
+    var i          = 0
     while (i < rowCount) {
       indexArray(i) = (i, array1(i), array2(i), array3(i), array4(i), array5(i))
       i += 1

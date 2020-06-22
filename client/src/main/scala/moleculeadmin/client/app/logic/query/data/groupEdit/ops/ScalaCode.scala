@@ -27,8 +27,8 @@ case class ScalaCode(cols: Seq[Col], col: Col, scalaExpr: String)
   // Aggregate mutable buffers with attr code
   var n = 0
   cols.collect {
-    case col@Col(_, _, _, _, _, tpe, _, card, opt, _, _, attrExpr, _, _, _)
-      if attrExpr != "edit" =>
+    case col@Col(_, _, _, _, _, tpe, _, card, opt, _, _, _, _, _, _, kind)
+      if kind != "edit" =>
 
       n += 1
       val attr                          = attrResolver.postfixed(col)

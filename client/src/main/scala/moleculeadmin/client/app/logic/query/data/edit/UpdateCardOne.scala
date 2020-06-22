@@ -31,7 +31,7 @@ case class UpdateCardOne[T](
   attrName: String,
   attrType: String,
   enums: Seq[String],
-  expr: String
+  kind: String
 )(implicit ctx: Ctx.Owner)
   extends UpdateClient[T](
     cols, qr, editArray, baseClass,
@@ -98,7 +98,7 @@ case class UpdateCardOne[T](
         window.alert(s"Invalid $attrFull value of type `$attrType`:\n$newStr")
         cell.focus()
 
-      } else if (expr == "edit") {
+      } else if (kind == "edit") {
         println(s"$eid $attrFull $newVopt")
         if (related == 0) {
           editArray(rowIndex) = newVopt
