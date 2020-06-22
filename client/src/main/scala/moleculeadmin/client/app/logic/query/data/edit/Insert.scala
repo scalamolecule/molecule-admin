@@ -17,10 +17,10 @@ trait Insert extends BaseKeyEvents with BodyElements with TypeValidation {
 
   protected def editableCols: Seq[Col] = {
     columns.now.flatMap {
-      case col if col.attr == "e"        => None
+      case col if col.attr == "e"           => None
       case Col(_, _, _, _, _, _, _, _, _, _, _,
-      "t" | "tx" | "txInstant", _, _, _) => None
-      case col                           => Some(col)
+      "t" | "tx" | "txInstant", _, _, _, _) => None
+      case col                              => Some(col)
     }
   }
 
@@ -147,7 +147,7 @@ trait Insert extends BaseKeyEvents with BodyElements with TypeValidation {
   }
 
   def valuePairs(rowValues: Seq[Seq[String]]): Seq[String] = {
-    val cols = editableCols
+    val cols      = editableCols
     val maxLength = cols.map(c => (c.nsFull + c.attr).length).max
     cols.zipWithIndex.map {
       case (col, i) =>

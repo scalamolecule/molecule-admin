@@ -28,9 +28,9 @@ abstract class TxLambdas(
     colIndex: Int,
   )(implicit ctx: Ctx.Owner): Int => JsDom.TypedTag[TableCell] = {
     val arrayT = qr.num(arrayIndex)
-    val tx_    = cols.isDefinedAt(colIndex + 1) && cols(colIndex + 1).attrExpr == "tx"
+    val tx_    = cols.isDefinedAt(colIndex + 1) && cols(colIndex + 1).kind == "tx"
     val j      = if (tx_) 2 else 1
-    val txI_   = cols.isDefinedAt(colIndex + j) && cols(colIndex + j).attrExpr == "txInstant"
+    val txI_   = cols.isDefinedAt(colIndex + j) && cols(colIndex + j).kind == "txInstant"
     (tx_, txI_) match {
       // t
       case (false, false) =>
@@ -109,8 +109,8 @@ abstract class TxLambdas(
     colIndex: Int
   )(implicit ctx: Ctx.Owner): Int => JsDom.TypedTag[TableCell] = {
     val arrayTx = qr.num(arrayIndex)
-    val t_      = cols.isDefinedAt(colIndex - 1) && cols(colIndex - 1).attrExpr == "t"
-    val txI_    = cols.isDefinedAt(colIndex + 1) && cols(colIndex + 1).attrExpr == "txInstant"
+    val t_      = cols.isDefinedAt(colIndex - 1) && cols(colIndex - 1).kind == "t"
+    val txI_    = cols.isDefinedAt(colIndex + 1) && cols(colIndex + 1).kind == "txInstant"
     (t_, txI_) match {
       // tx
       case (false, false) =>
@@ -188,10 +188,10 @@ abstract class TxLambdas(
   )(implicit ctx: Ctx.Owner): Int => JsDom.TypedTag[TableCell] = {
     val arrayTxInstant = qr.str(arrayIndex)
     val tx_            = cols.isDefinedAt(colIndex - 1) &&
-      cols(colIndex - 1).attrExpr == "tx"
+      cols(colIndex - 1).kind == "tx"
     val j              = if (tx_) 2 else 1
     val t_             = cols.isDefinedAt(colIndex - j) &&
-      cols(colIndex - j).attrExpr == "t"
+      cols(colIndex - j).kind == "t"
     (t_, tx_) match {
       // txInstant
       case (false, false) =>

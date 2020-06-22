@@ -157,6 +157,7 @@ trait HeadElements extends ColOps
     attribute: String,
     postfix: String,
     expr: String,
+    kind: String,
     edit: MouseEvent => Unit,
     save: MouseEvent => Unit,
     cancel: MouseEvent => Unit,
@@ -187,7 +188,7 @@ trait HeadElements extends ColOps
           div(cls := "dropdown-divider", margin := "3px 0"),
           a(href := "#", cls := "dropdown-item", "Retract entities", onclick := retractEntities)
         )
-    } else if (expr == "edit") {
+    } else if (kind == "edit") {
       Seq(
         a(href := "#", cls := "dropdown-item", "Save", onclick := save),
         a(href := "#", cls := "dropdown-item", "Cancel edit", onclick := cancel),
@@ -235,6 +236,7 @@ trait HeadElements extends ColOps
     expr: String,
     sortDir: String,
     sortPos: Int,
+    kind: String,
     sort: MouseEvent => Unit,
     editable: Boolean,
     edit: MouseEvent => Unit,
@@ -249,39 +251,40 @@ trait HeadElements extends ColOps
     editExprItems: List[Frag],
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = {
     val attrCell = {
-      if (expr == "orig") {
+      if (kind == "orig") {
         td(
           paddingTop := 1,
           paddingLeft := 6,
           attribute,
-          if (postfix.isEmpty) () else _pf(postfix)
+          if (postfix.isEmpty) () else _pf(postfix),
+          if (expr.nonEmpty) span(cls := "expr", expr) else (),
         )
-      } else if (expr == "edit") {
+      } else if (kind == "edit") {
         td(
           paddingTop := 2,
           paddingLeft := 6,
           padding := 0,
           attrMenu(
-            attribute, postfix, expr, edit, save, cancel,
+            attribute, postfix, "edit", kind, edit, save, cancel,
             retractEntities, retractValues,
             editDropdownId = editDropdownId,
             editExprItems = editExprItems,
           ),
         )
-      } else if (nonMenuExprs.contains(expr)) {
+      } else if (aggrs.contains(expr) || specials.contains(kind)) {
         // non-editable aggr/tx
         td(
           paddingTop := 1,
           paddingLeft := 6,
           attribute,
           if (postfix.isEmpty) () else _pf(postfix),
-          span(cls := "expr", expr),
+          span(cls := "expr", expr + kind), // only one will have a value
         )
       } else if (attribute == "e") {
         td(
           padding := 0,
           attrMenu(
-            attribute, postfix, expr, edit, save, cancel,
+            attribute, postfix, expr, kind, edit, save, cancel,
             retractEntities, retractValues, togglers, joinAttrs, joinMaker)
         )
       } else if (editable) {
@@ -290,7 +293,7 @@ trait HeadElements extends ColOps
           paddingLeft := 6,
           padding := 0,
           attrMenu(
-            attribute, postfix, expr, edit, save, cancel,
+            attribute, postfix, expr, kind, edit, save, cancel,
             retractEntities, retractValues)
         )
       } else {
@@ -364,6 +367,7 @@ trait HeadElements extends ColOps
     attribute: String,
     postfix: String,
     expr: String,
+    kind: String,
     editable: Boolean,
     edit: MouseEvent => Unit,
     save: MouseEvent => Unit,
@@ -373,7 +377,7 @@ trait HeadElements extends ColOps
     editDropdownId: String,
     editExprItems: List[Frag],
   ): TypedTag[TableCell] = {
-    if (expr == "orig" || !editable) {
+    if (kind == "orig" || !editable) {
       td(
         cls := "header",
         verticalAlign.middle,
@@ -386,7 +390,7 @@ trait HeadElements extends ColOps
       td(
         cls := "header",
         attrMenu(
-          attribute, postfix, expr, edit, save, cancel,
+          attribute, postfix, expr, kind, edit, save, cancel,
           retractEntities, retractValues,
           editDropdownId = editDropdownId,
           editExprItems = editExprItems

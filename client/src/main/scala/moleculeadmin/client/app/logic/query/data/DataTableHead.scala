@@ -83,7 +83,7 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
     attrResolver: ResolveAttrs
   ): JsDom.TypedTag[TableCell] = {
     val Col(colIndex, _, nsAlias, nsFull, attr, _, colType, card, _, _,
-    aggrType, expr, sortDir, sortPos, _) = col
+    aggrType, expr, sortDir, sortPos, _, kind ) = col
 
     val syncId   = "filter-" + colIndex
     val postfix  = attrResolver.postfix(col)
@@ -118,8 +118,8 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
         joinVars(colIndex, nsFull) else (Nil, null)
 
       _attrHeaderSortable(
-        syncId, attr, postfix, expr, sortDir, sortPos, sort,
-        editable, edit, save, cancel,
+        syncId, attr, postfix, expr, sortDir, sortPos, kind,
+        sort, editable, edit, save, cancel,
         retractEntities, retractValues,
         togglers,
         joinAttrs, joinMaker,
@@ -128,7 +128,7 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
 
     } else {
       _attrHeader(
-        attr, postfix, expr,
+        attr, postfix, expr, kind,
         editable, edit, save, cancel,
         retractEntities, retractValues,
         editDropdownId, editExprItems
@@ -220,7 +220,7 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
 
   def inputCell(col: Col): JsDom.TypedTag[TableCell] = {
     val Col(colIndex, _, _, _, _, attrType,
-    colType, _, _, _, _, attrExpr, _, _, _) = col
+    colType, _, _, _, _, _, _, _, _, kind) = col
 
     val filterId        = "filter-" + colIndex
     val defaultEditExpr = EditExprs(col).defaultEditExpr
@@ -244,8 +244,7 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
 
     def filterCell(): JsDom.TypedTag[TableCell] = {
       val editable    = if (
-        attrType == "datom" ||
-          Seq("orig", "t", "tx", "txInstant").contains(attrExpr)
+        attrType == "datom" || specials.contains(kind)
       ) "" else " editable"
       val filterExpr  = filters.now.get(colIndex).fold("")(_.filterExpr)
       val applyFilter = { () =>
@@ -273,6 +272,6 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
       }
       _attrFilterCell(editable, filterId, filterExpr, applyFilter)
     }
-    if (attrExpr == "edit") editCell() else filterCell()
+    if (kind == "edit") editCell() else filterCell()
   }
 }

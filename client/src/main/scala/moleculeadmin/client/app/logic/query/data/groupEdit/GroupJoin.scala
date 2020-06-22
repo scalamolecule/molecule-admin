@@ -70,7 +70,7 @@ case class GroupJoin(colIndex: Int, nsFull: String)(implicit val ctx: Ctx.Owner)
     ).call().map {
       case Right(count) =>
         val queryHasRefAttr = columns.now.exists {
-          case Col(_, _, `nsFull`, _, attr, "ref", _, _, _, _, _, _, _, _, _)
+          case Col(_, _, `nsFull`, _, attr, "ref", _, _, _, _, _, _, _, _, _, _)
             if clean(attr) == refAttr => true
           case _                      => false
         }

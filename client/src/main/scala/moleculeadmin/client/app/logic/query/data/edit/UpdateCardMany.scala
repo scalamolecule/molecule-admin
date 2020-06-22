@@ -31,7 +31,7 @@ case class UpdateCardMany[T](
   attrType: String,
   enums: Seq[String],
   cellType: String,
-  expr: String
+  kind: String
 )(implicit ctx: Ctx.Owner)
   extends UpdateClient[T](
     cols, qr, editArray, baseClass,
@@ -135,7 +135,7 @@ case class UpdateCardMany[T](
         window.alert(s"Can't update $attrFull with invalid value(s): $retractsAsserts")
         cell.focus()
 
-      } else if (expr == "edit") {
+      } else if (kind == "edit") {
         println(s"$eid $attrFull $newVopt")
         if (related == 0) {
           editArray(rowIndex) = newVopt

@@ -1,4 +1,5 @@
 package moleculeadmin.client.app.logic.query.data.groupEdit.ops
+
 import moleculeadmin.shared.ast.query.Col
 import moleculeadmin.shared.ops.query.ColOps
 
@@ -6,7 +7,7 @@ import moleculeadmin.shared.ops.query.ColOps
 abstract class ScalaCodeImplicits(cols: Seq[Col], col: Col, scalaExpr: String)
   extends TypeMappings with ColOps {
 
-  val Col(_, _, nsAlias, nsFull, attr, attrType, _, card, _, _, _, _, _, _, _) = col
+  val Col(_, _, nsAlias, nsFull, attr, attrType, _, card, _, _, _, _, _, _, _, _) = col
 
   val q = "\"\"\""
 
@@ -38,7 +39,7 @@ abstract class ScalaCodeImplicits(cols: Seq[Col], col: Col, scalaExpr: String)
       case List(b)    => ("", b)
       case _          => ("", "")
     }
-    val rhs1 = card match {
+    val rhs1            = card match {
       case 1 =>
         if (rhs0.isEmpty || rhs0 == "None")
           s"Option.empty[$processType]"

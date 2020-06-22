@@ -12,7 +12,7 @@ case class ColType2TransferTypeLambdas(qr: QueryResult) extends HelpersAdmin {
 
   def get: Seq[Int => Any] = {
     columns.now.collect {
-      case col if col.attrExpr != "edit" =>
+      case col if col.kind != "edit" =>
         getLambda(col.colType, col.colIndex, col.attr.last == '$')
     }
   }

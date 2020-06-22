@@ -17,7 +17,7 @@ import scala.scalajs.js.timers.setTimeout
 
 case class EditExprs(col: Col) extends HeadElements {
 
-  val Col(colIndex, _, _, nsFull, attr, _, _, card, opt, _, _, _, _, _, _) = col
+  val Col(colIndex, _, _, nsFull, attr, _, _, card, opt, _, _, _, _, _, _, _) = col
 
   val fullAttr = s":$nsFull/$attr"
 

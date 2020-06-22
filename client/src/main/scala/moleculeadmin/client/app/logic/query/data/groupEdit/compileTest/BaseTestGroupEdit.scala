@@ -1,18 +1,19 @@
 package moleculeadmin.client.app.logic.query.data.groupEdit.compileTest
+
 import moleculeadmin.client.app.logic.query.QueryState.columns
 import moleculeadmin.shared.ast.query.Col
 
 
 class BaseTestGroupEdit(col: Col) extends TestScalaFiddle {
 
-  val Col(_, _, _, _, attr, attrType, _, _, _, _, _, _, _, _, _) = col
+  val Col(_, _, _, _, attr, attrType, _, _, _, _, _, _, _, _, _, _) = col
 
   val optional = attr.last == '$'
 
   columns() = List(
     eCol,
-    col.copy(colIndex = 1, attrExpr = "orig"),
-    col.copy(colIndex = 2, attrExpr = "edit")
+    col.copy(colIndex = 1, kind = "orig"),
+    col.copy(colIndex = 2, kind = "edit")
   )
 
   def showResult(
