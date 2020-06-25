@@ -23,31 +23,35 @@ trait KeyEvents
 
   def registerKeyEvents(implicit ctx: Ctx.Owner, nsMap: Map[String, Ns]): Unit = {
     document.onkeydown = { e: KeyboardEvent =>
-      val shift = e.getModifierState("Shift")
-      val ctrl  = e.getModifierState("Control")
-      val alt   = e.getModifierState("Alt")
-      val cmd   = e.getModifierState("Meta")
-      val mod   = shift || ctrl || alt || cmd
+      val shift            = e.getModifierState("Shift")
+      val ctrl             = e.getModifierState("Control")
+      val alt              = e.getModifierState("Alt")
+      val cmd              = e.getModifierState("Meta")
+      val modifiersPressed = shift || ctrl || alt || cmd
+      val repeat           = e.repeat
 
       if (document.activeElement == document.body) {
         // Browsing ..........................
-        if (!mod) {
+        if (!modifiersPressed) {
           e.key match {
-            case "Escape"   => toggleOffAll()
-            case "l"        => toggleQueryListMenu()
-            case "n"        => addInsertNewDataRow0(e)
-            case "u"        => toggleUndo()
-            case "v"        => toggleViewsMenu()
-            case "g"        => toggleGroupedMenu()
-            case "q"        => toggleQueryBuilder
-            case "d"        => toggle("tableData")
-            case "s"        => if (e.repeat) toggling = true else toggleStar()
-            case "f"        => if (e.repeat) toggling = true else toggleFlag()
-            case "c"        => if (e.repeat) toggling = true else toggleCheck()
-            case "PageUp"   => prevPage
-            case "PageDown" => nextPage
-            case "Home"     => firstPage
-            case "End"      => lastPage
+            case "PageDown" if repeat => throttle(e, () => prevPage, () => nextPage)
+            case "PageUp" if repeat   => throttle(e, () => prevPage, () => nextPage)
+            case "PageDown"           => nextPage
+            case "PageUp"             => prevPage
+            case "End"                => lastPage
+            case "Home"               => firstPage
+
+            case "Escape" => toggleOffAll()
+            case "l"      => toggleQueryListMenu()
+            case "n"      => addInsertNewDataRow0(e)
+            case "u"      => toggleUndo()
+            case "v"      => toggleViewsMenu()
+            case "g"      => toggleGroupedMenu()
+            case "q"      => toggleQueryBuilder
+            case "d"      => toggle("tableData")
+            case "s"      => if (e.repeat) toggling = true else toggleStar()
+            case "f"      => if (e.repeat) toggling = true else toggleFlag()
+            case "c"      => if (e.repeat) toggling = true else toggleCheck()
 
             case k if queryListOpen    => queryList(e, k)
             case k if groupedOpen      => grouped(e, k)
@@ -62,6 +66,7 @@ trait KeyEvents
             case _   => ()
           }
         } else {
+          // modifiers used
           e.key match {
             case "z" if cmd => undoLastClean
             case _          => paging(e, ctrl, alt, cmd)

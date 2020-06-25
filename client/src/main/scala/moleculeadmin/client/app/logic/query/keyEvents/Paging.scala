@@ -44,6 +44,8 @@ trait Paging extends BaseKeyEvents {
       e.key match {
         case "ArrowLeft"  => backward(); j += 1
         case "ArrowRight" => forward(); j += 1
+        case "PageUp"     => backward(); j += 1
+        case "PageDown"   => forward(); j += 1
         case _            => ()
       }
       t2 = js.Date.now
