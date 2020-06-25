@@ -30,19 +30,24 @@ trait KeyEvents
       val mod   = shift || ctrl || alt || cmd
 
       if (document.activeElement == document.body) {
+        // Browsing ..........................
         if (!mod) {
           e.key match {
-            case "Escape" => toggleOffAll()
-            case "l"      => toggleQueryListMenu()
-            case "n"      => addInsertNewDataRow0(e)
-            case "u"      => toggleUndo()
-            case "v"      => toggleViewsMenu()
-            case "g"      => toggleGroupedMenu()
-            case "q"      => toggleQueryBuilder
-            case "d"      => toggle("tableData")
-            case "s"      => if (e.repeat) toggling = true else toggleStar()
-            case "f"      => if (e.repeat) toggling = true else toggleFlag()
-            case "c"      => if (e.repeat) toggling = true else toggleCheck()
+            case "Escape"   => toggleOffAll()
+            case "l"        => toggleQueryListMenu()
+            case "n"        => addInsertNewDataRow0(e)
+            case "u"        => toggleUndo()
+            case "v"        => toggleViewsMenu()
+            case "g"        => toggleGroupedMenu()
+            case "q"        => toggleQueryBuilder
+            case "d"        => toggle("tableData")
+            case "s"        => if (e.repeat) toggling = true else toggleStar()
+            case "f"        => if (e.repeat) toggling = true else toggleFlag()
+            case "c"        => if (e.repeat) toggling = true else toggleCheck()
+            case "PageUp"   => prevPage
+            case "PageDown" => nextPage
+            case "Home"     => firstPage
+            case "End"      => lastPage
 
             case k if queryListOpen    => queryList(e, k)
             case k if groupedOpen      => grouped(e, k)
@@ -64,6 +69,7 @@ trait KeyEvents
         }
 
       } else if (document.activeElement.isInstanceOf[TableCell]) {
+        // Editing ..........................
         e.key match {
           case x if insertMode                   => x match {
             case "Escape"         => abortInsert()
@@ -84,6 +90,10 @@ trait KeyEvents
           case "ArrowLeft" if ctrl               => cellLeft(e)
           case "ArrowRight" if ctrl && alt       => endOfRow(e)
           case "ArrowRight" if ctrl              => cellRight(e)
+          case "PageUp"                          => pageUp(e)
+          case "PageDown"                        => pageDown(e)
+          case "Home"                            => first(e)
+          case "End"                             => last(e)
           case "Backspace"                       => deleteItem(e)
           case "Enter" if shift                  => multilineSoftNewLine(e)
           case "Enter" if ctrl                   => multilineAddItem(e)
