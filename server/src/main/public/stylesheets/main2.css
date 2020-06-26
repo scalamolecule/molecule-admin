@@ -190,8 +190,19 @@ table.tableRowLink th {
     font-weight: normal;
 }
 table.tableRowLink td {
+    max-width: 1500px;
+    word-wrap: break-word;
     padding: 0px 5px 0px 5px;
     vertical-align: top;
+}
+table.tableRowLink td.retract a {
+    top: 0;
+    padding-bottom: 6px;
+    font-size: 9px;
+    color: #888;
+}
+table.tableRowLink td.retract a:hover {
+    color: #00a4db;
 }
 
 
