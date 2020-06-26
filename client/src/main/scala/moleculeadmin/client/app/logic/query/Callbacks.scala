@@ -152,7 +152,8 @@ class Callbacks(implicit ctx: Ctx.Owner)
       getFavoriteQueries,
       useQueryCallback,
       upsertQueryCallback,
-      unfavoriteQueryCallback
+      unfavoriteQueryCallback,
+      retractQueryCallback
     ).foreach(row => list.appendChild(row.render))
   }
 
