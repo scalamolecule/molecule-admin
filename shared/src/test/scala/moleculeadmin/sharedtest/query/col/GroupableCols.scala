@@ -67,6 +67,22 @@ object GroupableCols extends TestSuite with TreeSchema with ColOps {
       )
     }
 
+
+    test("group editable") {
+      getGroupableCols(
+        List(
+          Col(0, 0, "Ns", "Ns", "e", "datom", "double", 1, false, Seq(), "", "", "", 0, "", ""),
+          Col(1, 0, "Ns", "Ns", "int", "Int", "double", 1, false, Seq(), "", "", "", 0, "", ""),
+          Col(2, 0, "Ns", "Ns", "str$", "String", "string", 1, true, Seq(), "", "", "", 0, "", "orig"),
+          Col(3, 0, "Ns", "Ns", "str$", "String", "string", 1, true, Seq(), "", "", "", 0, "", "edit")
+        )
+      ) ==> List(
+        Col(1, 0, "Ns", "Ns", "int", "Int", "double", 1, false, Seq(), "", "", "", 0, "", ""),
+        Col(2, 0, "Ns", "Ns", "str$", "String", "string", 1, true, Seq(), "", "", "", 0, "", "orig")
+      )
+    }
+
+
     test("two ns with eid") {
       getGroupableCols(
         List(
@@ -90,7 +106,7 @@ object GroupableCols extends TestSuite with TreeSchema with ColOps {
         List(
           Col(0, 0, "Release", "Release", "e", "datom", "double", 1, false, Seq(), "", "", "", 0, ""),
           Col(1, 0, "Release", "Release", "month", "Long", "double", 1, false, Seq(), "", "", "", 0, ""),
-          Col(2, 0, "Release", "Release", "month", "Long", "double", 1, false, Seq(), "", "txInstant", "", 0, ""),
+          Col(2, 0, "Release", "Release", "month", "Long", "double", 1, false, Seq(), "", "", "", 0, "", "txInstant"),
           Col(3, 0, "Release", "Release", "day", "Long", "double", 1, false, Seq(), "", "", "", 0, ""),
           Col(4, 1, "Artists", "Artist", "e", "datom", "double", 1, false, Seq(), "", "", "", 0, ""),
           Col(5, 1, "Artists", "Artist", "startYear", "Long", "double", 1, false, Seq(), "", "", "", 0, ""),
@@ -108,7 +124,7 @@ object GroupableCols extends TestSuite with TreeSchema with ColOps {
           Col(0, 0, "Release", "Release", "e", "datom", "double", 1, false, Seq(), "", "", "", 0, ""),
           Col(1, 0, "Release", "Release", "month", "Long", "double", 1, false, Seq(), "", "", "", 0, ""),
           Col(2, 0, "Release", "Release", "day", "Long", "double", 1, false, Seq(), "", "", "", 0, ""),
-          Col(3, 0, "Release", "Release", "day", "Long", "double", 1, false, Seq(), "", "txInstant", "", 0, ""),
+          Col(3, 0, "Release", "Release", "day", "Long", "double", 1, false, Seq(), "", "", "", 0, "", "txInstant"),
           Col(4, 1, "Artists", "Artist", "e", "datom", "double", 1, false, Seq(), "", "", "", 0, ""),
           Col(5, 1, "Artists", "Artist", "startYear", "Long", "double", 1, false, Seq(), "", "", "", 0, ""),
           Col(6, 1, "Artists", "Artist", "name", "String", "string", 1, false, Seq(), "", "", "", 0, "")
@@ -127,7 +143,7 @@ object GroupableCols extends TestSuite with TreeSchema with ColOps {
           Col(2, 0, "Release", "Release", "day", "Long", "double", 1, false, Seq(), "", "", "", 0, ""),
           Col(3, 1, "Artists", "Artist", "e", "datom", "double", 1, false, Seq(), "", "", "", 0, ""),
           Col(4, 1, "Artists", "Artist", "startYear", "Long", "double", 1, false, Seq(), "", "", "", 0, ""),
-          Col(5, 1, "Artists", "Artist", "startYear", "Long", "double", 1, false, Seq(), "", "txInstant", "", 0, ""),
+          Col(5, 1, "Artists", "Artist", "startYear", "Long", "double", 1, false, Seq(), "", "", "", 0, "", "txInstant"),
           Col(6, 1, "Artists", "Artist", "name", "String", "string", 1, false, Seq(), "", "", "", 0, "")
         )
       ) ==> List(
@@ -145,7 +161,7 @@ object GroupableCols extends TestSuite with TreeSchema with ColOps {
           Col(3, 1, "Artists", "Artist", "e", "datom", "double", 1, false, Seq(), "", "", "", 0, ""),
           Col(4, 1, "Artists", "Artist", "startYear", "Long", "double", 1, false, Seq(), "", "", "", 0, ""),
           Col(5, 1, "Artists", "Artist", "name", "String", "string", 1, false, Seq(), "", "", "", 0, ""),
-          Col(6, 1, "Artists", "Artist", "name", "String", "string", 1, false, Seq(), "", "txInstant", "", 0, "")
+          Col(6, 1, "Artists", "Artist", "name", "String", "string", 1, false, Seq(), "", "", "", 0, "", "txInstant")
         )
       ) ==> List(
         Col(1, 0, "Release", "Release", "month", "Long", "double", 1, false, Seq(), "", "", "", 0, ""),

@@ -271,8 +271,8 @@ trait HeadElements extends ColOps
             editExprItems = editExprItems,
           ),
         )
-      } else if (aggrs.contains(expr) || specials.contains(kind)) {
-        // non-editable aggr/tx
+      } else if (aggrs.contains(expr) || nonEditable.contains(kind)) {
+        // non-editable aggr/txs
         td(
           paddingTop := 1,
           paddingLeft := 6,
@@ -405,7 +405,6 @@ trait HeadElements extends ColOps
   }
 
   def _attrFilterCell(
-    editable: String,
     filterId: String,
     filterExpr: String,
     applyFilter: () => Unit
@@ -417,7 +416,7 @@ trait HeadElements extends ColOps
 
     val bgColor = if (filterExpr.nonEmpty) Color.filter else Color.white
     td(
-      cls := "header input" + editable,
+      cls := "header input",
       id := filterId,
       contenteditable := true,
       backgroundColor := bgColor,
