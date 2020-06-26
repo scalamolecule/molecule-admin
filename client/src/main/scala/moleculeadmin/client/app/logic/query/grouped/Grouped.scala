@@ -1,9 +1,6 @@
 package moleculeadmin.client.app.logic.query.grouped
 
-import moleculeadmin.client.app.logic.query.KeyEvents
 import moleculeadmin.client.app.logic.query.QueryState._
-import moleculeadmin.client.app.logic.query.data.TypeValidation
-import moleculeadmin.client.app.html.query.GroupedAttrElements
 import moleculeadmin.shared.ast.query.Col
 import moleculeadmin.shared.ops.query.data.FilterFactory
 import org.scalajs.dom.document
@@ -14,9 +11,8 @@ import scalatags.JsDom.all._
 import scala.scalajs.js.timers.setTimeout
 
 
-case class Grouped[T](col: Col)
-                     (implicit ctx: Ctx.Owner) extends GroupedUpdate[T](col)
-  with GroupedAttrElements with KeyEvents with FilterFactory with TypeValidation {
+case class Grouped[T](col: Col)(implicit ctx: Ctx.Owner)
+  extends GroupedUpdate[T](col) with FilterFactory {
 
   // Local caches
 
@@ -108,6 +104,7 @@ case class Grouped[T](col: Col)
     }.mkString("\n")
     val filter = createFilter(col, filterExpr, splitComma = false).get
     filters() = filters.now.filterNot(_._1 == colIndex) + (colIndex -> filter)
+    columns.recalc()
   }
 
   def toggleOn(rowIndex: Int, curVopt: Option[T], count: Int): Unit = {
@@ -124,6 +121,7 @@ case class Grouped[T](col: Col)
     selected = selected.filterNot(_ == (rowIndex, curVopt, count))
     if (selected.isEmpty) {
       filters() = filters.now - colIndex
+      columns.recalc()
     } else {
       showGrouped()
       setFilter()

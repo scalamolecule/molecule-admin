@@ -1,14 +1,12 @@
 package moleculeadmin.client.app.logic.query
 
-import moleculeadmin.client.app.logic.query.QueryState._
-import moleculeadmin.client.app.logic.query.grouped.{Grouped, GroupedData}
 import moleculeadmin.client.app.html.query.GroupedAttrElements
-import org.scalajs.dom.document
+import moleculeadmin.client.app.logic.query.QueryState._
+import moleculeadmin.client.app.logic.query.grouped.Grouped
 import org.scalajs.dom.html.Element
 import rx.{Ctx, Rx}
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
-import scala.scalajs.js.timers.setTimeout
 
 
 case class RenderGrouped()(implicit ctx: Ctx.Owner)
