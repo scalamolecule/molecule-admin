@@ -64,13 +64,13 @@ trait ColOps extends HelpersAdmin {
     "aggrInt", "aggrDouble", "aggrSingle", "aggrSingleSample")
 
   val aggrs = Seq(
-    //    "orig",
     "count", "count-distinct",
     "sum", "avg", "median", "variance", "stddev",
-    //    "t", "tx", "txInstant"
   )
 
-  val specials = Seq("orig", "t", "tx", "txInstant")
+  val nonEditable = Seq("orig", "t", "tx", "txInstant")
+
+  val nonGroupable = "edit" +: nonEditable.tail
 
   def isEditable(
     cols: Seq[Col],
@@ -86,9 +86,9 @@ trait ColOps extends HelpersAdmin {
       case (col,
       (0, false)) if col.colIndex > colIndex => (0, false)
 
-      // Not editable if aggr or special
+      // Not editable if aggr or nonEditable
       case (Col(`colIndex`, _, _, _, _, _, _, _, _, _, _, attrExpr, _, _, _, kind),
-      (0, false)) if aggrs.contains(attrExpr) || specials.contains(kind) => (0, false)
+      (0, false)) if aggrs.contains(attrExpr) || nonEditable.contains(kind) => (0, false)
 
       // Start checking
       case (Col(`colIndex`, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _),
@@ -230,7 +230,7 @@ trait ColOps extends HelpersAdmin {
         (1, nsAlias, cols)
 
       case ((1, curNsAlias, cols), Col(_, _, nsAlias, _, _, _, _, _, _, _, _, attrExpr, _, _, _, kind))
-        if curNsAlias == nsAlias && aggrs.contains(attrExpr) || specials.contains(kind) =>
+        if curNsAlias == nsAlias && (aggrs.contains(attrExpr) || nonGroupable.contains(kind)) =>
         (1, nsAlias, cols)
 
       case ((1, curNsAlias, cols), col@Col(_, _, nsAlias, _, _, _, _, _, _, _, _, _, _, _, _, _))
