@@ -83,7 +83,7 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
     attrResolver: ResolveAttrs
   ): JsDom.TypedTag[TableCell] = {
     val Col(colIndex, _, nsAlias, nsFull, attr, _, colType, card, _, _,
-    aggrType, expr, sortDir, sortPos, _, kind ) = col
+    aggrType, expr, sortDir, sortPos, _, kind) = col
 
     val syncId   = "filter-" + colIndex
     val postfix  = attrResolver.postfix(col)
@@ -249,7 +249,7 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
       val filterExpr  = filters.now.get(colIndex).fold("")(_.filterExpr)
       val applyFilter = { () =>
         val filterCell    = document.getElementById(filterId)
-        val newFilterExpr = filterCell.innerHTML.replace("<br>", "\n").trim
+        val newFilterExpr = _html2str(filterCell.innerHTML)
         // Let only filters() propagate change
         offset.kill()
         offset() = 0
