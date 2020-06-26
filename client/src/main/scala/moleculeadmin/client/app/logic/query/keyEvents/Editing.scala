@@ -82,11 +82,13 @@ trait Editing extends Paging {
 
   private def headerCellToFirstCell(curCell: HTMLInputElement): Unit = {
     // Get col no from header `id="filter-23" contenteditable...`
-    val colNo           = curCell.id.substring(7, 10).trim.replace("\"", "").toInt + 1
-    val firstRow        = getFirstRow
-    val cellBelow: Node = firstRow.childNodes.item(colNo)
-    selectContent(cellBelow)
-    markRow(firstRow)
+    val colNo    = curCell.id.substring(7, 10).trim.replace("\"", "").toInt + 1
+    val firstRow = getFirstRow
+    if (firstRow != null) {
+      val cellBelow: Node = firstRow.childNodes.item(colNo)
+      selectContent(cellBelow)
+      markRow(firstRow)
+    }
   }
 
 

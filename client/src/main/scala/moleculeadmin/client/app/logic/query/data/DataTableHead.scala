@@ -249,7 +249,7 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
       val filterExpr  = filters.now.get(colIndex).fold("")(_.filterExpr)
       val applyFilter = { () =>
         val filterCell    = document.getElementById(filterId)
-        val newFilterExpr = filterCell.textContent.trim
+        val newFilterExpr = filterCell.innerHTML.replace("<br>", "\n").trim
         // Let only filters() propagate change
         offset.kill()
         offset() = 0
