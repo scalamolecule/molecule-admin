@@ -116,65 +116,95 @@ case class GroupSave(col: Col)(implicit val ctx: Ctx.Owner)
     prepare: (Long, Option[ColType], Option[ColType]) => Seq[(Long, Seq[T], Seq[T])],
     save: Seq[(Long, Seq[T], Seq[T])] => Future[Either[String, (Long, Long, String)]],
     updateCell: (Int, Option[ColType]) => Unit
-  ): Unit = try {
-    val origArray     = arrays(origIndex)
-    val editArray     = arrays(editIndex)
-    var oldVopt       = Option.empty[ColType]
-    var newVopt       = Option.empty[ColType]
-    val data          = new ListBuffer[(Long, Seq[T], Seq[T])]
-    var i             = 0
-    var j             = 0
-    var tableRowIndex = 0
+  ): Unit = {
+    val origArray       = arrays(origIndex)
+    val editArray       = arrays(editIndex)
+    val origArrayCached = origArray.clone()
+    var oldVopt         = Option.empty[ColType]
+    var newVopt         = Option.empty[ColType]
+    val data            = new ListBuffer[(Long, Seq[T], Seq[T])]
+    var i               = 0
+    var j               = 0
+    var tableRowIndex   = 0
+    var clientUpdated   = false
 
-    if (filters.now.nonEmpty && lastRow != cachedSortFilterIndex.length) {
-      val err = "Unexpected internal error: " +
-        s"lastRow count ($lastRow) doesn't match " +
-        s"cachedFilterIndex.length (${cachedSortFilterIndex.length})"
-      window.alert(err)
-      throw new RuntimeException(err)
+    def rollback(): Unit = {
+      i = 0
+      while (i < lastRow) {
+        j = indexBridge(i)
+        // Reset old orig value
+        origArray(j) = origArrayCached(j)
+        i += 1
+      }
+      // Redraw table body/footer of current page
+      offset.recalc()
     }
 
-    while (i < lastRow) {
-      j = indexBridge(i)
-
-      // Current values
-      eid = eidArray(j).get.toLong
-      oldVopt = origArray(j)
-      newVopt = editArray(j)
-
-      // Collect db update stmts
-      data ++= prepare(eid, oldVopt, newVopt)
-
-      // Update table cell(s)
-      if (i >= tableRowIndexOffset && i < tableRowIndexMax) {
-        updateCell(tableRowIndex, newVopt)
-        tableRowIndex += 1
+    try {
+      if (filters.now.nonEmpty && lastRow != cachedSortFilterIndex.length) {
+        val err = "Unexpected internal error: " +
+          s"lastRow count ($lastRow) doesn't match " +
+          s"cachedFilterIndex.length (${cachedSortFilterIndex.length})"
+        window.alert(err)
+        throw new RuntimeException(err)
       }
 
-      // Update client cache of original column
-      origArray(j) = newVopt
+      // Update client
+      while (i < lastRow) {
+        j = indexBridge(i)
 
-      i += 1
-    }
+        // Current values
+        eid = eidArray(j).get.toLong
+        oldVopt = origArray(j)
+        newVopt = editArray(j)
 
-    if (data.nonEmpty) {
-      save(data.toSeq).map {
-        case Right(_) =>
-          println(s"Successfully saved ${data.length} changes for attr `$attrFull`")
+        // Collect db update stmts
+        data ++= prepare(eid, oldVopt, newVopt)
 
-          // Reset cache to avoid old attr data to hang over
-          cachedQueryResult = qr
+        // Update table cells
+        if (i >= tableRowIndexOffset && i < tableRowIndexMax) {
+          updateCell(tableRowIndex, newVopt)
+          tableRowIndex += 1
+        }
 
-        case Left(err) =>
-          window.alert(s"Error saving $attrFull changes:\n$err")
+        // Update client cache of original column
+        origArray(j) = newVopt
+
+        i += 1
       }
-    } else {
-      println("No changes")
+      clientUpdated = true
+
+      if (data.nonEmpty) {
+        save(data.toSeq).map {
+          case Right(_) =>
+            println(s"Successfully saved ${data.length} changes for attr `$attrFull`")
+
+            // Reset cache to avoid old attr data to hang over
+            cachedQueryResult = qr
+
+          case Left(err) =>
+            rollback()
+            val msg = s"Couldn't save new group edit data for attr `$attrFull` to database." +
+              s"\nSuccessfully rolling back data in browser. " +
+              s"\nError was:\n" + err
+            println(msg)
+            window.alert(msg)
+        }
+      } else {
+        println("No changes")
+      }
+    } catch {
+      case e: Throwable =>
+        val err = if (clientUpdated) {
+          rollback()
+          s"Successfully rolled back from unexpected group edit error for attr `$attrFull`: " + e
+        } else {
+          s"Unexpected error saving new group edit data for attr `$attrFull`: " + e
+        }
+        println(err)
+        window.alert(err)
+        throw e
     }
-  } catch {
-    case e: Throwable =>
-      println("Unexpected error saving group data: " + e)
-      throw e
   }
 
 
