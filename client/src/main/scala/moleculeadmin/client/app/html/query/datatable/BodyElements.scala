@@ -30,15 +30,9 @@ trait BodyElements
     cls := "view",
     td(rowIndex + 1),
     onmouseover := { () =>
-      if (toggling) {
-        toggler match {
-          case "s" => toggleStar()
-          case "f" => toggleFlag()
-          case "c" => toggleCheck()
-          case _   =>
-        }
-      }
-
+      if (togglers(0)) toggleStar()
+      if (togglers(1)) toggleFlag()
+      if (togglers(2)) toggleCheck()
     },
     cells
   ).render
