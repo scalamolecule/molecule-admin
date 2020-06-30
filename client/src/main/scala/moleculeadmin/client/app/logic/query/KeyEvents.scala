@@ -41,24 +41,27 @@ trait KeyEvents
             case "End"                => lastPage
             case "Home"               => firstPage
 
-            case "Escape"  => toggleOffAll()
-            case "l"       => toggleQueryListMenu()
-            case "n"       => addInsertNewDataRow0(e)
-            case "u"       => toggleUndo()
-            case "v"       => toggleViewsMenu()
-            case "g"       => toggleGroupedMenu()
-            case "q"       => toggleQueryBuilder
-            case "d"       => toggle("tableData")
-            case "s" | "1" => if (e.repeat) togglers(0) = true else toggleStar()
-            case "f" | "2" => if (e.repeat) togglers(1) = true else toggleFlag()
-            case "c" | "3" => if (e.repeat) togglers(2) = true else toggleCheck()
+            case "Escape" => toggleOffAll()
+            case "l"      => toggleQueryListMenu()
+            case "n"      => addInsertNewDataRow0(e)
+            case "u"      => toggleUndo()
+            case "v"      => toggleViewsMenu()
+            case "g"      => toggleGroupedMenu()
+            case "q"      => toggleQueryBuilder
+            case "d"      => toggle("tableData")
 
             case k if queryListOpen    => queryList(e, k)
             case k if groupedOpen      => grouped(e, k)
             case k if viewsOpen        => views(e, k)
             case k if queryBuilderOpen => queryBuilder(k)
-            case " "                   => noScrollToBottom(e)
-            case _                     => ()
+
+            // keys 1-3 after view selectors by number
+            case "s" | "1" => if (e.repeat) togglers(0) = true else toggleStar()
+            case "f" | "2" => if (e.repeat) togglers(1) = true else toggleFlag()
+            case "c" | "3" => if (e.repeat) togglers(2) = true else toggleCheck()
+
+            case " " => noScrollToBottom(e)
+            case _   => ()
           }
         } else if (shift) {
           e.key match {
