@@ -121,11 +121,8 @@ object QueryState extends QueryApi {
   var flagTogglers  = Map.empty[String, () => Unit]
   var checkTogglers = Map.empty[String, () => Unit]
 
-  // Are we toggling multiple rows while holding down toggle key?
-  var toggling = false
-
-  // Which kind of marker is being toggled (s/f/c)
-  var toggler = ""
+  // Keys pressed to mark multiple rows while hovering
+  val togglers = new Array[Boolean](3)
 
   // Undo coordinates
   var curLastTxResults: Array[TxResult]         = Array.empty

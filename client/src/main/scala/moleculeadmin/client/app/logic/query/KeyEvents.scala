@@ -41,17 +41,17 @@ trait KeyEvents
             case "End"                => lastPage
             case "Home"               => firstPage
 
-            case "Escape" => toggleOffAll()
-            case "l"      => toggleQueryListMenu()
-            case "n"      => addInsertNewDataRow0(e)
-            case "u"      => toggleUndo()
-            case "v"      => toggleViewsMenu()
-            case "g"      => toggleGroupedMenu()
-            case "q"      => toggleQueryBuilder
-            case "d"      => toggle("tableData")
-            case "s"      => if (e.repeat) toggling = true else toggleStar()
-            case "f"      => if (e.repeat) toggling = true else toggleFlag()
-            case "c"      => if (e.repeat) toggling = true else toggleCheck()
+            case "Escape"  => toggleOffAll()
+            case "l"       => toggleQueryListMenu()
+            case "n"       => addInsertNewDataRow0(e)
+            case "u"       => toggleUndo()
+            case "v"       => toggleViewsMenu()
+            case "g"       => toggleGroupedMenu()
+            case "q"       => toggleQueryBuilder
+            case "d"       => toggle("tableData")
+            case "s" | "1" => if (e.repeat) togglers(0) = true else toggleStar()
+            case "f" | "2" => if (e.repeat) togglers(1) = true else toggleFlag()
+            case "c" | "3" => if (e.repeat) togglers(2) = true else toggleCheck()
 
             case k if queryListOpen    => queryList(e, k)
             case k if groupedOpen      => grouped(e, k)
@@ -112,10 +112,15 @@ trait KeyEvents
     }
 
     document.onkeyup = { e: KeyboardEvent =>
-      if (toggling && document.activeElement == document.body) {
+      if (
+        document.activeElement == document.body &&
+          (togglers(0) || togglers(1) || togglers(2))
+      ) {
         e.key match {
-          case "s" | "f" | "c" => toggling = false
-          case _               =>
+          case "s" | "1" => togglers(0) = false
+          case "f" | "2" => togglers(1) = false
+          case "c" | "3" => togglers(2) = false
+          case _         =>
         }
       }
     }

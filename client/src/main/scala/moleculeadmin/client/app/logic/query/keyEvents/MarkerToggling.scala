@@ -12,17 +12,17 @@ trait MarkerToggling {
   }
 
   def toggleStar(): Unit = {
-    toggler = "s"
+    togglers(0) = true
     starTogglers.get(getCellId).foreach(_())
   }
 
   def toggleFlag(): Unit = {
-    toggler = "f"
+    togglers(1) = true
     flagTogglers.get(getCellId).foreach(_())
   }
 
   def toggleCheck(): Unit = {
-    toggler = "c"
+    togglers(2) = true
     checkTogglers.get(getCellId).foreach(_())
   }
 }
