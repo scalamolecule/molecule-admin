@@ -12,12 +12,15 @@ trait ModelOps extends BaseQuery with HelpersAdmin {
 
 
   def hasIncompleteBranches(elements: Seq[Element]): Boolean = {
-    elements.foldLeft(true) {
-      case (res, _: Generic)                 => res
-      case (res, _: ReBond)                  => res
-      case (_, a: Atom) if mandatory(a.attr) => false
-      case (res, _)                          => res
-    }
+    elements.foldLeft(true, false) {
+      case ((res, _), Generic(_, "e", _, _)) => (res, true)
+      case ((res, gen), _: Generic)          => (res, gen)
+      case ((res, gen), _: ReBond)           => (res, gen)
+      case ((res, _), _: Bond)               => (res, false)
+      case (_, a: Atom) if mandatory(a.attr) => (false, false)
+      case ((_, true), _: Atom)              => (false, false)
+      case ((res, gen), _)                   => (res, gen)
+    }._1
   }
 
   def toggleEdit(elements: Seq[Element],

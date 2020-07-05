@@ -16,7 +16,7 @@ trait AppElements extends RegexMatching {
   def _row: JsDom.TypedTag[Div] = div(cls := "row")
 
   def _rowCol: JsDom.TypedTag[Div] = div(cls := "col")
-  def _rowCol1: JsDom.TypedTag[Div] = _rowCol(paddingTop := 10)
+  def _rowCol1: JsDom.TypedTag[Div] = _rowCol(paddingTop := 10, paddingLeft := 30)
   def _rowCol2: JsDom.TypedTag[Div] = _rowCol(paddingRight := 0)
 
   def _rowColAuto: JsDom.TypedTag[Div] = div(cls := "col-md-auto")
