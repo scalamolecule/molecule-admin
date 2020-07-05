@@ -152,5 +152,27 @@ object ModelOpsTest extends TestSuite with ModelOps {
       emptyNamespaces(nil).nonEmpty ==> false
       hasIncompleteBranches(nil) ==> true
     }
+
+
+    test("Count/tacit") {
+      val tacitOnly = Seq(
+        Atom("Ns", "int_", "Int", 1, VarValue)
+      )
+      emptyNamespaces(tacitOnly).nonEmpty ==> false
+      hasIncompleteBranches(tacitOnly) ==> true
+
+      val aggrOnly = Seq(
+        Generic("Ns", "e", "datom", Fn("count", None))
+      )
+      emptyNamespaces(aggrOnly).nonEmpty ==> false
+      hasIncompleteBranches(aggrOnly) ==> true
+
+      val aggrTacit = Seq(
+        Generic("Ns", "e", "datom", Fn("count", None)),
+        Atom("Ns", "int_", "Int", 1, VarValue)
+      )
+      emptyNamespaces(aggrTacit).nonEmpty ==> false
+      hasIncompleteBranches(aggrTacit) ==> false
+    }
   }
 }

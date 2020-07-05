@@ -374,6 +374,27 @@ object Molecule2ModelTest extends TestSuite with TreeSchema with Helpers with Ex
     }
 
 
+    test("count") {
+
+      // How many unique ints?
+      Molecule2Model("Ns.int(count)") ==> Right(Seq(
+        Atom("Ns", "int", "Int", 1, Fn("count", None))
+      ))
+
+      // How many entities with each unique int?
+      Molecule2Model("Ns.e(count).int") ==> Right(Seq(
+        Generic("Ns", "e", "datom", Fn("count", None)),
+        Atom("Ns", "int", "Int", 1, VarValue)
+      ))
+
+      // How many entities with int?
+      Molecule2Model("Ns.e(count).int_") ==> Right(Seq(
+        Generic("Ns", "e", "datom", Fn("count", None)),
+        Atom("Ns", "int_", "Int", 1, VarValue)
+      ))
+    }
+
+
     test("attr + aggregates") {
 
       Molecule2Model("Ns.int.int(count)") ==> Right(Seq(
