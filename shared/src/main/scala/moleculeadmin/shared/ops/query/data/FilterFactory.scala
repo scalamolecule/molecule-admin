@@ -3,10 +3,11 @@ package moleculeadmin.shared.ops.query.data
 import java.util.regex.Pattern
 import molecule.util.{DateHandling, RegexMatching}
 import moleculeadmin.shared.ast.query._
+import moleculeadmin.shared.util.HelpersAdmin
 import moleculeadmin.shared.util.PredicateMerger._
 import scala.language.existentials
 
-trait FilterFactory extends RegexMatching with DateHandling {
+trait FilterFactory extends RegexMatching with DateHandling with HelpersAdmin {
 
   def createFilter(
     col: Col,
@@ -43,7 +44,7 @@ trait FilterFactory extends RegexMatching with DateHandling {
           case "Int" | "Long" | "ref" => filter[Double](predNumber)
           case _                      => filter[Double](predDecimal)
         }
-        case _                       => None
+        case maps                    => filter[String](predString)
       }
     } else {
       aggrType match {
@@ -164,13 +165,12 @@ trait FilterFactory extends RegexMatching with DateHandling {
 
 
   def predString(token: String): Option[Markers => Option[String] => Boolean] = {
-    // (don't trim to allow matching empty string)
     token match {
-      case ""                 => None // no filter
+      case ""                 => Some(_ => _.fold(false)(_.matches("")))
       case "-"                => Some(_ => _.isEmpty)
       case "+"                => Some(_ => _.isDefined)
-      case r"\{( *)$spaces\}" => Some(_ => _.fold(false)(s => s.matches(spaces)))
-      case r"/(.*)$regex"     => Some(_ => _.fold(false)(s => s.matches(regex)))
+      case r"\{( *)$spaces\}" => Some(_ => _.fold(false)(_.matches(spaces)))
+      case r"/(.*)$regex"     => Some(_ => _.fold(false)(_.matches(regex)))
       case r"i/(.*)$regex"    => Some(_ => _.fold(false)(s =>
         Pattern.compile(regex, Pattern.CASE_INSENSITIVE).matcher(s).matches()
       ))
@@ -181,12 +181,12 @@ trait FilterFactory extends RegexMatching with DateHandling {
         !Pattern.compile(regex, Pattern.CASE_INSENSITIVE).matcher(s).matches()
       ))
       case r"v *=>(.*)"       => None // todo?: compile Scala filter expr
-      case r"!(.*)$needle"    => Some(_ => _.fold(false)(s => !s.contains(needle)))
-      case r">=(.*)$needle"   => Some(_ => _.fold(false)(s => s >= needle))
-      case r">(.*)$needle"    => Some(_ => _.fold(false)(s => s > needle))
-      case r"<=(.*)$needle"   => Some(_ => _.fold(false)(s => s <= needle))
-      case r"<(.*)$needle"    => Some(_ => _.fold(false)(s => s < needle))
-      case needle             => Some(_ => _.fold(false)(s => s.contains(needle)))
+      case r"!(.*)$needle"    => Some(_ => _.fold(false)(!_.contains(needle)))
+      case r">=(.*)$needle"   => Some(_ => _.fold(false)(_ >= needle))
+      case r">(.*)$needle"    => Some(_ => _.fold(false)(_ > needle))
+      case r"<=(.*)$needle"   => Some(_ => _.fold(false)(_ <= needle))
+      case r"<(.*)$needle"    => Some(_ => _.fold(false)(_ < needle))
+      case needle             => Some(_ => _.fold(false)(_.contains(needle)))
     }
   }
 

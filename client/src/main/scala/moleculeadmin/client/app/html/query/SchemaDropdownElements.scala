@@ -21,7 +21,7 @@ trait SchemaDropdownElements extends AppElements with DropdownMenu {
     cursor.pointer,
     onclick := { () =>
       window.alert(
-        "Various attribute selections can be toggle with shortcuts:\n" +
+        "Various query builder attribute selections can be toggled with shortcuts:\n" +
           "a - All attributes\n" +
           "w - Attributes with values\n" +
           "r - Attributes except ref attributes"

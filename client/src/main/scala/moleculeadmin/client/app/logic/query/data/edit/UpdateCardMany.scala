@@ -65,33 +65,14 @@ case class UpdateCardMany[T](
       // Consider line shifts not as new item but as line shift within string
       List(raw.replace("<ul></ul>", ""))
     } else if (cellType == "str") {
-      raw.substring(8, raw.length - 10).split("</li><li>").toList
+      val before = "<ul><li>".size
+      val after  = "</li></ul>".size
+      raw.substring(before, raw.length - after).split("</li><li>").toList
     } else {
       raw.split("<br>").toList
     }
 
-    val vs = if (attrType == "String" && enums.isEmpty) {
-      strs.map(_
-        .replace("&nbsp;", " ")
-        .replace("&lt;", "<")
-        .replace("&gt;", ">")
-        .replace("&amp;", "&")
-        .replace("<br>", "\n")
-        .trim)
-        .filter(_.nonEmpty)
-        .map(_html2str)
-    } else {
-      strs.flatMap(
-        _.split("<br>")
-          .map(_
-            .replace("&nbsp;", " ")
-            .replace("&lt;", "<")
-            .replace("&gt;", ">")
-            .replace("&amp;", "&")
-            .trim)
-          .filter(_.nonEmpty)
-      )
-    }
+    val vs = _decode(strs, attrType, enums)
 
     val newStrs: List[String] = vs.distinct.sorted
 

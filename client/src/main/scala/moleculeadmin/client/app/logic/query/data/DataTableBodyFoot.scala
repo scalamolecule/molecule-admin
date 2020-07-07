@@ -19,7 +19,7 @@ case class DataTableBodyFoot()(implicit val ctx: Ctx.Owner)
     tableFoot: TableSection,
     queryResult: QueryResult
   ): Unit = Rx {
-    //    println("---- body ----")
+    //    println("--- body/foot ---")
 
     // triggers
     columns()

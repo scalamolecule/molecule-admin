@@ -1,14 +1,14 @@
 package moleculeadmin.client.app.html
 
-import molecule.util.RegexMatching
+import moleculeadmin.shared.util.HelpersAdmin
+import org.scalajs.dom.html._
 import org.scalajs.dom.{document, window}
-import org.scalajs.dom.html.{Div, Element, LI, Span, TableCell, TableRow, UList}
 import scalatags.JsDom
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
 
 
-trait AppElements extends RegexMatching {
+trait AppElements extends HelpersAdmin {
 
   def _containerFluid: JsDom.TypedTag[Div] = div(cls := "container-fluid")
   def _containerFluid2: JsDom.TypedTag[Div] = _containerFluid(paddingLeft := 0)
@@ -29,7 +29,7 @@ trait AppElements extends RegexMatching {
 
   def _formatEmpty(s: String): String = if (s.trim.isEmpty) s"{$s}" else s
 
-  def _optStr2frags(optStr: Option[String]): Seq[Frag] = {
+  def _optStr2frags(optStr: scala.Option[String]): Seq[Frag] = {
     optStr.fold(Seq.empty[Frag])(_str2frags)
   }
 
@@ -53,24 +53,34 @@ trait AppElements extends RegexMatching {
     }
   }
 
-  def _html2str(html: String): String = {
-    val str = html
-      .replaceFirst("<span[^>]*>", "")
-      .replaceFirst("</span>", "")
-      .replace("<span></span>", "")
-      .replace("&nbsp;", " ")
-      .replace("&amp;", "&")
-      .replace("&lt;", "<")
-      .replace("&gt;", ">")
-      .replace("<br>", "\n")
-    if (str.startsWith("{"))
-    // Invisible empty strings surrounded with { }
-      if (str.endsWith("}") && str.tail.init.replace("\n", " ").trim.isEmpty)
-        str.tail.init
-      else
-        str
-    else
-      str
+  def _decode(
+    strs: List[String],
+    attrType: String,
+    enums: Seq[String] = Nil
+  ): List[String] = {
+    if (attrType == "String" && enums.isEmpty) {
+      strs
+        .map(_
+          .replace("&nbsp;", " ")
+          .replace("&lt;", "<")
+          .replace("&gt;", ">")
+          .replace("&amp;", "&")
+          .replace("<br>", "\n")
+          .trim)
+        .filter(_.nonEmpty)
+        .map(_html2str)
+    } else {
+      strs.flatMap(
+        _.split("<br>")
+          .map(_
+            .replace("&nbsp;", " ")
+            .replace("&lt;", "<")
+            .replace("&gt;", ">")
+            .replace("&amp;", "&")
+            .trim)
+          .filter(_.nonEmpty)
+      )
+    }
   }
 
   def _shortcut(underlined: String, tail: String, prefix: String = ""): TypedTag[Span] =

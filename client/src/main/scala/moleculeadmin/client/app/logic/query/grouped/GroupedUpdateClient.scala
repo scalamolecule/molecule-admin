@@ -7,7 +7,7 @@ import rx.Ctx
 import scalatags.JsDom.all.td
 import moleculeadmin.client.app.logic.query.QueryState._
 
-// Facade to UpdateClient to avoid redundant code in GroupedData
+// Facade to UpdateClient to avoid redundant code in GroupedUpdate
 case class GroupedUpdateClient[T](
   qr: QueryResult,
   valueArray: Array[Option[T]],
@@ -44,7 +44,7 @@ case class GroupedUpdateClient[T](
     {(i: Int) => ""},
     t, tx, txInstant,
     tableRows.item(0).asInstanceOf[TableRow],
-    0L,
+    curEntity.now,
     newVopt,
     valueColIndex,
     affectedRows,

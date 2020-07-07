@@ -9,6 +9,10 @@ import scalatags.JsDom.all.{marginTop, _}
 
 trait GroupedAttrElements extends SubMenuElements with HeadElements {
 
+
+  //  val none     = "__none__"
+  val none     = "" // Presumable clear enough to show blank space
+
   def _groupedCard(
     header: String,
     spanOfSelected: Span,
@@ -44,8 +48,9 @@ trait GroupedAttrElements extends SubMenuElements with HeadElements {
             ),
           ),
           td(
-            if (colType == "double") color := "#49a523" else (),
-            v.fold("__none__")(_.toString)
+            if (colType == "double" || colType == "listDouble")
+              color := "#49a523" else (),
+            v.fold(none)(_.toString)
           ),
           td(c)
         )
@@ -92,7 +97,7 @@ trait GroupedAttrElements extends SubMenuElements with HeadElements {
 
   def _sort(colType: String, dir: String): TypedTag[Span] =
     span(
-      if (colType == "double") float.right else (),
+      if (colType == "double" || colType == "listDouble") float.right else (),
       span(cls := s"oi oi-caret-$dir", verticalAlign.middle,
         paddingLeft := 0,
       ),
@@ -104,7 +109,7 @@ trait GroupedAttrElements extends SubMenuElements with HeadElements {
   def _noSort(colType: String): TypedTag[Span] =
     span(
       cls := s"oi oi-elevator",
-      if (colType == "double") float.right else (),
+      if (colType == "double" || colType == "listDouble") float.right else (),
       color := "#bbbbbb",
       marginTop := 1,
     )
@@ -113,7 +118,7 @@ trait GroupedAttrElements extends SubMenuElements with HeadElements {
     rowId: String,
     cellId: String,
     rowIndex: Int,
-    curV: String,
+    curVopt: scala.Option[String],
     count: Int,
     update: () => Unit,
     toggle: () => Unit
@@ -125,7 +130,7 @@ trait GroupedAttrElements extends SubMenuElements with HeadElements {
         id := cellId,
         contenteditable := true,
         onblur := update,
-        _str2frags(curV)
+        _optStr2frags(curVopt)
       ),
       td(
         count,

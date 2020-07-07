@@ -16,10 +16,6 @@ trait FilterIndex {
     sortIndex: Array[Int] = Array.empty[Int]
   ): Array[Int] = {
 
-    // Card one lambdas
-
-    // None doesn't satisfy any predicate.
-    // (Use nil in query buildup to get non-values)
     def lambdaOne[T](
       values: Array[Option[T]],
       predicate: Option[T] => Boolean
@@ -31,9 +27,6 @@ trait FilterIndex {
       }
     }
 
-    // Card many lambdas
-
-    // At least one value in a Set should satisfy the predicate
     def lambdaMany[T](
       values: Array[Option[List[T]]],
       predicate: Option[T] => Boolean
@@ -49,6 +42,29 @@ trait FilterIndex {
           values(sortIndex(i)) match {
             case Some(vs) => vs.exists(v => predicate(Some(v)))
             case None     => predicate(None)
+          }
+      }
+    }
+
+    def lambdaMap(
+      values: Array[Option[Map[String, String]]],
+      predicate: Option[String] => Boolean
+    ): Int => Boolean = {
+      if (sortIndex.isEmpty) {
+        i: Int =>
+          values(i) match {
+            case Some(pairs) => pairs.exists {
+              case (k, v) => predicate(Some(s"$k -> $v"))
+            }
+            case None        => predicate(None)
+          }
+      } else {
+        i: Int =>
+          values(sortIndex(i)) match {
+            case Some(pairs) => pairs.exists {
+              case (k, v) => predicate(Some(s"$k -> $v"))
+            }
+            case None        => predicate(None)
           }
       }
     }
@@ -79,6 +95,24 @@ trait FilterIndex {
       lambdaMany(values, predicate.asInstanceOf[Option[String] => Boolean])
     }
 
+    def mapDouble(f: Filter[_]): Int => Boolean = {
+      val arrayIndex = qr.arrayIndexes(f.colIndex)
+      // Convert Double values to String values
+      val values     = qr.mapNum(arrayIndex).map { optMap =>
+        optMap.map { valueMap =>
+          valueMap.map { case (k, v) => (k, v.toString) }
+        }
+      }
+      val predicate  = f.markerPred((curStars, curFlags, curChecks))
+      lambdaMap(values, predicate.asInstanceOf[Option[String] => Boolean])
+    }
+    def mapString(f: Filter[_]): Int => Boolean = {
+      val arrayIndex = qr.arrayIndexes(f.colIndex)
+      val values     = qr.mapStr(arrayIndex)
+      val predicate  = f.markerPred((curStars, curFlags, curChecks))
+      lambdaMap(values, predicate.asInstanceOf[Option[String] => Boolean])
+    }
+
     var i                                = 0
     var posIndex                         = 0
     val lastRow                          = qr.rowCount
@@ -92,7 +126,8 @@ trait FilterIndex {
           case "string"     => string(f)
           case "listDouble" => listDouble(f)
           case "listString" => listString(f)
-          case _            => _: Int => true
+          case "mapDouble"  => mapDouble(f)
+          case "mapString"  => mapString(f)
         }
     }
 

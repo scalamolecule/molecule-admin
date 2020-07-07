@@ -14,16 +14,21 @@ case class RenderGrouped()(implicit ctx: Ctx.Owner)
 
 
   def dynRender: Rx.Dynamic[TypedTag[Element]] = Rx {
+    //    println("--- RenderGrouped... " + groupedColIndexes.now)
     groupedColIndexes()
     if (showGrouped && groupedColIndexes.now.nonEmpty) {
       _cardsContainer(
         columns.now.collect {
           case col if groupedColIndexes.now.contains(col.colIndex)
             && groupableCols.map(_.colIndex).contains(col.colIndex) => {
-            if (col.colType == "double")
-              Grouped[Double](col).render
-            else
-              Grouped[String](col).render
+            col.colType match {
+              case "string"     => Grouped[String](col).render
+              case "double"     => Grouped[Double](col).render
+              case "listString" => Grouped[List[String]](col).render
+              case "listDouble" => Grouped[List[Double]](col).render
+              case "mapString"  => Grouped[Map[String, String]](col).render
+              case "mapDouble"  => Grouped[Map[String, Double]](col).render
+            }
           }
         }
       )

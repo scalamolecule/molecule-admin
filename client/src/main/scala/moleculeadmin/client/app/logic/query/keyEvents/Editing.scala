@@ -1,14 +1,15 @@
 package moleculeadmin.client.app.logic.query.keyEvents
 
+import moleculeadmin.client.app.html.AppElements
 import moleculeadmin.client.app.logic.query.QueryState.{editCellId, groupEditId}
-import org.scalajs.dom.html.{TableCell, TableRow}
+import org.scalajs.dom.html.TableRow
 import org.scalajs.dom.raw.{HTMLInputElement, HTMLUListElement, KeyboardEvent}
 import org.scalajs.dom.{Node, document, window}
 import rx.Ctx
 import scalatags.JsDom.all._
 
 
-trait Editing extends Paging {
+trait Editing extends Paging with AppElements {
 
   private def getColNo(id: String): Int =
     if (id.startsWith("grouped-cell-")) 1 else id.substring(4, 6).trim.toInt
@@ -115,11 +116,11 @@ trait Editing extends Paging {
   def multilineSoftNewLine(e: KeyboardEvent): Unit = {
     val curCell         = document.activeElement
     val card            = curCell.getAttribute("card")
-    val isCardMany      = card != null && (card == "2" || card == "3")
+    val isCardManyOrMap = card != null && (card == "2" || card == "3")
     val cls             = curCell.getAttribute("class")
     val clss            = if (cls != null) cls.split(" ").toSeq else Seq.empty[String]
     val acceptMultiLine = clss.intersect(Seq("str", "input")).nonEmpty
-    if (isCardMany || acceptMultiLine) {
+    if (isCardManyOrMap || acceptMultiLine) {
       // Allow soft new line within cell
     } else {
       // Prevent internal line shifts in non-String cells
@@ -144,14 +145,15 @@ trait Editing extends Paging {
         node0.appendChild(li().render)
         node0
       } else {
-        // Remove empty unordered list in empty cell
+        // Remove empty unordered list of empty cell
         curCell.removeChild(curCell.lastElementChild)
-        // Place text in unordered list and add new empty item to continue editing
-        val curVs    = curCell.innerHTML.split("<br>").toList
-        val newUList = ul(
-          li(curVs.flatMap(v => Seq(v: Frag, br)).init),
-          li()
-        ).render
+        // - Preserve soft line shifts (<br>)
+        // - Decode control characters
+        val curVs    = curCell.innerHTML.split("<br>").toList.flatMap(v =>
+          Seq(_decode(List(v), "String").head: Frag, br)
+        ).init
+        // - Place text in unordered list
+        val newUList = ul(li(curVs), li()).render
         // Replace cell with uList
         curCell.innerHTML = ""
         curCell.appendChild(newUList)
