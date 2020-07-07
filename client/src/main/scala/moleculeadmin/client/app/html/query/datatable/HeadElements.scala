@@ -406,15 +406,19 @@ trait HeadElements extends ColOps
 
   def _attrFilterCell(
     filterId: String,
-    filterExpr: String,
+    filterExprOpt: scala.Option[String],
     applyFilter: () => Unit
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = {
-    val htmlFilter: Seq[Frag] = if (filterExpr.contains("\n"))
-      filterExpr.split("\n").toSeq.flatMap(s => Seq(StringFrag(s), br)).init
-    else
-      Seq(filterExpr)
+    val htmlFilter: Seq[Frag] = filterExprOpt match {
+      case None                                          =>
+        Seq.empty[Frag]
+      case Some(filterExpr) if filterExpr.contains("\n") =>
+        filterExpr.split("\n").toSeq.flatMap(s => Seq(StringFrag(s), br)).init
+      case Some(filterExpr)                              =>
+        _str2frags(filterExpr)
+    }
 
-    val bgColor = if (filterExpr.nonEmpty) Color.filter else Color.white
+    val bgColor = if (filterExprOpt.nonEmpty) Color.filter else Color.white
     td(
       cls := "header input",
       id := filterId,

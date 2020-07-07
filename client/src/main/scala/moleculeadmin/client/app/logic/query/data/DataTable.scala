@@ -22,10 +22,8 @@ import scalatags.JsDom.all._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 
-case class DataTable()(implicit val ctx: Ctx.Owner)
-  extends Callbacks
-    with KeyEvents with ModelOps with TableElements with UrlHandling {
-
+case class DataTable()(implicit val ctx: Ctx.Owner) extends Callbacks
+  with KeyEvents with ModelOps with TableElements with UrlHandling {
 
   def dynRender: Rx.Dynamic[JsDom.TypedTag[HTMLElement]] = Rx {
     // Var's not to trigger this Rx
@@ -121,7 +119,8 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
 
     // Re-calculate other elements
     showUndo.recalc()
-    groupedColIndexes.recalc()
+
+    //    groupedColIndexes.recalc()
     curViews.recalc()
 
     registerKeyEvents
@@ -131,12 +130,13 @@ case class DataTable()(implicit val ctx: Ctx.Owner)
   }
 
   // Used to ignore previous calls when requests are fired faster than responses return
-  var lastAjaxCall = 0
+  private var lastAjaxCall = 0
 
   def fetchAndPopulate(
     tableBody: TableSection,
     tableFoot: TableSection
   ): Unit = {
+    //    println("--- fetchAndPopulate ---")
     val (query, _, _, _) = Model2Query(Model(modelElements.now))
     val datalogQuery     = molecule.transform.Query2String(query).multiLine(60)
     val resolve          = (expr: QueryExpr) => Query2String(query).p(expr)

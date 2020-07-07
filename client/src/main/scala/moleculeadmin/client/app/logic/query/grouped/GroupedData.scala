@@ -9,56 +9,77 @@ import rx.Ctx
 abstract class GroupedData[T](col: Col)(implicit ctx: Ctx.Owner)
   extends KeyEvents {
 
-  val Col(colIndex, _, nsAlias, nsFull, attr, attrType, colType, _,
+  val Col(colIndex, _, nsAlias, nsFull, attr, attrType, colType, card,
   opt, enums, _, _, _, _, _, _) = col
 
-  val qr            = cachedQueryResult
-  val attrFull      = s":$nsFull/${clean(attr)}"
-  val enumPrefix    = if (enums.isEmpty) "" else s":$nsAlias.${clean(attr)}/"
-  val isNum         = Seq("Int", "Long", "Float", "Double").contains(attrType)
-  val mandatory     = !opt
-  val valueColIndex = colIndex + 1
-  val eidIndex      = getEidColIndex(columns.now, colIndex, nsAlias, nsFull)
-  val eidArray      = qr.num(qr.arrayIndexes(eidIndex))
-  val arrayIndex    = qr.arrayIndexes(colIndex)
-  val valueArray    = (
-    if (colType == "double")
-      qr.num(arrayIndex)
-    else
-      qr.str(arrayIndex)
-    ).asInstanceOf[Array[Option[T]]]
+  val qr         = cachedQueryResult
+  val arrayIndex = qr.arrayIndexes(colIndex)
+  val valueArray = (colType match {
+    case "string"     => qr.str(arrayIndex)
+    case "double"     => qr.num(arrayIndex)
+    case "listString" => qr.listStr(arrayIndex)
+    case "listDouble" => qr.listNum(arrayIndex)
+    case "mapString"  => qr.mapStr(arrayIndex)
+    case "mapDouble"  => qr.mapNum(arrayIndex)
+  }).asInstanceOf[Array[Option[T]]]
 
   private var countEmpty = 0
-  private var rawDoubles = Seq.empty[(Double, Int)]
-  private var rawStrings = Seq.empty[(String, Int)]
-  private var doubles    = List.empty[(Option[Double], Int)]
-  private var strings    = List.empty[(Option[String], Int)]
 
-  var groupedData = List.empty[(Option[T], Int)]
-  val none        = "__none__"
+  // For sorting by number/string
+  private var strings       = List.empty[(Option[String], Int)]
+  private var doubles       = List.empty[(Option[Double], Int)]
+  private var mappedStrings = List.empty[(Option[(String, String)], Int)]
+  private var mappedDoubles = List.empty[(Option[(String, Double)], Int)]
 
-  def rowId(rowIndex: Int) = s"grouped-row-$colIndex-$rowIndex"
+  var groupedData = List.empty[(Option[String], Int)]
 
-  def cellId(rowIndex: Int) = s"grouped-cell-$colIndex-$rowIndex"
 
   def sortData(ordering: Int): Unit = {
-    groupedData = (if (colType == "double") {
-      val vs = if (countEmpty > 0) (None, countEmpty) +: doubles else doubles
-      ordering match {
-        case 1 => vs.sortBy { case (v, c) => (-c, v) }
-        case 2 => vs.sortBy { case (v, c) => (c, v) }
-        case 3 => vs.sortBy(_._1)
-        case 4 => vs.sortBy(_._1).reverse
-      }
-    } else {
-      val vs = if (countEmpty > 0) (None, countEmpty) +: strings else strings
-      ordering match {
-        case 1 => vs.sortBy { case (v, c) => (-c, v) }
-        case 2 => vs.sortBy { case (v, c) => (c, v) }
-        case 3 => vs.sortBy(_._1)
-        case 4 => vs.sortBy(_._1).reverse
-      }
-    }).asInstanceOf[List[(Option[T], Int)]]
+    groupedData = colType match {
+      case "string" | "listString" =>
+        val vs = if (countEmpty > 0) (None, countEmpty) +: strings else strings
+        ordering match {
+          case 1 => vs.sortBy { case (v, c) => (-c, v) }
+          case 2 => vs.sortBy { case (v, c) => (c, v) }
+          case 3 => vs.sortBy(_._1)
+          case 4 => vs.sortBy(_._1).reverse
+        }
+
+      case "double" | "listDouble" =>
+        val vs = if (countEmpty > 0) (None, countEmpty) +: doubles else doubles
+        (ordering match {
+          case 1 => vs.sortBy { case (v, c) => (-c, v) }
+          case 2 => vs.sortBy { case (v, c) => (c, v) }
+          case 3 => vs.sortBy(_._1)
+          case 4 => vs.sortBy(_._1).reverse
+        }).map { case (v, c) => (v.map(_.toString), c) }
+
+      case "mapString" =>
+        val vs     = if (countEmpty > 0) (None, countEmpty) +: mappedStrings else mappedStrings
+        val sorted = ordering match {
+          case 1 => vs.sortBy { case (v, c) => (-c, v) }
+          case 2 => vs.sortBy { case (v, c) => (c, v) }
+          case 3 => vs.sortBy(_._1)
+          case 4 => vs.sortBy(_._1).reverse
+        }
+        sorted.map {
+          case (None, c)         => (None, c)
+          case (Some((k, v)), c) => (Some(s"$k -> $v"), c)
+        }
+
+      case "mapDouble" =>
+        val vs     = if (countEmpty > 0) (None, countEmpty) +: mappedDoubles else mappedDoubles
+        val sorted = ordering match {
+          case 1 => vs.sortBy { case (v, c) => (-c, v) }
+          case 2 => vs.sortBy { case (v, c) => (c, v) }
+          case 3 => vs.sortBy(_._1)
+          case 4 => vs.sortBy(_._1).reverse
+        }
+        sorted.map {
+          case (None, c)         => (None, c)
+          case (Some((k, v)), c) => (Some(s"$k -> $v"), c)
+        }
+    }
   }
 
   def extractGroupedData(): Unit = {
@@ -67,31 +88,90 @@ abstract class GroupedData[T](col: Col)(implicit ctx: Ctx.Owner)
     val lastRow     = actualRowCount
     colType match {
       case "string" =>
-        val valueArray = qr.str(qr.arrayIndexes(colIndex))
-        var vs         = List.empty[String]
-        groupedData = Nil
+        val valueArray1 = valueArray.asInstanceOf[Array[Option[String]]]
+        var vs          = List.empty[String]
         while (rowIndex < lastRow) {
-          valueArray(indexBridge(rowIndex)) match {
-            case None    => countEmpty += 1
-            case Some(v) => vs = (if (v.trim.isEmpty) s"{$v}" else v) :: vs
-          }
-          rowIndex += 1
-        }
-        rawStrings = vs.groupBy(identity).view.mapValues(_.length).toSeq
-        strings = vs.groupBy(identity).map { case (k, v) => (Some(k), v.length) }.toList
-
-      case "double" =>
-        val valueArray = qr.num(qr.arrayIndexes(colIndex))
-        var vs         = List.empty[Double]
-        while (rowIndex < lastRow) {
-          valueArray(indexBridge(rowIndex)) match {
+          valueArray1(indexBridge(rowIndex)) match {
             case None    => countEmpty += 1
             case Some(v) => vs = v :: vs
           }
           rowIndex += 1
         }
-        rawDoubles = vs.groupBy(identity).view.mapValues(_.length).toSeq
-        doubles = vs.groupBy(identity).map { case (k, v) => (Some(k), v.length) }.toList
+        strings = vs.groupBy(identity).map {
+          case (v, simVs) => (Some(v), simVs.length)
+        }.toList
+
+      case "double" =>
+        val valueArray1 = valueArray.asInstanceOf[Array[Option[Double]]]
+        var vs          = List.empty[Double]
+        while (rowIndex < lastRow) {
+          valueArray1(indexBridge(rowIndex)) match {
+            case None    => countEmpty += 1
+            case Some(v) => vs = v :: vs
+          }
+          rowIndex += 1
+        }
+        doubles = vs.groupBy(identity).map {
+          case (v, simVs) => (Some(v), simVs.length)
+        }.toList
+
+
+      case "listString" =>
+        val valueArray1 = valueArray.asInstanceOf[Array[Option[List[String]]]]
+        var vs          = List.empty[String]
+        while (rowIndex < lastRow) {
+          valueArray1(indexBridge(rowIndex)) match {
+            case None     => countEmpty += 1
+            case Some(vv) => vs = vv ::: vs
+          }
+          rowIndex += 1
+        }
+        strings = vs.groupBy(identity).map {
+          case (v, simVs) => (Some(v), simVs.length)
+        }.toList
+
+      case "listDouble" =>
+        val valueArray1 = valueArray.asInstanceOf[Array[Option[List[Double]]]]
+        var vs          = List.empty[Double]
+        while (rowIndex < lastRow) {
+          valueArray1(indexBridge(rowIndex)) match {
+            case None     => countEmpty += 1
+            case Some(vv) => vs = vv ::: vs
+          }
+          rowIndex += 1
+        }
+        doubles = vs.groupBy(identity).map {
+          case (v, simVs) => (Some(v), simVs.size)
+        }.toList
+
+
+      case "mapString" =>
+        val valueArray1 = valueArray.asInstanceOf[Array[Option[Map[String, String]]]]
+        var pairs       = List.empty[(String, String)]
+        while (rowIndex < lastRow) {
+          valueArray1(indexBridge(rowIndex)) match {
+            case None     => countEmpty += 1
+            case Some(vv) => pairs = vv.toList ::: pairs
+          }
+          rowIndex += 1
+        }
+        mappedStrings = pairs.groupBy(identity).map {
+          case (pair, simPairs) => (Some(pair), simPairs.size)
+        }.toList
+
+      case "mapDouble" =>
+        val valueArray1 = valueArray.asInstanceOf[Array[Option[Map[String, Double]]]]
+        var pairs       = List.empty[(String, Double)]
+        while (rowIndex < lastRow) {
+          valueArray1(indexBridge(rowIndex)) match {
+            case None     => countEmpty += 1
+            case Some(vv) => pairs = vv.toList ::: pairs
+          }
+          rowIndex += 1
+        }
+        mappedDoubles = pairs.groupBy(identity).map {
+          case (pair, simPairs) => (Some(pair), simPairs.size)
+        }.toList
     }
   }
 }

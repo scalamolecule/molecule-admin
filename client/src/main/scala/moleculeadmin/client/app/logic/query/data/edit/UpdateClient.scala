@@ -1,4 +1,5 @@
 package moleculeadmin.client.app.logic.query.data.edit
+
 import moleculeadmin.client.app.logic.query.QueryState._
 import moleculeadmin.client.app.logic.query.data.TypeValidation
 import moleculeadmin.client.app.logic.query.keyEvents.Editing

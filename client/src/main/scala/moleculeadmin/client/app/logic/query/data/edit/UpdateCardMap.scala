@@ -60,35 +60,15 @@ case class UpdateCardMap[T](
     val raw  = cell.innerHTML
     val strs = if (raw.endsWith("<ul></ul>")) {
       raw.replace("<ul></ul>", "").split("<br>").toList
-    } else
+    } else {
+      val before = "<ul><li>".size
+      val after  = "</li></ul>".size
       raw
-        .substring(8, raw.length - 10)
+        .substring(before, raw.length - after)
         .split("</li><li>")
         .toList
-
-    val vs = if (attrType == "String" && enums.isEmpty) {
-      strs
-        .map(_
-          .replace("&nbsp;", " ")
-          .replace("&lt;", "<")
-          .replace("&gt;", ">")
-          .replace("&amp;", "&")
-          .replace("<br>", "\n")
-          .trim)
-        .filter(_.nonEmpty)
-        .map(_html2str)
-    } else {
-      strs.flatMap(
-        _.split("<br>")
-          .map(_
-            .replace("&nbsp;", " ")
-            .replace("&lt;", "<")
-            .replace("&gt;", ">")
-            .replace("&amp;", "&")
-            .trim)
-          .filter(_.nonEmpty)
-      )
     }
+    val vs = _decode(strs, attrType, enums)
 
     val newPairs: List[(String, String)] = vs.map { pair =>
       if (!pair.contains("->")) {
@@ -101,9 +81,8 @@ case class UpdateCardMap[T](
         (k, truncateDateStr(v))
       else
         (k, v)
-    }.toMap.toList // remove pairs with duplicate keys
-      .sortBy(_._1)
-
+    }.toMap // ensure unique keys
+      .toList.sortBy(_._1)
 
     if (oldPairs == newPairs) {
       // Remove superfluous line shifts
@@ -177,7 +156,6 @@ case class UpdateCardMap[T](
         }
 
       } else {
-
         // Update edit cell
         redrawCell()
 
@@ -218,20 +196,16 @@ case class UpdateCardMap[T](
 
     def redrawCell(): Node = {
       cell.innerHTML = ""
-      val vs = if (attrType == "String")
+      val items = if (attrType == "String")
         newPairs.sorted.map {
-          case (k, v) => span(_str2frags(k + " -> " + v))
+          case (k, v) => li(_str2frags(k + " -> " + v))
         }
       else
         newPairs.sorted.map {
-          case (k, v) => span(k + " -> " + v)
+          case (k, v) => li(k + " -> " + v)
         }
 
-      vs.foreach { v =>
-        cell.appendChild(v.render)
-        cell.appendChild(br.render)
-      }
-      cell
+      cell.appendChild(ul(items).render)
     }
   }
 }

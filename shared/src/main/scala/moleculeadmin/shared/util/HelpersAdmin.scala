@@ -39,6 +39,26 @@ trait HelpersAdmin extends Helpers with SpecialNames {
     }
   }
 
+  def _html2str(html: String): String = {
+    val str = html
+      .replaceFirst("<span[^>]*>", "")
+      .replaceFirst("</span>", "")
+      .replace("<span></span>", "")
+      .replace("&nbsp;", " ")
+      .replace("&amp;", "&")
+      .replace("&lt;", "<")
+      .replace("&gt;", ">")
+      .replace("<br>", "\n")
+    if (str.startsWith("{"))
+    // Invisible empty strings surrounded with { }
+      if (str.endsWith("}") && str.tail.init.replace("\n", " ").trim.isEmpty)
+        str.tail.init
+      else
+        str
+    else
+      str
+  }
+
   def renderValue(v: Any): String = v match {
     case d: Date                            => date2str(d.asInstanceOf[Date])
     case s: String if s.startsWith("__n__") => s.drop(5)

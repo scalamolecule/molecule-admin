@@ -243,31 +243,29 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
     }
 
     def filterCell(): JsDom.TypedTag[TableCell] = {
-      val filterExpr  = filters.now.get(colIndex).fold("")(_.filterExpr)
-      val applyFilter = { () =>
-        val filterCell    = document.getElementById(filterId)
-        val newFilterExpr = _html2str(filterCell.innerHTML).trim
+      val filterExprOpt = filters.now.get(colIndex).map(_.filterExpr)
+      val applyFilter   = { () =>
         // Let only filters() propagate change
         offset.kill()
         offset() = 0
-        if (newFilterExpr.isEmpty) {
+        val filterCell        = document.getElementById(filterId)
+        val newFilterExprHtml = filterCell.innerHTML
+        if (attrType != "String" && newFilterExprHtml.trim.isEmpty
+          || attrType == "String" && newFilterExprHtml.isEmpty) {
           _markFilterCell(filterCell, false)
-          filterCell.setAttribute("style", "background-color: white")
           filters() = filters.now - colIndex
         } else {
           _markFilterCell(filterCell, true)
-          filterCell.setAttribute("style", "background-color: #9de9ff")
+          val newFilterExpr = _html2str(newFilterExprHtml)
           createFilter(col, newFilterExpr, attrType != "String") match {
-            case Some(filter) =>
-              // Overwrite filter at colIndex
-              filters() = filters.now + (colIndex -> filter)
+            case Some(filter) => filters() = filters.now + (colIndex -> filter)
             case None         => filters() = filters.now - colIndex
           }
         }
         // Update grouped values
         groupedColIndexes.recalc()
       }
-      _attrFilterCell(filterId, filterExpr, applyFilter)
+      _attrFilterCell(filterId, filterExprOpt, applyFilter)
     }
     if (kind == "edit") editCell() else filterCell()
   }

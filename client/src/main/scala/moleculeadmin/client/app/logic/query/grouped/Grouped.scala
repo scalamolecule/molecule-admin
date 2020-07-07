@@ -17,13 +17,14 @@ case class Grouped[T](col: Col)(implicit ctx: Ctx.Owner)
   // Local caches
 
   // Selected triples of rowIndex/value/count
-  var selected = Seq.empty[(Int, Option[T], Int)]
+  //  var selected = Seq.empty[(Int, Option[T], Int)]
+  private var selected = Seq.empty[(Int, Option[String], Int)]
 
   // Current ordering of grouped data
-  var curOrdering = 1
+  private var curOrdering = 1
 
-  val spanOfSelected   = span().render
-  val groupedTableBody = _groupedTableBody(colIndex)
+  private val spanOfSelected   = span().render
+  private val groupedTableBody = _groupedTableBody(colIndex)
 
 
   def render: JsDom.TypedTag[Element] = {
@@ -56,17 +57,18 @@ case class Grouped[T](col: Col)(implicit ctx: Ctx.Owner)
   def populate(ordering: Int): Unit = {
     curOrdering = ordering
     sortData(ordering)
-    val countAll   = groupedData.length
+    val countAll = groupedData.length
     // Avoid out-of-memory rendering more than 25000 rows in group table
-    val count   = countAll.min(25000)
-    val headRow = _headRow(colType, count, sort, ordering)
+    // Of course depends of data size and hardware
+    val count    = countAll.min(25000)
+    val headRow  = _headRow(colType, count, sort, ordering)
 
     groupedTableBody.innerHTML = ""
     groupedTableBody.appendChild(headRow)
     val previewCount = 20
 
     if (count > previewCount) {
-      // Render first 10 immediately
+      // Render first 20 (visible) immediately
       appendRows(groupedTableBody, 0, previewCount)
       // Render the rest afterwards in the background
       setTimeout(200) {
@@ -76,7 +78,6 @@ case class Grouped[T](col: Col)(implicit ctx: Ctx.Owner)
       appendRows(groupedTableBody, 0, count)
     }
   }
-
 
   def appendRows(
     groupedTableBody: TableSection,
@@ -92,22 +93,52 @@ case class Grouped[T](col: Col)(implicit ctx: Ctx.Owner)
     }
   }
 
+  private val rowMaker: (Int, (Option[String], Int)) => TableRow = {
+    colType match {
+      case "double" | "listDouble" =>
+        (rowIndex: Int, vc: (Option[String], Int)) =>
+          _rowNum(
+            rowId(rowIndex),
+            cellId(rowIndex),
+            rowIndex,
+            vc._1.getOrElse(none),
+            vc._2,
+            update(rowIndex),
+            toggle(rowIndex, vc._1, vc._2)
+          )
+
+      case _ =>
+        (rowIndex: Int, vc: (Option[String], Int)) =>
+          _rowStr(
+            rowId(rowIndex),
+            cellId(rowIndex),
+            rowIndex,
+            vc._1,
+            vc._2,
+            update(rowIndex),
+            toggle(rowIndex, vc._1, vc._2)
+          )
+    }
+  }
+
+  private val update = updateLambda(
+    document.getElementById("tableBody").childNodes)
+
+  private val toggle = {
+    (rowIndex: Int, curVopt: Option[String], count: Int) =>
+      () =>
+        if (selected.contains((rowIndex, curVopt, count)))
+          toggleOff(rowIndex, curVopt, count)
+        else
+          toggleOn(rowIndex, curVopt, count)
+  }
+
   def showGrouped(): Unit = {
     spanOfSelected.appendChild(_groupedSelected(colType, selected, toggleOff))
     spanOfSelected.appendChild(_separator)
   }
 
-  def setFilter(): Unit = {
-    val filterExpr = selected.map {
-      case (_, None, _)    => "-"
-      case (_, Some(v), _) => v
-    }.mkString("\n")
-    val filter = createFilter(col, filterExpr, splitComma = false).get
-    filters() = filters.now.filterNot(_._1 == colIndex) + (colIndex -> filter)
-    columns.recalc()
-  }
-
-  def toggleOn(rowIndex: Int, curVopt: Option[T], count: Int): Unit = {
+  def toggleOn(rowIndex: Int, curVopt: Option[String], count: Int): Unit = {
     document.getElementById(rowId(rowIndex)).setAttribute("class", "selected")
     spanOfSelected.innerHTML = ""
     selected = selected :+ (rowIndex, curVopt, count)
@@ -115,52 +146,34 @@ case class Grouped[T](col: Col)(implicit ctx: Ctx.Owner)
     setFilter()
   }
 
-  def toggleOff(rowIndex: Int, curVopt: Option[T], count: Int): Unit = {
+  def toggleOff(rowIndex: Int, curVopt: Option[String], count: Int): Unit = {
     document.getElementById(rowId(rowIndex)).removeAttribute("class")
     spanOfSelected.innerHTML = ""
     selected = selected.filterNot(_ == (rowIndex, curVopt, count))
     if (selected.isEmpty) {
-      filters() = filters.now - colIndex
-      columns.recalc()
+      removeFilter()
     } else {
       showGrouped()
       setFilter()
     }
   }
 
-  val toggle = (rowIndex: Int, curVopt: Option[T], count: Int) => () =>
-    if (selected.contains((rowIndex, curVopt, count)))
-      toggleOff(rowIndex, curVopt, count)
-    else
-      toggleOn(rowIndex, curVopt, count)
+  def setFilter(): Unit = {
+    val filterExpr = selected.map {
+      case (_, None, _)    => "-"
+      case (_, Some(v), _) => v
+    }.mkString("\n")
+    val filter     = createFilter(col, filterExpr, splitComma = false).get
+    // Let only columns trigger
+    filters.kill()
+    filters() = filters.now.filterNot(_._1 == colIndex) + (colIndex -> filter)
+    columns.recalc()
+  }
 
-
-  val update = updateLambda(document.getElementById("tableBody").childNodes)
-
-  val rowMaker: (Int, (Option[T], Int)) => TableRow = {
-    if (colType == "double") {
-      (rowIndex: Int, vc: (Option[T], Int)) =>
-        _rowNum(
-          rowId(rowIndex),
-          cellId(rowIndex),
-          rowIndex,
-          vc._1.fold("__none__")(_.toString),
-          vc._2,
-          update(rowIndex),
-          toggle(rowIndex, vc._1, vc._2)
-        )
-    } else {
-      // todo special case for Date and other types?
-      (rowIndex: Int, vc: (Option[T], Int)) =>
-        _rowStr(
-          rowId(rowIndex),
-          cellId(rowIndex),
-          rowIndex,
-          vc._1.fold("__none__")(_.toString),
-          vc._2,
-          update(rowIndex),
-          toggle(rowIndex, vc._1, vc._2)
-        )
-    }
+  def removeFilter(): Unit = {
+    // Let only columns trigger
+    filters.kill()
+    filters() = filters.now - colIndex
+    columns.recalc()
   }
 }
