@@ -5,6 +5,7 @@ import moleculeadmin.client.app.logic.query.data.TypeValidation
 import moleculeadmin.client.app.logic.query.keyEvents.Editing
 import moleculeadmin.shared.ast.query.{Col, QueryResult}
 import moleculeadmin.shared.ops.query.ColOps
+import org.scalajs.dom.document
 import org.scalajs.dom.html.{TableCell, TableRow}
 import rx.Ctx
 
@@ -54,6 +55,11 @@ abstract class UpdateClient[T](
     affectedRows: List[Int] = Nil,
     affectedIndexes: Array[Int] = Array.empty[Int]
   ): Unit = {
+
+    val curRow = if(row.parentNode == null) {
+      // Get row dynamically if page has changed and table not rendered yet
+      document.activeElement.parentNode.asInstanceOf[TableRow]
+    } else row
 
     // Update arrays in client memory ---------------------------------------
 
@@ -212,9 +218,9 @@ abstract class UpdateClient[T](
     if (valueColIndex == -1) {
       if (related == 0) {
         // Only one row updated
-        replaceTxCells(rowIndex, row)
+        replaceTxCells(rowIndex, curRow)
       } else {
-        val tableRows = row.parentNode.childNodes
+        val tableRows = curRow.parentNode.childNodes
         var rowIndex  = 0
         val length    = tableRows.length
         while (rowIndex < length) {
@@ -227,7 +233,7 @@ abstract class UpdateClient[T](
         }
       }
     } else {
-      val tableRows = row.parentNode.childNodes
+      val tableRows = curRow.parentNode.childNodes
       affectedRows.foreach { rowIndex =>
         replaceTxCells(rowIndex, tableRows.item(rowIndex).asInstanceOf[TableRow])
       }
