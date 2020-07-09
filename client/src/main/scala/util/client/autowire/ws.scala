@@ -73,7 +73,7 @@ case class AutowireClientWebSocket(socket: WebSocket)
     }
 
     // Response
-    val promise = Promise[ByteBuffer]
+    val promise = Promise[ByteBuffer]()
     socket.onmessage = {
       (e: MessageEvent) =>
         promise.trySuccess(
