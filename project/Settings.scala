@@ -12,7 +12,7 @@ object Settings {
     name := "molecule-admin",
     organization := "org.scalamolecule",
     version := "0.7",
-    scalaVersion := "2.13.2",
+    scalaVersion := "2.13.3",
     scalacOptions := Seq(
       "-deprecation",
       "-encoding",

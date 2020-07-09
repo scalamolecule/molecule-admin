@@ -29,18 +29,18 @@ trait Paging extends BaseKeyEvents {
   ) = {
     // Throttle paging for smooth rendering
     if (beginning < 10000000) {
-      beginning = js.Date.now
+      beginning = js.Date.now()
     }
     i += 1
     if (keyRepeatMs == 0 && i == 3) {
       // Measure duration of 2 key repeats and apply a rough
       // factor of 40% for processing leaving 60% time to rendering
-      keyRepeatMs = ((js.Date.now - beginning) / 2 * 0.4).round
+      keyRepeatMs = ((js.Date.now() - beginning) / 2 * 0.4).round
       // println("keyRepeatInterval " + keyRepeatMs)
     }
 
     if (i % cycles == 0) {
-      t1 = js.Date.now
+      t1 = js.Date.now()
       e.key match {
         case "ArrowLeft"  => backward(); j += 1
         case "ArrowRight" => forward(); j += 1
@@ -48,7 +48,7 @@ trait Paging extends BaseKeyEvents {
         case "PageDown"   => forward(); j += 1
         case _            => ()
       }
-      t2 = js.Date.now
+      t2 = js.Date.now()
       delta = t2 - t1
       tProcess = tProcess + delta
       avg = tProcess / j

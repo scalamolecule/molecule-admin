@@ -100,7 +100,7 @@ trait Editing extends Paging with AppElements {
     // Avoid deleting item code
     if (curCell.getAttribute("class") == "items") {
       // Find caret position in cell
-      val range         = window.getSelection.getRangeAt(0)
+      val range         = window.getSelection().getRangeAt(0)
       val preCaretRange = range.cloneRange()
       preCaretRange.selectNodeContents(curCell)
       preCaretRange.setEnd(range.endContainer, range.endOffset)
@@ -160,11 +160,11 @@ trait Editing extends Paging with AppElements {
         newUList
       }
       // Set caret in new item
-      val range       = document.createRange
-      val sel         = window.getSelection
+      val range       = document.createRange()
+      val sel         = window.getSelection()
       range.setStart(uList.childNodes.item(uList.childNodes.length - 1), 0)
       range.collapse(true)
-      sel.removeAllRanges
+      sel.removeAllRanges()
       sel.addRange(range)
     }
   }
