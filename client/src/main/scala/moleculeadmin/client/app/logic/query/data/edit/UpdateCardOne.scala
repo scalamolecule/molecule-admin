@@ -149,8 +149,8 @@ case class UpdateCardOne[T](
           }
         }
 
-        // update db
-        val dbUpdate = if (colType == "double") {
+        // update db call
+        val dbUpdateCall = if (colType == "double") {
           val data = if (nonEmpty)
             Seq((eid, Nil, Seq(value.toDouble)))
           else
@@ -161,10 +161,11 @@ case class UpdateCardOne[T](
             Seq((eid, Nil, Seq(value)))
           else
             Seq((eid, Seq(value), Nil))
-
           queryWireAjax().updateStr(db, attrFull, attrType, enumPrefix, data).call()
         }
-        dbUpdate.foreach {
+
+        // do update
+        dbUpdateCall.foreach {
           case Right((t, tx, txInstant)) =>
             updateClient(cellIdMaker, t, tx, txInstant, row, eid, newVopt)
             if (nonEmpty)

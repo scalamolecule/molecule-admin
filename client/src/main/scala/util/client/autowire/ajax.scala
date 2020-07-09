@@ -4,6 +4,7 @@ import java.nio.ByteBuffer
 import autowire.ClientProxy
 import boopickle.Default._
 import org.scalajs.dom
+import org.scalajs.dom.ext.AjaxException
 import org.scalajs.dom.window
 import util.shared.autowire.AutowireSerializers
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -30,9 +31,20 @@ case class AutowireClientAjax(context: String)
       data = Pickle.intoBytes(req.args),
       responseType = "arraybuffer",
       headers = Map("Content-Type" -> "application/octet-stream")
-    ).map { r =>
+    ).map(r =>
       // Response
       TypedArrayBuffer.wrap(r.response.asInstanceOf[ArrayBuffer])
+    ).recover {
+      // Catch ajax exceptions and alert user
+      case e@AjaxException(xhr) =>
+        val advice = "\nPlease re-run Play server from terminal and refresh page."
+        val msg = xhr.status match {
+          case 0 => s"Ajax call failed: server not responding. $advice"
+          case n => s"Ajax call failed: XMLHttpRequest.status = $n. $advice"
+        }
+        println(msg)
+        window.alert(msg)
+        throw e
     }
   }
 }
