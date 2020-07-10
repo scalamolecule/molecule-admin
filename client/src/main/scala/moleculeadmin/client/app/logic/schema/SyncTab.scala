@@ -269,9 +269,9 @@ case class SyncTab(db: String)(implicit val ctx: Ctx.Owner)
                 td(),
                 td(attr, if (ok) () else style := "font-weight: bold; color:red;"),
                 td(),
-                td(baseOptions, if (ok) () else style := "font-weight: bold; color:red;"),
+                td(baseOptions.mkString(", "), if (ok) () else style := "font-weight: bold; color:red;"),
                 td(),
-                td(testOptions, if (ok) () else style := "font-weight: bold; color:red;")
+                td(testOptions.mkString(", "), if (ok) () else style := "font-weight: bold; color:red;")
               )
           }
         }

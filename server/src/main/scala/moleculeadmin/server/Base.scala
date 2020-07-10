@@ -63,9 +63,8 @@ trait Base extends BaseApi with DatomicUri with HelpersAdmin {
     val schemaRaw = Entity(conn.db.entity(dbE), conn, dbE.asInstanceOf[Object]).touch
 
     def cleanOptions(options: Option[List[String]]): Option[Set[String]] = options match {
-      case None                         => Option.empty[Set[String]]
-      case Some(opts) if opts.size == 1 => Option.empty[Set[String]]
-      case Some(opts)                   =>
+      case None       => Option.empty[Set[String]]
+      case Some(opts) =>
         Some(opts
           .map(_.substring(24))
           .filterNot(_ == "indexed").toSet) // remove :meta_Attribute.options/
