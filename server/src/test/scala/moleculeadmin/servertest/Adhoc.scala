@@ -10,7 +10,6 @@ import utest._
 import scala.languageFeature.implicitConversions._
 import scala.concurrent.ExecutionContext.Implicits.global
 import boopickle.Default._
-import db.core.dsl.coreTest._
 
 
 object Adhoc extends TestSuite
@@ -25,24 +24,29 @@ object Adhoc extends TestSuite
 
   val tests = Tests {
 
-    test("Adhoc") {
-
-      1 ==> 1
-
-//      implicit val conn = recreateDbFrom(CoreTestSchema, host + "/CoreTest", protocol)
-//      recreateDbFrom(PartitionSchema, host + "/Partition", protocol)
-//      implicit val conn = Conn(uriBase + "/Partition")
-//      implicit val conn = Conn(uriBase + "/Partition1")
-//      implicit val conn = Conn(uriBase + "/mbrainz-1968-1973")
+    test("CoreTest") {
+      //      implicit val conn = recreateDbFrom(CoreTestSchema, host + "/CoreTest", protocol)
       implicit val conn = Conn(base + "/CoreTest")
+      import db.core.dsl.coreTest._
 
-//      installMoleculeAdminSampleDbs(Seq("Partition"))
-//
-//      createAttribute(partitionMetaSchema, "Partition", "a", "Aa", "", 1, "Int") ==> Left(
-//        "Empty attribute name."
-//      )
+    }
 
 
+    test("MoleculeAdmin") {
+      implicit val conn = Conn(base + "/MoleculeAdmin")
+      import db.admin.dsl.moleculeAdmin._
+
+      meta_Partition.name_("music")
+        .Namespaces.name_("WorkTitle")
+        .Attrs.name("lang1").options$.get ==> 7
+//        .Attrs.a("lang1").options$.get ==> 7
+
+    }
+
+
+    test("mbrainz") {
+      implicit val conn = Conn(base + "/mbrainz-1968-1973")
+      import db.integration.dsl.mBrainz._
     }
   }
 }

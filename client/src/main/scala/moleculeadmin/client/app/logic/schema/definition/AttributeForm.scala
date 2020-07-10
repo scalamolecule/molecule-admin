@@ -213,25 +213,17 @@ case class AttributeForm(db: String,
         case _                       => valOptions
       }
       val curOpts = options.getOrElse(Nil).toSeq
-      if (curOpts.isEmpty) {
-        select(id := s"attr-opts",
-          opts.map(opt =>
-            option(value := opt, opt)
+      div(
+        opts.tail.map(v =>
+          div(cls := "form-check",
+            input(tpe := "checkbox", cls := "form-check-input", id := s"attr-opts-$v", name := "attr-opts", value := v,
+              if (curOpts contains v) checked := true else (),
+              onchange := { () => lastOption() = v }
+            ),
+            label(cls := "form-check-label", `for` := s"attr-opts-$v", width := "100%", v)
           )
-        ).render
-      } else {
-        div(
-          opts.tail.map(v =>
-            div(cls := "form-check",
-              input(tpe := "checkbox", cls := "form-check-input", id := s"attr-opts-$v", name := "attr-opts", value := v,
-                if (curOpts contains v) checked := true else (),
-                onchange := { () => lastOption() = v }
-              ),
-              label(cls := "form-check-label", `for` := s"attr-opts-$v", width := "100%", v)
-            )
-          )
-        ).render
-      }
+        )
+      ).render
     } else {
       select(id := "attr-opts", strOptions.map(opt => option(value := opt, opt))).render
     }

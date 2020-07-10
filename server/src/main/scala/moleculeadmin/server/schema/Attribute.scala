@@ -494,7 +494,7 @@ object Attribute extends SchemaBase with Base {
 
                     if (curOptions != options.sorted) {
 
-                      if (options.contains("fulltext"))
+                      if (!curOptions.contains("fulltext") && options.contains("fulltext"))
                         throw new RuntimeException(s"Can't add fulltext option to existing attribute.")
 
                       val passedOpts: Seq[String] = options.sorted
@@ -512,7 +512,8 @@ object Attribute extends SchemaBase with Base {
                         throw new RuntimeException(s"Found unrecognized option(s): " + nonAvailableOptions.mkString(", ") +
                           s"\nAvailable options: noHistory, uniqueValue, uniqueIdentity, isComponent, fulltext")
 
-                      val (_, isComponent, noHistory, fulltext, unique) = Schema.a(curAttrFull).isComponent$.noHistory$.fulltext$.unique$.get(liveConn).head
+                      val (_, isComponent, noHistory, fulltext, unique) =
+                        Schema.a(curAttrFull).isComponent$.noHistory$.fulltext$.unique$.get(liveConn).head
                       val liveOpts: Seq[String]                         = Seq(
                         //                      Some("indexed"), // default
                         if (isComponent.isDefined) Some("isComponent") else None,
@@ -530,12 +531,12 @@ object Attribute extends SchemaBase with Base {
                       val obsoleteOpts: Seq[String] = curOptions.diff(passedOpts)
                       val newOpts     : Seq[String] = passedOpts.diff(curOptions)
 
-                      //                    println("-----------------------------------")
-                      //                    println("liveOpts    : " + liveOpts.mkString(", "))
-                      //                    println("curOptions  : " + curOptions.mkString(", "))
-                      //                    println("passedOpts  : " + passedOpts.mkString(", "))
-                      //                    println("obsoleteOpts: " + obsoleteOpts.mkString(", "))
-                      //                    println("newOpts     : " + newOpts.mkString(", "))
+                      //                      println("-----------------------------------")
+                      //                      println("liveOpts    : " + liveOpts)
+                      //                      println("curOptions  : " + curOptions)
+                      //                      println("passedOpts  : " + passedOpts)
+                      //                      println("obsoleteOpts: " + obsoleteOpts)
+                      //                      println("newOpts     : " + newOpts)
 
                       if (obsoleteOpts.contains("fulltext"))
                         throw new RuntimeException(s"Can't remove fulltext option from existing attribute.")
@@ -710,7 +711,6 @@ object Attribute extends SchemaBase with Base {
 
                     // Roll-back ==================================================================================
                     case error: Throwable => try {
-
 
                       // Restore order of meta attributes
                       metaAttrs.foreach { case (e, pos1, _) =>
