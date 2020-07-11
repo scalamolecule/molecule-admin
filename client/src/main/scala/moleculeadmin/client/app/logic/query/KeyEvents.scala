@@ -49,6 +49,7 @@ trait KeyEvents
             case "g"      => toggleGroupedMenu()
             case "q"      => toggleQueryBuilder
             case "d"      => toggle("tableData")
+            case "e"      => toggleView(2) // Entity view
 
             case k if queryListOpen    => queryList(e, k)
             case k if groupedOpen      => grouped(e, k)
