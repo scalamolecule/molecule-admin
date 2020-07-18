@@ -8,11 +8,11 @@ import utest._
 object ResetDbs extends TestSuite with ExampleData with ResetDbsCmds {
 
   val tests = Tests {
-//    test("Reset all") {
-//      resetDbs()
-//      //          populateCoreTest(Conn(base + "/CoreTest"))
-//      populateCoreTestNested(Conn(base + "/CoreTest"))
-//    }
+    //    test("Reset all") {
+    //      resetDbs()
+    //      //          populateCoreTest(Conn(base + "/CoreTest"))
+    //      populateCoreTestNested(Conn(base + "/CoreTest"))
+    //    }
 
     //    test("Reset all and poplulate") {
     //      resetDbs()
