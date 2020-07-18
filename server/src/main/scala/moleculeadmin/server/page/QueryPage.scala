@@ -13,6 +13,7 @@ object QueryPage extends Base {
 
       fontAwesome,
       openIconic,
+      materialIcons,
 
       mainCss,
       tableDataCss,

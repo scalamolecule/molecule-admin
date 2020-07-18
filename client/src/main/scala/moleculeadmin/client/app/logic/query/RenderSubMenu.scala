@@ -21,18 +21,25 @@ case class RenderSubMenu()(implicit val ctx: Ctx.Owner)
 
   def dynRender: Rx.Dynamic[JsDom.TypedTag[Span]] = Rx {
     renderSubMenu()
-    span(
-      _maxRowsSelector,
-      ul(
-        cls := "nav nav-pills",
-        SubMenuQueryList().render,
-        SubMenuNew().render,
-        SubMenuUndo().render,
-        SubMenuGrouped().render,
-        SubMenuViews().render,
-        SubMenuShortCuts().render,
-        SubMenuEntityLock().render
+
+    if (cachedQueryResult == null) {
+      span()
+    } else {
+      // Re-loaded when data is fetched
+      span(
+        _maxRowsSelector,
+        ul(
+          cls := "nav nav-pills",
+          SubMenuQueryList().render,
+          SubMenuNew().render,
+          SubMenuUndo().render,
+          SubMenuGrouped().render,
+          SubMenuViews().render,
+          SubMenuShortCuts().render,
+          SubMenuGridSettings().render,
+          SubMenuEntityLock().render
+        )
       )
-    )
+    }
   }
 }

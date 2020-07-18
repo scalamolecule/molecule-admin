@@ -11,7 +11,7 @@ import scalatags.JsDom.all._
 
 trait UndoElements extends AppElements with RxBindings {
 
-  val datomTable =
+  def datomTable =
     table(
       cls := "undoTxs",
       id := "undoTxs",

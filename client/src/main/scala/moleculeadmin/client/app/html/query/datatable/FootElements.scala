@@ -1,6 +1,6 @@
 package moleculeadmin.client.app.html.query.datatable
+import moleculeadmin.client.app.css.Color
 import moleculeadmin.client.app.html.AppElements
-import moleculeadmin.shared.styles.Color
 import org.scalajs.dom.html.{Div, Select, Table}
 import org.scalajs.dom.raw.HTMLElement
 import scalatags.JsDom.TypedTag

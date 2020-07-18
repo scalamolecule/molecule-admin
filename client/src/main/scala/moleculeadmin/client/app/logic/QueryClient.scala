@@ -78,6 +78,7 @@ object QueryClient
     Rx {
       maxRows() = settings.getOrElse("maxRows", "-1").toInt
       limit() = settings.getOrElse("limit", "20").toInt
+      gridType() = settings.getOrElse("gridType", "1").toInt
       querySelection() = settings.getOrElse("querySelection", "a")
       if (valuesCounted) {
         queryBaseSelection = settings.getOrElse("queryBaseSelection", "a")

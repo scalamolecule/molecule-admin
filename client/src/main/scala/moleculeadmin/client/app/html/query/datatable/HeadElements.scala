@@ -2,11 +2,11 @@ package moleculeadmin.client.app.html.query.datatable
 
 import java.net.URI
 import java.util.UUID
+import moleculeadmin.client.app.css.Color
 import util.client.rx.RxBindings
 import moleculeadmin.client.app.logic.query.QueryState.groupEditId
 import moleculeadmin.client.app.html.query.SchemaDropdownElements
 import moleculeadmin.shared.ops.query.ColOps
-import moleculeadmin.shared.styles.Color
 import org.scalajs.dom
 import org.scalajs.dom.html._
 import org.scalajs.dom.raw

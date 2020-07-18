@@ -1,13 +1,13 @@
 package moleculeadmin.client.app.html.common
+import moleculeadmin.client.app.css.Color
 import moleculeadmin.client.app.html.AppElements
-import moleculeadmin.shared.styles.Color
 import org.scalajs.dom.html.{Anchor, Div, Select, Span}
 import scalatags.JsDom
 import scalatags.JsDom.all._
 
 trait TopMenuElements extends AppElements {
 
-  val _topBar: JsDom.TypedTag[Div] = _containerFluid(
+  def _topBar: JsDom.TypedTag[Div] = _containerFluid(
     padding := "4px 5px 4px 13px",
     backgroundColor := "#dfdfdf",
     borderBottomStyle.solid,

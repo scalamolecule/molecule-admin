@@ -2,13 +2,13 @@ package moleculeadmin.client.app.logic.query.keyEvents
 
 import autowire._
 import boopickle.Default._
+import moleculeadmin.client.app.css.{Color, Mark}
 import moleculeadmin.client.app.logic.query.QueryState._
 import moleculeadmin.client.app.logic.query.data.edit.Insert
 import moleculeadmin.client.app.logic.query.marker.Toggle
 import moleculeadmin.client.queryWireAjax
 import moleculeadmin.shared.ast.query.Col
 import moleculeadmin.shared.ops.query.BaseQuery
-import moleculeadmin.shared.styles.Color
 import org.scalajs.dom.html.{TableCell, TableSection}
 import org.scalajs.dom.raw.{HTMLCollection, KeyboardEvent}
 import org.scalajs.dom.{document, window}
@@ -62,9 +62,9 @@ trait Inserting extends Insert with BaseQuery with Editing {
             color := Color.textDarkGray,
             _xRetract(() => ())(visibility.hidden),
             eid,
-            i(cls := mark.starOff),
-            i(cls := mark.flagOff, visibility.hidden),
-            i(cls := mark.checkOff, visibility.hidden)
+            i(cls := Mark.starOff),
+            i(cls := Mark.flagOff, visibility.hidden),
+            i(cls := Mark.checkOff, visibility.hidden)
           ).render
         )
         Toggle(tableBody, "star", false, eid = eid)

@@ -18,7 +18,7 @@ abstract class TxLambdas(
   cols: Seq[Col],
   qr: QueryResult,
 )(implicit ctx: Ctx.Owner)
-  extends Base
+  extends TxLambdasGrid(cols, qr)
     with BodyElements with DateHandling {
 
 

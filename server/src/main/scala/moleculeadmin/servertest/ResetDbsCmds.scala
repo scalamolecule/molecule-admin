@@ -19,7 +19,7 @@ trait ResetDbsCmds extends SchemaResets with ExampleData {
 
   def resetDbs(dbs0: Seq[String] = Nil): Conn = {
     val conn = if (dbs0.isEmpty) {
-      log.info("Creating MoleculeAdmin database...")
+      log.info("Re-creating MoleculeAdmin database...")
       recreateDbFrom(MoleculeAdminSchema, host + "/MoleculeAdmin", protocol)
     } else {
       log.info("Connecting to MoleculeAdmin...")
@@ -273,5 +273,57 @@ trait ResetDbsCmds extends SchemaResets with ExampleData {
       (3, 3, 2),
       (3, 3, 3),
     )
+  }
+
+  def populateCoreTestNested(implicit conn: Conn): Unit = {
+//    for {
+//      a <- Seq(1, 2)
+//      b <- Seq(1, 2)
+//      c <- Seq(1, 2)
+//      d <- Seq(1, 2)
+//      e <- Seq(1, 2)
+//    } yield println(s"($a, $b, $c, $d, $e),")
+
+    val base: Seq[(Int, Long, Float, Double, BigInt)] = List(
+      (1, 1, 1, 1, 1),
+      (1, 1, 1, 1, 2),
+      (1, 1, 1, 2, 1),
+      (1, 1, 1, 2, 2),
+      (1, 1, 2, 1, 1),
+      (1, 1, 2, 1, 2),
+      (1, 1, 2, 2, 1),
+      (1, 1, 2, 2, 2),
+      (1, 2, 1, 1, 1),
+      (1, 2, 1, 1, 2),
+      (1, 2, 1, 2, 1),
+      (1, 2, 1, 2, 2),
+      (1, 2, 2, 1, 1),
+      (1, 2, 2, 1, 2),
+      (1, 2, 2, 2, 1),
+      (1, 2, 2, 2, 2),
+      (2, 1, 1, 1, 1),
+      (2, 1, 1, 1, 2),
+      (2, 1, 1, 2, 1),
+      (2, 1, 1, 2, 2),
+      (2, 1, 2, 1, 1),
+      (2, 1, 2, 1, 2),
+      (2, 1, 2, 2, 1),
+      (2, 1, 2, 2, 2),
+      (2, 2, 1, 1, 1),
+      (2, 2, 1, 1, 2),
+      (2, 2, 1, 2, 1),
+      (2, 2, 1, 2, 2),
+      (2, 2, 2, 1, 1),
+      (2, 2, 2, 1, 2),
+      (2, 2, 2, 2, 1),
+      (2, 2, 2, 2, 2),
+    )
+
+    val data = (1 to 10).flatMap(n => base.map(t =>
+      (t._1, t._2, t._3, t._4, t._5, BigDecimal(n)))
+    )
+
+
+    Ns.int.long.float.double.bigInt.bigDec insert data
   }
 }

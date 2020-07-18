@@ -2,13 +2,13 @@ package moleculeadmin.client.app.logic.query.marker
 
 import autowire._
 import boopickle.Default._
-import moleculeadmin.client.app.logic.query.QueryState._
+import moleculeadmin.client.app.css.Mark
 import moleculeadmin.client.app.html.AppElements
+import moleculeadmin.client.app.logic.query.QueryState._
 import moleculeadmin.client.queryWireAjax
 import org.scalajs.dom.html.TableSection
 import org.scalajs.dom.raw.HTMLCollection
 import org.scalajs.dom.window
-import rx.Ctx
 import scala.concurrent.ExecutionContext.Implicits.global
 
 
@@ -19,17 +19,17 @@ case class ToggleOffAll(tableBody: TableSection, tpe: String) extends AppElement
       case "star" =>
         val starred = curStars
         curStars = Set.empty[Long]
-        (mark.starOff, 1, starred, starred.size, "Unstarring all")
+        (Mark.starOff, 1, starred, starred.size, "Unstarring all")
 
       case "flag" =>
         val flagged = curFlags
         curFlags = Set.empty[Long]
-        (mark.flagOff, 2, flagged, flagged.size, "Unflagging all")
+        (Mark.flagOff, 2, flagged, flagged.size, "Unflagging all")
 
       case "check" =>
         val checked = curChecks
         curChecks = Set.empty[Long]
-        (mark.checkOff, 3, checked, checked.size, "Unchecking all")
+        (Mark.checkOff, 3, checked, checked.size, "Unchecking all")
     }
 
   if (count > 1)

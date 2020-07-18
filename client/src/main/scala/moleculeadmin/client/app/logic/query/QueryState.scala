@@ -1,7 +1,6 @@
 package moleculeadmin.client.app.logic.query
 
 import molecule.ast.model.Element
-import moleculeadmin.client.app.logic.query.data.RowBuilder
 import moleculeadmin.shared.api.QueryApi
 import moleculeadmin.shared.ast.query.{Col, Filter, QueryDTO, QueryResult}
 import moleculeadmin.shared.ast.schema.{MetaSchema, Ns}
@@ -138,4 +137,8 @@ object QueryState extends QueryApi {
   // Url
   val curUrl: Var[String] = Var("")
 
+  // Grid
+  val gridType      : Var[Int]      = Var(1)
+  var cachedGridType                = 1
+  val gridColIndexes: Var[Seq[Int]] = Var(Seq.empty[Int])
 }

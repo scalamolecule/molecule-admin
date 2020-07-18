@@ -31,8 +31,8 @@ abstract class GroupedUpdate[T](col: Col)(implicit ctx: Ctx.Owner)
           .asInstanceOf[HTMLInputElement]
         val oldSopt         = groupedData(rowIndex)._1.map(t => _html2str(t))
         val (newSopt, newS) = groupedCell.innerHTML.trim match {
-          case "" | `none` => (Option.empty[String], none)
-          case s0          => val s = _html2str(s0); (Some(s), s)
+          case "" => (Option.empty[String], "")
+          case s0 => val s = _html2str(s0); (Some(s), s)
         }
 
         if (editCellId.nonEmpty
@@ -253,7 +253,7 @@ abstract class GroupedUpdate[T](col: Col)(implicit ctx: Ctx.Owner)
           case 1 if !valueFiltering =>
             // Allow in-memory replacing if not already filtering
             updateClient(t, tx, txInstant)
-          case _                        =>
+          case _                    =>
             // Need to re-load since
             // - Some filters
             // - there's no single `newTopt` card-many value
@@ -290,7 +290,7 @@ abstract class GroupedUpdate[T](col: Col)(implicit ctx: Ctx.Owner)
           groupedCell.appendChild(newSopt.get.render)
         }
       } else {
-        groupedCell.appendChild(none.render)
+        groupedCell.appendChild("".render)
       }
 
       // Update values in data table
@@ -342,7 +342,7 @@ abstract class GroupedUpdate[T](col: Col)(implicit ctx: Ctx.Owner)
       )
 
       // Focus next grouped value in refreshed grouped data table
-      val nextRowIndex = if(rowIndex == groupedData.length - 1)
+      val nextRowIndex = if (rowIndex == groupedData.length - 1)
         rowIndex else rowIndex + 1
       document.getElementById(s"grouped-cell-$colIndex-$nextRowIndex")
         .asInstanceOf[HTMLInputElement].focus()

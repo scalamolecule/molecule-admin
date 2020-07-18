@@ -1,7 +1,7 @@
 package moleculeadmin.client.app.html.query
 
+import moleculeadmin.client.app.css.Color
 import util.client.rx.RxBindings
-import moleculeadmin.shared.styles.Color
 import org.scalajs.dom
 import org.scalajs.dom.html.{Anchor, Element, HR, Select, Span, Table}
 import org.scalajs.dom.{document, html, window}

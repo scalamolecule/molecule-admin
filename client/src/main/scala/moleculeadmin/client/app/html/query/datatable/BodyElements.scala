@@ -1,19 +1,18 @@
 package moleculeadmin.client.app.html.query.datatable
 
-import util.client.rx.RxBindings
 import molecule.util.DateHandling
-import moleculeadmin.client.app.logic.query.QueryState.curUrl
+import moleculeadmin.client.app.css.Color
 import moleculeadmin.client.app.html.AppElements
-import moleculeadmin.shared.styles.Color
-import org.scalajs.dom.html.{Anchor, Element, Span, TableCell, TableRow}
+import moleculeadmin.client.app.logic.query.QueryState.{curUrl, _}
+import moleculeadmin.client.app.logic.query.keyEvents.MarkerToggling
+import org.scalajs.dom.html.{Element, Span, TableCell, TableRow}
 import org.scalajs.dom.raw.Node
+import org.scalajs.dom.window
 import rx.{Ctx, Rx}
 import scalatags.JsDom
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
-import org.scalajs.dom.{document, window}
-import moleculeadmin.client.app.logic.query.QueryState._
-import moleculeadmin.client.app.logic.query.keyEvents.MarkerToggling
+import util.client.rx.RxBindings
 
 
 trait BodyElements
@@ -63,29 +62,27 @@ trait BodyElements
 
   // Card one ======================================================
 
-  def _tdOneStr(cellId: String): TypedTag[TableCell] = td(
+  def _tdOneStr(cellId: String, prio: String = ""): TypedTag[TableCell] = td(
     id := cellId,
-    cls := "str",
+    cls := s"str$prio",
     cursor.default
   )
 
-  def _tdOneNum(cellId: String): TypedTag[TableCell] = td(
+  def _tdOneNum(cellId: String, prio: String = ""): TypedTag[TableCell] = td(
     id := cellId,
-    cls := "num",
+    cls := s"num$prio",
     cursor.default
   )
 
-  def _tdOneAggr(cellId: String): TypedTag[TableCell] = td(
+  def _tdOneAggr(cellId: String, prio: String = ""): TypedTag[TableCell] = td(
     id := cellId,
-    cls := "num",
+    cls := s"num$prio",
     noAggrEdit
   )
 
-  def _tdOneDate(
-    cellId: String
-  ): TypedTag[TableCell] = td(
+  def _tdOneDate(cellId: String, prio: String = ""): TypedTag[TableCell] = td(
     id := cellId,
-    cls := "date"
+    cls := s"date$prio"
   )
 
   def _tdOneEid(
@@ -101,10 +98,11 @@ trait BodyElements
     starToggle: () => Unit,
     flagToggle: () => Unit,
     checkToggle: () => Unit,
+    prio: String = ""
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = {
     td(
       id := cellId,
-      cls := Rx(if (eid == curEntity()) "eidChosen" else "eid"),
+      cls := Rx((if (eid == curEntity()) "eidChosen" else "eid") + prio),
       onmouseover := setCurEid,
       onclick := lockCurEid,
       // todo: skip span and do css magic to avoid squeezing overflow
@@ -123,9 +121,10 @@ trait BodyElements
     curEntity: rx.Var[Long],
     setCurEid: Long => () => Unit,
     lockCurEid: Long => () => Unit,
+    prio: String = ""
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = td(
     id := cellId,
-    cls := Rx(if (ref == curEntity()) "eidChosen" else "eid"),
+    cls := Rx((if (ref == curEntity()) "eidChosen" else "eid") + prio),
     attr("card") := 1,
     ref,
     onmouseover := setCurEid(ref),
@@ -138,7 +137,7 @@ trait BodyElements
     eid: Long,
     strFrag: Frag,
     update: () => Unit,
-    markRow: String => () => Unit,
+    markRow: String => () => Unit
   ): TypedTag[TableCell] = {
     td(
       id := cellId,
@@ -158,7 +157,7 @@ trait BodyElements
     eid: Long,
     optValue: Option[String],
     update: () => Unit,
-    markRow: String => () => Unit,
+    markRow: String => () => Unit
   ): TypedTag[TableCell] = td(
     id := cellId,
     cls := cellClass,
@@ -177,7 +176,7 @@ trait BodyElements
     eid: Long,
     optValue: Option[T],
     update: () => Unit,
-    markRow: String => () => Unit,
+    markRow: String => () => Unit
   ): TypedTag[TableCell] = td(
     id := cellId,
     cls := cellClass,
@@ -196,13 +195,14 @@ trait BodyElements
     curEntity: rx.Var[Long],
     setCurEid: Long => () => Unit,
     lockCurEid: Long => () => Unit,
-    update: () => Unit
+    update: () => Unit,
+    prio: String = ""
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = {
     val refStr = optValue.fold("")(_.toString)
     val ref    = optValue.fold(0L)(_.toLong)
     td(
       id := cellId,
-      cls := Rx(if (ref > 0L && ref == curEntity()) "eidChosen" else "eid"),
+      cls := Rx((if (ref > 0L && ref == curEntity()) "eidChosen" else "eid") + prio),
       refStr,
       onmouseover := setCurEid(ref),
       onclick := lockCurEid(ref),
@@ -219,11 +219,12 @@ trait BodyElements
     optValue: Option[Double],
     update: () => Unit,
     markRow: String => () => Unit,
+    prio: String = ""
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = {
     val ref = optValue.fold("")(_.toString)
     td(
       id := cellId,
-      cls := "num",
+      cls := s"num$prio",
       ref,
       attr("card") := 1,
       attr("eid") := eid,
@@ -239,7 +240,7 @@ trait BodyElements
     eid: Long,
     optValue: Option[String],
     update: () => Unit,
-    markRow: String => () => Unit,
+    markRow: String => () => Unit
   ): TypedTag[TableCell] = td(
     id := cellId,
     cls := cellClass,
@@ -299,10 +300,11 @@ trait BodyElements
   def _tdManyDate(
     cellId: String,
     vs: List[String],
-    showAll: Boolean
+    showAll: Boolean,
+    prio: String = ""
   ): TypedTag[TableCell] = td(
     id := cellId,
-    cls := "str",
+    cls := s"str$prio",
     attr("card") := 2,
     if (showAll)
       ul(vs.sorted.map(v => li(truncateDateStr(v))))
@@ -313,10 +315,11 @@ trait BodyElements
   def _tdManyDouble(
     cellId: String,
     vs: List[Double],
-    showAll: Boolean
+    showAll: Boolean,
+    prio: String = ""
   ): TypedTag[TableCell] = td(
     id := cellId,
-    cls := "num",
+    cls := s"num$prio",
     attr("card") := 2,
     if (showAll)
       ul(vs.sorted.map(li(_)))
@@ -331,7 +334,8 @@ trait BodyElements
     setCurEid: Long => () => Unit,
     lockCurEid: Long => () => Unit,
     showAll: Boolean = false,
-    max: Int = defaultSize
+    max: Int = defaultSize,
+    prio: String = ""
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = {
     val vsSorted = vs.sorted
     val list     = ul().render
@@ -363,6 +367,7 @@ trait BodyElements
     }
     td(
       id := cellId,
+      cls := prio,
       attr("card") := 2,
       list
     )
@@ -432,9 +437,11 @@ trait BodyElements
     lockCurEid: Long => () => Unit,
     update: () => Unit,
     markRow: String => () => Unit,
+    prio: String = ""
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = {
     td(
       id := cellId,
+      cls := prio,
       attr("card") := 2,
       attr("eid") := eid,
       contenteditable := true,
@@ -485,9 +492,9 @@ trait BodyElements
 
   // Map ==============================================================
 
-  def _tdMapItems(cellId: String): TypedTag[TableCell] = td(
+  def _tdMapItems(cellId: String, prio: String = ""): TypedTag[TableCell] = td(
     id := cellId,
-    cls := "mapPairs",
+    cls := s"mapPairs$prio",
     cursor.default
   )
 
@@ -565,42 +572,60 @@ trait BodyElements
 
   def _tdMapStr(
     cellId: String,
-    vs: Map[String, String]
+    vs: Map[String, String],
+    prio: String = ""
   ): TypedTag[TableCell] =
     mapCell(
       cellId,
-      vs.toSeq.sortBy(_._1), (v: String) => td(_str2frags(v))
+      vs.toSeq.sortBy(_._1),
+      (v: String) => td(_str2frags(v)),
+      prio = prio
     )
 
   def _tdMapDate(
     cellId: String,
-    vs: Map[String, String]
+    vs: Map[String, String],
+    prio: String = ""
   ): TypedTag[TableCell] =
     mapCell(
       cellId,
-      vs.toSeq.sortBy(_._1), (v: String) => td(truncateDateStr(v))
+      vs.toSeq.sortBy(_._1),
+      (v: String) => td(truncateDateStr(v)),
+      prio = prio
     )
 
   def _tdMapStrOther(
     cellId: String,
-    vs: Map[String, String]
+    vs: Map[String, String],
+    prio: String = ""
   ): TypedTag[TableCell] =
     mapCell(
       cellId,
-      vs.toSeq.sortBy(_._1), (v: String) => td(v)
+      vs.toSeq.sortBy(_._1),
+      (v: String) => td(v),
+      prio = prio
     )
 
   def _tdMapDouble(
     cellId: String,
-    vs: Map[String, Double]
+    vs: Map[String, Double],
+    prio: String = ""
   ): TypedTag[TableCell] =
     mapCell(
       cellId,
-      vs.toSeq.sortBy(_._1), (v: Double) => td(v)
+      vs.toSeq.sortBy(_._1),
+      (v: Double) => td(v),
+      prio = prio
     )
 
 
   // Hard-coding each combination to make row rendering as fast as possible
+
+  lazy val noAggrEdit = onclick := { () =>
+    window.alert(
+      "Entity id, aggregates and transaction values can't be edited."
+    )
+  }
 
   // t ----------------------------------------
 
@@ -608,10 +633,11 @@ trait BodyElements
     cellId: String,
     t: Long,
     curT: rx.Var[Long],
-    mouseover: () => Unit
+    mouseover: () => Unit,
+    prio: String = ""
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = td(
     id := cellId,
-    cls := Rx(if (curT() == t) "txChosen" else "tx"),
+    cls := Rx((if (curT() == t) "txChosen" else "tx") + prio),
     t, onmouseover := mouseover, noAggrEdit
   )
 
@@ -621,10 +647,11 @@ trait BodyElements
     t: Long,
     tx: Long,
     curT: rx.Var[Long],
-    mouseover: () => Unit
+    mouseover: () => Unit,
+    prio: String = ""
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = td(
     id := cellId,
-    cls := Rx(if (curT() == t) "txChosen" else "tx"),
+    cls := Rx((if (curT() == t) "txChosen" else "tx") + prio),
     t, onmouseover := mouseover, noAggrEdit
   )
   def _tdOneT_inst(
@@ -632,10 +659,11 @@ trait BodyElements
     t: Long,
     txInstant: String,
     curT: rx.Var[Long],
-    mouseover: () => Unit
+    mouseover: () => Unit,
+    prio: String = ""
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = td(
     id := cellId,
-    cls := Rx(if (curT() == t) "txChosen" else "tx"),
+    cls := Rx((if (curT() == t) "txChosen" else "tx") + prio),
     t, onmouseover := mouseover, noAggrEdit
   )
   def _tdOneT_tx_inst(
@@ -644,10 +672,11 @@ trait BodyElements
     tx: Long,
     txInstant: String,
     curT: rx.Var[Long],
-    mouseover: () => Unit
+    mouseover: () => Unit,
+    prio: String = ""
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = td(
     id := cellId,
-    cls := Rx(if (curT() == t) "txChosen" else "tx"),
+    cls := Rx((if (curT() == t) "txChosen" else "tx") + prio),
     t, onmouseover := mouseover, noAggrEdit
   )
 
@@ -657,10 +686,11 @@ trait BodyElements
     cellId: String,
     tx: Long,
     curTx: rx.Var[Long],
-    mouseover: () => Unit
+    mouseover: () => Unit,
+    prio: String = ""
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = td(
     id := cellId,
-    cls := Rx(if (curTx() == tx) "txChosen" else "tx"),
+    cls := Rx((if (curTx() == tx) "txChosen" else "tx") + prio),
     tx, onmouseover := mouseover, noAggrEdit
   )
   def _tdOneTx_t(
@@ -668,10 +698,11 @@ trait BodyElements
     tx: Long,
     t: Long,
     curTx: rx.Var[Long],
-    mouseover: () => Unit
+    mouseover: () => Unit,
+    prio: String = ""
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = td(
     id := cellId,
-    cls := Rx(if (curTx() == tx) "txChosen" else "tx"),
+    cls := Rx((if (curTx() == tx) "txChosen" else "tx") + prio),
     tx, onmouseover := mouseover, noAggrEdit
   )
   def _tdOneTx_inst(
@@ -679,10 +710,11 @@ trait BodyElements
     tx: Long,
     txInstant: String,
     curTx: rx.Var[Long],
-    mouseover: () => Unit
+    mouseover: () => Unit,
+    prio: String = ""
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = td(
     id := cellId,
-    cls := Rx(if (curTx() == tx) "txChosen" else "tx"),
+    cls := Rx((if (curTx() == tx) "txChosen" else "tx") + prio),
     tx, onmouseover := mouseover, noAggrEdit
   )
   def _tdOneTx_t_inst(
@@ -691,10 +723,11 @@ trait BodyElements
     t: Long,
     txInstant: String,
     curTx: rx.Var[Long],
-    mouseover: () => Unit
+    mouseover: () => Unit,
+    prio: String = ""
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = td(
     id := cellId,
-    cls := Rx(if (curTx() == tx) "txChosen" else "tx"),
+    cls := Rx((if (curTx() == tx) "txChosen" else "tx") + prio),
     tx, onmouseover := mouseover, noAggrEdit
   )
 
@@ -704,10 +737,11 @@ trait BodyElements
     cellId: String,
     txInstant: String,
     curTxInstant: rx.Var[String],
-    mouseover: () => Unit
+    mouseover: () => Unit,
+    prio: String = ""
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = td(
     id := cellId,
-    cls := Rx(if (curTxInstant() == txInstant) "txChosen" else "tx"),
+    cls := Rx((if (curTxInstant() == txInstant) "txChosen" else "tx") + prio),
     txInstant, onmouseover := mouseover, noAggrEdit
   )
   def _tdOneTxInstant_t(
@@ -715,10 +749,11 @@ trait BodyElements
     txInstant: String,
     t: Long,
     curTxInstant: rx.Var[String],
-    mouseover: () => Unit
+    mouseover: () => Unit,
+    prio: String = ""
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = td(
     id := cellId,
-    cls := Rx(if (curTxInstant() == txInstant) "txChosen" else "tx"),
+    cls := Rx((if (curTxInstant() == txInstant) "txChosen" else "tx") + prio),
     txInstant, onmouseover := mouseover, noAggrEdit
   )
   def _tdOneTxInstant_tx(
@@ -726,10 +761,11 @@ trait BodyElements
     txInstant: String,
     tx: Long,
     curTxInstant: rx.Var[String],
-    mouseover: () => Unit
+    mouseover: () => Unit,
+    prio: String = ""
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = td(
     id := cellId,
-    cls := Rx(if (curTxInstant() == txInstant) "txChosen" else "tx"),
+    cls := Rx((if (curTxInstant() == txInstant) "txChosen" else "tx") + prio),
     txInstant, onmouseover := mouseover, noAggrEdit
   )
   def _tdOneTxInstant_t_tx(
@@ -738,10 +774,11 @@ trait BodyElements
     t: Long,
     tx: Long,
     curTxInstant: rx.Var[String],
-    mouseover: () => Unit
+    mouseover: () => Unit,
+    prio: String = ""
   )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = td(
     id := cellId,
-    cls := Rx(if (curTxInstant() == txInstant) "txChosen" else "tx"),
+    cls := Rx((if (curTxInstant() == txInstant) "txChosen" else "tx") + prio),
     txInstant, onmouseover := mouseover, noAggrEdit
   )
 
