@@ -36,10 +36,7 @@ object Adhoc extends TestSuite
       implicit val conn = Conn(base + "/MoleculeAdmin")
       import db.admin.dsl.moleculeAdmin._
 
-      meta_Partition.name_("music")
-        .Namespaces.name_("WorkTitle")
-        .Attrs.name("lang1").options$.get ==> 7
-//        .Attrs.a("lang1").options$.get ==> 7
+
 
     }
 
@@ -47,6 +44,9 @@ object Adhoc extends TestSuite
     test("mbrainz") {
       implicit val conn = Conn(base + "/mbrainz-1968-1973")
       import db.integration.dsl.mBrainz._
+
+
     }
   }
+
 }

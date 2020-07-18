@@ -1,8 +1,8 @@
 package moleculeadmin.client.app.html.dbs
 
+import moleculeadmin.client.app.css.Color
 import moleculeadmin.client.app.html.AppElements
 import moleculeadmin.shared.ast.db.Db
-import moleculeadmin.shared.styles.Color
 import org.scalajs.dom.html._
 import rx._
 import scalatags.JsDom
@@ -243,7 +243,7 @@ trait DbsElements extends RxBindings with AppElements {
 
   // Create database -----------------------------------------------------------
 
-  val _createDbInput: Input = input(
+  lazy val _createDbInput: Input = input(
     cls := "inputs",
     size := 25,
     marginTop := 5,

@@ -37,7 +37,8 @@ case class AutowireClientAjax(context: String)
     ).recover {
       // Catch ajax exceptions and alert user
       case e@AjaxException(xhr) =>
-        val advice = "\nPlease re-run Play server from terminal and refresh page."
+        val advice = "\nPlease try to refresh page or else re-run Play server " +
+          "from terminal and then refresh page."
         val msg = xhr.status match {
           case 0 => s"Ajax call failed: server not responding. $advice"
           case n => s"Ajax call failed: XMLHttpRequest.status = $n. $advice"

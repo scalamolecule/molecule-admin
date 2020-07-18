@@ -113,7 +113,7 @@ trait AppElements extends HelpersAdmin {
       whiteSpace.nowrap
     )
 
-  val hljs =
+  def hljs =
     script(
       """$(document).ready(function() {
         |  $('pre code').each(function(i, block) {
@@ -129,7 +129,7 @@ trait AppElements extends HelpersAdmin {
       hljs
     )
 
-  val defaultSize = 10
+  def defaultSize = 10
 
   protected def expandingList(
     items: Seq[TypedTag[LI]],
@@ -167,20 +167,6 @@ trait AppElements extends HelpersAdmin {
     list
   }
 
-  object mark {
-    val starOn   = "fas fa-star starOn"
-    val starOff  = "far fa-star starOff"
-    val flagOn   = "fas fa-flag flagOn"
-    val flagOff  = "far fa-flag flagOff"
-    val checkOn  = "fas fa-check-circle checkOn"
-    val checkOff = "fas fa-check checkOff"
-  }
-
-  val noAggrEdit = onclick := { () =>
-    window.alert(
-      "Entity id, aggregates and transaction values can't be edited."
-    )
-  }
 
   def mapRow(k: String, vCell: TypedTag[TableCell]): TypedTag[TableRow] =
     tr(td(k), td("➜"), vCell)
@@ -189,11 +175,12 @@ trait AppElements extends HelpersAdmin {
     cellId: String,
     rawPairs: Seq[(String, T)],
     processValue: T => TypedTag[TableCell],
-    asserted: Boolean = true
+    asserted: Boolean = true,
+    prio: String = ""
   ): TypedTag[TableCell] = {
     td(
       id := cellId,
-      if (asserted) () else cls := "retracted",
+      if (asserted) prio else cls := s"retracted$prio",
       table(cls := "mapPairs",
         rawPairs.map {
           case (k, v) => mapRow(k, processValue(v))

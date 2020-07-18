@@ -7,7 +7,7 @@ import moleculeadmin.shared.ast.schema._
 
 trait SchemaResets extends DatomicUri {
 
-  val projectHome = pwd
+  val projectHome: Path = if (pwd.last == "server") pwd else pwd / "server"
 
   val partitionDefFile =
     """package db.migration.schema
@@ -41,7 +41,7 @@ trait SchemaResets extends DatomicUri {
       |}
       |""".stripMargin
 
-  val partitionDefFilePath = projectHome / "server" / "src" / "main" / "scala" / "db" / "migration" / "schema" / "PartitionDefinition.scala"
+  val partitionDefFilePath = projectHome / "src" / "main" / "scala" / "db" / "migration" / "schema" / "PartitionDefinition.scala"
 
   val partitionMetaSchema = MetaSchema(List(
     Part(1, "a", None, None, List(
@@ -95,7 +95,7 @@ trait SchemaResets extends DatomicUri {
       |}
       |""".stripMargin
 
-  val partition1DefFilePath = projectHome / "server" / "src" / "main" / "scala" / "db" / "migration" / "schema" / "Partition1Definition.scala"
+  val partition1DefFilePath = projectHome / "src" / "main" / "scala" / "db" / "migration" / "schema" / "Partition1Definition.scala"
 
   val partition1MetaSchema = MetaSchema(List(
     Part(1, "a", None, None, List(
@@ -191,7 +191,8 @@ trait SchemaResets extends DatomicUri {
       |}
       |""".stripMargin
 
-  val coreDefFilePath = projectHome / "server" / "src" / "main" / "scala" / "db" / "core" / "schema" / "CoreTestDefinition.scala"
+  val coreDefFilePath = projectHome / "src" / "main" / "scala" / "db" / "core" / "schema" / "CoreTestDefinition.scala"
+
 
   val coreMetaSchema = MetaSchema(Seq(
     Part(1, "db.part/user", None, None, List(

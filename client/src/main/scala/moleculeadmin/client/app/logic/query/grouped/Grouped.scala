@@ -101,7 +101,7 @@ case class Grouped[T](col: Col)(implicit ctx: Ctx.Owner)
             rowId(rowIndex),
             cellId(rowIndex),
             rowIndex,
-            vc._1.getOrElse(none),
+            vc._1.getOrElse(""),
             vc._2,
             update(rowIndex),
             toggle(rowIndex, vc._1, vc._2)

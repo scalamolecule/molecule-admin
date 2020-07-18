@@ -1,23 +1,21 @@
 package moleculeadmin.client.app.html.query
 
-import moleculeadmin.client.app.logic.query.QueryState._
 import moleculeadmin.client.app.html.AppElements
 import moleculeadmin.client.app.html.common.DropdownMenu
+import moleculeadmin.client.app.logic.query.QueryState._
 import moleculeadmin.shared.ast.query.QueryDTO
-import org.scalajs.dom
 import org.scalajs.dom.document
 import org.scalajs.dom.html._
 import org.scalajs.dom.raw.HTMLElement
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
-import scalatags.generic
 
 
 trait SubMenuElements extends AppElements with DropdownMenu {
 
   // Max row selector --------------------------------------------------------
 
-  val _maxRowsSelector =
+  lazy val _maxRowsSelector =
     select(
       marginRight := 5,
       for ((v, label) <- Seq(
@@ -41,6 +39,39 @@ trait SubMenuElements extends AppElements with DropdownMenu {
       }
     ).render
 
+
+  // Grid selector --------------------------------------------------------
+
+  lazy val _gridSelector = {
+    select(
+      marginRight := 6,
+      for ((v, label) <- Seq(
+        (0, "No grid"),
+        (1, "Indent"),
+        (2, "Full"),
+      )) yield {
+        if (v == gridType.now)
+          option(value := v, label, selected)
+        else
+          option(value := v, label)
+      }
+    ).render
+  }
+
+  lazy val prioOn = Seq(
+    i(cls := "material-icons", "looks_one"),
+    i(cls := "material-icons", "looks_two"),
+    i(cls := "material-icons", "looks_3"),
+    i(cls := "material-icons", "looks_4"),
+    i(cls := "material-icons", "looks_5")
+  )
+  lazy val prioOff = Seq(
+    i(cls := "material-icons material-icons-outlined", "looks_one"),
+    i(cls := "material-icons material-icons-outlined", "looks_two"),
+    i(cls := "material-icons material-icons-outlined", "looks_3"),
+    i(cls := "material-icons material-icons-outlined", "looks_4"),
+    i(cls := "material-icons material-icons-outlined", "looks_5")
+  )
 
   // Queries -------------------------------------------------------------------
 

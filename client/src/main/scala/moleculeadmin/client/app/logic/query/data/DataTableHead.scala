@@ -141,7 +141,8 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
       !columns.now.exists(_.colIndex == colIndex)) {
       window.alert("Can sort maximum 5 columns.")
     } else {
-      //        println("------------ sort ------------")
+      e.preventDefault()
+      //      println("------------ sort ------------")
       // Let only columns() propagate change
       offset.kill()
       // Show first page with each new sort

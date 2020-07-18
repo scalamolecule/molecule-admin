@@ -25,7 +25,8 @@ trait Base extends BaseApi with DatomicUri with HelpersAdmin {
     case e: Throwable if e.toString.contains("Connection is broken") =>
       LoggerFactory.getLogger(getClass).error(e.getMessage)
       Left(
-        "Datomic Transactor unavailable. Please restart it and refresh the page.")
+        "Datomic Transactor unavailable. Please try to refresh the page or " +
+          "restart the transactor and then refresh the page.")
 
     case e: Throwable =>
       val log = LoggerFactory.getLogger(getClass)
@@ -65,9 +66,8 @@ trait Base extends BaseApi with DatomicUri with HelpersAdmin {
     def cleanOptions(options: Option[List[String]]): Option[Set[String]] = options match {
       case None       => Option.empty[Set[String]]
       case Some(opts) =>
-        Some(opts
-          .map(_.substring(24))
-          .filterNot(_ == "indexed").toSet) // remove :meta_Attribute.options/
+        val withoutIndex = opts.map(_.substring(24)).filterNot(_ == "indexed")
+        if (withoutIndex.isEmpty) None else Some(withoutIndex.toSet)
     }
 
     val parts = for {

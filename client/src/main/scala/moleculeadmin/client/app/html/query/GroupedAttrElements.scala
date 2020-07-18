@@ -1,17 +1,13 @@
 package moleculeadmin.client.app.html.query
 
+import moleculeadmin.client.app.css.Color
 import moleculeadmin.client.app.html.query.datatable.HeadElements
-import moleculeadmin.shared.styles.Color
 import org.scalajs.dom.html._
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all.{marginTop, _}
 
 
 trait GroupedAttrElements extends SubMenuElements with HeadElements {
-
-
-  //  val none     = "__none__"
-  val none     = "" // Presumable clear enough to show blank space
 
   def _groupedCard(
     header: String,
@@ -50,7 +46,7 @@ trait GroupedAttrElements extends SubMenuElements with HeadElements {
           td(
             if (colType == "double" || colType == "listDouble")
               color := "#49a523" else (),
-            v.fold(none)(_.toString)
+            v.fold("")(_.toString)
           ),
           td(c)
         )

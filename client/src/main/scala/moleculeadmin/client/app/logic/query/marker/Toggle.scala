@@ -2,6 +2,7 @@ package moleculeadmin.client.app.logic.query.marker
 
 import autowire._
 import boopickle.Default._
+import moleculeadmin.client.app.css.Mark
 import moleculeadmin.client.app.html.AppElements
 import moleculeadmin.client.app.logic.query.QueryState._
 import moleculeadmin.client.queryWireAjax
@@ -73,7 +74,7 @@ case class Toggle(
               curStars -= eid
               (Set(eid), 1)
             }
-          (mark.starOff, 1, starred, count, "Unstarring")
+          (Mark.starOff, 1, starred, count, "Unstarring")
 
         case "flag" =>
           val (flagged, count) =
@@ -85,7 +86,7 @@ case class Toggle(
               curFlags -= eid
               (Set(eid), 1)
             }
-          (mark.flagOff, 2, flagged, count, "Unflagging")
+          (Mark.flagOff, 2, flagged, count, "Unflagging")
 
         case "check" =>
           val (checked, count) =
@@ -97,7 +98,7 @@ case class Toggle(
               curChecks -= eid
               (Set(eid), 1)
             }
-          (mark.checkOff, 3, checked, count, "Unchecking")
+          (Mark.checkOff, 3, checked, count, "Unchecking")
       }
     } else {
       // turn on
@@ -112,7 +113,7 @@ case class Toggle(
               curStars += eid
               (Set(eid), 1)
             }
-          (mark.starOn, 1, notStarred, count, "Starring")
+          (Mark.starOn, 1, notStarred, count, "Starring")
 
         case "flag" =>
           val (notFlagged, count) =
@@ -124,7 +125,7 @@ case class Toggle(
               curFlags += eid
               (Set(eid), 1)
             }
-          (mark.flagOn, 2, notFlagged, count, "Flagging")
+          (Mark.flagOn, 2, notFlagged, count, "Flagging")
 
         case "check" =>
           val (notChecked, count) =
@@ -136,7 +137,7 @@ case class Toggle(
               curChecks += eid
               (Set(eid), 1)
             }
-          (mark.checkOn, 3, notChecked, count, "Checking")
+          (Mark.checkOn, 3, notChecked, count, "Checking")
       }
     }
   }

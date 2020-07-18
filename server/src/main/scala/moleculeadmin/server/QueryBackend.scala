@@ -484,12 +484,9 @@ class QueryBackend extends ToggleBackend {
         case Nil           => Left(
           s"Unexpectedly couldn't find saved molecule `$molecule1` in meta database."
         )
-        case List(queryId) =>
-          queryId.retract
-          Right("ok")
         case favIds        =>
-          Left(s"Unexpectedly found ${favIds.size} instances of saved " +
-            s"molecule `$molecule1` in meta database.")
+          retract(favIds)
+          Right("ok")
       }
     }
   }

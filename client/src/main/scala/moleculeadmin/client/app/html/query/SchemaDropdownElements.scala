@@ -1,8 +1,8 @@
 package moleculeadmin.client.app.html.query
 
+import moleculeadmin.client.app.css.Color
 import moleculeadmin.client.app.html.AppElements
 import moleculeadmin.client.app.html.common.DropdownMenu
-import moleculeadmin.shared.styles.Color
 import org.scalajs.dom.html.{Div, UList}
 import org.scalajs.dom.window
 import scalatags.JsDom

@@ -65,6 +65,17 @@ i.oi-x:hover {
     color: red;
 }
 
+.prio{
+    display: flex;
+}
+.prio i {
+    margin-left: 4px;
+    cursor: pointer;
+}
+.material-icons {
+    color: rgba(0, 0, 0, 0.35);
+    font-size: 18px;
+}
 
 
 .breadcrumb {

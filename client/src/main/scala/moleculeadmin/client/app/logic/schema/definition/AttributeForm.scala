@@ -90,7 +90,8 @@ case class AttributeForm(db: String,
       } else {
         div(
           opts.tail.map(opt =>
-            div(cls := "form-check",
+            div(
+              cls := "form-check",
               input(tpe := "checkbox", cls := "form-check-input", id := s"attr-opts-$opt", name := "attr-opts", value := opt,
                 if (curOpts contains opt) checked := true else (),
                 onchange := { () => lastOption() = opt }

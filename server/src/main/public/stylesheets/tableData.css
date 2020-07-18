@@ -64,6 +64,8 @@
     border-right-color: #ababab;
     border-right-width: 1px;
 }
+
+
 .tableData tBody td:nth-child(1) {
     width: 20px;
     cursor: default;
@@ -117,10 +119,12 @@
     color: #881cc5;
     cursor: default;
 }
+
 .tableData tBody td.num {
     text-align: right;
     color: #49a523;
 }
+
 .tableData tBody td.assert {
     border-left: 3px solid #00dc00;
 }
@@ -142,13 +146,8 @@
     background: #ffcc3c6b;
 }
 .tableData tbody tr.edit {
-    #background: #d3f2ff;
-    ##background: #ddf5ff;
-    #background: #ddffde;
-    #background: #bdffa8;
     background: #c6ffb4;
 }
-
 
 .tableData tbody td.items ul {
     list-style-type: disc;
@@ -177,6 +176,37 @@
     background-color: #3cb7ff4f;
     cursor: pointer;
 }
+
+
+/* Nested border markings by priority */
+
+.tableData tbody tr .prio5 {
+    border-top-style: solid;
+    border-top-color: #ababab;
+    border-top-width: 1px;
+}
+.tableData tbody tr .prio4 {
+    border-top-style: solid;
+    border-top-color: #000;
+    border-top-width: 1px;
+}
+.tableData tbody tr .prio3 {
+    border-top-style: solid;
+    border-top-color: #898989;
+    border-top-width: 3px;
+}
+.tableData tbody tr .prio2 {
+    border-top-style: solid;
+    border-top-color: #fa9800;
+    border-top-width: 3px;
+}
+.tableData tbody tr .prio1 {
+    border-top-style: solid;
+    border-top-color: #ff3d3d;
+    border-top-width: 3px;
+}
+
+
 
 
 .tableData tfoot td {

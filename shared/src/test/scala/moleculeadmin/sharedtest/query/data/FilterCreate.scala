@@ -39,8 +39,8 @@ object FilterCreate extends TestSuite with FilterFactory {
       def string(filterExpr: String): Seq[Option[String]] =
         testStringExpr(strings, filterExpr, "String")
 
-      // No filtering
-      string("") ==> noFilter
+      // no empty strings
+      string("") ==> Nil
 
       // All values
       string("+") ==> Seq(Some("Apple"), Some("Banana"), Some("Citrus"))

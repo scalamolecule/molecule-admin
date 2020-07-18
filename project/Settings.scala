@@ -1,4 +1,5 @@
 import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
+import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.jsEnv
 import play.sbt.PlayImport.{PlayKeys, guice, specs2}
 import sbt.Keys._
 import sbt._
@@ -6,12 +7,12 @@ import sbt._
 
 object Settings {
 
-  private val moleculeVersion = "0.22.5"
+  private val moleculeVersion = "0.22.7"
 
   val common: Seq[Def.Setting[_]] = Seq(
     name := "molecule-admin",
     organization := "org.scalamolecule",
-    version := "0.7",
+    version := "0.8",
     scalaVersion := "2.13.3",
     scalacOptions := Seq(
       "-deprecation",
@@ -28,9 +29,10 @@ object Settings {
     libraryDependencies ++= Seq(
       "org.scala-js" %%% "scalajs-dom" % "1.0.0",
       "com.lihaoyi" %%% "scalarx" % "0.4.2",
-      "io.github.cquiroz" %%% "scala-java-time" % "2.0.0"
+      "io.github.cquiroz" %%% "scala-java-time" % "2.0.0",
     ),
-    testFrameworks += new TestFramework("utest.runner.Framework")
+    testFrameworks += new TestFramework("utest.runner.Framework"),
+    jsEnv in Test := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv()
   )
 
   val server: Seq[Def.Setting[_]] = common ++ Seq(
@@ -50,6 +52,7 @@ object Settings {
       "org.webjars.npm" % "popper.js" % "1.16.0",
       "org.webjars" % "bootstrap" % "4.5.0",
       "org.webjars.bower" % "open-iconic" % "1.1.1",
+//      "org.webjars.npm" % "material-icons" % "0.3.1",
       "org.webjars" % "font-awesome" % "5.5.0",
       "org.webjars.bower" % "highlightjs" % "9.12.0",
       //      "org.atteo" % "evo-inflector" % "1.2.2", // English pluralizer

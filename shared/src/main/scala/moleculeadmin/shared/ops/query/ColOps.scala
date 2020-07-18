@@ -402,4 +402,8 @@ trait ColOps extends HelpersAdmin {
       singleToggle()
     }
   }
+
+  def getSortColIndexes(cols: Seq[Col]) = cols.sortBy(_.sortPos).collect {
+    case c if c.sortDir.nonEmpty => c.colIndex
+  }
 }
