@@ -27,7 +27,6 @@ object QueryClient
   // Single Rx context to be passed around wherever needed
   implicit val ctx: Ctx.Owner = rx.Ctx.Owner.safe()
 
-
   @JSExport
   def load(db0: String): Unit = queryWireAjax().loadMetaData(db0).call().foreach {
     case Right(pageMetaData) =>
@@ -51,7 +50,6 @@ object QueryClient
     case Left(err) =>
       window.alert(s"Error loading Query page:\n$err")
   }
-
 
   def init(db0: String, pageMetaData: PageMetaData): Seq[String] = {
     val (
