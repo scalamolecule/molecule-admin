@@ -136,7 +136,7 @@ trait Editing extends Paging with AppElements {
   def multilineAddItem(e: KeyboardEvent): Unit = {
     val curCell = document.activeElement
     // Create new empty String item (since we have multiline values)
-    if (curCell.getAttribute("class") == "items") {
+    if (curCell.getAttribute("class").startsWith("items")) {
       // Prevent line shift
       e.preventDefault()
       val uList: Node = curCell.firstChild
