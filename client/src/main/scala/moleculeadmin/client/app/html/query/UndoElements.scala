@@ -11,14 +11,14 @@ import scalatags.JsDom.all._
 
 trait UndoElements extends AppElements with RxBindings {
 
-  def datomTable =
+  lazy val datomTable =
     table(
       cls := "undoTxs",
       id := "undoTxs",
       tr(td("Fetching tx data from Log..."))
     ).render
 
-  val container =
+  def container =
     _cardsContainer(
       _card(
         _cardHeader(h5("Undo")),
