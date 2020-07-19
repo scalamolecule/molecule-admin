@@ -128,7 +128,7 @@ case class DataTableHead(tableBody: TableSection)(implicit ctx: Ctx.Owner)
 
     } else {
       _attrHeader(
-        attr, postfix, expr, kind,
+        syncId, attr, postfix, expr, kind,
         editable, edit, save, cancel,
         retractEntities, retractValues,
         editDropdownId, editExprItems

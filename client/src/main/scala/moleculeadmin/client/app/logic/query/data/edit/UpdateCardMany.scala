@@ -64,12 +64,10 @@ case class UpdateCardMany[T](
     } else if (raw.endsWith("<ul></ul>")) {
       // Consider line shifts not as new item but as line shift within string
       List(raw.replace("<ul></ul>", ""))
-    } else if (cellType == "str") {
+    } else {
       val before = "<ul><li>".size
       val after  = "</li></ul>".size
       raw.substring(before, raw.length - after).split("</li><li>").toList
-    } else {
-      raw.split("<br>").toList
     }
 
     val vs = _decode(strs, attrType, enums)

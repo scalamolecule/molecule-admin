@@ -139,26 +139,9 @@ trait Editing extends Paging with AppElements {
     if (curCell.getAttribute("class") == "items") {
       // Prevent line shift
       e.preventDefault()
-      val node0: Node = curCell.firstChild
-      val uList: Node = if (node0.isInstanceOf[HTMLUListElement]) {
-        // add list item to existing unordered list
-        node0.appendChild(li().render)
-        node0
-      } else {
-        // Remove empty unordered list of empty cell
-        curCell.removeChild(curCell.lastElementChild)
-        // - Preserve soft line shifts (<br>)
-        // - Decode control characters
-        val curVs    = curCell.innerHTML.split("<br>").toList.flatMap(v =>
-          Seq(_decode(List(v), "String").head: Frag, br)
-        ).init
-        // - Place text in unordered list
-        val newUList = ul(li(curVs), li()).render
-        // Replace cell with uList
-        curCell.innerHTML = ""
-        curCell.appendChild(newUList)
-        newUList
-      }
+      val uList: Node = curCell.firstChild
+      // add list item to existing unordered list
+      uList.appendChild(li().render)
       // Set caret in new item
       val range       = document.createRange()
       val sel         = window.getSelection()

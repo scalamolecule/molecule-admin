@@ -407,7 +407,7 @@ trait BodyElements
     contenteditable := true,
     onclick := markRow(cellId),
     onblur := update,
-    vs.flatMap(v => Seq(v: Frag, br))
+    ul(vs.map(li(_)))
   )
 
   def _tdManyDoubleEdit(
@@ -425,7 +425,7 @@ trait BodyElements
     contenteditable := true,
     onclick := markRow(cellId),
     onblur := update,
-    vs.flatMap(v => Seq(v: Frag, br))
+    ul(vs.map(li(_)))
   )
 
   def _tdManyRefEdit(
