@@ -229,6 +229,12 @@ trait HeadElements extends ColOps
 
   def _pf(postfix: String): Frag = span(postfix, cls := "postfix")
 
+  def spinCell(syncId: String)(implicit ctx: Ctx.Owner): TypedTag[TableCell] =
+    td(
+      width := "5%",
+      Rx(if (groupEditId() == syncId) _sync() else span())
+    )
+
   def _attrHeaderSortable(
     syncId: String,
     attribute: String,
@@ -313,11 +319,6 @@ trait HeadElements extends ColOps
       }
     }
 
-    val spinCell = td(
-      width := "5%",
-      Rx(if (groupEditId() == syncId) _sync() else span())
-    )
-
     val sortCell = td(
       cursor.pointer,
       width := "25%",
@@ -341,7 +342,7 @@ trait HeadElements extends ColOps
         width := "100%",
         tr(
           attrCell(width := "70%"),
-          spinCell,
+          spinCell(syncId),
           sortCell
         )
       )
@@ -364,6 +365,7 @@ trait HeadElements extends ColOps
   )
 
   def _attrHeader(
+    syncId: String,
     attribute: String,
     postfix: String,
     expr: String,
@@ -376,7 +378,7 @@ trait HeadElements extends ColOps
     retractValues: MouseEvent => Unit,
     editDropdownId: String,
     editExprItems: List[Frag],
-  ): TypedTag[TableCell] = {
+  )(implicit ctx: Ctx.Owner): TypedTag[TableCell] = {
     if (kind == "orig" || !editable) {
       td(
         cls := "header",
@@ -385,6 +387,24 @@ trait HeadElements extends ColOps
         paddingRight := 6,
         attribute,
         if (postfix.isEmpty) () else _pf(postfix)
+      )
+    } else if (kind == "edit") {
+      td(
+        cls := "header",
+        table(
+          width := "100%",
+          tr(
+            td(width := "70%",
+              attrMenu(
+                attribute, postfix, "edit", kind, edit, save, cancel,
+                retractEntities, retractValues,
+                editDropdownId = editDropdownId,
+                editExprItems = editExprItems
+              )
+            ),
+            spinCell(syncId)
+          )
+        )
       )
     } else {
       td(
