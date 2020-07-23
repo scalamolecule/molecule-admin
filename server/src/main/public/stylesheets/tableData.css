@@ -34,6 +34,9 @@
     font-style: italic;
     padding: 2px 6px 2px 6px;
 }
+.tableData thead tr:nth-child(3) td.header  {
+    border-bottom-color: #777;
+}
 .tableData thead td span.expr {
     padding-left: 6px;
     font-weight: bold;
@@ -192,8 +195,8 @@
 }
 .tableData tbody tr .prio3 {
     border-top-style: solid;
-    border-top-color: #898989;
-    border-top-width: 3px;
+    border-top-color: #d10000;
+    border-top-width: 1px;
 }
 .tableData tbody tr .prio2 {
     border-top-style: solid;
