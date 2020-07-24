@@ -57,8 +57,12 @@ abstract class GroupedUpdate[T](col: Col)(implicit ctx: Ctx.Owner)
 
           } else if (newSopt.nonEmpty && !validGroupedValue(newS)) {
             editCellId = ""
-            window.alert(s"Invalid card-$card value of type `$attrType` " +
-              s"for attribute $attrFull :\n$newS")
+            val msg = if (attrType == "ref")
+              s"Invalid card-$card ref id(s) for $attrFull :\n$newS"
+            else
+              s"Invalid card-$card value of type `$attrType` " +
+                s"for attribute $attrFull :\n$newS"
+            window.alert(msg)
             groupedCell.focus()
 
           } else {

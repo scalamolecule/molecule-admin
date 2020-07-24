@@ -7,6 +7,7 @@ import moleculeadmin.client.app.html.query.datatable.BodyElements
 import moleculeadmin.shared.ast.query.Col
 import org.scalajs.dom.html.TableCell
 import org.scalajs.dom.window
+import scalatags.JsDom.all.s
 import scala.collection.mutable.ListBuffer
 
 
@@ -28,6 +29,8 @@ trait Insert extends BaseKeyEvents with BodyElements with TypeValidation {
     val (attr, attrType, card, enums, mandatory) =
       (col.attr, col.attrType, col.card, col.enums, !col.opt)
 
+    val attrFull   = s":${col.nsFull}/${clean(attr)}"
+
     val html = cell.innerHTML
 
     def err(msg: String): Nothing = {
@@ -39,7 +42,11 @@ trait Insert extends BaseKeyEvents with BodyElements with TypeValidation {
 
     def validate(str: String): String = {
       if (!valid(attrType, str)) {
-        err(s"Invalid `$attr` value of type `$attrType`:\n$str")
+        val msg = if(attrType == "ref")
+          s"Invalid ref id for $attrFull (test ids from 10000 and up allowed):\n$str"
+        else
+          s"Invalid $attrFull values of type `$attrType`:\n$str"
+        err(msg)
       } else {
         str
       }

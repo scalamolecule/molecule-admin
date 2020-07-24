@@ -111,7 +111,11 @@ case class UpdateCardMany[T](
 
       } else if (!newStrs.forall(valid(attrType, _))) {
         editCellId = ""
-        window.alert(s"Can't update $attrFull with invalid value(s): $retractsAsserts")
+        val msg = if (attrType == "ref")
+          s"Can't update ref invalid $attrFull ref id(s): $retractsAsserts"
+        else
+          s"Can't update $attrFull with invalid value(s): $retractsAsserts"
+        window.alert(msg)
         cell.focus()
 
       } else if (kind == "edit") {
@@ -162,10 +166,12 @@ case class UpdateCardMany[T](
 
     } else if (eid != 0) {
       if (!newStrs.forall(valid(attrType, _))) {
-        window.alert(
-          s"Invalid $attrFull values of type `$attrType`:\n  " +
-            newStrs.mkString("\n  ")
-        )
+        val vs  = newStrs.mkString("\n  ")
+        val msg = if (attrType == "ref")
+          s"Invalid ref ids for $attrFull (test ids >= 10000 are allowed):\n$vs"
+        else
+          s"Invalid $attrFull values of type `$attrType`:\n$vs"
+        window.alert(msg)
         cell.focus()
       } else {
         println(s"OBS: New $attrFull value will not be saved " +
