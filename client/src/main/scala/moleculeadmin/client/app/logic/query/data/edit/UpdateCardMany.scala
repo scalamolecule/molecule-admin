@@ -55,25 +55,20 @@ case class UpdateCardMany[T](
         vs.map(_.toString).distinct.sorted
     }
 
-    val raw  = cell.innerHTML
-    val strs = if (cellType == "ref") {
-      val s1 = raw.replaceAll("</*ul[^>]*>", "")
-      s1.substring(s1.indexOf(">", 5) + 1, s1.length - 5)
-        .replaceAll("(<br>)*$", "")
-        .split("""</li><li class="eid(Chosen)*">""").toList
+    val raw     = cell.innerHTML
+    val strs    = if (cellType == "ref") {
+      raw.split("<[^>]*>").filter(_.nonEmpty).toList
     } else if (raw.endsWith("<ul></ul>")) {
       // Consider line shifts not as new item but as line shift within string
       List(raw.replace("<ul></ul>", ""))
-    } else {
+    } else if (raw.startsWith("<ul>")) {
       val before = "<ul><li>".size
       val after  = "</li></ul>".size
       raw.substring(before, raw.length - after).split("</li><li>").toList
+    } else {
+      raw.split("<br>").toList
     }
-
-    val vs = _decode(strs, attrType, enums)
-
-    val newStrs: List[String] = vs.distinct.sorted
-
+    val newStrs = _decode(strs, attrType, enums).distinct.sorted
 
     if (oldStrs == newStrs) {
       // Remove superfluous line shifts
@@ -186,24 +181,23 @@ case class UpdateCardMany[T](
     }
 
     def redrawCell(): Node = {
-      cell.innerHTML = ""
-      val vs: Seq[Frag] = if (cellType == "ref") {
+      val vs = if (cellType == "ref") {
         newStrs.map(_.toLong).sorted.map { ref =>
-          span(
+          li(
             cls := Rx(if (ref == curEntity()) "eidChosen" else "eid"),
             ref,
             onmouseover := { () => curEntity() = ref }
           )
         }
       } else if (isNum) {
-        newStrs.map(_.toDouble).sorted.flatMap(Seq(_, br))
+        newStrs.map(_.toDouble).sorted.map(li(_))
       } else if (attrType == "String" && enums.isEmpty) {
-        Seq(ul(newStrs.sorted.map(s => li(_str2frags(s)))))
+        newStrs.sorted.map(s => li(_str2frags(s)))
       } else {
-        newStrs.sorted.flatMap(Seq(_, br))
+        newStrs.sorted.map(li(_))
       }
-      vs.foreach(v => cell.appendChild(v.render))
-      cell
+      cell.innerHTML = ""
+      cell.appendChild(ul(vs).render)
     }
   }
 }
