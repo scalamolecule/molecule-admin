@@ -95,7 +95,11 @@ case class UpdateCardOne[T](
 
       } else if (!valid(attrType, newStr)) {
         editCellId = ""
-        window.alert(s"Invalid $attrFull value of type `$attrType`:\n$newStr")
+        val msg = if (attrType == "ref")
+          s"Invalid $attrFull ref id (test id >= 10000 is allowed):\n$newStr"
+        else
+          s"Invalid $attrFull value of type `$attrType`:\n$newStr"
+        window.alert(msg)
         cell.focus()
 
       } else if (kind == "edit") {
@@ -187,7 +191,11 @@ case class UpdateCardOne[T](
 
     } else if (eid != 0) {
       if (!valid(attrType, newStr)) {
-        window.alert(s"Invalid `$attrFull` value of type `$attrType`:\n$newStr")
+        val msg = if (attrType == "ref")
+          s"Invalid $attrFull ref id (test id >= 10000 is allowed):\n$newStr"
+        else
+          s"Invalid $attrFull value of type `$attrType`:\n$newStr"
+        window.alert(msg)
         cell.focus()
       } else {
         println(s"OBS: New `$attrFull` value `$newStr` will not be saved " +
