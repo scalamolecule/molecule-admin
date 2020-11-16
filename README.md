@@ -96,6 +96,37 @@ It's recommended to use MoleculeAdmin in the Google Chrome browser for expected
 look and behaviour.
 
 
+## Group edits with custom Scala code 
+
+An advanced feature of MoleculeAdmin is to make group edits on a whole column
+of data. In the input cell above the group edit column, you define a Scala
+transformation lambda that will be applied to each value in turn. The lambda
+code snippet will be automatically compiled and applied once you hit enter and
+transform all current values of the column, both visible on the current page and
+subsequent values. Make sure you have filtered exactly the values that you
+want to transform!
+
+Your Scala lambda code snippet is compiled by a separately running ScalaFiddle
+server to javascript code that is then applied to the current values. Both the 
+browser table and memory and the Datomic database is updated.
+
+If you want to use this group edit functionality, you'll need to once initially 
+clone the adapted ScalaFiddle server for MoleculeAdmin:
+```
+git clone https://github.com/scalamolecule/scalafiddle-core.git
+```
+From here on you only need to start the server and have it running in the 
+background to allow group edits:
+```
+cd scalafiddle-core
+sbt "~; router/reStart; compilerServer06x/reStart"
+```
+MoleculeAdmin can then talk automatically in the background with the 
+scalafiddle-core server through `http://localhost:8880/embed`.
+
+See examples of group edits [here][group-edit-examples].
+
+
 ## Enable your own Datomic database
 
 For MoleculeAdmin to be able to work with a database it needs a path to a
@@ -188,3 +219,6 @@ Marc Grue
 
 #### License
 Molecule is licensed under the [Apache License 2.0](http://en.wikipedia.org/wiki/Apache_license)
+
+
+[group-edit-examples]: https://github.com/scalamolecule/molecule-admin/blob/master/client/src/main/scala/moleculeadmin/client/app/logic/query/data/groupEdit/compileTest/Card1.scala

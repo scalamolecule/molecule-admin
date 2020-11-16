@@ -29,7 +29,7 @@ object TestScalaFiddle {
   The Scala expression is sent to ScalaFiddle, compiled to JS and then applied
   to the initial data and the result is compared to the expected data.
 
-  Note that initially the ScalaFiddle server with send back error-400's for
+  Note that initially the ScalaFiddle server will send back error-400's for
   all calls except the current one. Then just refresh until all code snippets
   have been cached.
   */
