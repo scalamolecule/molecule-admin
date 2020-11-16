@@ -11,6 +11,32 @@ import scala.scalajs.js
 import scala.scalajs.js.JSConverters._
 
 
+/** Testing various group edit operations for cardinality-one attributes.
+ *
+ * MoleculeAdmin transforms each cardinality-one value in a group edit column
+ * by applying a lambda expression that takes the current value as input and
+ * transform the value.
+ *
+ * For cardinality-one attributes, the expected transformation lambda type
+ * is `attr-type => Option[attr-type]`. If the right-hand side is `None`, the
+ * value will be retracted.
+ *
+ * Since we always expect the left-hand side input to be the attribute value,
+ * only the right-hand side of the lambda is entered in the input field of
+ * the group edit column.
+ *
+ * So, for instance to increase the age for all persons,
+ * one can simply write `Some(age + 1)` where "age" refers to a cardinality-one
+ * attribute `age`.
+ *
+ * MoleculeAdmin will then apply the lambda `age => Some(age + 1)` to all
+ * age values in the group edit column - both on the current and subsequent
+ * pages! Therefore, make sure to filter only the values that you
+ * want to transform!
+ *
+ * Below you can see various examples of right-hand side expressions for all
+ * attribute types.
+ */
 object Card1 extends TestScalaFiddle with ColOps {
 
   case class Compiler(

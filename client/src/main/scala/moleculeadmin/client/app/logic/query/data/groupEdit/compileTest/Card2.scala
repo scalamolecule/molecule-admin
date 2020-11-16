@@ -10,6 +10,34 @@ import scala.scalajs.js
 import scala.scalajs.js.JSConverters._
 
 
+
+/** Testing various group edit operations for cardinality-many attributes.
+ *
+ * MoleculeAdmin transforms each list of cardinality-many values in a group edit
+ * column by applying a lambda expression that takes the current list of values
+ * as input and transform them to a new list of values.
+ *
+ * For cardinality-many attributes, the expected transformation lambda type
+ * is `List[attr-type] => List[attr-type]`. If the right-hand side is `Nil`, all
+ * values for each entity in question are retracted.
+ *
+ * Since we always expect the left-hand side input to be a `List` of attribute
+ * values, only the right-hand side of the lambda is entered in the input field of
+ * the group edit column.
+ *
+ * So, for instance to remove a specific category from some posts,
+ * one can simply write `categories.filterNot("dull")` where "categories" refers
+ * to a cardinality-many attribute `categories`.
+ *
+ * MoleculeAdmin will then apply the lambda
+ * `categories => categories.filterNot("dull")` to all
+ * categories values in the group edit column - both on the current and subsequent
+ * pages! Therefore, make sure to filter only the values that you
+ * want to transform!
+ *
+ * Below you can see various examples of right-hand side expressions for all
+ * attribute types.
+ */
 object Card2 extends TestScalaFiddle {
 
   case class Compiler(

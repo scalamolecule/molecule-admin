@@ -10,6 +10,34 @@ import scala.scalajs.js
 import scala.scalajs.js.JSConverters._
 
 
+
+/** Testing various group edit operations for cardinality-map attributes.
+ *
+ * MoleculeAdmin transforms each map of cardinality-map pairs in a group edit
+ * column by applying a lambda expression that takes the current map of pairs
+ * as input and transform them to a new Map.
+ *
+ * For cardinality-map attributes, the expected transformation lambda type
+ * is `Map[attr-type] => Map[attr-type]`. If the right-hand side is `Nil` or an
+ * empty `Map`, all values for each entity in question are retracted.
+ *
+ * Since we always expect the left-hand side input to be a `Map` of attribute
+ * pairs, only the right-hand side of the lambda is entered in the input field of
+ * the group edit column.
+ *
+ * So, for instance to add a value pair, one can simply write
+ * `results + ("Ben" -> 23)` where "results" refers
+ * to a cardinality-map attribute `results`.
+ *
+ * MoleculeAdmin will then apply the lambda
+ * `results => results + ("Ben" -> 23)` to all
+ * result value pairs in the group edit column - both on the current and subsequent
+ * pages! Therefore, make sure to filter only the values that you
+ * want to transform!
+ *
+ * Below you can see various examples of right-hand side expressions for all
+ * attribute types.
+ */
 object Card3 extends TestScalaFiddle {
 
   val emptyMap = Map.empty[String, String]

@@ -4,7 +4,7 @@ import java.nio.ByteBuffer
 import akka.stream.scaladsl.Flow
 import akka.util.ByteString
 import boopickle.Default._
-import moleculeadmin.server.utils.Tags
+import moleculeadmin.server.utils.HtmlTags
 import play.api.http.websocket.{BinaryMessage, Message, TextMessage}
 import play.api.mvc._
 import util.server.autowire.AutowireServer.Router
@@ -13,7 +13,7 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 
 
-trait AutowireController extends InjectedController with Tags {
+trait AutowireController extends InjectedController with HtmlTags {
 
   /** Instantiate router in inheriting Controller with
    * {{{

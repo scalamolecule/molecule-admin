@@ -18,7 +18,7 @@ import scalatags.Text.all.Tag
  * Let your controller extend this class
  * */
 
-trait Tags {
+trait HtmlTags {
 
   implicit def contentTypeOfTag(implicit codec: Codec): ContentTypeOf[Tag] = {
     ContentTypeOf[Tag](Some(ContentTypes.HTML))
