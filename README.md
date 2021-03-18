@@ -157,7 +157,7 @@ MoleculeAdmin can "take over" the responsibility of keeping your schema definiti
 file in sync with your database. So instead of you writing manually to the schema 
 definition file, you let MoleculeAdmin write changes directly to it. 
 
-### Clojue/Java users
+### Clojure/Java users
 
 For Clojure/Java users not using Scala, it would be cool if we could use the newer
 Datomic feature of exporting the schema definition for a database
