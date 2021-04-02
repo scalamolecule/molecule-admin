@@ -3,10 +3,10 @@ package moleculeadmin.shared.ops.transform
 import java.net.URI
 import java.util.{Date, UUID}
 import moleculeadmin.shared.api.QueryApi
-import moleculeadmin.shared.ast.schema.{Attr, Ns}
+import moleculeadmin.shared.ast.metaSchema.{MetaAttr, MetaNs}
 import moleculeadmin.shared.ops.query.BaseQuery
 import moleculeadmin.shared.api.QueryApi
-import moleculeadmin.shared.ast.schema._
+import moleculeadmin.shared.ast.metaSchema._
 import molecule.ast.model._
 import moleculeadmin.shared.ops.query.BaseQuery
 import moleculeadmin.shared.util.HelpersAdmin
@@ -15,11 +15,11 @@ import scala.collection.mutable.ListBuffer
 
 object Molecule2Model {
   def apply(molecule: String)
-           (implicit nsMap: Map[String, Ns]): Either[String, Seq[Element]] =
+           (implicit nsMap: Map[String, MetaNs]): Either[String, Seq[Element]] =
     new Molecule2Model(molecule, nsMap).getModel
 }
 
-class Molecule2Model(molecule0: String, nsMap: Map[String, Ns])
+class Molecule2Model(molecule0: String, nsMap: Map[String, MetaNs])
   extends QueryApi with BaseQuery with HelpersAdmin with Model2Molecule {
 
   // Schema extractions
@@ -33,7 +33,7 @@ class Molecule2Model(molecule0: String, nsMap: Map[String, Ns])
       .flatMap(a => Seq(a.name, noTick(a.name) + "$", noTick(a.name) + "_")))
   }
 
-  val attrDefs: Map[String, Map[String, Attr]] = nsMap.map {
+  val attrDefs: Map[String, Map[String, MetaAttr]] = nsMap.map {
     case (nsFull, nsDef) => nsFull ->
       (("e" -> nsDef.attrs.head) +:
         nsDef.attrs.tail
@@ -50,7 +50,7 @@ class Molecule2Model(molecule0: String, nsMap: Map[String, Ns])
       .map(a => noTick(a.name).capitalize).distinct
   }
 
-  val refDefs: Map[String, Map[String, Attr]] = nsMap.map {
+  val refDefs: Map[String, Map[String, MetaAttr]] = nsMap.map {
     case (nsFull, nsDef) => nsFull -> nsDef.attrs.tail
       .filter(a => a.refNs$.isDefined)
       .map(a => noTick(a.name).capitalize -> a)
@@ -259,7 +259,7 @@ class Molecule2Model(molecule0: String, nsMap: Map[String, Ns])
           ) {
             addEdit(attr, a.tpe, a.card)
           } else {
-            val (value, enumPrefix) = if (a.enums$.isDefined)
+            val (value, enumPrefix) = if (a.enums.nonEmpty)
               (EnumVal, Some(s":$curNsFull.$attr/")) else (VarValue, None)
             elements += Atom(curNsFull, attr, a.tpe, a.card, value, enumPrefix)
           }
@@ -301,7 +301,7 @@ class Molecule2Model(molecule0: String, nsMap: Map[String, Ns])
           val (tpe, card, enumPrefix, opt) = (
             a.tpe,
             a.card,
-            a.enums$.fold(Option.empty[String])(_ => Some(s":$curNsFull.$attr/")),
+            if (a.enums.nonEmpty) Some(s":$curNsFull.$attr/") else None,
             attr.last == '$'
           )
           fn match {

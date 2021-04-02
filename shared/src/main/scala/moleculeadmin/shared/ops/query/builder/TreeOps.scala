@@ -1,7 +1,7 @@
 package moleculeadmin.shared.ops.query.builder
 
 import molecule.ast.model._
-import moleculeadmin.shared.ast.schema.{Attr, Ns}
+import moleculeadmin.shared.ast.metaSchema.{MetaAttr, MetaNs}
 import moleculeadmin.shared.ast.tree.Tree
 import moleculeadmin.shared.ops.query.{BaseQuery, DebugBranches}
 
@@ -9,13 +9,13 @@ import moleculeadmin.shared.ops.query.{BaseQuery, DebugBranches}
 trait TreeOps extends BaseQuery with DebugBranches {
 
   private def refs(ns: String)
-                  (implicit nsMap: Map[String, Ns]): Seq[(String, Ns)] = for {
-    Attr(_, attr, _, tpe, _, ref, _, _, _, _, _, _, _) <- nsMap(ns).attrs if tpe == "ref"
-    ns1@Ns(_, _, refFull, _, _, _) <- nsMap.values if refFull == ref.get
+                  (implicit nsMap: Map[String, MetaNs]): Seq[(String, MetaNs)] = for {
+    MetaAttr(_, attr, _, tpe, _, ref, _, _, _, _, _, _, _) <- nsMap(ns).attrs if tpe == "ref"
+    ns1@MetaNs(_, _, refFull, _, _, _) <- nsMap.values if refFull == ref.get
   } yield attr -> ns1
 
 
-  def mkTree(modelTree: Seq[Any])(implicit nsMap: Map[String, Ns]): Tree = {
+  def mkTree(modelTree: Seq[Any])(implicit nsMap: Map[String, MetaNs]): Tree = {
 
     def traverse(path0: Seq[(String, String)],
                  tree0: Tree,
@@ -120,7 +120,7 @@ trait TreeOps extends BaseQuery with DebugBranches {
     refAttr: String,
     refNs0: String,
     attrName: String = ""
-  )(implicit nsMap: Map[String, Ns]): Seq[Element] = {
+  )(implicit nsMap: Map[String, MetaNs]): Seq[Element] = {
 
     //    println(path0)
     //    println(refAttr)
@@ -133,21 +133,21 @@ trait TreeOps extends BaseQuery with DebugBranches {
     val refAttrClean = clean(refAttr)
 
     val bond = nsMap(ns0).attrs.collectFirst {
-      case Attr(_, `refAttr`, card, _, _, _, _, _, _, _, _, _, _) =>
+      case MetaAttr(_, `refAttr`, card, _, _, _, _, _, _, _, _, _, _) =>
         Bond(ns0, refAttr, refNs, card)
     }.get // In our closed eco-system we can expect the refAttr to be present
 
     val attr: GenericAtom = if (attrName.isEmpty)
       Atom(refNs, dummy, "", 1, NoValue, None, List(), List())
     else nsMap(refNs).attrs.collectFirst {
-      case Attr(_, `attrName`, _, "datom", _, _, _, _, _, _, _, _, _) =>
+      case MetaAttr(_, `attrName`, _, "datom", _, _, _, _, _, _, _, _, _) =>
         Generic(refNs, attrName, "datom", EntValue)
 
-      case Attr(_, `attrName`, card, tpe1, Some(_), _, _, _, _, _, _, _, _) =>
-        Atom(refNs, attrName, tpe1, card, EnumVal, Some(s":$refNs.$attrName/"))
-
-      case Attr(_, `attrName`, card, tpe1, _, _, _, _, _, _, _, _, _) =>
+      case MetaAttr(_, `attrName`, card, tpe1, Nil, _, _, _, _, _, _, _, _) =>
         Atom(refNs, attrName, tpe1, card, VarValue)
+
+      case MetaAttr(_, `attrName`, card, tpe1, _, _, _, _, _, _, _, _, _) =>
+        Atom(refNs, attrName, tpe1, card, EnumVal, Some(s":$refNs.$attrName/"))
     }.get
 
     def rebonds(path: Seq[(String, String)]): Seq[ReBond] = {
@@ -259,17 +259,17 @@ trait TreeOps extends BaseQuery with DebugBranches {
     before1 ++ after
   }
 
-  def attrSelection(attrs0: Seq[Attr],
+  def attrSelection(attrs0: Seq[MetaAttr],
                     selAttrs: Seq[GenericAtom],
-                    refs0: Seq[(String, Ns)],
-                    selection: String): (Seq[Attr], Seq[(String, Int, Ns)]) = {
+                    refs0: Seq[(String, MetaNs)],
+                    selection: String): (Seq[MetaAttr], Seq[(String, Int, MetaNs)]) = {
     val attrCardinalities = attrs0.map(a => a.name -> a.card).toMap
     selection match {
       case "m"   =>
         //        println("m")
         val selAttrNames = selAttrs.map(_.attr)
         val attrs        = attrs0.collect {
-          case a@Attr(_, attr, _, _, _, _, _, _, _, _, _, _, _)
+          case a@MetaAttr(_, attr, _, _, _, _, _, _, _, _, _, _, _)
             if selAttrNames.exists(_.startsWith(attr)) => a
         }
         (attrs, Nil)

@@ -13,7 +13,7 @@ import org.scalajs.dom.raw
 import org.scalajs.dom.{ClipboardEvent, Event, MouseEvent, document, window}
 import rx.{Ctx, Rx}
 import scalatags.JsDom.TypedTag
-import scalatags.JsDom.all.{span, _}
+import scalatags.JsDom.all._
 import scala.scalajs.js.timers.setTimeout
 import scala.util.{Failure, Success, Try}
 

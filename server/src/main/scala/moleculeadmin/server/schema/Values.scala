@@ -26,7 +26,7 @@ object Values extends SchemaBase with Base {
         .get.sortBy(r => (r._2, r._5, r._8))
 
       schema.foreach { case (_, _, part, _, _, ns, attrE, _, attr, tpe, enums, refNs, descrAttr) =>
-        updateAttrCountsAndValues(dbConn, part, ns, attrE, attr, tpe, enums, refNs, descrAttr, max)
+        updateAttrCountsAndValues(dbConn, part, ns, attrE, attr, tpe, enums.getOrElse(Nil).toSeq, refNs, descrAttr, max)
       }
 
       println("------- Namespace attribute entity counts --------------")
@@ -83,7 +83,7 @@ object Values extends SchemaBase with Base {
     }
   }
 
-  def updateAttrCountsAndValues(dbConn: Conn, part: String, ns: String, attrE: Long, attr: String, tpe: String, enums: Option[Set[String]], refNs: Option[String],
+  def updateAttrCountsAndValues(dbConn: Conn, part: String, ns: String, attrE: Long, attr: String, tpe: String, enums: Seq[String], refNs: Option[String],
                                 descrAttr: Option[String], max: Int = 25)(implicit moleculeAdminConn: Conn): Unit = {
 
     val fullAttr    = getFullAttr(part, ns, attr)

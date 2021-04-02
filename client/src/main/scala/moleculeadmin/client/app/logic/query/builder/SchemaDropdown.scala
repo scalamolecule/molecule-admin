@@ -3,7 +3,7 @@ package moleculeadmin.client.app.logic.query.builder
 import util.client.rx.RxBindings
 import moleculeadmin.client.app.html.query.SchemaDropdownElements
 import moleculeadmin.client.app.logic.query.QueryState.{db, modelElements, newQueryBuildup}
-import moleculeadmin.shared.ast.schema._
+import moleculeadmin.shared.ast.metaSchema._
 import molecule.ast.model._
 import moleculeadmin.shared.ops.query.SchemaOps
 import org.scalajs.dom.html.UList
@@ -18,13 +18,12 @@ case class SchemaDropdown(metaSchema: MetaSchema, selection: String)
   extends RxBindings with SchemaOps with SchemaDropdownElements {
 
   def nsUls(
-    nss: Seq[Ns],
+    nss: Seq[MetaNs],
     dropdownType: JsDom.TypedTag[UList]
   ): JsDom.TypedTag[UList] = dropdownType(
-    for (Ns(_, ns, nsFull, _, _, attrs0) <- nss) yield {
+    for (MetaNs(_, ns, nsFull, _, _, attrs0) <- nss) yield {
       // Add entity id
-      val attrs = Attr(0, "e", 1, "datom",
-        None, None, None, None, None, None, None, None, Nil) +: attrs0
+      val attrs = MetaAttr(0, "e", 1, "datom", Nil, None, Nil, None, None, None, None, None, Nil) +: attrs0
       _submenu(
         a(href := "#", ns,
           onclick := { () =>
@@ -32,7 +31,7 @@ case class SchemaDropdown(metaSchema: MetaSchema, selection: String)
           }
         ),
         _menu(
-          for (Attr(_, attr, car, attrType, enums, _, _, _, _, _, _, _, _) <- attrs) yield {
+          for (MetaAttr(_, attr, car, attrType, enums, _, _, _, _, _, _, _, _) <- attrs) yield {
             val manyAsterisk = if (car > 2) " **" else if (car == 2) " *" else ""
             li(
               a(href := "#",
@@ -58,10 +57,10 @@ case class SchemaDropdown(metaSchema: MetaSchema, selection: String)
     }
   )
 
-  val partitions: Seq[Part] = getFilteredSchema(metaSchema, selection).parts
+  val partitions: Seq[MetaPart] = getFilteredSchema(metaSchema, selection).parts
 
   def schemaWithPartitions: JsDom.TypedTag[UList] = _topMenu(
-    for (Part(_, part, _, _, nss) <- partitions) yield {
+    for (MetaPart(_, part, _, _, nss) <- partitions) yield {
       _submenu(
         a(href := "#", part),
         nsUls(nss, _menu)

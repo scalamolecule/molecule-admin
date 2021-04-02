@@ -3,7 +3,7 @@ import autowire._
 import boopickle.Default._
 import moleculeadmin.client.app.logic.schema.SchemaState._
 import moleculeadmin.client.schemaWire
-import moleculeadmin.shared.ast.schema._
+import moleculeadmin.shared.ast.metaSchema._
 import org.scalajs.dom.Element
 import rx.{Ctx, Rx}
 import scalatags.JsDom.all._

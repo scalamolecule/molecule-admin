@@ -138,8 +138,9 @@ case class DataTable()(implicit val ctx: Ctx.Owner) extends Callbacks
   ): Unit = {
     //    println("--- fetchAndPopulate ---")
     val (query, _, _, _) = Model2Query(Model(modelElements.now))
-    val datalogQuery     = molecule.transform.Query2String(query).multiLine(60)
-    val resolve          = (expr: QueryExpr) => Query2String(query).p(expr)
+    val q2s              = Query2String(query)
+    val datalogQuery     = q2s.multiLine(60)
+    val resolve          = (expr: QueryExpr) => q2s.p(expr)
     val rules            = if (query.i.rules.nonEmpty)
       Some("[" + (query.i.rules map resolve mkString " ") + "]") else None
     val (l, ll, lll)     = encodeInputs(query)

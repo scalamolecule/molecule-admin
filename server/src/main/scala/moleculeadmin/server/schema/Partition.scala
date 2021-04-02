@@ -7,7 +7,7 @@ import db.admin.dsl.moleculeAdmin._
 import molecule.api.out15._
 import molecule.facade.Conn
 import moleculeadmin.server.Base
-import moleculeadmin.shared.ast.schema._
+import moleculeadmin.shared.ast.metaSchema._
 import moleculeadmin.server.utils.DefFile
 
 
@@ -57,7 +57,7 @@ object Partition extends SchemaBase  with Base{
               }
 
               // Add partition to client schema
-              val newPartition : Part       = Part(pos, part, descr, None, Nil)
+              val newPartition : MetaPart   = MetaPart(pos, part, descr, None, Nil)
               val updatedSchema: MetaSchema = MetaSchema(
                 if (schema.parts.isEmpty) {
                   Seq(newPartition)
@@ -130,14 +130,14 @@ object Partition extends SchemaBase  with Base{
               } else try {
 
                 // Modifying partition definition for each change
-                var updatedPartDef: Part = schema0.parts.find(_.name == curPart).get
+                var updatedPartDef: MetaPart = schema0.parts.find(_.name == curPart).get
 
 
                 // partition pos ....................................................
 
                 var schema: MetaSchema = if (pos > 0 && pos != curPos) {
                   MetaSchema(schema0.parts.map {
-                    case partDef@Part(_, `curPart`, _, _, _) =>
+                    case partDef@MetaPart(_, `curPart`, _, _, _) =>
                       // meta
                       meta_Partition(partE).pos(pos).update
                       // client
@@ -145,7 +145,7 @@ object Partition extends SchemaBase  with Base{
                       updatedPartDef = partDef1
                       partDef1
 
-                    case partDef@Part(otherPos, otherPart, _, _, _) if otherPos > curPos && otherPos <= pos =>
+                    case partDef@MetaPart(otherPos, otherPart, _, _, _) if otherPos > curPos && otherPos <= pos =>
                       // meta
                       val otherPartE = partitionEntities(otherPart)
                       val newPos     = otherPos - 1
@@ -153,7 +153,7 @@ object Partition extends SchemaBase  with Base{
                       // client
                       partDef.copy(pos = newPos)
 
-                    case partDef@Part(otherPos, otherPart, _, _, _) if otherPos < curPos && otherPos >= pos =>
+                    case partDef@MetaPart(otherPos, otherPart, _, _, _) if otherPos < curPos && otherPos >= pos =>
                       // meta
                       val otherPartE = partitionEntities(otherPart)
                       val newPos     = otherPos + 1
@@ -170,8 +170,8 @@ object Partition extends SchemaBase  with Base{
 
                 def updateSchema = {
                   schema = MetaSchema(schema.parts.map {
-                    case Part(_, `curPart`, _, _, _) => updatedPartDef
-                    case partDef                     => partDef
+                    case MetaPart(_, `curPart`, _, _, _) => updatedPartDef
+                    case partDef                         => partDef
                   })
                 }
 
@@ -196,8 +196,8 @@ object Partition extends SchemaBase  with Base{
 
                   // Alter ident of all attributes in partition (!!)
                   val txMaps = for {
-                    Ns(_, ns, _, _, _, attrs) <- updatedPartDef.nss
-                    Attr(_, attr, _, _, _, _, _, _, _, _, _, _, _) <- attrs
+                    MetaNs(_, ns, _, _, _, attrs) <- updatedPartDef.nss
+                    MetaAttr(_, attr, _, _, _, _, _, _, _, _, _, _, _) <- attrs
                   } yield {
                     val (curAttr, newAttr) = (getFullAttr(curPart, ns, attr), getFullAttr(newPart, ns, attr))
                     rollbackAttrStmtsMap.add(
@@ -216,15 +216,15 @@ object Partition extends SchemaBase  with Base{
                   // update references to all namespaces in this partition
                   val partPrefix: String = curPart + "_"
                   schema = MetaSchema(schema.parts.map {
-                    case partDef@Part(_, part, _, _, nss) => {
-                      val nsDefs: Seq[Ns] = nss.map {
-                        case nsDef@Ns(_, ns, _, _, _, attrs) => {
+                    case partDef@MetaPart(_, part, _, _, nss) => {
+                      val nsDefs: Seq[MetaNs] = nss.map {
+                        case nsDef@MetaNs(_, ns, _, _, _, attrs) => {
 
                           // Update ref attributes
-                          val attrDefs: Seq[Attr] = attrs.map {
+                          val attrDefs: Seq[MetaAttr] = attrs.map {
 
                             // Ref attribute with reference to old partition name
-                            case refAttr@Attr(_, attr, _, _, _, Some(curFullRefNs), _, _, _, _, _, _, _) if curFullRefNs.startsWith(partPrefix) =>
+                            case refAttr@MetaAttr(_, attr, _, _, _, Some(curFullRefNs), _, _, _, _, _, _, _) if curFullRefNs.startsWith(partPrefix) =>
 
                               // Replace old partition name with new name in reference
                               val newRefNs: String = newPart + "_" + curFullRefNs.split("_")(1)
@@ -335,9 +335,9 @@ object Partition extends SchemaBase  with Base{
 
                   // No values asserted - "park"/rename all attributes in partition (!!)
                   val txMaps = for {
-                    Part(_, part1, _, _, nss) <- schema.parts if part1 == part
-                    Ns(_, _, nsFull, _, _, attrs) <- nss
-                    Attr(_, attr, _, _, _, _, _, _, _, _, _, _, _) <- attrs
+                    MetaPart(_, part1, _, _, nss) <- schema.parts if part1 == part
+                    MetaNs(_, _, nsFull, _, _, attrs) <- nss
+                    MetaAttr(_, attr, _, _, _, _, _, _, _, _, _, _, _) <- attrs
                   } yield {
                     rollbackAttrStmtsMap.add(
                       Util.map(":db/id", s":-$nsFull/$attr", ":db/ident", s":$nsFull/$attr")

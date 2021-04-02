@@ -2,7 +2,7 @@ package moleculeadmin.client.app.logic.schema
 import boopickle.Default._
 import moleculeadmin.client.app.logic.schema.SchemaState._
 import moleculeadmin.client.app.logic.schema.definition._
-import moleculeadmin.shared.ast.schema.{Attr => Attr_, _}
+import moleculeadmin.shared.ast.metaSchema._
 import rx.{Ctx, Rx}
 import scalatags.JsDom.all._
 
@@ -25,7 +25,7 @@ case class DefineTab(db: String, schema0: MetaSchema)
         // Schema tree menu
         td(verticalAlign.top,
           div(cls := "list-group",
-            for (Part(_, part, _, _, nss) <- schema1.parts) yield SchemaTree(part, nss).render
+            for (MetaPart(_, part, _, _, nss) <- schema1.parts) yield SchemaTree(part, nss).render
           )
         ),
 
@@ -44,9 +44,9 @@ case class DefineTab(db: String, schema0: MetaSchema)
             if (activeAttr.nonEmpty) {
               val (ns, attr) = (nss.last, activeAttr.get)
               for {
-                Part(_, `part`, _, _, nss) <- schema1.parts
-                Ns(_, `ns`, _, _, _, attrs) <- nss
-                Attr_(n, `attr`, card, attrType, enums, refNs, options, doc, attrGroup, _, _, _, _) <- attrs
+                MetaPart(_, `part`, _, _, nss) <- schema1.parts
+                MetaNs(_, `ns`, _, _, _, attrs) <- nss
+                MetaAttr(n, `attr`, card, attrType, enums, refNs, options, doc, attrGroup, _, _, _, _) <- attrs
               } yield
                 AttributeOnlyEdit(db, schema1, part, ns, n, attr, card, attrType, enums, refNs, options, doc, attrs, attrGroup).render
 
@@ -54,15 +54,15 @@ case class DefineTab(db: String, schema0: MetaSchema)
               val nsAlias = nss.last
 
               for {
-                Part(_, `part`, _, _, nss) <- schema1.parts
-                Ns(n, `nsAlias`, ns, nsDescr, _, attrs) <- nss
+                MetaPart(_, `part`, _, _, nss) <- schema1.parts
+                MetaNs(n, `nsAlias`, ns, nsDescr, _, attrs) <- nss
               } yield
                 Attributes(db, schema1, nss, part, n, nsAlias, ns, nsDescr, attrs).render
 
             } else {
 
               for {
-                Part(n, `part`, descr, _, nss) <- schema1.parts
+                MetaPart(n, `part`, descr, _, nss) <- schema1.parts
               } yield
                 Namespaces(db, schema1, n, part, descr, nss).render
             }

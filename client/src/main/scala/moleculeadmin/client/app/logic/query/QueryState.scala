@@ -3,7 +3,7 @@ package moleculeadmin.client.app.logic.query
 import molecule.ast.model.Element
 import moleculeadmin.shared.api.QueryApi
 import moleculeadmin.shared.ast.query.{Col, Filter, QueryDTO, QueryResult}
-import moleculeadmin.shared.ast.schema.{MetaSchema, Ns}
+import moleculeadmin.shared.ast.metaSchema.{MetaSchema, MetaNs}
 import moleculeadmin.shared.ast.tree.Tree
 import rx.Var
 import scala.collection.mutable
@@ -19,7 +19,7 @@ object QueryState extends QueryApi {
   var dbSettingsIdOpt = Option.empty[Long]
 
   // Schema ----------------------------------------
-  implicit var nsMap: Map[String, Ns] = Map.empty[String, Ns]
+  implicit var nsMap: Map[String, MetaNs] = Map.empty[String, MetaNs]
   var metaSchema   : MetaSchema          = null
   var valuesCounted: Boolean             = false
   var viewCellTypes: Map[String, String] = Map.empty

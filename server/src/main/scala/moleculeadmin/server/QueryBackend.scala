@@ -560,12 +560,12 @@ class QueryBackend extends ToggleBackend {
     update(db, attrFull, data, getNumCaster(attrType))
   }
 
-  import moleculeadmin.shared.ast.schema
+  import moleculeadmin.shared.ast.metaSchema
 
   override def insert(
     db: String,
     molecule: String,
-    nsMap: Map[String, schema.Ns],
+    nsMap: Map[String, metaSchema.MetaNs],
     rowValues: Seq[Seq[String]]
   ): Either[String, Long] = {
     // Model without initial entity id

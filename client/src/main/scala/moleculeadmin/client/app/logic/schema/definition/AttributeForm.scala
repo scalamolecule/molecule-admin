@@ -4,7 +4,7 @@ import autowire._
 import boopickle.Default._
 import moleculeadmin.client.app.logic.schema.SchemaState._
 import moleculeadmin.client.schemaWire
-import moleculeadmin.shared.ast.schema.{Attr => Attr_, _}
+import moleculeadmin.shared.ast.metaSchema._
 import org.scalajs.dom.raw.{HTMLInputElement, HTMLSelectElement, HTMLTextAreaElement}
 import org.scalajs.dom.{Element, document, window}
 import rx.{Ctx, Rx, Var}
@@ -22,11 +22,11 @@ case class AttributeForm(db: String,
                          attr: String,
                          card: Int,
                          attrType0: String,
-                         enums: Option[Set[String]],
+                         enums: Seq[String],
                          refNs: Option[String],
-                         options: Option[Set[String]],
+                         options: Seq[String],
                          doc: Option[String],
-                         attrs: Seq[Attr_],
+                         attrs: Seq[MetaAttr],
                          attrGroup0: Option[String])
                         (implicit val ctx: Ctx.Owner) extends Base {
 
@@ -56,8 +56,8 @@ case class AttributeForm(db: String,
       id := s"attr-refNs",
       marginTop := s"${top}px",
       for {
-        Part(_, part1, _, _, nss) <- schema1.parts
-        Ns(_, ns1, _, _, _, _) <- nss
+        MetaPart(_, part1, _, _, nss) <- schema1.parts
+        MetaNs(_, ns1, _, _, _, _) <- nss
       } yield {
         val refNs1 = part match {
           case "db.part/user" => ns1
@@ -67,9 +67,9 @@ case class AttributeForm(db: String,
       }
     )
 
-    def renderEnumsTextArea(curEnums0: Option[Set[String]] = None, curEnumsStr: Option[String] = None) = {
-      val enumValues = if (curEnums0.isDefined)
-        curEnums0.get.toSeq.sorted
+    def renderEnumsTextArea(curEnums0: Seq[String] = Nil, curEnumsStr: Option[String] = None) = {
+      val enumValues = if (curEnums0.nonEmpty)
+        curEnums0.sorted
       else if (curEnumsStr.isDefined)
         curEnumsStr.get.split("\n").toSeq.sorted
       else
@@ -213,12 +213,11 @@ case class AttributeForm(db: String,
         case "ref" | "biEdge" | "bi" => refOptions
         case _                       => valOptions
       }
-      val curOpts = options.getOrElse(Nil).toSeq
       div(
         opts.tail.map(v =>
           div(cls := "form-check",
             input(tpe := "checkbox", cls := "form-check-input", id := s"attr-opts-$v", name := "attr-opts", value := v,
-              if (curOpts contains v) checked := true else (),
+              if (options contains v) checked := true else (),
               onchange := { () => lastOption() = v }
             ),
             label(cls := "form-check-label", `for` := s"attr-opts-$v", width := "100%", v)
@@ -416,7 +415,7 @@ case class AttributeForm(db: String,
               val enumInput   = document.getElementById("attr-enums")
               val curEnumsStr = if (enumInput != null) enumInput.asInstanceOf[HTMLTextAreaElement].value else ""
               if (update)
-                div("Enum with values:", br, renderEnumsTextArea(None, Some(curEnumsStr))).render
+                div("Enum with values:", br, renderEnumsTextArea(Nil, Some(curEnumsStr))).render
               else
                 renderTypeSelector(allTypes, t, br, renderEnumsTextArea())
               renderOptions(valOptions, getOpts)

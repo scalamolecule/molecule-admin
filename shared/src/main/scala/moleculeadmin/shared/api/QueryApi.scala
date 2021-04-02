@@ -1,7 +1,7 @@
 package moleculeadmin.shared.api
 
 import moleculeadmin.shared.ast.query.{Col, QueryDTO, QueryResult}
-import moleculeadmin.shared.ast.schema
+import moleculeadmin.shared.ast.metaSchema
 import scala.collection.mutable.ListBuffer
 
 trait QueryApi extends BaseApi {
@@ -87,7 +87,7 @@ trait QueryApi extends BaseApi {
   def insert(
     db: String,
     molecule: String,
-    nsMap: Map[String, schema.Ns],
+    nsMap: Map[String, metaSchema.MetaNs],
     rowValues: Seq[Seq[String]]
   ): Either[String, Long] = ???
 

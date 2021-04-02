@@ -6,7 +6,7 @@ import util.client.rx.RxBindings
 import moleculeadmin.client.app.html.AppElements
 import moleculeadmin.client.schemaWire
 import moleculeadmin.shared.api.BaseApi
-import moleculeadmin.shared.ast.schema._
+import moleculeadmin.shared.ast.metaSchema._
 import moleculeadmin.shared.util.HelpersAdmin
 import org.scalajs.dom
 import org.scalajs.dom.Event

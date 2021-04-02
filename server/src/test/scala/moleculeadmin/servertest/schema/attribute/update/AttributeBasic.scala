@@ -2,7 +2,7 @@ package moleculeadmin.servertest.schema.attribute.update
 
 import molecule.util.Helpers
 import moleculeadmin.servertest._
-import moleculeadmin.shared.ast.schema._
+import moleculeadmin.shared.ast.metaSchema._
 import moleculeadmin.shared.testdata.TreeSchema
 import utest._
 import scala.languageFeature.implicitConversions._
@@ -71,22 +71,22 @@ object AttributeBasic extends TestSuite with TreeSchema with Helpers {
       )
 
       val nestedMetaSchema1 = MetaSchema(List(
-        Part(1, "a", None, None, List(
-          Ns(1, "Aa", "a_Aa", None, None, List()))),
-        Part(2, "b", None, None, List(
-          Ns(1, "Bb", "b_Bb", None, None, List(
-            Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-            Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()))),
-          Ns(2, "Bc", "b_Bc", None, None, List(
-            Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()))),
-          Ns(3, "Bz", "b_Bz", None, None, List(
-            Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List())
+        MetaPart(1, "a", None, None, List(
+          MetaNs(1, "Aa", "a_Aa", None, None, List()))),
+        MetaPart(2, "b", None, None, List(
+          MetaNs(1, "Bb", "b_Bb", None, None, List(
+            MetaAttr(1, "bb1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+            MetaAttr(2, "bb2", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))),
+          MetaNs(2, "Bc", "b_Bc", None, None, List(
+            MetaAttr(1, "bc1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))),
+          MetaNs(3, "Bz", "b_Bz", None, None, List(
+            MetaAttr(1, "bb1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List())
           ))
         )),
-        Part(3, "c", None, None, List()),
-        Part(3, "z", None, None, List(
-          Ns(1, "Bb", "b_Bb", None, None, List(
-            Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List())
+        MetaPart(3, "c", None, None, List()),
+        MetaPart(3, "z", None, None, List(
+          MetaNs(1, "Bb", "b_Bb", None, None, List(
+            MetaAttr(1, "bb1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List())
           ))
         ))
       ))

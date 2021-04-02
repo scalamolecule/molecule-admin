@@ -3,7 +3,7 @@ import util.client.rx.RxBindings
 import moleculeadmin.client.app.html.AppElements
 import moleculeadmin.client.app.logic.query.QueryState.{modelElements, nsMap, tree}
 import moleculeadmin.client.app.html.common.DropdownMenu
-import moleculeadmin.shared.ast.schema._
+import moleculeadmin.shared.ast.metaSchema._
 import moleculeadmin.shared.ast.tree.Tree
 import moleculeadmin.shared.ops.query.builder.TreeOps
 import org.scalajs.dom.html.Div
@@ -40,7 +40,7 @@ case class QueryBranches(selection: String)(implicit val ctx: Ctx.Owner)
                 // Attributes section -------------------------------
 
                 for {
-                  Attr(i, attr, car, attrType, enums, refNs, options, doc, _, _, _, _, topValues) <- attrs
+                  MetaAttr(i, attr, car, attrType, enums, refNs, options, doc, _, _, _, _, topValues) <- attrs
                 } yield {
                   val (attrFull, attrClass, attrValue) = attrFullClass(selAttrs, attr, refNs)
                   val manyAsterisk                     = if (car > 2) " **" else if (car == 2) " *" else ""
@@ -73,7 +73,7 @@ case class QueryBranches(selection: String)(implicit val ctx: Ctx.Owner)
 
                 if (refs.isEmpty) () else {
                   _divider +: (
-                    for ((refAttr, car, Ns(_, _, refNsFull, _, _, refAttrs)) <- refs) yield {
+                    for ((refAttr, car, MetaNs(_, _, refNsFull, _, _, refAttrs)) <- refs) yield {
                       val refAttr1 = refAttr.capitalize + (if (car > 2) " **" else if (car == 2) " *" else "")
 
                       if (selRefs.contains(refAttr)) {
@@ -93,7 +93,7 @@ case class QueryBranches(selection: String)(implicit val ctx: Ctx.Owner)
                           ),
                           _menu(
                             for {
-                              Attr(_, attr, _, _, _, _, _, _, _, _, _, _, _) <- refAttrs
+                              MetaAttr(_, attr, _, _, _, _, _, _, _, _, _, _, _) <- refAttrs
                             } yield {
                               li(
                                 a(href := "#", attr,

@@ -1,7 +1,7 @@
 package moleculeadmin.shared.ops.query.attr
 
 import moleculeadmin.shared.api.QueryApi
-import moleculeadmin.shared.ast.schema.{Attr, Ns}
+import moleculeadmin.shared.ast.metaSchema.{MetaAttr, MetaNs}
 import molecule.ast.model._
 import moleculeadmin.shared.ops.query.BaseQuery
 
@@ -22,7 +22,7 @@ trait ModeOps extends QueryApi with BaseQuery {
     model: Seq[Element],
     path: Seq[(String, String)],
     selAttr: String
-  )(implicit nsMap: Map[String, Ns]): Seq[Element] = {
+  )(implicit nsMap: Map[String, MetaNs]): Seq[Element] = {
     val ns                      = path.last._2
     val (before, branch, after) = isolateBranch(model, path)
     val (prev, cur, sub)        = isolateAttr(branch, ns, selAttr)
@@ -98,7 +98,7 @@ trait ModeOps extends QueryApi with BaseQuery {
     path: Seq[(String, String)],
     selAttr: String,
     mode: String
-  )(implicit nsMap: Map[String, Ns]): Seq[Element] = {
+  )(implicit nsMap: Map[String, MetaNs]): Seq[Element] = {
     val ns                      = path.last._2
     val (before, branch, after) = isolateBranch(model, path)
     val (prev, cur, sub)        = isolateAttr(branch, ns, selAttr)
@@ -169,35 +169,35 @@ trait ModeOps extends QueryApi with BaseQuery {
   }
 
 
-  private def newAttr1(ns: String, attr: String, nsMap: Map[String, Ns],
+  private def newAttr1(ns: String, attr: String, nsMap: Map[String, MetaNs],
                        ext: String = ""): GenericAtom = nsMap(ns).attrs.collectFirst {
-    case Attr(_, `attr`, _, "datom", _, _, _, _, _, _, _, _, _)                      => Generic(ns, "e" + ext, "datom", EntValue)
-    case Attr(_, `attr`, card, tpe, Some(_), _, _, _, _, _, _, _, _) if ext == "nil" => Atom(ns, attr + "_", tpe, card, Fn("not", None), Some(s":$ns.$attr/"))
-    case Attr(_, `attr`, card, tpe, Some(_), _, _, _, _, _, _, _, _)                 => Atom(ns, attr + ext, tpe, card, EnumVal, Some(s":$ns.$attr/"))
-    case Attr(_, `attr`, card, tpe, _, _, _, _, _, _, _, _, _) if ext == "nil"       => Atom(ns, attr + "_", tpe, card, Fn("not", None))
-    case Attr(_, `attr`, card, tpe, _, _, _, _, _, _, _, _, _)                       => Atom(ns, attr + ext, tpe, card, VarValue)
+    case MetaAttr(_, `attr`, _, "datom", _, _, _, _, _, _, _, _, _)                  => Generic(ns, "e" + ext, "datom", EntValue)
+    case MetaAttr(_, `attr`, card, tpe, Nil, _, _, _, _, _, _, _, _) if ext == "nil" => Atom(ns, attr + "_", tpe, card, Fn("not", None))
+    case MetaAttr(_, `attr`, card, tpe, Nil, _, _, _, _, _, _, _, _)                 => Atom(ns, attr + ext, tpe, card, VarValue)
+    case MetaAttr(_, `attr`, card, tpe, _, _, _, _, _, _, _, _, _) if ext == "nil"   => Atom(ns, attr + "_", tpe, card, Fn("not", None), Some(s":$ns.$attr/"))
+    case MetaAttr(_, `attr`, card, tpe, _, _, _, _, _, _, _, _, _)                   => Atom(ns, attr + ext, tpe, card, EnumVal, Some(s":$ns.$attr/"))
   }.get
 
 
-  private def newAttr2(ns: String, attr: String, nsMap: Map[String, Ns], mode: String,
+  private def newAttr2(ns: String, attr: String, nsMap: Map[String, MetaNs], mode: String,
                        single: Boolean): Seq[GenericAtom] = mode match {
     case "mandatory" if attr == "e" => Seq(Generic(ns, "e", "datom", EntValue))
     case "tacit" if attr == "e"     => Seq(Generic(ns, "e_", "datom", EntValue))
     case "mandatory"                => nsMap(ns).attrs.collectFirst {
-      case Attr(_, `attr`, card, tpe, Some(_), _, _, _, _, _, _, _, _) => Seq(Atom(ns, attr, tpe, card, EnumVal, Some(s":$ns.$attr/")))
-      case Attr(_, `attr`, card, tpe, _, _, _, _, _, _, _, _, _)       => Seq(Atom(ns, attr, tpe, card, VarValue))
+      case MetaAttr(_, `attr`, card, tpe, Nil, _, _, _, _, _, _, _, _) => Seq(Atom(ns, attr, tpe, card, VarValue))
+      case MetaAttr(_, `attr`, card, tpe, _, _, _, _, _, _, _, _, _)   => Seq(Atom(ns, attr, tpe, card, EnumVal, Some(s":$ns.$attr/")))
     }.get
     case "tacit"                    => nsMap(ns).attrs.collectFirst {
-      case Attr(_, `attr`, card, tpe, Some(_), _, _, _, _, _, _, _, _) => Seq(Atom(ns, attr + "_", tpe, card, EnumVal, Some(s":$ns.$attr/")))
-      case Attr(_, `attr`, card, tpe, _, _, _, _, _, _, _, _, _)       => Seq(Atom(ns, attr + "_", tpe, card, VarValue))
+      case MetaAttr(_, `attr`, card, tpe, Nil, _, _, _, _, _, _, _, _) => Seq(Atom(ns, attr + "_", tpe, card, VarValue))
+      case MetaAttr(_, `attr`, card, tpe, _, _, _, _, _, _, _, _, _)   => Seq(Atom(ns, attr + "_", tpe, card, EnumVal, Some(s":$ns.$attr/")))
     }.get
     case "optional"                 => nsMap(ns).attrs.collectFirst {
-      case Attr(_, `attr`, card, tpe, Some(_), _, _, _, _, _, _, _, _) => Seq(Atom(ns, attr + "$", tpe, card, EnumVal, Some(s":$ns.$attr/")))
-      case Attr(_, `attr`, card, tpe, _, _, _, _, _, _, _, _, _)       => Seq(Atom(ns, attr + "$", tpe, card, VarValue))
+      case MetaAttr(_, `attr`, card, tpe, Nil, _, _, _, _, _, _, _, _) => Seq(Atom(ns, attr + "$", tpe, card, VarValue))
+      case MetaAttr(_, `attr`, card, tpe, _, _, _, _, _, _, _, _, _)   => Seq(Atom(ns, attr + "$", tpe, card, EnumVal, Some(s":$ns.$attr/")))
     }.get
     case "nil"                      => nsMap(ns).attrs.collectFirst {
-      case Attr(_, `attr`, card, tpe, Some(_), _, _, _, _, _, _, _, _) => Seq(Atom(ns, attr + "_", tpe, card, Fn("not", None), Some(s":$ns.$attr/")))
-      case Attr(_, `attr`, card, tpe, _, _, _, _, _, _, _, _, _)       => Seq(Atom(ns, attr + "_", tpe, card, Fn("not", None)))
+      case MetaAttr(_, `attr`, card, tpe, Nil, _, _, _, _, _, _, _, _) => Seq(Atom(ns, attr + "_", tpe, card, Fn("not", None)))
+      case MetaAttr(_, `attr`, card, tpe, _, _, _, _, _, _, _, _, _)   => Seq(Atom(ns, attr + "_", tpe, card, Fn("not", None), Some(s":$ns.$attr/")))
     }.get
     case "none" if single           => Seq(Atom(ns, dummy, "", 1, NoValue, None, List(), List()))
     case "none"                     => Nil

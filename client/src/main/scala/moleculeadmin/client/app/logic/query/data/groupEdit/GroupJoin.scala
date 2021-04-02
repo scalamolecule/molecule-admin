@@ -7,7 +7,7 @@ import moleculeadmin.client.app.logic.query.QueryState._
 import moleculeadmin.client.app.logic.query.keyEvents.Paging
 import moleculeadmin.client.queryWireAjax
 import moleculeadmin.shared.ast.query.Col
-import moleculeadmin.shared.ast.schema.Attr
+import moleculeadmin.shared.ast.metaSchema.MetaAttr
 import org.scalajs.dom.window
 import rx.Ctx
 import scala.collection.mutable.ListBuffer
@@ -18,19 +18,14 @@ case class GroupJoin(colIndex: Int, nsFull: String)(implicit val ctx: Ctx.Owner)
 
   val attrs: Seq[NsData] = {
     nsMap(nsFull).attrs.collect {
-      case Attr(_, refAttr, refCard, _, _, Some(refNs), _, _, _, _, _, _, _) =>
+      case MetaAttr(_, refAttr, refCard, _, _, Some(refNs), _, _, _, _, _, _, _) =>
         val valueAttrs = nsMap(refNs).attrs.map { at =>
-          val opt = at.options$ match {
-            case None       => ""
-            case Some(opts) =>
-              if (opts.contains("uniqueIdentity"))
-                "uniqueIdentity"
-              else if (opts.contains("uniqueValue"))
+          val opt = if(at.options.contains("uniqueIdentity"))
+            "uniqueIdentity"
+          else if(at.options.contains("uniqueValue"))
                 "uniqueValue"
-              else
-                ""
-          }
-          (at.name, at.tpe, at.enums$.isDefined, opt)
+          else ""
+          (at.name, at.tpe, at.enums.nonEmpty, opt)
         }
         (nsFull, refAttr, refCard, refNs, valueAttrs)
     }

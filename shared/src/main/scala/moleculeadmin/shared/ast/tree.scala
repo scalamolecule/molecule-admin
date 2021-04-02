@@ -1,14 +1,14 @@
 package moleculeadmin.shared.ast
 import molecule.ast.model.GenericAtom
-import moleculeadmin.shared.ast.schema._
+import moleculeadmin.shared.ast.metaSchema._
 import moleculeadmin.shared.util.HelpersAdmin
 
 object tree extends HelpersAdmin {
 
   case class Tree(path: Seq[(String, String)],
-                  attrs: Seq[Attr],
+                  attrs: Seq[MetaAttr],
                   selAttrs: Seq[GenericAtom],
-                  refs: Seq[(String, Ns)],
+                  refs: Seq[(String, MetaNs)],
                   selRefs: Seq[String],
                   branches: Seq[Tree]) {
 
@@ -46,9 +46,9 @@ object tree extends HelpersAdmin {
         case Some(set: Set[_])                => s"""Some(Set(${set.map(v => s""""$v"""").mkString(", ")}))"""
         case Some(other)                      => s"""Some("${other.toString}")"""
       }
-      def attr(a: Attr) = a match {
-        case Attr(order, name, card, tpe, enums, ref, options, doc, attrGroup, attrValueCount, attrDistinctValueCount, descrAttr, topValues) =>
-          s"""($order, "$name", $card, "$tpe", ${o(enums)}, ${o(ref)}, ${o(options)}, ${o(doc)}, ${o(attrGroup)}, ${o(attrValueCount)}, ${o(attrDistinctValueCount)}, ${o(descrAttr)}, ${topValues.take(2).mkString(", ") + ", ..."})"""
+      def attr(a: MetaAttr) = a match {
+        case MetaAttr(order, name, card, tpe, enums, ref, options, doc, attrGroup, attrValueCount, attrDistinctValueCount, descrAttr, topValues) =>
+          s"""($order, "$name", $card, "$tpe", ${seq(enums)}, ${o(ref)}, ${seq(options)}, ${o(doc)}, ${o(attrGroup)}, ${o(attrValueCount)}, ${o(attrDistinctValueCount)}, ${o(descrAttr)}, ${topValues.take(2).mkString(", ") + ", ..."})"""
       }
 
       def recurse(branches: Seq[Tree], indent: Int): String = {
@@ -80,12 +80,12 @@ object tree extends HelpersAdmin {
         case Some(set: Set[_])                => s"""Some(Set(${set.map(v => s""""$v"""").mkString(", ")}))"""
         case Some(other)                      => s"""Some("${other.toString}")"""
       }
-      def attr(a: Attr) = a match {
-        case Attr(order, name, card, tpe, enums, ref, options, doc, attrGroup, attrValueCount, attrDistinctValueCount, descrAttr, topValues) =>
-          s"""($order, "$name", $card, "$tpe", ${o(enums)}, ${o(ref)}, ${o(options)}, ${o(doc)}, ${o(attrGroup)}, ${o(attrValueCount)}, ${o(attrDistinctValueCount)}, ${o(descrAttr)}, ${topValues.take(2).mkString(", ") + ", ..."})"""
+      def attr(a: MetaAttr) = a match {
+        case MetaAttr(order, name, card, tpe, enums, ref, options, doc, attrGroup, attrValueCount, attrDistinctValueCount, descrAttr, topValues) =>
+          s"""($order, "$name", $card, "$tpe", ${seq(enums)}, ${o(ref)}, ${seq(options)}, ${o(doc)}, ${o(attrGroup)}, ${o(attrValueCount)}, ${o(attrDistinctValueCount)}, ${o(descrAttr)}, ${topValues.take(2).mkString(", ") + ", ..."})"""
       }
-      def ns(n: Ns, s: String) = n match {
-        case Ns(order, name, nameFull, nsDescr, nsCount, attrs) => s"""($order, "$name", "$nameFull", "$nsDescr", List(${attrs.map(attr).mkString(s"\n$s            ", s",\n$s            ", ")")})"""
+      def ns(n: MetaNs, s: String) = n match {
+        case MetaNs(order, name, nameFull, nsDescr, nsCount, attrs) => s"""($order, "$name", "$nameFull", "$nsDescr", List(${attrs.map(attr).mkString(s"\n$s            ", s",\n$s            ", ")")})"""
       }
 
       def recurse(branches: Seq[Tree], indent: Int): String = {

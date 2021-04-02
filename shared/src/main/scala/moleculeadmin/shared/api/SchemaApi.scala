@@ -1,6 +1,6 @@
 package moleculeadmin.shared.api
 
-import moleculeadmin.shared.ast.schema._
+import moleculeadmin.shared.ast.metaSchema._
 
 trait SchemaApi extends BaseApi {
 

@@ -1,12 +1,12 @@
 package moleculeadmin.client.app.logic.schema.definition
 import boopickle.Default._
 import moleculeadmin.client.app.logic.schema.SchemaState._
-import moleculeadmin.shared.ast.schema.{Attr => Attr_, _}
+import moleculeadmin.shared.ast.metaSchema._
 import rx.{Ctx, Rx}
 import scalatags.JsDom.all._
 
 
-case class SchemaTree(part0: String, nss0: Seq[Ns])(implicit val ctx: Ctx.Owner) extends Base {
+case class SchemaTree(part0: String, nss0: Seq[MetaNs])(implicit val ctx: Ctx.Owner) extends Base {
 
   def treeAttr(part: String, ns: String, attr: String) = {
     val openNs = open.now.find(_._1 == part).get._2.last
@@ -31,7 +31,7 @@ case class SchemaTree(part0: String, nss0: Seq[Ns])(implicit val ctx: Ctx.Owner)
     }
   }
 
-  def treeNamespace(part: String, ns: String, attrs: Seq[Attr_]) = {
+  def treeNamespace(part: String, ns: String, attrs: Seq[MetaAttr]) = {
     val (_, openNss, openAttr) = open.now.find(_._1 == part).get
     Rx {
       if (openNss.contains(ns)) {
@@ -45,7 +45,7 @@ case class SchemaTree(part0: String, nss0: Seq[Ns])(implicit val ctx: Ctx.Owner)
           ),
           div(cls := "list-group list-group-flush", marginTop := 2,
             for {
-              Attr_(_, attr, _, _, _, _, _, _, _, _, _, _, _) <- attrs
+              MetaAttr(_, attr, _, _, _, _, _, _, _, _, _, _, _) <- attrs
             } yield treeAttr(part, ns, attr)
           ),
           onclick := hideNs(part, ns)
@@ -83,7 +83,7 @@ case class SchemaTree(part0: String, nss0: Seq[Ns])(implicit val ctx: Ctx.Owner)
           ),
           div(cls := "list-group list-group-flush", marginTop := 5,
             for {
-              Ns(_, ns, _, _, _, attrs0) <- nss0
+              MetaNs(_, ns, _, _, _, attrs0) <- nss0
             } yield treeNamespace(part, ns, attrs0)
           ),
           onclick := hidePart(part)

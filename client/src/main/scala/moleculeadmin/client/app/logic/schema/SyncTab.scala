@@ -6,7 +6,7 @@ import util.client.rx.RxBindings
 import moleculeadmin.client.app.html.AppElements
 import moleculeadmin.client.schemaWire
 import moleculeadmin.shared.api.BaseApi
-import moleculeadmin.shared.ast.schema.FlatSchema
+import moleculeadmin.shared.ast.metaSchema.FlatSchema
 import moleculeadmin.shared.ops.schema.Sync
 import rx.{Ctx, Rx, Var}
 import scalatags.JsDom.all._

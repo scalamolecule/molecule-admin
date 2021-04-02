@@ -3,7 +3,7 @@ import autowire._
 import boopickle.Default._
 import moleculeadmin.client.app.logic.schema.SchemaState._
 import moleculeadmin.client.schemaWire
-import moleculeadmin.shared.ast.schema._
+import moleculeadmin.shared.ast.metaSchema._
 import org.scalajs.dom.window
 import rx.{Ctx, Rx}
 import scalatags.JsDom.all._
@@ -34,7 +34,7 @@ case class Partitions(db: String, schema1: MetaSchema)(implicit val ctx: Ctx.Own
         Rx {
           tbody(
             for {
-              Part(n, part, partDescr0, partValueCount0, nss) <- schema1.parts
+              MetaPart(n, part, partDescr0, partValueCount0, nss) <- schema1.parts
             } yield {
               val attrCount = nss.map(_.attrs.length).sum
               val partValueCount = if (partValueCount0.isEmpty) "" else thousands(partValueCount0.get)

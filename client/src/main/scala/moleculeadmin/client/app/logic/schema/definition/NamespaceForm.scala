@@ -3,7 +3,7 @@ import autowire._
 import boopickle.Default._
 import moleculeadmin.client.app.logic.schema.SchemaState._
 import moleculeadmin.client.schemaWire
-import moleculeadmin.shared.ast.schema._
+import moleculeadmin.shared.ast.metaSchema._
 import org.scalajs.dom.Element
 import rx.{Ctx, Rx}
 import scalatags.JsDom.all._
@@ -13,7 +13,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 case class NamespaceForm(db: String,
                          schema1: MetaSchema,
-                         nss: Seq[Ns],
+                         nss: Seq[MetaNs],
                          part: String,
                          pos: Int,
                          nsAlias: String,

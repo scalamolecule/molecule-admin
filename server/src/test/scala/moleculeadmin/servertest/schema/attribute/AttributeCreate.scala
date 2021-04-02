@@ -7,7 +7,7 @@ import db.admin.dsl.moleculeAdmin._
 import molecule.api.out10._
 import molecule.util.Helpers
 import moleculeadmin.servertest._
-import moleculeadmin.shared.ast.schema._
+import moleculeadmin.shared.ast.metaSchema._
 import moleculeadmin.shared.testdata.TreeSchema
 import utest._
 import scala.languageFeature.implicitConversions._
@@ -80,9 +80,9 @@ object AttributeCreate extends TestSuite with TreeSchema with Helpers {
       // Client schema
       createAttribute(partitionMetaSchema, "Partition", "a", "Aa",
         "number", 1, "Int", Nil, None, Nil, Some("number description")).getOrElse(MetaSchema(Nil)).parts.head ==>
-        Part(1, "a", None, None, Seq(
-          Ns(1, "Aa", "a_Aa", None, None, Seq(
-            Attr(1, "number", 1, "Int", None, None, Some(Set("indexed")), Some("number description"), None, None, None, None, List())))))
+        MetaPart(1, "a", None, None, Seq(
+          MetaNs(1, "Aa", "a_Aa", None, None, Seq(
+            MetaAttr(1, "number", 1, "Int", Nil, None, Seq("indexed"), Some("number description"), None, None, None, None, List())))))
 
       // def file has namespace prepared, here positioned first
       read ! partitionDefFilePath ==>
@@ -136,9 +136,9 @@ object AttributeCreate extends TestSuite with TreeSchema with Helpers {
       // Client schema
       createAttribute(partitionMetaSchema, "Partition", "a", "Aa",
         "number", 1, "Int", Nil, None, Seq("noHistory"), Some("number description")).getOrElse(MetaSchema(Nil)).parts.head ==>
-        Part(1, "a", None, None, Seq(
-          Ns(1, "Aa", "a_Aa", None, None, Seq(
-            Attr(1, "number", 1, "Int", None, None, Some(Set("indexed", "noHistory")), Some("number description"), None, None, None, None, List())))))
+        MetaPart(1, "a", None, None, Seq(
+          MetaNs(1, "Aa", "a_Aa", None, None, Seq(
+            MetaAttr(1, "number", 1, "Int", Nil, None, Seq("indexed", "noHistory"), Some("number description"), None, None, None, None, List())))))
 
       // def file has namespace prepared, here positioned first
       read ! partitionDefFilePath ==>
@@ -192,13 +192,13 @@ object AttributeCreate extends TestSuite with TreeSchema with Helpers {
 
       createAttribute(partitionMetaSchema, "Partition", "b", "Bb", "text",
         2, "String", Seq("enum1", "enum2"), None, Seq("fulltext", "noHistory", "uniqueValue"), Some("descr"), 2).getOrElse(MetaSchema(Nil)).parts(1) ==>
-        Part(2, "b", None, None, List(
-          Ns(1, "Bb", "b_Bb", None, None, List(
-            Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-            Attr(2, "text", 2, "String", Some(Set("enum1", "enum2")), None, Some(Set("indexed", "fulltext", "noHistory", "uniqueValue")), Some("descr"), None, None, None, None, List()),
-            Attr(3, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()))),
-          Ns(2, "Bc", "b_Bc", None, None, List(
-            Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List())))))
+        MetaPart(2, "b", None, None, List(
+          MetaNs(1, "Bb", "b_Bb", None, None, List(
+            MetaAttr(1, "bb1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+            MetaAttr(2, "text", 2, "String", Seq("enum1", "enum2"), None, Seq("indexed", "fulltext", "noHistory", "uniqueValue"), Some("descr"), None, None, None, None, List()),
+            MetaAttr(3, "bb2", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))),
+          MetaNs(2, "Bc", "b_Bc", None, None, List(
+            MetaAttr(1, "bc1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List())))))
 
       read ! partitionDefFilePath ==>
         """package db.migration.schema
@@ -253,13 +253,13 @@ object AttributeCreate extends TestSuite with TreeSchema with Helpers {
 
       createAttribute(partitionMetaSchema, "Partition", "b", "Bc",
         "ref", 1, "ref", Nil, Some("b_Bb")).getOrElse(MetaSchema(Nil)).parts(1) ==>
-        Part(2, "b", None, None, List(
-          Ns(1, "Bb", "b_Bb", None, None, List(
-            Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-            Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()))),
-          Ns(2, "Bc", "b_Bc", None, None, List(
-            Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-            Attr(2, "ref", 1, "ref", None, Some("b_Bb"), Some(Set("indexed")), None, None, None, None, None, List())))))
+        MetaPart(2, "b", None, None, List(
+          MetaNs(1, "Bb", "b_Bb", None, None, List(
+            MetaAttr(1, "bb1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+            MetaAttr(2, "bb2", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))),
+          MetaNs(2, "Bc", "b_Bc", None, None, List(
+            MetaAttr(1, "bc1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+            MetaAttr(2, "ref", 1, "ref", Nil, Some("b_Bb"), Seq("indexed"), None, None, None, None, None, List())))))
 
       read ! partitionDefFilePath ==>
         """package db.migration.schema
@@ -321,17 +321,17 @@ object AttributeCreate extends TestSuite with TreeSchema with Helpers {
       createAttribute(partitionMetaSchema, "Partition", "a", "Aa",
         "ref", 2, "ref", Nil, Some("b_Bb")) ==> Right(
         MetaSchema(List(
-          Part(1, "a", None, None, List(
-            Ns(1, "Aa", "a_Aa", None, None, List(
-              Attr(1, "ref", 2, "ref", None, Some("b_Bb"), Some(Set("indexed")), None, None, None, None, None, List()),
+          MetaPart(1, "a", None, None, List(
+            MetaNs(1, "Aa", "a_Aa", None, None, List(
+              MetaAttr(1, "ref", 2, "ref", Nil, Some("b_Bb"), Seq("indexed"), None, None, None, None, None, List()),
             )))),
-          Part(2, "b", None, None, List(
-            Ns(1, "Bb", "b_Bb", None, None, List(
-              Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-              Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()))),
-            Ns(2, "Bc", "b_Bc", None, None, List(
-              Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()))))),
-          Part(3, "c", None, None, List())
+          MetaPart(2, "b", None, None, List(
+            MetaNs(1, "Bb", "b_Bb", None, None, List(
+              MetaAttr(1, "bb1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+              MetaAttr(2, "bb2", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))),
+            MetaNs(2, "Bc", "b_Bc", None, None, List(
+              MetaAttr(1, "bc1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))))),
+          MetaPart(3, "c", None, None, List())
         )
         ))
 

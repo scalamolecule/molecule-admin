@@ -5,7 +5,7 @@ import db.admin.dsl.moleculeAdmin._
 import molecule.api.out10._
 import molecule.util.Helpers
 import moleculeadmin.servertest._
-import moleculeadmin.shared.ast.schema._
+import moleculeadmin.shared.ast.metaSchema._
 import moleculeadmin.shared.testdata.TreeSchema
 import utest._
 
@@ -51,16 +51,16 @@ object PartitionCreate extends TestSuite with TreeSchema with Helpers {
       // Client schema
       createPartition(partitionMetaSchema, "Partition", "x", Some("Description of x"), 2) ==> Right(
         MetaSchema(List(
-          Part(1, "a", None, None, List(
-            Ns(1, "Aa", "a_Aa", None, None, List()))),
-          Part(2, "x", Some("Description of x"), None, List()),
-          Part(3, "b", None, None, List(
-            Ns(1, "Bb", "b_Bb", None, None, List(
-              Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-              Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()))),
-            Ns(2, "Bc", "b_Bc", None, None, List(
-              Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()))))),
-          Part(4, "c", None, None, List())
+          MetaPart(1, "a", None, None, List(
+            MetaNs(1, "Aa", "a_Aa", None, None, List()))),
+          MetaPart(2, "x", Some("Description of x"), None, List()),
+          MetaPart(3, "b", None, None, List(
+            MetaNs(1, "Bb", "b_Bb", None, None, List(
+              MetaAttr(1, "bb1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+              MetaAttr(2, "bb2", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))),
+            MetaNs(2, "Bc", "b_Bc", None, None, List(
+              MetaAttr(1, "bc1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))))),
+          MetaPart(4, "c", None, None, List())
         ))
       )
 
@@ -126,16 +126,16 @@ object PartitionCreate extends TestSuite with TreeSchema with Helpers {
 
       createPartition(partitionMetaSchema, "Partition", "x", None, 1) ==> Right(
         MetaSchema(List(
-          Part(1, "x", None, None, List()),
-          Part(2, "a", None, None, List(
-            Ns(1, "Aa", "a_Aa", None, None, List()))),
-          Part(3, "b", None, None, List(
-            Ns(1, "Bb", "b_Bb", None, None, List(
-              Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-              Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()))),
-            Ns(2, "Bc", "b_Bc", None, None, List(
-              Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()))))),
-          Part(4, "c", None, None, List())
+          MetaPart(1, "x", None, None, List()),
+          MetaPart(2, "a", None, None, List(
+            MetaNs(1, "Aa", "a_Aa", None, None, List()))),
+          MetaPart(3, "b", None, None, List(
+            MetaNs(1, "Bb", "b_Bb", None, None, List(
+              MetaAttr(1, "bb1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+              MetaAttr(2, "bb2", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))),
+            MetaNs(2, "Bc", "b_Bc", None, None, List(
+              MetaAttr(1, "bc1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))))),
+          MetaPart(4, "c", None, None, List())
         ))
       )
 
@@ -196,32 +196,32 @@ object PartitionCreate extends TestSuite with TreeSchema with Helpers {
       // part
       createPartition(partitionMetaSchema, "Partition", "x") ==> Right(
         MetaSchema(List(
-          Part(1, "a", None, None, List(
-            Ns(1, "Aa", "a_Aa", None, None, List()))),
-          Part(2, "b", None, None, List(
-            Ns(1, "Bb", "b_Bb", None, None, List(
-              Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-              Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()))),
-            Ns(2, "Bc", "b_Bc", None, None, List(
-              Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()))))),
-          Part(3, "c", None, None, List()),
-          Part(4, "x", None, None, List())
+          MetaPart(1, "a", None, None, List(
+            MetaNs(1, "Aa", "a_Aa", None, None, List()))),
+          MetaPart(2, "b", None, None, List(
+            MetaNs(1, "Bb", "b_Bb", None, None, List(
+              MetaAttr(1, "bb1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+              MetaAttr(2, "bb2", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))),
+            MetaNs(2, "Bc", "b_Bc", None, None, List(
+              MetaAttr(1, "bc1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))))),
+          MetaPart(3, "c", None, None, List()),
+          MetaPart(4, "x", None, None, List())
         ))
       )
       // ns
       createNamespace(getMetaSchema("Partition"), "Partition", "x", "Xx") ==> Right(
         MetaSchema(List(
-          Part(1, "a", None, None, List(
-            Ns(1, "Aa", "a_Aa", None, None, List()))),
-          Part(2, "b", None, None, List(
-            Ns(1, "Bb", "b_Bb", None, None, List(
-              Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-              Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()))),
-            Ns(2, "Bc", "b_Bc", None, None, List(
-              Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()))))),
-          Part(3, "c", None, None, List()),
-          Part(4, "x", None, None, List(
-            Ns(1, "Xx", "x_Xx", None, None, List())))
+          MetaPart(1, "a", None, None, List(
+            MetaNs(1, "Aa", "a_Aa", None, None, List()))),
+          MetaPart(2, "b", None, None, List(
+            MetaNs(1, "Bb", "b_Bb", None, None, List(
+              MetaAttr(1, "bb1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+              MetaAttr(2, "bb2", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))),
+            MetaNs(2, "Bc", "b_Bc", None, None, List(
+              MetaAttr(1, "bc1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))))),
+          MetaPart(3, "c", None, None, List()),
+          MetaPart(4, "x", None, None, List(
+            MetaNs(1, "Xx", "x_Xx", None, None, List())))
         ))
       )
 
@@ -285,50 +285,50 @@ object PartitionCreate extends TestSuite with TreeSchema with Helpers {
       // part
       createPartition(partitionMetaSchema, "Partition", "x") ==> Right(
         MetaSchema(List(
-          Part(1, "a", None, None, List(
-            Ns(1, "Aa", "a_Aa", None, None, List()))),
-          Part(2, "b", None, None, List(
-            Ns(1, "Bb", "b_Bb", None, None, List(
-              Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-              Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()))),
-            Ns(2, "Bc", "b_Bc", None, None, List(
-              Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()))))),
-          Part(3, "c", None, None, List()),
-          Part(4, "x", None, None, List())
+          MetaPart(1, "a", None, None, List(
+            MetaNs(1, "Aa", "a_Aa", None, None, List()))),
+          MetaPart(2, "b", None, None, List(
+            MetaNs(1, "Bb", "b_Bb", None, None, List(
+              MetaAttr(1, "bb1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+              MetaAttr(2, "bb2", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))),
+            MetaNs(2, "Bc", "b_Bc", None, None, List(
+              MetaAttr(1, "bc1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))))),
+          MetaPart(3, "c", None, None, List()),
+          MetaPart(4, "x", None, None, List())
         ))
       )
       // ns
       createNamespace(getMetaSchema("Partition"), "Partition", "x", "Xx") ==> Right(
         MetaSchema(List(
-          Part(1, "a", None, None, List(
-            Ns(1, "Aa", "a_Aa", None, None, List()))),
-          Part(2, "b", None, None, List(
-            Ns(1, "Bb", "b_Bb", None, None, List(
-              Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-              Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()))),
-            Ns(2, "Bc", "b_Bc", None, None, List(
-              Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()))))),
-          Part(3, "c", None, None, List()),
-          Part(4, "x", None, None, List(
-            Ns(1, "Xx", "x_Xx", None, None, List())))
+          MetaPart(1, "a", None, None, List(
+            MetaNs(1, "Aa", "a_Aa", None, None, List()))),
+          MetaPart(2, "b", None, None, List(
+            MetaNs(1, "Bb", "b_Bb", None, None, List(
+              MetaAttr(1, "bb1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+              MetaAttr(2, "bb2", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))),
+            MetaNs(2, "Bc", "b_Bc", None, None, List(
+              MetaAttr(1, "bc1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))))),
+          MetaPart(3, "c", None, None, List()),
+          MetaPart(4, "x", None, None, List(
+            MetaNs(1, "Xx", "x_Xx", None, None, List())))
         ))
       )
       // attr
       createAttribute(getMetaSchema("Partition"), "Partition", "x", "Xx", "xx1", 1, "Int") ==> Right(
         MetaSchema(List(
-          Part(1, "a", None, None, List(
-            Ns(1, "Aa", "a_Aa", None, None, List()))),
-          Part(2, "b", None, None, List(
-            Ns(1, "Bb", "b_Bb", None, None, List(
-              Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-              Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()))),
-            Ns(2, "Bc", "b_Bc", None, None, List(
-              Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()))))),
-          Part(3, "c", None, None, List()),
-          Part(4, "x", None, None, List(
-            Ns(1, "Xx", "x_Xx", None, None, List(
-              Attr(1, "xx1", 1, "Int", None, None, Some(Set("indexed")), None, None, None, None, None, List())
-            ))))
+          MetaPart(1, "a", None, None, List(
+            MetaNs(1, "Aa", "a_Aa", None, None, List()))),
+          MetaPart(2, "b", None, None, List(
+            MetaNs(1, "Bb", "b_Bb", None, None, List(
+              MetaAttr(1, "bb1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+              MetaAttr(2, "bb2", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))),
+            MetaNs(2, "Bc", "b_Bc", None, None, List(
+              MetaAttr(1, "bc1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))))),
+          MetaPart(3, "c", None, None, List()),
+          MetaPart(4, "x", None, None, List(
+            MetaNs(1, "Xx", "x_Xx", None, None, List(
+              MetaAttr(1, "xx1", 1, "Int", Nil, None, Seq("indexed"), None, None, None, None, None, List()
+            )))))
         ))
       )
 

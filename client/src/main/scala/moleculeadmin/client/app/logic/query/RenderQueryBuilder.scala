@@ -3,7 +3,7 @@ package moleculeadmin.client.app.logic.query
 import moleculeadmin.client.app.html.query.SchemaDropdownElements
 import moleculeadmin.client.app.logic.query.QueryState.{queryBaseSelection, querySelection}
 import moleculeadmin.client.app.logic.query.builder.{QueryBranches, SchemaDropdown}
-import moleculeadmin.shared.ast.schema.MetaSchema
+import moleculeadmin.shared.ast.metaSchema.MetaSchema
 import org.scalajs.dom.Node
 import rx.Ctx
 import scalatags.JsDom.all._

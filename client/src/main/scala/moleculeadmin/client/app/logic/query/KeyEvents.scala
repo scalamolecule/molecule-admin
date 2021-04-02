@@ -1,7 +1,7 @@
 package moleculeadmin.client.app.logic.query
 
 import moleculeadmin.client.app.logic.query.keyEvents._
-import moleculeadmin.shared.ast.schema.Ns
+import moleculeadmin.shared.ast.metaSchema.MetaNs
 import moleculeadmin.shared.ops.query.{ColOps, MoleculeOps}
 import org.scalajs.dom.document
 import org.scalajs.dom.html.TableCell
@@ -21,7 +21,7 @@ trait KeyEvents
     with Undoing
     with Editing {
 
-  def registerKeyEvents(implicit ctx: Ctx.Owner, nsMap: Map[String, Ns]): Unit = {
+  def registerKeyEvents(implicit ctx: Ctx.Owner, nsMap: Map[String, MetaNs]): Unit = {
     document.onkeydown = { e: KeyboardEvent =>
       val shift            = e.getModifierState("Shift")
       val ctrl             = e.getModifierState("Control")

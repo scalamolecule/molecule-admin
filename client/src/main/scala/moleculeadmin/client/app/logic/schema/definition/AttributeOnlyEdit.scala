@@ -1,9 +1,8 @@
 package moleculeadmin.client.app.logic.schema.definition
 import boopickle.Default._
-import moleculeadmin.shared.ast.schema.{Attr => Attr_, _}
-import scalatags.JsDom.all._
-import moleculeadmin.client.app.logic.schema.SchemaState._
+import moleculeadmin.shared.ast.metaSchema._
 import rx.Ctx
+import scalatags.JsDom.all._
 
 
 case class AttributeOnlyEdit(db: String,
@@ -14,11 +13,11 @@ case class AttributeOnlyEdit(db: String,
                              attr: String,
                              card: Int,
                              attrType: String,
-                             enums: Option[Set[String]],
+                             enums: Seq[String],
                              refNs: Option[String],
-                             options: Option[Set[String]],
+                             options: Seq[String],
                              doc: Option[String],
-                             attrs: Seq[Attr_],
+                             attrs: Seq[MetaAttr],
                              attrGroup: Option[String])
                             (implicit val ctx: Ctx.Owner) extends Base {
 

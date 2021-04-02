@@ -6,7 +6,7 @@ import molecule.facade.Conn
 import moleculeadmin.server.schema._
 import moleculeadmin.server.utils.DefFile
 import moleculeadmin.shared.api.SchemaApi
-import moleculeadmin.shared.ast.schema._
+import moleculeadmin.shared.ast.metaSchema._
 import moleculeadmin.shared.ops.query.SchemaOps
 import org.slf4j.LoggerFactory
 

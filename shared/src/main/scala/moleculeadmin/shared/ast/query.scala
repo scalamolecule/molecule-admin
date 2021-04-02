@@ -1,6 +1,6 @@
 package moleculeadmin.shared.ast
 
-import moleculeadmin.shared.ast.schema.seq
+import moleculeadmin.shared.ast.metaSchema.seq
 import moleculeadmin.shared.ast.tree.Tree
 import molecule.ast.model.Element
 import moleculeadmin.shared.util.HelpersAdmin

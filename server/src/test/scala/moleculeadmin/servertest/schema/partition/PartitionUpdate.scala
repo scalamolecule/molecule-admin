@@ -5,7 +5,7 @@ import db.admin.dsl.moleculeAdmin._
 import molecule.api.out10._
 import molecule.util.Helpers
 import moleculeadmin.servertest._
-import moleculeadmin.shared.ast.schema._
+import moleculeadmin.shared.ast.metaSchema._
 import moleculeadmin.shared.testdata.TreeSchema
 import utest._
 
@@ -77,15 +77,15 @@ object PartitionUpdate extends TestSuite with TreeSchema with Helpers {
 
         updatePartition(partitionMetaSchema, "Partition", "a", "a", None, 2) ==> Right(
           MetaSchema(List(
-            Part(1, "b", None, None, List(
-              Ns(1, "Bb", "b_Bb", None, None, List(
-                Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-                Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()))),
-              Ns(2, "Bc", "b_Bc", None, None, List(
-                Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()))))),
-            Part(2, "a", None, None, List(
-              Ns(1, "Aa", "a_Aa", None, None, List()))),
-            Part(3, "c", None, None, List())
+            MetaPart(1, "b", None, None, List(
+              MetaNs(1, "Bb", "b_Bb", None, None, List(
+                MetaAttr(1, "bb1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+                MetaAttr(2, "bb2", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))),
+              MetaNs(2, "Bc", "b_Bc", None, None, List(
+                MetaAttr(1, "bc1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))))),
+            MetaPart(2, "a", None, None, List(
+              MetaNs(1, "Aa", "a_Aa", None, None, List()))),
+            MetaPart(3, "c", None, None, List())
           ))
         )
 
@@ -135,15 +135,15 @@ object PartitionUpdate extends TestSuite with TreeSchema with Helpers {
 
         updatePartition(partitionMetaSchema, "Partition", "a", "a", None, 3) ==> Right(
           MetaSchema(List(
-            Part(1, "b", None, None, List(
-              Ns(1, "Bb", "b_Bb", None, None, List(
-                Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-                Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()))),
-              Ns(2, "Bc", "b_Bc", None, None, List(
-                Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()))))),
-            Part(2, "c", None, None, List()),
-            Part(3, "a", None, None, List(
-              Ns(1, "Aa", "a_Aa", None, None, List())))
+            MetaPart(1, "b", None, None, List(
+              MetaNs(1, "Bb", "b_Bb", None, None, List(
+                MetaAttr(1, "bb1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+                MetaAttr(2, "bb2", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))),
+              MetaNs(2, "Bc", "b_Bc", None, None, List(
+                MetaAttr(1, "bc1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))))),
+            MetaPart(2, "c", None, None, List()),
+            MetaPart(3, "a", None, None, List(
+              MetaNs(1, "Aa", "a_Aa", None, None, List())))
           ))
         )
 
@@ -161,15 +161,15 @@ object PartitionUpdate extends TestSuite with TreeSchema with Helpers {
 
         updatePartition(partitionMetaSchema, "Partition", "b", "b", None, 1) ==> Right(
           MetaSchema(List(
-            Part(1, "b", None, None, List(
-              Ns(1, "Bb", "b_Bb", None, None, List(
-                Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-                Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()))),
-              Ns(2, "Bc", "b_Bc", None, None, List(
-                Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()))))),
-            Part(2, "a", None, None, List(
-              Ns(1, "Aa", "a_Aa", None, None, List()))),
-            Part(3, "c", None, None, List())
+            MetaPart(1, "b", None, None, List(
+              MetaNs(1, "Bb", "b_Bb", None, None, List(
+                MetaAttr(1, "bb1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+                MetaAttr(2, "bb2", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))),
+              MetaNs(2, "Bc", "b_Bc", None, None, List(
+                MetaAttr(1, "bc1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))))),
+            MetaPart(2, "a", None, None, List(
+              MetaNs(1, "Aa", "a_Aa", None, None, List()))),
+            MetaPart(3, "c", None, None, List())
           ))
         )
 
@@ -219,15 +219,15 @@ object PartitionUpdate extends TestSuite with TreeSchema with Helpers {
 
         updatePartition(partitionMetaSchema, "Partition", "b", "b", None, 3) ==> Right(
           MetaSchema(List(
-            Part(1, "a", None, None, List(
-              Ns(1, "Aa", "a_Aa", None, None, List()))),
-            Part(2, "c", None, None, List()),
-            Part(3, "b", None, None, List(
-              Ns(1, "Bb", "b_Bb", None, None, List(
-                Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-                Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()))),
-              Ns(2, "Bc", "b_Bc", None, None, List(
-                Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List())))))
+            MetaPart(1, "a", None, None, List(
+              MetaNs(1, "Aa", "a_Aa", None, None, List()))),
+            MetaPart(2, "c", None, None, List()),
+            MetaPart(3, "b", None, None, List(
+              MetaNs(1, "Bb", "b_Bb", None, None, List(
+                MetaAttr(1, "bb1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+                MetaAttr(2, "bb2", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))),
+              MetaNs(2, "Bc", "b_Bc", None, None, List(
+                MetaAttr(1, "bc1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List())))))
           ))
         )
 
@@ -245,15 +245,15 @@ object PartitionUpdate extends TestSuite with TreeSchema with Helpers {
 
         updatePartition(partitionMetaSchema, "Partition", "c", "c", None, 1) ==> Right(
           MetaSchema(List(
-            Part(1, "c", None, None, List()),
-            Part(2, "a", None, None, List(
-              Ns(1, "Aa", "a_Aa", None, None, List()))),
-            Part(3, "b", None, None, List(
-              Ns(1, "Bb", "b_Bb", None, None, List(
-                Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-                Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()))),
-              Ns(2, "Bc", "b_Bc", None, None, List(
-                Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List())))))
+            MetaPart(1, "c", None, None, List()),
+            MetaPart(2, "a", None, None, List(
+              MetaNs(1, "Aa", "a_Aa", None, None, List()))),
+            MetaPart(3, "b", None, None, List(
+              MetaNs(1, "Bb", "b_Bb", None, None, List(
+                MetaAttr(1, "bb1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+                MetaAttr(2, "bb2", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))),
+              MetaNs(2, "Bc", "b_Bc", None, None, List(
+                MetaAttr(1, "bc1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List())))))
           ))
         )
 
@@ -305,15 +305,15 @@ object PartitionUpdate extends TestSuite with TreeSchema with Helpers {
       // Add description
       updatePartition(partitionMetaSchema, "Partition", "a", "a", Some("description"), 1) ==> Right(
         MetaSchema(List(
-          Part(1, "a", Some("description"), None, List(
-            Ns(1, "Aa", "a_Aa", None, None, List()))),
-          Part(2, "b", None, None, List(
-            Ns(1, "Bb", "b_Bb", None, None, List(
-              Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-              Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()))),
-            Ns(2, "Bc", "b_Bc", None, None, List(
-              Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()))))),
-          Part(3, "c", None, None, List())
+          MetaPart(1, "a", Some("description"), None, List(
+            MetaNs(1, "Aa", "a_Aa", None, None, List()))),
+          MetaPart(2, "b", None, None, List(
+            MetaNs(1, "Bb", "b_Bb", None, None, List(
+              MetaAttr(1, "bb1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+              MetaAttr(2, "bb2", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))),
+            MetaNs(2, "Bc", "b_Bc", None, None, List(
+              MetaAttr(1, "bc1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))))),
+          MetaPart(3, "c", None, None, List())
         ))
       )
 
@@ -357,15 +357,15 @@ object PartitionUpdate extends TestSuite with TreeSchema with Helpers {
       // Change description
       updatePartition(partitionMetaSchema, "Partition", "a", "a", Some("other description")) ==> Right(
         MetaSchema(List(
-          Part(1, "a", Some("other description"), None, List(
-            Ns(1, "Aa", "a_Aa", None, None, List()))),
-          Part(2, "b", None, None, List(
-            Ns(1, "Bb", "b_Bb", None, None, List(
-              Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-              Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()))),
-            Ns(2, "Bc", "b_Bc", None, None, List(
-              Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()))))),
-          Part(3, "c", None, None, List())
+          MetaPart(1, "a", Some("other description"), None, List(
+            MetaNs(1, "Aa", "a_Aa", None, None, List()))),
+          MetaPart(2, "b", None, None, List(
+            MetaNs(1, "Bb", "b_Bb", None, None, List(
+              MetaAttr(1, "bb1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+              MetaAttr(2, "bb2", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))),
+            MetaNs(2, "Bc", "b_Bc", None, None, List(
+              MetaAttr(1, "bc1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))))),
+          MetaPart(3, "c", None, None, List())
         ))
       )
 
@@ -410,15 +410,15 @@ object PartitionUpdate extends TestSuite with TreeSchema with Helpers {
       // Remove description with None
       updatePartition(partitionMetaSchema, "Partition", "a", "a", None) ==> Right(
         MetaSchema(List(
-          Part(1, "a", None, None, List(
-            Ns(1, "Aa", "a_Aa", None, None, List()))),
-          Part(2, "b", None, None, List(
-            Ns(1, "Bb", "b_Bb", None, None, List(
-              Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-              Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()))),
-            Ns(2, "Bc", "b_Bc", None, None, List(
-              Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()))))),
-          Part(3, "c", None, None, List())
+          MetaPart(1, "a", None, None, List(
+            MetaNs(1, "Aa", "a_Aa", None, None, List()))),
+          MetaPart(2, "b", None, None, List(
+            MetaNs(1, "Bb", "b_Bb", None, None, List(
+              MetaAttr(1, "bb1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+              MetaAttr(2, "bb2", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))),
+            MetaNs(2, "Bc", "b_Bc", None, None, List(
+              MetaAttr(1, "bc1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))))),
+          MetaPart(3, "c", None, None, List())
         ))
       )
 
@@ -459,15 +459,15 @@ object PartitionUpdate extends TestSuite with TreeSchema with Helpers {
       // Applying empty text has same effect as applying None
       updatePartition(partitionMetaSchema, "Partition", "a", "a", Some("")) ==> Right(
         MetaSchema(List(
-          Part(1, "a", None, None, List(
-            Ns(1, "Aa", "a_Aa", None, None, List()))),
-          Part(2, "b", None, None, List(
-            Ns(1, "Bb", "b_Bb", None, None, List(
-              Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-              Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()))),
-            Ns(2, "Bc", "b_Bc", None, None, List(
-              Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()))))),
-          Part(3, "c", None, None, List())
+          MetaPart(1, "a", None, None, List(
+            MetaNs(1, "Aa", "a_Aa", None, None, List()))),
+          MetaPart(2, "b", None, None, List(
+            MetaNs(1, "Bb", "b_Bb", None, None, List(
+              MetaAttr(1, "bb1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+              MetaAttr(2, "bb2", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))),
+            MetaNs(2, "Bc", "b_Bc", None, None, List(
+              MetaAttr(1, "bc1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))))),
+          MetaPart(3, "c", None, None, List())
         ))
       )
 
@@ -515,15 +515,15 @@ object PartitionUpdate extends TestSuite with TreeSchema with Helpers {
 
         updatePartition(partitionMetaSchema, "Partition", "a", "x") ==> Right(
           MetaSchema(List(
-            Part(1, "x", None, None, List(
-              Ns(1, "Aa", "x_Aa", None, None, List()))),
-            Part(2, "b", None, None, List(
-              Ns(1, "Bb", "b_Bb", None, None, List(
-                Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-                Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()))),
-              Ns(2, "Bc", "b_Bc", None, None, List(
-                Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()))))),
-            Part(3, "c", None, None, List())
+            MetaPart(1, "x", None, None, List(
+              MetaNs(1, "Aa", "x_Aa", None, None, List()))),
+            MetaPart(2, "b", None, None, List(
+              MetaNs(1, "Bb", "b_Bb", None, None, List(
+                MetaAttr(1, "bb1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+                MetaAttr(2, "bb2", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))),
+              MetaNs(2, "Bc", "b_Bc", None, None, List(
+                MetaAttr(1, "bc1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))))),
+            MetaPart(3, "c", None, None, List())
           ))
         )
 
@@ -543,15 +543,15 @@ object PartitionUpdate extends TestSuite with TreeSchema with Helpers {
 
         updatePartition(partitionMetaSchema, "Partition", "b", "x") ==> Right(
           MetaSchema(List(
-            Part(1, "a", None, None, List(
-              Ns(1, "Aa", "a_Aa", None, None, List()))),
-            Part(2, "x", None, None, List(
-              Ns(1, "Bb", "x_Bb", None, None, List(
-                Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-                Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()))),
-              Ns(2, "Bc", "x_Bc", None, None, List(
-                Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()))))),
-            Part(3, "c", None, None, List())
+            MetaPart(1, "a", None, None, List(
+              MetaNs(1, "Aa", "a_Aa", None, None, List()))),
+            MetaPart(2, "x", None, None, List(
+              MetaNs(1, "Bb", "x_Bb", None, None, List(
+                MetaAttr(1, "bb1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+                MetaAttr(2, "bb2", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))),
+              MetaNs(2, "Bc", "x_Bc", None, None, List(
+                MetaAttr(1, "bc1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))))),
+            MetaPart(3, "c", None, None, List())
           ))
         )
 
@@ -609,15 +609,15 @@ object PartitionUpdate extends TestSuite with TreeSchema with Helpers {
 
         updatePartition(partitionMetaSchema, "Partition", "c", "x") ==> Right(
           MetaSchema(List(
-            Part(1, "a", None, None, List(
-              Ns(1, "Aa", "a_Aa", None, None, List()))),
-            Part(2, "b", None, None, List(
-              Ns(1, "Bb", "b_Bb", None, None, List(
-                Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-                Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()))),
-              Ns(2, "Bc", "b_Bc", None, None, List(
-                Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()))))),
-            Part(3, "x", None, None, List())
+            MetaPart(1, "a", None, None, List(
+              MetaNs(1, "Aa", "a_Aa", None, None, List()))),
+            MetaPart(2, "b", None, None, List(
+              MetaNs(1, "Bb", "b_Bb", None, None, List(
+                MetaAttr(1, "bb1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+                MetaAttr(2, "bb2", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))),
+              MetaNs(2, "Bc", "b_Bc", None, None, List(
+                MetaAttr(1, "bc1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))))),
+            MetaPart(3, "x", None, None, List())
           ))
         )
 
@@ -638,15 +638,15 @@ object PartitionUpdate extends TestSuite with TreeSchema with Helpers {
 
       updatePartition(partitionMetaSchema, "Partition", "b", "x", Some("description"), 1) ==> Right(
         MetaSchema(List(
-          Part(1, "x", Some("description"), None, List(
-            Ns(1, "Bb", "x_Bb", None, None, List(
-              Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-              Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()))),
-            Ns(2, "Bc", "x_Bc", None, None, List(
-              Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()))))),
-          Part(2, "a", None, None, List(
-            Ns(1, "Aa", "a_Aa", None, None, List()))),
-          Part(3, "c", None, None, List())
+          MetaPart(1, "x", Some("description"), None, List(
+            MetaNs(1, "Bb", "x_Bb", None, None, List(
+              MetaAttr(1, "bb1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+              MetaAttr(2, "bb2", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))),
+            MetaNs(2, "Bc", "x_Bc", None, None, List(
+              MetaAttr(1, "bc1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))))),
+          MetaPart(2, "a", None, None, List(
+            MetaNs(1, "Aa", "a_Aa", None, None, List()))),
+          MetaPart(3, "c", None, None, List())
         ))
       )
 

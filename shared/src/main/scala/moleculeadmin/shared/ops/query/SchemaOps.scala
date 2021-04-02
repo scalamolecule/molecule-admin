@@ -2,54 +2,54 @@ package moleculeadmin.shared.ops.query
 
 import moleculeadmin.shared.api.QueryApi
 import moleculeadmin.shared.ast.query.Col
-import moleculeadmin.shared.ast.schema._
+import moleculeadmin.shared.ast.metaSchema._
 
 
 trait SchemaOps {
 
   def getFilteredSchema(schema: MetaSchema, selection: String): MetaSchema = selection match {
     case "v" => MetaSchema(
-      for (Part(partN, part, partDescr, entityCount, nss) <- schema.parts if entityCount.isDefined && entityCount.get != 0) yield {
+      for (MetaPart(partN, part, partDescr, entityCount, nss) <- schema.parts if entityCount.isDefined && entityCount.get != 0) yield {
         val nss2 = for {
-          Ns(nsN, ns, nsFull, nsDescr, entityCount, attrs) <- nss if entityCount.isDefined && entityCount.get != 0
+          MetaNs(nsN, ns, nsFull, nsDescr, entityCount, attrs) <- nss if entityCount.isDefined && entityCount.get != 0
         } yield {
           val attrs2 = for {
             attr <- attrs if attr.entityCount$.isDefined && attr.entityCount$.get != 0
           } yield attr
-          Ns(nsN, ns, nsFull, nsDescr, entityCount, attrs2)
+          MetaNs(nsN, ns, nsFull, nsDescr, entityCount, attrs2)
         }
-        Part(partN, part, partDescr, entityCount, nss2)
+        MetaPart(partN, part, partDescr, entityCount, nss2)
       }
     )
 
     case "r" => MetaSchema(
-      for (Part(partN, part, partDescr, entityCount, nss) <- schema.parts if entityCount.isDefined && entityCount.get != 0) yield {
+      for (MetaPart(partN, part, partDescr, entityCount, nss) <- schema.parts if entityCount.isDefined && entityCount.get != 0) yield {
         val nss2 = for {
-          Ns(nsN, ns, nsFull, nsDescr, entityCount, attrs) <- nss if entityCount.isDefined && entityCount.get != 0
+          MetaNs(nsN, ns, nsFull, nsDescr, entityCount, attrs) <- nss if entityCount.isDefined && entityCount.get != 0
         } yield {
           val attrs2 = for {
             attr <- attrs if attr.entityCount$.isDefined && attr.entityCount$.get != 0 && attr.tpe != "ref"
           } yield attr
-          Ns(nsN, ns, nsFull, nsDescr, entityCount, attrs2)
+          MetaNs(nsN, ns, nsFull, nsDescr, entityCount, attrs2)
         }
-        Part(partN, part, partDescr, entityCount, nss2)
+        MetaPart(partN, part, partDescr, entityCount, nss2)
       }
     )
     case _   => schema
   }
 
 
-  def mkNsMap(metaSchema: MetaSchema): (Map[String, Ns], Boolean) = {
+  def mkNsMap(metaSchema: MetaSchema): (Map[String, MetaNs], Boolean) = {
     var counted           = false
-    val initialEntityAttr = Attr(0, "e", 1, "datom", None, None, None, None, None, None, None, None, Nil)
+    val initialEntityAttr = MetaAttr(0, "e", 1, "datom", Nil, None, Nil, None, None, None, None, None, Nil)
     val nsMap             = (for {
-      Part(_, _, _, _, nss) <- metaSchema.parts
-      Ns(i, ns, nsFull, nsDescr, nsCount, attrs) <- nss
+      MetaPart(_, _, _, _, nss) <- metaSchema.parts
+      MetaNs(i, ns, nsFull, nsDescr, nsCount, attrs) <- nss
     } yield {
       if (!counted) {
         counted = attrs.exists(_.entityCount$.isDefined)
       }
-      nsFull -> Ns(i, ns, nsFull, nsDescr, nsCount, initialEntityAttr +: attrs)
+      nsFull -> MetaNs(i, ns, nsFull, nsDescr, nsCount, initialEntityAttr +: attrs)
     }).toMap
 
     //    nsMap.map { case (ns, nsDef) => s""""$ns" -> $nsDef,""" } foreach println
@@ -57,14 +57,14 @@ trait SchemaOps {
   }
 
 
-  def mkViewCellTypes(nsMap: Map[String, Ns]): Map[String, String] = {
+  def mkViewCellTypes(nsMap: Map[String, MetaNs]): Map[String, String] = {
     val attrs: Map[String, String] = for {
       (nsFull, nsDef) <- nsMap
       attr <- nsDef.attrs
     } yield {
       val cellType = (attr.tpe match {
-        case "String" if attr.enums$.isDefined                             => "enum"
-        case "String"                                                      => "str"
+        case "String" if attr.enums.nonEmpty => "enum"
+        case "String"                        => "str"
         case "Int" | "Long" | "Float" | "Double" | "BigInt" | "BigDecimal" => "num"
         case "ref"                                                         => "ref"
         case "Date"                                                        => "date"
@@ -85,9 +85,9 @@ trait SchemaOps {
   }
 
 
-  def mkEnumAttrs(nsMap: Map[String, Ns]): Seq[String] = (for {
+  def mkEnumAttrs(nsMap: Map[String, MetaNs]): Seq[String] = (for {
     (nsFull, nsDef) <- nsMap
-    attr <- nsDef.attrs if attr.enums$.isDefined
+    attr <- nsDef.attrs if attr.enums.nonEmpty
   } yield {
     s":$nsFull/${attr.name}"
   }).toSeq
@@ -96,13 +96,13 @@ trait SchemaOps {
   def mkFlatAttrs(metaSchema: MetaSchema): FlatSchema = {
     var n = 0
     for {
-      Part(_, part, partDescr, _, nss) <- metaSchema.parts.sortBy(_.pos)
-      Ns(_, ns, nsFull, nsDescr, _, attrs) <- nss.sortBy(_.pos)
-      Attr(_, attr, card, tpe, enums, refNs, options, doc, aGr, count, valCount, descrAttr, topValues) <- attrs.sortBy(_.pos)
+      MetaPart(_, part, partDescr, _, nss) <- metaSchema.parts.sortBy(_.pos)
+      MetaNs(_, ns, nsFull, nsDescr, _, attrs) <- nss.sortBy(_.pos)
+      MetaAttr(_, attr, card, tpe, enums, refNs, options, doc, aGr, count, valCount, descrAttr, topValues) <- attrs.sortBy(_.pos)
     } yield {
       n += 1
-      FlatAttr(n, part, partDescr, ns, nsFull, nsDescr, attr, card, tpe, enums.getOrElse(Nil).toSeq,
-        refNs, options.getOrElse(Nil).toSeq, doc, aGr, count, valCount, descrAttr, topValues)
+      FlatAttr(n, part, partDescr, ns, nsFull, nsDescr, attr, card, tpe, enums,
+        refNs, options, doc, aGr, count, valCount, descrAttr, topValues)
     }
   }
 }

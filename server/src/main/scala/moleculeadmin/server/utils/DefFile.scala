@@ -7,7 +7,7 @@ import db.admin.dsl.moleculeAdmin._
 import molecule.api.out10._
 import molecule.facade.Conn
 import moleculeadmin.shared.api.BaseApi
-import moleculeadmin.shared.ast.schema._
+import moleculeadmin.shared.ast.metaSchema._
 import moleculeadmin.shared.util.HelpersAdmin
 import sbtmolecule.Ast._
 import sbtmolecule.DefinitionParser
@@ -225,8 +225,8 @@ case class DefFile(
 
   def recreateFrom(metaSchema: MetaSchema): Either[String, MetaSchema] = {
 
-    def genAttr(part: String, attribute: Attr, longest: Int, allAttrs: Seq[String]): String = {
-      val Attr(_, attr, card0, attrType, enums0, ref, options0, doc0, attrGroup, _, _, _, _) = attribute
+    def genAttr(part: String, attribute: MetaAttr, longest: Int, allAttrs: Seq[String]): String = {
+      val MetaAttr(_, attr, card0, attrType, enums0, ref, options0, doc0, attrGroup, _, _, _, _) = attribute
 
       val valIndent = if (part == "db.part/user") "    " else "      "
       val attrFull  = if (scalaKeywords.contains(attr)) s"`$attr`" else attr
@@ -238,7 +238,7 @@ case class DefFile(
         case 3 => "map"
       }
 
-      val tpe = if (enums0.isDefined)
+      val tpe = if (enums0.nonEmpty)
         cardPrefix + "Enum"
       else
         ref match {
@@ -255,17 +255,20 @@ case class DefFile(
           case Some(refNs)                        => cardPrefix + "[" + refNs.capitalize + "]"
         }
 
-      val enums = enums0 match {
-        case None     => ""
-        case Some(es) =>
-          es.toList.sorted.mkString("(\"", "\", \"", "\")")
-      }
+      val enums = if(enums0.isEmpty) "" else enums0.sorted.mkString("(\"", "\", \"", "\")")
+//      val enums = enums0 match {
+//        case None     => ""
+//        case Some(es) =>
+//          es.toList.sorted.mkString("(\"", "\", \"", "\")")
+//      }
 
-      val options = options0.map(_.filterNot(_ == "indexed")) match {
-        case None                       => ""
-        case Some(opts) if opts.isEmpty => ""
-        case Some(opts)                 => "." + opts.mkString(".")
-      }
+      val options1 = options0.map(_ == "indexed")
+      val options = if(options1.isEmpty) "" else "." + options1.mkString(".")
+//      val options = options0.map(_.filterNot(_ == "indexed")) match {
+//        case None                       => ""
+//        case Some(opts) if opts.isEmpty => ""
+//        case Some(opts)                 => "." + opts.mkString(".")
+//      }
 
       val doc = doc0 match {
         case None    => ""
@@ -286,13 +289,13 @@ case class DefFile(
       s"${descrVal}val $attrFull $s= $tpe$enums$options$doc"
     }
 
-    def genNs(part: String, namespace: Ns): String = {
-      val Ns(_, ns, _, descr0, _, attrs) = namespace
-      val nsIndent                       = if (part == "db.part/user") "  " else "    "
+    def genNs(part: String, namespace: MetaNs): String = {
+      val MetaNs(_, ns, _, descr0, _, attrs) = namespace
+      val nsIndent                           = if (part == "db.part/user") "  " else "    "
       if (ns.isEmpty) "" else {
         val allAttrs = attrs.map(_.name)
 
-        val attrGroups: Seq[Seq[Attr]] = attrs.foldLeft(Seq.empty[Seq[Attr]]) {
+        val attrGroups: Seq[Seq[MetaAttr]] = attrs.foldLeft(Seq.empty[Seq[MetaAttr]]) {
           case (groups, a) if groups.isEmpty         => Seq(Seq(a))
           case (groups, a) if a.attrGroup$.isDefined => groups :+ Seq(a)
           case (groups, a) if groups.size == 1       => Seq(groups.head :+ a)
@@ -318,9 +321,9 @@ case class DefFile(
       }
     }
 
-    def genPart(partition: Part): String = {
-      val Part(_, part, descr0, _, nss) = partition
-      val descr                         = descr0 match {
+    def genPart(partition: MetaPart): String = {
+      val MetaPart(_, part, descr0, _, nss) = partition
+      val descr                             = descr0 match {
         case None    => "  "
         case Some(d) =>
           val line = "-" * (90 - d.length)

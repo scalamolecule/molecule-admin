@@ -5,7 +5,7 @@ import db.admin.dsl.moleculeAdmin._
 import molecule.api.out10._
 import molecule.util.Helpers
 import moleculeadmin.servertest._
-import moleculeadmin.shared.ast.schema._
+import moleculeadmin.shared.ast.metaSchema._
 import moleculeadmin.shared.testdata.TreeSchema
 import utest._
 
@@ -68,15 +68,15 @@ object NamespaceUpdate extends TestSuite with TreeSchema with Helpers {
 
       updateNamespace(partitionMetaSchema, "Partition", "b", "Bb", "Bb", None, 2) ==> Right(
         MetaSchema(List(
-          Part(1, "a", None, None, List(
-            Ns(1, "Aa", "a_Aa", None, None, List()))),
-          Part(2, "b", None, None, List(
-            Ns(1, "Bc", "b_Bc", None, None, List(
-              Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()))),
-            Ns(2, "Bb", "b_Bb", None, None, List(
-              Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-              Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()))))),
-          Part(3, "c", None, None, List()),
+          MetaPart(1, "a", None, None, List(
+            MetaNs(1, "Aa", "a_Aa", None, None, List()))),
+          MetaPart(2, "b", None, None, List(
+            MetaNs(1, "Bc", "b_Bc", None, None, List(
+              MetaAttr(1, "bc1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))),
+            MetaNs(2, "Bb", "b_Bb", None, None, List(
+              MetaAttr(1, "bb1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+              MetaAttr(2, "bb2", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))))),
+          MetaPart(3, "c", None, None, List()),
         ))
       )
 
@@ -125,15 +125,15 @@ object NamespaceUpdate extends TestSuite with TreeSchema with Helpers {
 
       updateNamespace(partitionMetaSchema, "Partition", "b", "Bc", "Bc", None, 1) ==> Right(
         MetaSchema(List(
-          Part(1, "a", None, None, List(
-            Ns(1, "Aa", "a_Aa", None, None, List()))),
-          Part(2, "b", None, None, List(
-            Ns(1, "Bc", "b_Bc", None, None, List(
-              Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()))),
-            Ns(2, "Bb", "b_Bb", None, None, List(
-              Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-              Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()))))),
-          Part(3, "c", None, None, List()),
+          MetaPart(1, "a", None, None, List(
+            MetaNs(1, "Aa", "a_Aa", None, None, List()))),
+          MetaPart(2, "b", None, None, List(
+            MetaNs(1, "Bc", "b_Bc", None, None, List(
+              MetaAttr(1, "bc1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))),
+            MetaNs(2, "Bb", "b_Bb", None, None, List(
+              MetaAttr(1, "bb1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+              MetaAttr(2, "bb2", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))))),
+          MetaPart(3, "c", None, None, List()),
         ))
       )
 
@@ -182,15 +182,15 @@ object NamespaceUpdate extends TestSuite with TreeSchema with Helpers {
 
       updateNamespace(partitionMetaSchema, "Partition", "b", "Bb", "Bb", Some("description"), 1) ==> Right(
         MetaSchema(List(
-          Part(1, "a", None, None, List(
-            Ns(1, "Aa", "a_Aa", None, None, List()))),
-          Part(2, "b", None, None, List(
-            Ns(1, "Bb", "b_Bb", Some("description"), None, List(
-              Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-              Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()))),
-            Ns(2, "Bc", "b_Bc", None, None, List(
-              Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()))))),
-          Part(3, "c", None, None, List()),
+          MetaPart(1, "a", None, None, List(
+            MetaNs(1, "Aa", "a_Aa", None, None, List()))),
+          MetaPart(2, "b", None, None, List(
+            MetaNs(1, "Bb", "b_Bb", Some("description"), None, List(
+              MetaAttr(1, "bb1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+              MetaAttr(2, "bb2", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))),
+            MetaNs(2, "Bc", "b_Bc", None, None, List(
+              MetaAttr(1, "bc1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))))),
+          MetaPart(3, "c", None, None, List()),
         ))
       )
 
@@ -233,15 +233,15 @@ object NamespaceUpdate extends TestSuite with TreeSchema with Helpers {
       // Change description
       updateNamespace(partitionMetaSchema, "Partition", "b", "Bb", "Bb", Some("other description")) ==> Right(
         MetaSchema(List(
-          Part(1, "a", None, None, List(
-            Ns(1, "Aa", "a_Aa", None, None, List()))),
-          Part(2, "b", None, None, List(
-            Ns(1, "Bb", "b_Bb", Some("other description"), None, List(
-              Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-              Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()))),
-            Ns(2, "Bc", "b_Bc", None, None, List(
-              Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()))))),
-          Part(3, "c", None, None, List()),
+          MetaPart(1, "a", None, None, List(
+            MetaNs(1, "Aa", "a_Aa", None, None, List()))),
+          MetaPart(2, "b", None, None, List(
+            MetaNs(1, "Bb", "b_Bb", Some("other description"), None, List(
+              MetaAttr(1, "bb1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+              MetaAttr(2, "bb2", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))),
+            MetaNs(2, "Bc", "b_Bc", None, None, List(
+              MetaAttr(1, "bc1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))))),
+          MetaPart(3, "c", None, None, List()),
         ))
       )
 
@@ -284,15 +284,15 @@ object NamespaceUpdate extends TestSuite with TreeSchema with Helpers {
       // Remove description with None
       updateNamespace(partitionMetaSchema, "Partition", "b", "Bb", "Bb", None) ==> Right(
         MetaSchema(List(
-          Part(1, "a", None, None, List(
-            Ns(1, "Aa", "a_Aa", None, None, List()))),
-          Part(2, "b", None, None, List(
-            Ns(1, "Bb", "b_Bb", None, None, List(
-              Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-              Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()))),
-            Ns(2, "Bc", "b_Bc", None, None, List(
-              Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()))))),
-          Part(3, "c", None, None, List()),
+          MetaPart(1, "a", None, None, List(
+            MetaNs(1, "Aa", "a_Aa", None, None, List()))),
+          MetaPart(2, "b", None, None, List(
+            MetaNs(1, "Bb", "b_Bb", None, None, List(
+              MetaAttr(1, "bb1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+              MetaAttr(2, "bb2", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))),
+            MetaNs(2, "Bc", "b_Bc", None, None, List(
+              MetaAttr(1, "bc1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))))),
+          MetaPart(3, "c", None, None, List()),
         ))
       )
 
@@ -334,15 +334,15 @@ object NamespaceUpdate extends TestSuite with TreeSchema with Helpers {
       // Applying empty text has same effect as applying None
       updateNamespace(partitionMetaSchema, "Partition", "b", "Bb", "Bb", Some("")) ==> Right(
         MetaSchema(List(
-          Part(1, "a", None, None, List(
-            Ns(1, "Aa", "a_Aa", None, None, List()))),
-          Part(2, "b", None, None, List(
-            Ns(1, "Bb", "b_Bb", None, None, List(
-              Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-              Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()))),
-            Ns(2, "Bc", "b_Bc", None, None, List(
-              Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()))))),
-          Part(3, "c", None, None, List()),
+          MetaPart(1, "a", None, None, List(
+            MetaNs(1, "Aa", "a_Aa", None, None, List()))),
+          MetaPart(2, "b", None, None, List(
+            MetaNs(1, "Bb", "b_Bb", None, None, List(
+              MetaAttr(1, "bb1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+              MetaAttr(2, "bb2", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))),
+            MetaNs(2, "Bc", "b_Bc", None, None, List(
+              MetaAttr(1, "bc1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))))),
+          MetaPart(3, "c", None, None, List()),
         ))
       )
 
@@ -388,15 +388,15 @@ object NamespaceUpdate extends TestSuite with TreeSchema with Helpers {
 
       updateNamespace(partitionMetaSchema, "Partition", "b", "Bb", "Bx") ==> Right(
         MetaSchema(List(
-          Part(1, "a", None, None, List(
-            Ns(1, "Aa", "a_Aa", None, None, List()))),
-          Part(2, "b", None, None, List(
-            Ns(1, "Bx", "b_Bx", None, None, List(
-              Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-              Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()))),
-            Ns(2, "Bc", "b_Bc", None, None, List(
-              Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()))))),
-          Part(3, "c", None, None, List()),
+          MetaPart(1, "a", None, None, List(
+            MetaNs(1, "Aa", "a_Aa", None, None, List()))),
+          MetaPart(2, "b", None, None, List(
+            MetaNs(1, "Bx", "b_Bx", None, None, List(
+              MetaAttr(1, "bb1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+              MetaAttr(2, "bb2", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))),
+            MetaNs(2, "Bc", "b_Bc", None, None, List(
+              MetaAttr(1, "bc1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))))),
+          MetaPart(3, "c", None, None, List()),
         ))
       )
 
@@ -454,32 +454,32 @@ object NamespaceUpdate extends TestSuite with TreeSchema with Helpers {
         "selfJoin", 1, "ref", Nil, Some("b_Bc")).getOrElse(MetaSchema(Nil))
 
       schema1 ==> MetaSchema(List(
-        Part(1, "a", None, None, List(
-          Ns(1, "Aa", "a_Aa", None, None, List()))),
-        Part(2, "b", None, None, List(
-          Ns(1, "Bb", "b_Bb", None, None, List(
-            Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-            Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()))),
-          Ns(2, "Bc", "b_Bc", None, None, List(
-            Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-            Attr(2, "selfJoin", 1, "ref", None, Some("b_Bc"), Some(Set("indexed")), None, None, None, None, None, List())
+        MetaPart(1, "a", None, None, List(
+          MetaNs(1, "Aa", "a_Aa", None, None, List()))),
+        MetaPart(2, "b", None, None, List(
+          MetaNs(1, "Bb", "b_Bb", None, None, List(
+            MetaAttr(1, "bb1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+            MetaAttr(2, "bb2", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))),
+          MetaNs(2, "Bc", "b_Bc", None, None, List(
+            MetaAttr(1, "bc1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+            MetaAttr(2, "selfJoin", 1, "ref", Nil, Some("b_Bc"), Seq("indexed"), None, None, None, None, None, List())
           )))),
-        Part(3, "c", None, None, List()),
+        MetaPart(3, "c", None, None, List()),
       ))
 
       updateNamespace(schema1, "Partition", "b", "Bc", "Bc1") ==> Right(
         MetaSchema(List(
-          Part(1, "a", None, None, List(
-            Ns(1, "Aa", "a_Aa", None, None, List()))),
-          Part(2, "b", None, None, List(
-            Ns(1, "Bb", "b_Bb", None, None, List(
-              Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-              Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()))),
-            Ns(2, "Bc1", "b_Bc1", None, None, List(
-              Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-              Attr(2, "selfJoin", 1, "ref", None, Some("b_Bc1"), Some(Set("indexed")), None, None, None, None, None, List())
+          MetaPart(1, "a", None, None, List(
+            MetaNs(1, "Aa", "a_Aa", None, None, List()))),
+          MetaPart(2, "b", None, None, List(
+            MetaNs(1, "Bb", "b_Bb", None, None, List(
+              MetaAttr(1, "bb1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+              MetaAttr(2, "bb2", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))),
+            MetaNs(2, "Bc1", "b_Bc1", None, None, List(
+              MetaAttr(1, "bc1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+              MetaAttr(2, "selfJoin", 1, "ref", Nil, Some("b_Bc1"), Seq("indexed"), None, None, None, None, None, List())
             )))),
-          Part(3, "c", None, None, List()),
+          MetaPart(3, "c", None, None, List()),
         ))
       )
     }
@@ -491,16 +491,16 @@ object NamespaceUpdate extends TestSuite with TreeSchema with Helpers {
 
       updateNamespace(partitionMetaSchema, "Partition", "b", "Bb", "Bx", Some("description"), 2) ==> Right(
         MetaSchema(List(
-          Part(1, "a", None, None, List(
-            Ns(1, "Aa", "a_Aa", None, None, List()))),
-          Part(2, "b", None, None, List(
-            Ns(1, "Bc", "b_Bc", None, None, List(
-              Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()))),
-            Ns(2, "Bx", "b_Bx", Some("description"), None, List(
-              Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-              Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()))),
+          MetaPart(1, "a", None, None, List(
+            MetaNs(1, "Aa", "a_Aa", None, None, List()))),
+          MetaPart(2, "b", None, None, List(
+            MetaNs(1, "Bc", "b_Bc", None, None, List(
+              MetaAttr(1, "bc1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))),
+            MetaNs(2, "Bx", "b_Bx", Some("description"), None, List(
+              MetaAttr(1, "bb1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+              MetaAttr(2, "bb2", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))),
           )),
-          Part(3, "c", None, None, List()),
+          MetaPart(3, "c", None, None, List()),
         ))
       )
 

@@ -1,7 +1,7 @@
 package moleculeadmin.shared.api
 
 import moleculeadmin.shared.ast.query.QueryDTO
-import moleculeadmin.shared.ast.schema.MetaSchema
+import moleculeadmin.shared.ast.metaSchema.MetaSchema
 
 
 trait BaseApi {

@@ -1,7 +1,7 @@
 package moleculeadmin.shared.ast
 import moleculeadmin.shared.util.HelpersAdmin
 
-object schema extends HelpersAdmin {
+object metaSchema extends HelpersAdmin {
 
   case class TopValue(entityCount: Int, value: String, label$: Option[String]) {
     override def toString = s"""TopValue($entityCount, "$value", ${o(label$)})"""
@@ -40,7 +40,9 @@ object schema extends HelpersAdmin {
   }
 
 
-  case class MetaSchema(parts: Seq[Part]) {
+  case class MetaSchema(
+    parts: Seq[MetaPart]
+  ) {
     override def toString =
       s"""MetaSchema(Seq(${
         if (parts.isEmpty) "" else parts.mkString("\n  ", ",\n  ", "")
@@ -48,30 +50,30 @@ object schema extends HelpersAdmin {
   }
 
 
-  case class Part(
+  case class MetaPart(
     pos: Int,
     name: String,
     descr$: Option[String] = None,
     entityCount$: Option[Int] = None,
-    nss: Seq[Ns] = Nil
+    nss: Seq[MetaNs] = Nil
   ) {
     override def toString =
-      s"""Part($pos, "$name", ${o(descr$)}, ${o(entityCount$)}, Seq(${
+      s"""MetaPart($pos, "$name", ${o(descr$)}, ${o(entityCount$)}, Seq(${
         if (nss.isEmpty) "" else nss.mkString("\n    ", ",\n    ", "")
       }))"""
   }
 
 
-  case class Ns(
+  case class MetaNs(
     pos: Int,
     name: String,
     nameFull: String,
     descr$: Option[String] = None,
     entityCount$: Option[Int] = None,
-    attrs: Seq[Attr] = Nil
+    attrs: Seq[MetaAttr] = Nil
   ) {
     override def toString =
-      s"""Ns($pos, "$name", "$nameFull", ${
+      s"""MetaNs($pos, "$name", "$nameFull", ${
         descr$.fold("None")(t => "Some(\"\"\"" + t + "\"\"\")")
       }, ${o(entityCount$)}, Seq(${
         if (attrs.isEmpty) "" else attrs.mkString("\n      ", ",\n      ", "")
@@ -79,14 +81,14 @@ object schema extends HelpersAdmin {
   }
 
 
-  case class Attr(
+  case class MetaAttr(
     pos: Int,
     name: String,
     card: Int,
     tpe: String,
-    enums$: Option[Set[String]] = None,
+    enums: Seq[String] = Nil,
     refNs$: Option[String] = None,
-    options$: Option[Set[String]] = None,
+    options: Seq[String] = Nil,
     doc$: Option[String] = None,
     attrGroup$: Option[String] = None,
     entityCount$: Option[Int] = None,
@@ -95,7 +97,7 @@ object schema extends HelpersAdmin {
     topValues: Seq[TopValue] = Nil
   ) {
     override def toString: String =
-      s"""Attr($pos, "$name", $card, "$tpe", ${os(enums$)}, ${o(refNs$)}, ${os(options$)}, ${o(doc$)}, """ +
+      s"""MetaAttr($pos, "$name", $card, "$tpe", ${seq(enums)}, ${o(refNs$)}, ${seq(options)}, ${o(doc$)}, """ +
         s"""${o(attrGroup$)}, ${o(entityCount$)}, ${o(distinctValueCount$)}, ${o(descrAttr$)}, Seq(${
           if (topValues.isEmpty) "" else topValues.mkString("\n        ", ",\n        ", "")
         }))"""

@@ -7,7 +7,7 @@ import molecule.api.out14._
 import molecule.facade.Conn
 import moleculeadmin.shared.api.BaseApi
 import moleculeadmin.shared.ast.query.{ColSetting, QueryDTO}
-import moleculeadmin.shared.ast.schema._
+import moleculeadmin.shared.ast.metaSchema._
 import moleculeadmin.shared.util.HelpersAdmin
 import org.slf4j.LoggerFactory
 
@@ -63,18 +63,18 @@ trait Base extends BaseApi with DatomicUri with HelpersAdmin {
     }
     val schemaRaw = Entity(conn.db.entity(dbE), conn, dbE.asInstanceOf[Object]).touch
 
-    def cleanOptions(options: Option[List[String]]): Option[Set[String]] = options match {
-      case None       => Option.empty[Set[String]]
+    def cleanOptions(options: Option[Seq[String]]): Option[Seq[String]] = options match {
+      case None       => Option.empty[Seq[String]]
       case Some(opts) =>
         val withoutIndex = opts.map(_.substring(24)).filterNot(_ == "indexed")
-        if (withoutIndex.isEmpty) None else Some(withoutIndex.toSet)
+        if (withoutIndex.isEmpty) None else Some(withoutIndex)
     }
 
     val parts = for {
       parts <- schemaRaw.get(":meta_Db/partitions").asInstanceOf[Option[List[Map[String, Any]]]].toSeq
       part <- parts
     } yield {
-      Part(
+      MetaPart(
         part(":meta_Partition/pos").asInstanceOf[Long].toInt,
         part(":meta_Partition/name").asInstanceOf[String],
         part.get(":meta_Partition/descr").asInstanceOf[Option[String]],
@@ -83,7 +83,7 @@ trait Base extends BaseApi with DatomicUri with HelpersAdmin {
           nss <- part.get(":meta_Partition/namespaces").asInstanceOf[Option[List[Map[String, Any]]]].toSeq
           ns <- nss
         } yield {
-          Ns(
+          MetaNs(
             ns(":meta_Namespace/pos").asInstanceOf[Long].toInt,
             ns(":meta_Namespace/name").asInstanceOf[String],
             ns(":meta_Namespace/nameFull").asInstanceOf[String],
@@ -124,14 +124,14 @@ trait Base extends BaseApi with DatomicUri with HelpersAdmin {
                 topValues2
               }
 
-              Attr(
+              MetaAttr(
                 attr(":meta_Attribute/pos").asInstanceOf[Long].toInt,
                 attr(":meta_Attribute/name").asInstanceOf[String],
                 card,
                 attrType,
-                attr.get(":meta_Attribute/enums").asInstanceOf[Option[Seq[String]]].map(_.toSet),
+                attr.get(":meta_Attribute/enums").asInstanceOf[Option[Seq[String]]].getOrElse(Nil),
                 attr.get(":meta_Attribute/refNs").asInstanceOf[Option[String]],
-                cleanOptions(attr.get(":meta_Attribute/options").asInstanceOf[Option[List[String]]]),
+                cleanOptions(attr.get(":meta_Attribute/options").asInstanceOf[Option[Seq[String]]]).getOrElse(Nil),
                 attr.get(":meta_Attribute/doc").asInstanceOf[Option[String]],
                 attr.get(":meta_Attribute/attrGroup").asInstanceOf[Option[String]],
                 attr.get(":meta_Attribute/entityCount").asInstanceOf[Option[Long]].map(_.toInt),

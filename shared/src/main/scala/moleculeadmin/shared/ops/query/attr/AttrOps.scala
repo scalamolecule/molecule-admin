@@ -11,7 +11,7 @@ trait AttrOps extends BaseQuery with DebugBranches {
                  attr: String,
                  attrType: String,
                  car: Int,
-                 enums: Option[Set[String]],
+                 enums: Seq[String],
                  operand: String,
                  input: String
                 ): Either[String, Seq[Element]] = {
@@ -98,12 +98,12 @@ trait AttrOps extends BaseQuery with DebugBranches {
                    attr: String,
                    attrType: String,
                    car: Int,
-                   enums: Option[Set[String]],
+                   enums: Seq[String],
                    v: Value
                   ): Seq[Element] = {
     val ns                       = path0.last._2
     val attrClean                = clean(attr)
-    val enumPrefix               = if (enums.isDefined) Some(s":$ns.$attrClean/") else None
+    val enumPrefix               = if (enums.nonEmpty) Some(s":$ns.$attrClean/") else None
     val (before, branch0, after) = isolateBranch(model, path0)
     val (prev, cur, sub)         = isolateAttr(branch0, ns, attr)
 

@@ -1,5 +1,5 @@
 package moleculeadmin.client.app.logic.schema
-import moleculeadmin.shared.ast.schema.MetaSchema
+import moleculeadmin.shared.ast.metaSchema.MetaSchema
 import rx.Var
 
 

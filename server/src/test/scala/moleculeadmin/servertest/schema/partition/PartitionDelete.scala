@@ -6,7 +6,7 @@ import db.migration.dsl.partition._
 import molecule.api.out10._
 import molecule.util.Helpers
 import moleculeadmin.servertest._
-import moleculeadmin.shared.ast.schema._
+import moleculeadmin.shared.ast.metaSchema._
 import moleculeadmin.shared.testdata.TreeSchema
 import utest._
 
@@ -35,14 +35,14 @@ object PartitionDelete extends TestSuite with TreeSchema with Helpers {
 
       deletePartition(partitionMetaSchema, "Partition", "c") ==> Right(
         MetaSchema(List(
-          Part(1, "a", None, None, List(
-            Ns(1, "Aa", "a_Aa", None, None, List()))),
-          Part(2, "b", None, None, List(
-            Ns(1, "Bb", "b_Bb", None, None, List(
-              Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-              Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()))),
-            Ns(2, "Bc", "b_Bc", None, None, List(
-              Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()))))),
+          MetaPart(1, "a", None, None, List(
+            MetaNs(1, "Aa", "a_Aa", None, None, List()))),
+          MetaPart(2, "b", None, None, List(
+            MetaNs(1, "Bb", "b_Bb", None, None, List(
+              MetaAttr(1, "bb1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+              MetaAttr(2, "bb2", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))),
+            MetaNs(2, "Bc", "b_Bc", None, None, List(
+              MetaAttr(1, "bc1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))))),
         ))
       )
 
@@ -86,13 +86,13 @@ object PartitionDelete extends TestSuite with TreeSchema with Helpers {
 
       deletePartition(partitionMetaSchema, "Partition", "a") ==> Right(
         MetaSchema(List(
-          Part(1, "b", None, None, List(
-            Ns(1, "Bb", "b_Bb", None, None, List(
-              Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-              Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()))),
-            Ns(2, "Bc", "b_Bc", None, None, List(
-              Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()))))),
-          Part(2, "c", None, None, List()),
+          MetaPart(1, "b", None, None, List(
+            MetaNs(1, "Bb", "b_Bb", None, None, List(
+              MetaAttr(1, "bb1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+              MetaAttr(2, "bb2", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))),
+            MetaNs(2, "Bc", "b_Bc", None, None, List(
+              MetaAttr(1, "bc1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))))),
+          MetaPart(2, "c", None, None, List()),
         ))
       )
 
@@ -133,9 +133,9 @@ object PartitionDelete extends TestSuite with TreeSchema with Helpers {
 
       deletePartition(partitionMetaSchema, "Partition", "b") ==> Right(
         MetaSchema(List(
-          Part(1, "a", None, None, List(
-            Ns(1, "Aa", "a_Aa", None, None, List()))),
-          Part(2, "c", None, None, List()),
+          MetaPart(1, "a", None, None, List(
+            MetaNs(1, "Aa", "a_Aa", None, None, List()))),
+          MetaPart(2, "c", None, None, List()),
         ))
       )
 
@@ -207,9 +207,9 @@ object PartitionDelete extends TestSuite with TreeSchema with Helpers {
 
       deletePartition(partitionMetaSchema, "Partition", "b") ==> Right(
         MetaSchema(List(
-          Part(1, "a", None, None, List(
-            Ns(1, "Aa", "a_Aa", None, None, List()))),
-          Part(2, "c", None, None, List()),
+          MetaPart(1, "a", None, None, List(
+            MetaNs(1, "Aa", "a_Aa", None, None, List()))),
+          MetaPart(2, "c", None, None, List()),
         ))
       )
 

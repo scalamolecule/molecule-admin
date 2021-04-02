@@ -3,7 +3,7 @@ package moleculeadmin.shared.ops.query
 import molecule.ast.model._
 import molecule.transform.Model2Query.coalesce
 import moleculeadmin.shared.ast.query.{Col, ColSetting, Filter, QueryDTO, QueryResult}
-import moleculeadmin.shared.ast.schema.{Attr, Ns}
+import moleculeadmin.shared.ast.metaSchema.{MetaAttr, MetaNs}
 import moleculeadmin.shared.util.HelpersAdmin
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
@@ -243,7 +243,7 @@ trait ColOps extends HelpersAdmin {
   }
 
   def getCols(elements: Seq[Element])
-             (implicit nsMap: Map[String, Ns]): Seq[Col] = {
+             (implicit nsMap: Map[String, MetaNs]): Seq[Col] = {
     var i          = 0
     val cols       = new ListBuffer[Col]()
     var related    = 0
@@ -257,10 +257,8 @@ trait ColOps extends HelpersAdmin {
         val enums = if (enumPrefix.isDefined) {
           val attr0 = clean(attr)
           nsMap(nsFull).attrs.collectFirst {
-            case Attr(_, `attr0`, _, _, enumsOpt, _, _, _, _, _, _, _, _) =>
-              enumsOpt
-          }.getOrElse(Option.empty[Set[String]])
-            .fold(Seq.empty[String])(_.toSeq.sorted)
+            case MetaAttr(_, `attr0`, _, _, enums, _, _, _, _, _, _, _, _) => enums
+          }.getOrElse(Seq.empty[String])
         } else {
           Seq.empty[String]
         }

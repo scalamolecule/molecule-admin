@@ -2,7 +2,7 @@ package moleculeadmin.client.app.logic.schema
 import boopickle.Default._
 import util.client.rx.RxBindings
 import moleculeadmin.shared.api.BaseApi
-import moleculeadmin.shared.ast.schema.FlatSchema
+import moleculeadmin.shared.ast.metaSchema.FlatSchema
 import org.scalajs.dom.html.Div
 import rx.{Ctx, Rx, Var}
 import scalatags.JsDom

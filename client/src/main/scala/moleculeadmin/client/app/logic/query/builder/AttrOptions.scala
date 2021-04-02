@@ -5,7 +5,7 @@ import molecule.ast.model._
 import moleculeadmin.client.app.logic.query.QueryState._
 import moleculeadmin.client.app.html.common.DropdownMenu
 import moleculeadmin.client.app.html.query.AttrOptElements
-import moleculeadmin.shared.ast.schema._
+import moleculeadmin.shared.ast.metaSchema._
 import moleculeadmin.shared.ops.query.attr.{AttrOps, ModeOps}
 import org.scalajs.dom.html.{Div, Input, LI, Select}
 import org.scalajs.dom.raw.{Event, HTMLElement}
@@ -23,8 +23,8 @@ case class AttrOptions(
   car: Int,
   attrType: String,
   attrValue: Value,
-  enums: Option[Set[String]],
-  options: Option[Set[String]],
+  enums: Seq[String],
+  options: Seq[String],
   doc: Option[String],
   topValues: Seq[TopValue],
   selAttrs: Seq[GenericAtom],
@@ -41,7 +41,7 @@ case class AttrOptions(
   var curFn      = ""
 
   val fulltext: Boolean = if (attrType == "String")
-    options.getOrElse(Set.empty[String]).contains("fulltext") else false
+    options.contains("fulltext") else false
 
   def id_(id: String): String = s"$path-$nsFull-$attr-$id-$i"
 
@@ -484,10 +484,10 @@ case class AttrOptions(
         inputs(compareValue(), aggrInputs(), aggrCounts(),
           aggrNumbers(), txGenerics())
 
-      case "String" if enums.isDefined && topValues.nonEmpty =>
+      case "String" if enums.nonEmpty && topValues.nonEmpty =>
         inputs(hr, top25(), aggrCounts(), txGenerics())
 
-      case "String" if enums.isDefined =>
+      case "String" if enums.nonEmpty =>
         inputs(aggrCounts(), txGenerics())
 
       case _ if topValues.nonEmpty =>

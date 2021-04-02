@@ -3,7 +3,7 @@ import autowire._
 import boopickle.Default._
 import moleculeadmin.client.app.logic.schema.SchemaState._
 import moleculeadmin.client.schemaWire
-import moleculeadmin.shared.ast.schema.{Attr => Attr_, _}
+import moleculeadmin.shared.ast.metaSchema._
 import org.scalajs.dom.html.TableRow
 import org.scalajs.dom.window
 import rx.{Ctx, Rx}
@@ -14,13 +14,13 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 case class Attributes(db: String,
                       schema1: MetaSchema,
-                      nss: Seq[Ns],
+                      nss: Seq[MetaNs],
                       part: String,
                       pos: Int,
                       nsAlias: String,
                       ns: String,
                       nsDescr: Option[String],
-                      attrs: Seq[Attr_])
+                      attrs: Seq[MetaAttr])
                      (implicit val ctx: Ctx.Owner) extends Base {
 
   def render = div(
@@ -28,8 +28,8 @@ case class Attributes(db: String,
     NamespaceForm(db, schema1, nss, part, pos, nsAlias, ns, nsDescr).render, // Update namespace
     Rx {
       val deleteAttrErr = err("delete-err")
-      val hasEnums = attrs.exists(_.enums$.getOrElse(Nil).nonEmpty)
-      val hasOptions = attrs.exists(_.options$.getOrElse(Nil).exists(_ != "indexed"))
+      val hasEnums = attrs.exists(_.enums.nonEmpty)
+      val hasOptions = attrs.exists(_.options.exists(_ != "indexed"))
       if (attrs.isEmpty) {
         div(s"Create first attribute in namespace `$nsAlias`:", marginTop := 20)
       } else {
@@ -50,7 +50,7 @@ case class Attributes(db: String,
             )
           ),
           tbody(
-            attrs.flatMap { case Attr_(n, attr, card, attrType0, enums0, ref, options0, doc0, attrGroup, entityCount0, distinctValueCount0, _, _) =>
+            attrs.flatMap { case MetaAttr(n, attr, card, attrType0, enums0, ref, options0, doc0, attrGroup, entityCount0, distinctValueCount0, _, _) =>
               val entityCount = if (entityCount0.isEmpty) "" else thousands(entityCount0.get)
               val distinctValueCount = if (distinctValueCount0.isEmpty) "" else thousands(distinctValueCount0.get)
               val cardPrefix = card match {
@@ -69,12 +69,12 @@ case class Attributes(db: String,
                 case None                                       => div(cardPrefix, attrType0.capitalize)
               }
               val enums = if (enums0.isEmpty) "" else {
-                val enumsSorted = enums0.get.toSeq.sorted
+                val enumsSorted = enums0.sorted
                 val first = enumsSorted.take(3).mkString(", ")
                 val more = if (enumsSorted.size <= 3) "" else " + " + (enumsSorted.size - 3) + " more..."
                 first + more
               }
-              val options = if (options0.nonEmpty) options0.get.filterNot(_ == "indexed").mkString(", ") else ""
+              val options = if (options0.nonEmpty) options0.filterNot(_ == "indexed").mkString(", ") else ""
               val doc = doc0.getOrElse("")
 
               val optAttrGroupRow: Seq[JsDom.TypedTag[TableRow]] = attrGroup match {
@@ -126,6 +126,6 @@ case class Attributes(db: String,
         )
       }
     },
-    AttributeForm(db, schema1, part, nsAlias, 0, "", 0, "", None, None, None, None, attrs, None).render // Create attribute
+    AttributeForm(db, schema1, part, nsAlias, 0, "", 0, "", Nil, None, Nil, None, attrs, None).render // Create attribute
   )
 }

@@ -3,7 +3,7 @@ import autowire._
 import boopickle.Default._
 import moleculeadmin.client.app.logic.schema.SchemaState._
 import moleculeadmin.client.schemaWire
-import moleculeadmin.shared.ast.schema._
+import moleculeadmin.shared.ast.metaSchema._
 import org.scalajs.dom.window
 import rx.{Ctx, Rx}
 import scalatags.JsDom.all._
@@ -15,7 +15,7 @@ case class Namespaces(db: String,
                       pos: Int,
                       part: String,
                       partDescr: Option[String],
-                      nss: Seq[Ns])(implicit val ctx: Ctx.Owner) extends Base {
+                      nss: Seq[MetaNs])(implicit val ctx: Ctx.Owner) extends Base {
 
   def render = div(
     Breadcrumb(db, part, "", "").render,
@@ -38,7 +38,7 @@ case class Namespaces(db: String,
 
           tbody(
             for {
-              Ns(n, ns, _, nsDescr0, nsValueCount0, attrs) <- nss
+              MetaNs(n, ns, _, nsDescr0, nsValueCount0, attrs) <- nss
             } yield {
               val nsValueCount = if (nsValueCount0.isEmpty) "" else thousands(nsValueCount0.get)
               val nsDescr = nsDescr0.getOrElse("")

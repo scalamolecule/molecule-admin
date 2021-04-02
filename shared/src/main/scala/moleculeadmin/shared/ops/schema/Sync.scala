@@ -1,7 +1,7 @@
 package moleculeadmin.shared.ops.schema
 
 import moleculeadmin.shared.api.SchemaApi
-import moleculeadmin.shared.ast.schema.FlatAttr
+import moleculeadmin.shared.ast.metaSchema.FlatAttr
 
 
 case class Sync(baseSchema: Seq[FlatAttr], testSchema: Seq[FlatAttr]) extends SchemaApi {

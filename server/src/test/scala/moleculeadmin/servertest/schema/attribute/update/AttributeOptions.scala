@@ -5,7 +5,7 @@ import db.admin.dsl.moleculeAdmin._
 import molecule.api.out10._
 import molecule.util.Helpers
 import moleculeadmin.servertest._
-import moleculeadmin.shared.ast.schema._
+import moleculeadmin.shared.ast.metaSchema._
 import moleculeadmin.shared.testdata.TreeSchema
 import utest._
 import scala.languageFeature.implicitConversions._
@@ -97,15 +97,15 @@ object AttributeOptions extends TestSuite with TreeSchema with Helpers {
       updateAttribute(partitionMetaSchema, "Partition", "b", "Bb", "bb1", "bb1",
         1, "Int", Nil, None, Seq("noHistory")) ==> Right(
         MetaSchema(List(
-          Part(1, "a", None, None, List(
-            Ns(1, "Aa", "a_Aa", None, None, List()))),
-          Part(2, "b", None, None, List(
-            Ns(1, "Bb", "b_Bb", None, None, List(
-              Attr(1, "bb1", 1, "Int", None, None, Some(Set("noHistory")), None, None, None, None, None, List()),
-              Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()))),
-            Ns(2, "Bc", "b_Bc", None, None, List(
-              Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()))))),
-          Part(3, "c", None, None, List())
+          MetaPart(1, "a", None, None, List(
+            MetaNs(1, "Aa", "a_Aa", None, None, List()))),
+          MetaPart(2, "b", None, None, List(
+            MetaNs(1, "Bb", "b_Bb", None, None, List(
+              MetaAttr(1, "bb1", 1, "Int", Nil, None, Seq("noHistory"), None, None, None, None, None, List()),
+              MetaAttr(2, "bb2", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))),
+            MetaNs(2, "Bc", "b_Bc", None, None, List(
+              MetaAttr(1, "bc1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))))),
+          MetaPart(3, "c", None, None, List())
         ))
       )
 
@@ -150,15 +150,15 @@ object AttributeOptions extends TestSuite with TreeSchema with Helpers {
       updateAttribute(partitionMetaSchema, "Partition", "b", "Bb", "bb1", "bb1",
         1, "Int", Nil, None, Nil) ==> Right(
         MetaSchema(List(
-          Part(1, "a", None, None, List(
-            Ns(1, "Aa", "a_Aa", None, None, List()))),
-          Part(2, "b", None, None, List(
-            Ns(1, "Bb", "b_Bb", None, None, List(
-              Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-              Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()))),
-            Ns(2, "Bc", "b_Bc", None, None, List(
-              Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()))))),
-          Part(3, "c", None, None, List())
+          MetaPart(1, "a", None, None, List(
+            MetaNs(1, "Aa", "a_Aa", None, None, List()))),
+          MetaPart(2, "b", None, None, List(
+            MetaNs(1, "Bb", "b_Bb", None, None, List(
+              MetaAttr(1, "bb1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+              MetaAttr(2, "bb2", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))),
+            MetaNs(2, "Bc", "b_Bc", None, None, List(
+              MetaAttr(1, "bc1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))))),
+          MetaPart(3, "c", None, None, List())
         ))
       )
     }
@@ -197,17 +197,17 @@ object AttributeOptions extends TestSuite with TreeSchema with Helpers {
       updateAttribute(schema1, "Partition", "b", "Bb", "refAttr", "refAttr",
         1, "ref", Nil, None, Seq("isComponent")) ==> Right(
         MetaSchema(List(
-          Part(1, "a", None, None, List(
-            Ns(1, "Aa", "a_Aa", None, None, List()))),
-          Part(2, "b", None, None, List(
-            Ns(1, "Bb", "b_Bb", None, None, List(
-              Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-              Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()),
-              Attr(3, "refAttr", 1, "ref", None, Some("b_Bc"), Some(Set("isComponent")), None, None, None, None, None, List())
+          MetaPart(1, "a", None, None, List(
+            MetaNs(1, "Aa", "a_Aa", None, None, List()))),
+          MetaPart(2, "b", None, None, List(
+            MetaNs(1, "Bb", "b_Bb", None, None, List(
+              MetaAttr(1, "bb1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+              MetaAttr(2, "bb2", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+              MetaAttr(3, "refAttr", 1, "ref", Nil, Some("b_Bc"), Seq("isComponent"), None, None, None, None, None, List())
             )),
-            Ns(2, "Bc", "b_Bc", None, None, List(
-              Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()))))),
-          Part(3, "c", None, None, List())
+            MetaNs(2, "Bc", "b_Bc", None, None, List(
+              MetaAttr(1, "bc1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))))),
+          MetaPart(3, "c", None, None, List())
         ))
       )
 
@@ -259,31 +259,31 @@ object AttributeOptions extends TestSuite with TreeSchema with Helpers {
       val schema1 = updateAttribute(partitionMetaSchema, "Partition", "b", "Bb", "bb1", "bb1",
         1, "Int", Nil, None, Seq("uniqueValue")).getOrElse(MetaSchema(Nil))
       schema1 ==> MetaSchema(List(
-        Part(1, "a", None, None, List(
-          Ns(1, "Aa", "a_Aa", None, None, List()))),
-        Part(2, "b", None, None, List(
-          Ns(1, "Bb", "b_Bb", None, None, List(
-            Attr(1, "bb1", 1, "Int", None, None, Some(Set("uniqueValue")), None, None, None, None, None, List()),
-            Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()),
+        MetaPart(1, "a", None, None, List(
+          MetaNs(1, "Aa", "a_Aa", None, None, List()))),
+        MetaPart(2, "b", None, None, List(
+          MetaNs(1, "Bb", "b_Bb", None, None, List(
+            MetaAttr(1, "bb1", 1, "Int", Nil, None, Seq("uniqueValue"), None, None, None, None, None, List()),
+            MetaAttr(2, "bb2", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
           )),
-          Ns(2, "Bc", "b_Bc", None, None, List(
-            Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()))))),
-        Part(3, "c", None, None, List()),
+          MetaNs(2, "Bc", "b_Bc", None, None, List(
+            MetaAttr(1, "bc1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))))),
+        MetaPart(3, "c", None, None, List()),
       ))
 
       updateAttribute(schema1, "Partition", "b", "Bb", "bb2", "bb2",
         1, "Int", Nil, None, Seq("uniqueIdentity")) ==> Right(
         MetaSchema(List(
-          Part(1, "a", None, None, List(
-            Ns(1, "Aa", "a_Aa", None, None, List()))),
-          Part(2, "b", None, None, List(
-            Ns(1, "Bb", "b_Bb", None, None, List(
-              Attr(1, "bb1", 1, "Int", None, None, Some(Set("uniqueValue")), None, None, None, None, None, List()),
-              Attr(2, "bb2", 1, "Int", None, None, Some(Set("uniqueIdentity")), None, None, None, None, None, List())
+          MetaPart(1, "a", None, None, List(
+            MetaNs(1, "Aa", "a_Aa", None, None, List()))),
+          MetaPart(2, "b", None, None, List(
+            MetaNs(1, "Bb", "b_Bb", None, None, List(
+              MetaAttr(1, "bb1", 1, "Int", Nil, None, Seq("uniqueValue"), None, None, None, None, None, List()),
+              MetaAttr(2, "bb2", 1, "Int", Nil, None, Seq("uniqueIdentity"), None, None, None, None, None, List())
             )),
-            Ns(2, "Bc", "b_Bc", None, None, List(
-              Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()))))),
-          Part(3, "c", None, None, List())
+            MetaNs(2, "Bc", "b_Bc", None, None, List(
+              MetaAttr(1, "bc1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))))),
+          MetaPart(3, "c", None, None, List())
         ))
       )
 
@@ -398,17 +398,17 @@ object AttributeOptions extends TestSuite with TreeSchema with Helpers {
         1, "ref", Nil, None, Seq("noHistory", "uniqueValue")).getOrElse(MetaSchema(Nil))
 
       schema2 ==> MetaSchema(List(
-        Part(1, "a", None, None, List(
-          Ns(1, "Aa", "a_Aa", None, None, List()))),
-        Part(2, "b", None, None, List(
-          Ns(1, "Bb", "b_Bb", None, None, List(
-            Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-            Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()),
-            Attr(3, "ref", 1, "ref", None, Some("b_Bc"), Some(Set("noHistory", "uniqueValue")), None, None, None, None, None, List())
+        MetaPart(1, "a", None, None, List(
+          MetaNs(1, "Aa", "a_Aa", None, None, List()))),
+        MetaPart(2, "b", None, None, List(
+          MetaNs(1, "Bb", "b_Bb", None, None, List(
+            MetaAttr(1, "bb1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+            MetaAttr(2, "bb2", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+            MetaAttr(3, "ref", 1, "ref", Nil, Some("b_Bc"), Seq("noHistory", "uniqueValue"), None, None, None, None, None, List())
           )),
-          Ns(2, "Bc", "b_Bc", None, None, List(
-            Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()))))),
-        Part(3, "c", None, None, List())
+          MetaNs(2, "Bc", "b_Bc", None, None, List(
+            MetaAttr(1, "bc1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))))),
+        MetaPart(3, "c", None, None, List())
       ))
 
       read ! partitionDefFilePath ==>
@@ -459,17 +459,17 @@ object AttributeOptions extends TestSuite with TreeSchema with Helpers {
         1, "ref", Nil, None, Seq("noHistory", "uniqueIdentity", "isComponent")
       ) ==> Right(
         MetaSchema(List(
-          Part(1, "a", None, None, List(
-            Ns(1, "Aa", "a_Aa", None, None, List()))),
-          Part(2, "b", None, None, List(
-            Ns(1, "Bb", "b_Bb", None, None, List(
-              Attr(1, "bb1", 1, "Int", None, None, None, None, None, None, None, None, List()),
-              Attr(2, "bb2", 1, "Int", None, None, None, None, None, None, None, None, List()),
-              Attr(3, "ref", 1, "ref", None, Some("b_Bc"), Some(Set("isComponent", "noHistory", "uniqueIdentity")), None, None, None, None, None, List())
+          MetaPart(1, "a", None, None, List(
+            MetaNs(1, "Aa", "a_Aa", None, None, List()))),
+          MetaPart(2, "b", None, None, List(
+            MetaNs(1, "Bb", "b_Bb", None, None, List(
+              MetaAttr(1, "bb1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+              MetaAttr(2, "bb2", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()),
+              MetaAttr(3, "ref", 1, "ref", Nil, Some("b_Bc"), Seq("isComponent", "noHistory", "uniqueIdentity"), None, None, None, None, None, List())
             )),
-            Ns(2, "Bc", "b_Bc", None, None, List(
-              Attr(1, "bc1", 1, "Int", None, None, None, None, None, None, None, None, List()))))),
-          Part(3, "c", None, None, List())
+            MetaNs(2, "Bc", "b_Bc", None, None, List(
+              MetaAttr(1, "bc1", 1, "Int", Nil, None, Nil, None, None, None, None, None, List()))))),
+          MetaPart(3, "c", None, None, List())
         ))
       )
 

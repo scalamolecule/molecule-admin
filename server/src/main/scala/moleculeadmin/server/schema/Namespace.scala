@@ -7,7 +7,7 @@ import db.admin.dsl.moleculeAdmin._
 import molecule.api.out15._
 import molecule.facade.Conn
 import moleculeadmin.server.Base
-import moleculeadmin.shared.ast.schema._
+import moleculeadmin.shared.ast.metaSchema._
 import moleculeadmin.server.utils.DefFile
 
 object Namespace extends SchemaBase with Base {
@@ -52,8 +52,8 @@ object Namespace extends SchemaBase with Base {
                 // Add ns to client schema
                 val updatedSchema: MetaSchema = MetaSchema(schema.parts.map {
                   case p if p.name == part =>
-                    val newNamespace        = Ns(pos, nsOnly, nsFull, descr, None, Nil)
-                    val updatedNss: Seq[Ns] = if (p.nss.isEmpty) {
+                    val newNamespace            = MetaNs(pos, nsOnly, nsFull, descr, None, Nil)
+                    val updatedNss: Seq[MetaNs] = if (p.nss.isEmpty) {
                       Seq(newNamespace)
                     } else {
                       p.nss.flatMap {
@@ -133,16 +133,16 @@ object Namespace extends SchemaBase with Base {
                 } else try {
 
                   // Modifying ns definition for each change
-                  var updatedNsDef: Ns = schema0.parts.find(_.name == part).get.nss.find(_.name == currentNs).get
+                  var updatedNsDef: MetaNs = schema0.parts.find(_.name == part).get.nss.find(_.name == currentNs).get
 
 
                   // namespace pos ....................................................
 
                   var schema: MetaSchema = if (pos > 0 && pos != curPos) {
                     MetaSchema(schema0.parts.map {
-                      case partDef@Part(_, `part`, _, _, nss) => {
-                        val nsDefs: Seq[Ns] = nss.map {
-                          case nsDef@Ns(_, `currentNs`, _, _, _, _) =>
+                      case partDef@MetaPart(_, `part`, _, _, nss) => {
+                        val nsDefs: Seq[MetaNs] = nss.map {
+                          case nsDef@MetaNs(_, `currentNs`, _, _, _, _) =>
                             // meta
                             meta_Namespace(nsE).pos(pos).update
                             // client
@@ -150,7 +150,7 @@ object Namespace extends SchemaBase with Base {
                             updatedNsDef = nsDef1
                             nsDef1
 
-                          case nsDef@Ns(otherPos, otherNs, _, _, _, _) if otherPos > curPos && otherPos <= pos =>
+                          case nsDef@MetaNs(otherPos, otherNs, _, _, _, _) if otherPos > curPos && otherPos <= pos =>
                             // meta
                             val otherNsE = nsEntities(otherNs)
                             val newPos   = otherPos - 1
@@ -158,7 +158,7 @@ object Namespace extends SchemaBase with Base {
                             // client
                             nsDef.copy(pos = newPos)
 
-                          case nsDef@Ns(otherPos, otherNs, _, _, _, _) if otherPos < curPos && otherPos >= pos =>
+                          case nsDef@MetaNs(otherPos, otherNs, _, _, _, _) if otherPos < curPos && otherPos >= pos =>
                             // meta
                             val otherNsE = nsEntities(otherNs)
                             val newPos   = otherPos + 1
@@ -181,10 +181,10 @@ object Namespace extends SchemaBase with Base {
 
                   def updateSchema = {
                     schema = MetaSchema(schema.parts.map {
-                      case partDef@Part(_, `part`, _, _, nss) => {
-                        val nsDefs: Seq[Ns] = nss.map {
-                          case Ns(_, `currentNs`, _, _, _, _) => updatedNsDef
-                          case nsDef1                         => nsDef1
+                      case partDef@MetaPart(_, `part`, _, _, nss) => {
+                        val nsDefs: Seq[MetaNs] = nss.map {
+                          case MetaNs(_, `currentNs`, _, _, _, _) => updatedNsDef
+                          case nsDef1                             => nsDef1
                         }
                         partDef.copy(nss = nsDefs)
                       }
@@ -227,12 +227,12 @@ object Namespace extends SchemaBase with Base {
 
                     // update meta references to this ns
                     schema = MetaSchema(schema.parts.map {
-                      case partDef@Part(_, part1, _, _, nss) => {
-                        val nsDefs: Seq[Ns] = nss.map {
-                          case nsDef@Ns(_, ns, nsFull, _, _, attrs) => {
-                            val attrDefs: Seq[Attr] = attrs.map {
+                      case partDef@MetaPart(_, part1, _, _, nss) => {
+                        val nsDefs: Seq[MetaNs] = nss.map {
+                          case nsDef@MetaNs(_, ns, nsFull, _, _, attrs) => {
+                            val attrDefs: Seq[MetaAttr] = attrs.map {
 
-                              case refAttr@Attr(_, attr, _, _, _, Some(`curNsFull`), _, _, _, _, _, _, _) =>
+                              case refAttr@MetaAttr(_, attr, _, _, _, Some(`curNsFull`), _, _, _, _, _, _, _) =>
 
                                 // update meta
                                 val attrE: Long = getAttrE(moleculeAdminConn, db, part1, ns, attr)
@@ -349,9 +349,9 @@ object Namespace extends SchemaBase with Base {
 
                     // No values asserted - "park"/rename all attributes in namespace (!)
                     val txMaps = for {
-                      Part(_, part1, _, _, nss) <- schema.parts if part1 == part
-                      Ns(_, ns1, nsFull, _, _, attrs) <- nss if ns1 == nsOnly
-                      Attr(_, attr, _, _, _, _, _, _, _, _, _, _, _) <- attrs
+                      MetaPart(_, part1, _, _, nss) <- schema.parts if part1 == part
+                      MetaNs(_, ns1, nsFull, _, _, attrs) <- nss if ns1 == nsOnly
+                      MetaAttr(_, attr, _, _, _, _, _, _, _, _, _, _, _) <- attrs
                     } yield {
                       rollbackAttrStmtsMap.add(
                         Util.map(":db/id", s":-$nsFull/$attr", ":db/ident", s":$nsFull/$attr")

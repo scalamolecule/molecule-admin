@@ -8,7 +8,7 @@ import db.admin.dsl.moleculeAdmin._
 import molecule.api.out15._
 import molecule.facade.Conn
 import moleculeadmin.server.Base
-import moleculeadmin.shared.ast.schema._
+import moleculeadmin.shared.ast.metaSchema._
 import moleculeadmin.server.utils.DefFile
 import scala.jdk.CollectionConverters._
 
@@ -41,7 +41,8 @@ object Attribute extends SchemaBase with Base {
               case Seq(nsE) => {
                 val liveConn = Conn(base + "/" + db)
                 val enums1   = if (enums.nonEmpty) Some(enums.toSet) else None
-                val options1 = Some(("indexed" +: options).toSet)
+                val options1 = "indexed" +: options
+                val options2 = Some(options1.toSet)
 
                 val curAttrs       = meta_Namespace(nsE).Attrs.e.pos.name.get
                 val pos            = if (pos0 == 0) curAttrs.length + 1 else pos0
@@ -57,7 +58,7 @@ object Attribute extends SchemaBase with Base {
                 } else try {
 
                   // Add attr to namespace in meta schema
-                  newAttrE = meta_Attribute.pos(pos).name(attr).card(card).tpe(tpe).enums$(enums1).refNs$(optRefNs).options$(options1).doc$(doc).save.eid
+                  newAttrE = meta_Attribute.pos(pos).name(attr).card(card).tpe(tpe).enums$(enums1).refNs$(optRefNs).options$(options2).doc$(doc).save.eid
                   meta_Namespace(nsE).attrs.assert(newAttrE).update
 
                   // Increase position for attributes after new attribute
@@ -75,10 +76,10 @@ object Attribute extends SchemaBase with Base {
                   // Add attr to client schema
                   val updatedSchema: MetaSchema = MetaSchema(schema.parts.map {
                     case p if p.name == part =>
-                      val updatedNss: Seq[Ns] = p.nss.map {
+                      val updatedNss: Seq[MetaNs] = p.nss.map {
                         case ns1 if ns1.name == nsOnly =>
-                          val newAttr     : Attr      = Attr(pos, attr, card, tpe, enums1, optRefNs, options1, doc, None, None, None, None, Nil)
-                          val updatedAttrs: Seq[Attr] = if (ns1.attrs.isEmpty) {
+                          val newAttr     : MetaAttr      = MetaAttr(pos, attr, card, tpe, enums, optRefNs, options1, doc, None, None, None, None, Nil)
+                          val updatedAttrs: Seq[MetaAttr] = if (ns1.attrs.isEmpty) {
                             Seq(newAttr)
                           } else {
                             ns1.attrs.flatMap {
@@ -222,7 +223,7 @@ object Attribute extends SchemaBase with Base {
                   } else try {
 
                     // Modifying attribute definition for each change
-                    def getUpdatedAttrDef(sch: MetaSchema): Attr = sch.parts.find(_.name == part) match {
+                    def getUpdatedAttrDef(sch: MetaSchema): MetaAttr = sch.parts.find(_.name == part) match {
                       case Some(partition) => partition.nss.find(_.name == nsOnly) match {
                         case Some(namespace) => namespace.attrs.find(_.name == curAttr) match {
                           case Some(attribute) => attribute
@@ -236,19 +237,19 @@ object Attribute extends SchemaBase with Base {
                         "Schema contains the following partition definitions:\n" + schema0.parts.mkString("\n"))
                     }
 
-                    var updatedAttrDef: Attr = getUpdatedAttrDef(schema0)
+                    var updatedAttrDef: MetaAttr = getUpdatedAttrDef(schema0)
 
 
                     // attribute pos ............................................................................
 
                     val schema: MetaSchema = if (pos > 0 && pos != curPos) {
                       MetaSchema(schema0.parts.map {
-                        case partDef@Part(_, `part`, _, _, nss) => {
-                          val nsDefs: Seq[Ns] = nss.map {
-                            case nsDef@Ns(_, `nsOnly`, _, _, _, attrs) => {
-                              val attrDefs: Seq[Attr] = attrs.map {
+                        case partDef@MetaPart(_, `part`, _, _, nss) => {
+                          val nsDefs: Seq[MetaNs] = nss.map {
+                            case nsDef@MetaNs(_, `nsOnly`, _, _, _, attrs) => {
+                              val attrDefs: Seq[MetaAttr] = attrs.map {
                                 // Current attr
-                                case attrDef@Attr(_, `curAttr`, _, _, _, _, _, _, _, _, _, _, _) =>
+                                case attrDef@MetaAttr(_, `curAttr`, _, _, _, _, _, _, _, _, _, _, _) =>
                                   // meta
                                   meta_Attribute(attrE).pos(pos).update
                                   // client
@@ -257,7 +258,7 @@ object Attribute extends SchemaBase with Base {
                                   updatedAttrDef
 
                                 // Attrs before
-                                case attrDef@Attr(otherPos, otherAttr, _, _, _, _, _, _, _, _, _, _, _) if otherPos > curPos && otherPos <= pos =>
+                                case attrDef@MetaAttr(otherPos, otherAttr, _, _, _, _, _, _, _, _, _, _, _) if otherPos > curPos && otherPos <= pos =>
                                   // meta
                                   val otherAttrE = attrEntities(otherAttr)
                                   val newPos     = otherPos - 1
@@ -266,7 +267,7 @@ object Attribute extends SchemaBase with Base {
                                   attrDef.copy(pos = newPos)
 
                                 // Attrs after
-                                case attrDef@Attr(otherPos, otherAttr, _, _, _, _, _, _, _, _, _, _, _) if otherPos < curPos && otherPos >= pos =>
+                                case attrDef@MetaAttr(otherPos, otherAttr, _, _, _, _, _, _, _, _, _, _, _) if otherPos < curPos && otherPos >= pos =>
                                   // meta
                                   val otherAttrE = attrEntities(otherAttr)
                                   val newPos     = otherPos + 1
@@ -468,7 +469,7 @@ object Attribute extends SchemaBase with Base {
                         meta_Attribute(attrE).enums(passedEnumValues).update
 
                         // client
-                        updatedAttrDef = updatedAttrDef.copy(enums$ = Some(passedEnumValues.toSet))
+                        updatedAttrDef = updatedAttrDef.copy(enums = passedEnumValues)
                       }
                     }
 
@@ -609,7 +610,7 @@ object Attribute extends SchemaBase with Base {
                       meta_Attribute(attrE).options(passedOpts).update
 
                       // client
-                      updatedAttrDef = updatedAttrDef.copy(options$ = if (passedOpts.nonEmpty) Some(passedOpts.toSet) else None)
+                      updatedAttrDef = updatedAttrDef.copy(options = if (passedOpts.nonEmpty) passedOpts else Nil)
                     }
 
 
@@ -688,16 +689,16 @@ object Attribute extends SchemaBase with Base {
 
                     // Replace updated attribute definition in client model
                     val updatedSchema: MetaSchema = MetaSchema(schema.parts.map {
-                      case partDef@Part(_, `part`, _, _, nss) => {
-                        val nsDefs: Seq[Ns] = nss.map {
-                          case nsDef@Ns(_, `nsOnly`, _, _, _, attrs) => {
-                            val attrDefs: Seq[Attr] = attrs.map {
-                              case Attr(_, `curAttr`, _, _, _, _, _, _, _, _, _, _, _) => updatedAttrDef
-                              case attrDef                                             => attrDef
+                      case partDef@MetaPart(_, `part`, _, _, nss) => {
+                        val nsDefs: Seq[MetaNs] = nss.map {
+                          case nsDef@MetaNs(_, `nsOnly`, _, _, _, attrs) => {
+                            val attrDefs: Seq[MetaAttr] = attrs.map {
+                              case MetaAttr(_, `curAttr`, _, _, _, _, _, _, _, _, _, _, _) => updatedAttrDef
+                              case attrDef                                                 => attrDef
                             }
                             nsDef.copy(attrs = attrDefs)
                           }
-                          case nsDef                                 => nsDef
+                          case nsDef                                     => nsDef
                         }
                         partDef.copy(nss = nsDefs)
                       }
