@@ -218,7 +218,7 @@ class Base(implicit ctx: Ctx.Owner)
         v.split("__~~__").toSeq.map(_.toDouble).sorted.map(n => li(n)))
     )
 
-    case "refSet" => {
+    case "refSet" =>
       if (expanded) {
         val eidsWithIndexes = v.split("__~~__").toSeq.map(_.toLong).zipWithIndex
         if (level < entityLevels) {
@@ -259,7 +259,6 @@ class Base(implicit ctx: Ctx.Owner)
             }
           )
         )
-
       } else {
         val ref = v.toLong
         // Separate row for each value returned from tx lookup
@@ -275,7 +274,6 @@ class Base(implicit ctx: Ctx.Owner)
           ref
         )
       }
-    }
 
     case "dateSet" =>
       td(

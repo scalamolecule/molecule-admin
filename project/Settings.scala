@@ -38,10 +38,8 @@ object Settings {
   val server: Seq[Def.Setting[_]] = common ++ Seq(
     name := "server",
     resolvers ++= Seq(
-      ("datomic" at "http://files.datomic.com/maven")
-        .withAllowInsecureProtocol(true),
-      ("clojars" at "http://clojars.org/repo")
-        .withAllowInsecureProtocol(true)
+      "datomic" at "https://files.datomic.com/maven",
+      "clojars" at "https://clojars.org/repo"
     ),
     libraryDependencies ++= Seq(
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,

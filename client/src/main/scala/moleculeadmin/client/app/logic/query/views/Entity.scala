@@ -117,7 +117,6 @@ case class Entity()(implicit ctx: Ctx.Owner) extends Base
   }
 
   val entityData: Rx.Dynamic[TypedTag[Table]] = Rx {
-
     curEntity() match {
       case 0   => // no entity id marked
       case eid =>
