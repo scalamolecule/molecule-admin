@@ -1,13 +1,30 @@
-target/
-.idea
-.DS_Store
-*~
+### Scala template
+*.class
+*.jar
 *.log
-*.iml
 
-logs
-project/project
-project/target
-tmp
-dist
-.cache
+# sbt specific
+.bloop
+.cache/
+.history/
+.lib/
+dist/*
+target/
+lib_managed/
+src_managed/
+project/boot/
+project/plugins/project/
+
+# idea specific
+*.idea
+*.bsp
+
+# Scala-IDE specific
+.scala_dependencies
+.worksheet
+
+# Mac
+*.DS_Store
+*/.DS_Store
+project/project/
+node_modules/
